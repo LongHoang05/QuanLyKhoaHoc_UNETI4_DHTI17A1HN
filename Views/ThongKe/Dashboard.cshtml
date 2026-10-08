@@ -1,7 +1,7 @@
-@*
-Họ và tên: Nguyễn Tùng Dương
-Mã sinh viên: 23103100003
-Nội dung thực hiện: Giao diện Dashboard (Module 5)
+﻿@*
+Há» vÃ  tÃªn: Nguyá»…n TÃ¹ng DÆ°Æ¡ng
+MÃ£ sinh viÃªn: 23103100003
+Ná»™i dung thá»±c hiá»‡n: Giao diá»‡n Dashboard (Module 5)
 *@
 
 @model QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.ViewModels.DashboardVM
@@ -9,40 +9,40 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="flex flex-col w-full gap-space-lg">
+<div class="flex flex-col w-full gap-4 md:gap-4 md:p-6 lg:gap-8">
         <!-- Top Navigation & Action Banner -->
-        <section class="flex flex-col xl:flex-row xl:items-center justify-between gap-space-md">
+        <section class="flex flex-col lg:flex-row xl:items-center justify-between gap-3 md:gap-4 lg:gap-4 md:p-6">
             <div class="flex flex-col gap-1">
                 <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container font-label-sm text-label-sm uppercase tracking-wider font-semibold">Cổng Thông Tin Đào Tạo</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container font-label-sm text-label-sm uppercase tracking-wider font-semibold">Cá»•ng ThÃ´ng Tin ÄÃ o Táº¡o</span>
                     <span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim"></span>
-                    <span class="font-label-sm text-label-sm text-on-surface-variant">Khu vực Hà Nội & Nam Định</span>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">Khu vá»±c HÃ  Ná»™i & Nam Äá»‹nh</span>
                 </div>
-                <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Bảng điều khiển quản trị</h1>
+                <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Báº£ng Ä‘iá»u khiá»ƒn quáº£n trá»‹</h1>
                 <p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1.5">
-                    <span class="">Chào mừng trở lại,</span>
-                    <strong class="text-on-surface font-label-lg">Giáo vụ (SV5)</strong>
-                    <span class="text-outline-variant">•</span>
+                    <span class="">ChÃ o má»«ng trá»Ÿ láº¡i,</span>
+                    <strong class="text-on-surface font-label-lg">GiÃ¡o vá»¥ (SV5)</strong>
+                    <span class="text-outline-variant">â€¢</span>
                     <span class="material-symbols-outlined text-[16px] text-on-surface-variant">schedule</span>
-                    <span class="">Cập nhật lần cuối: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</span>
+                    <span class="">Cáº­p nháº­t láº§n cuá»‘i: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</span>
                 </p>
             </div>
             <!-- Quick Action Controls -->
             <div class="flex flex-wrap items-center gap-2.5">
                 <button class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md shadow-sm hover:bg-surface-container-low transition-all" onclick="window.location.reload()" type="button">
                     <span class="material-symbols-outlined text-[18px] text-on-surface-variant transition-transform duration-500">sync</span>
-                    <span class="">Làm mới dữ liệu</span>
+                    <span class="">LÃ m má»›i dá»¯ liá»‡u</span>
                 </button>
             </div>
         </section>
 
         <!-- 8 High-Density Key Metrics (4x2 Responsive Grid) -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-4 md:p-6">
             <!-- Card 1: Total Programs -->
             <div class="group relative flex flex-col justify-between p-5 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-200">
                 <div class="flex items-start justify-between">
                     <div class="flex flex-col gap-1">
-                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Tổng chương trình đào tạo</span>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Tá»•ng chÆ°Æ¡ng trÃ¬nh Ä‘Ã o táº¡o</span>
                         <span class="font-display-lg text-display-lg text-on-surface leading-tight mt-1">@Model.TongSoCTDT</span>
                     </div>
                     <div class="w-10 h-10 rounded-lg bg-surface-container-low text-secondary flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -50,7 +50,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
                     </div>
                 </div>
                 <div class="mt-4 pt-3 flex items-center justify-between">
-                    <span class="font-label-sm text-label-sm text-on-surface-variant">Hệ chính quy</span>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">Há»‡ chÃ­nh quy</span>
                 </div>
             </div>
 
@@ -58,7 +58,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
             <div class="group relative flex flex-col justify-between p-5 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-200">
                 <div class="flex items-start justify-between">
                     <div class="flex flex-col gap-1">
-                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Tổng số lớp học</span>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Tá»•ng sá»‘ lá»›p há»c</span>
                         <span class="font-display-lg text-display-lg text-on-surface leading-tight mt-1">@Model.TongSoLop</span>
                     </div>
                     <div class="w-10 h-10 rounded-lg bg-surface-container-low text-on-primary-fixed-variant flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -66,7 +66,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
                     </div>
                 </div>
                 <div class="mt-4 pt-3 flex items-center justify-between">
-                    <span class="font-label-sm text-label-sm text-on-surface-variant">Toàn trường</span>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">ToÃ n trÆ°á»ng</span>
                 </div>
             </div>
 
@@ -74,7 +74,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
             <div class="group relative flex flex-col justify-between p-5 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-200">
                 <div class="flex items-start justify-between">
                     <div class="flex flex-col gap-1">
-                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Lớp đang mở đăng ký</span>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Lá»›p Ä‘ang má»Ÿ Ä‘Äƒng kÃ½</span>
                         <span class="font-display-lg text-display-lg text-on-surface leading-tight mt-1">@Model.LopDangMo</span>
                     </div>
                     <div class="w-10 h-10 rounded-lg bg-secondary-container/20 text-on-secondary-container flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -82,7 +82,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
                     </div>
                 </div>
                 <div class="mt-4 pt-3 flex items-center justify-between">
-                    <span class="font-label-sm text-label-sm text-on-secondary-container font-medium">Sẵn sàng nhận học viên</span>
+                    <span class="font-label-sm text-label-sm text-on-secondary-container font-medium">Sáºµn sÃ ng nháº­n há»c viÃªn</span>
                 </div>
             </div>
 
@@ -90,7 +90,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
             <div class="group relative flex flex-col justify-between p-5 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-200">
                 <div class="flex items-start justify-between">
                     <div class="flex flex-col gap-1">
-                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Tổng số sinh viên</span>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Tá»•ng sá»‘ sinh viÃªn</span>
                         <span class="font-display-lg text-display-lg text-on-surface leading-tight mt-1">@Model.TongSoHocVien</span>
                     </div>
                     <div class="w-10 h-10 rounded-lg bg-surface-container-low text-secondary flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -99,7 +99,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
                 </div>
                 <div class="mt-4 pt-3 flex items-center justify-between">
                     <span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed">
-                        @Model.HocVienHoanThanh SV hoàn thành
+                        @Model.HocVienHoanThanh SV hoÃ n thÃ nh
                     </span>
                 </div>
             </div>
@@ -108,7 +108,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
             <div class="group relative flex flex-col justify-between p-5 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-200">
                 <div class="flex items-start justify-between">
                     <div class="flex flex-col gap-1">
-                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Tổng lượt đăng ký</span>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Tá»•ng lÆ°á»£t Ä‘Äƒng kÃ½</span>
                         <span class="font-display-lg text-display-lg text-on-surface leading-tight mt-1">@Model.TongSoDangKy</span>
                     </div>
                     <div class="w-10 h-10 rounded-lg bg-surface-container-low text-on-surface flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -116,7 +116,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
                     </div>
                 </div>
                 <div class="mt-4 pt-3 flex items-center justify-between">
-                    <span class="font-label-sm text-label-sm text-on-surface-variant">Lượt tín chỉ</span>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">LÆ°á»£t tÃ­n chá»‰</span>
                 </div>
             </div>
 
@@ -124,7 +124,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
             <div class="group relative flex flex-col justify-between p-5 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-200">
                 <div class="flex items-start justify-between">
                     <div class="flex flex-col gap-1">
-                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Đăng ký chờ duyệt</span>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">ÄÄƒng kÃ½ chá» duyá»‡t</span>
                         <span class="font-display-lg text-display-lg text-on-surface leading-tight mt-1">@Model.DangKyChoDuyet</span>
                     </div>
                     <div class="w-10 h-10 rounded-lg bg-secondary-fixed/40 text-on-secondary-fixed-variant flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -133,7 +133,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
                 </div>
                 <div class="mt-4 pt-3 flex items-center justify-between">
                     <span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-medium">
-                        Cần xử lý
+                        Cáº§n xá»­ lÃ½
                     </span>
                 </div>
             </div>
@@ -142,7 +142,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
             <div class="group relative flex flex-col justify-between p-5 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-200">
                 <div class="flex items-start justify-between">
                     <div class="flex flex-col gap-1">
-                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Đăng ký đã duyệt</span>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">ÄÄƒng kÃ½ Ä‘Ã£ duyá»‡t</span>
                         <span class="font-display-lg text-display-lg text-on-surface leading-tight mt-1">@Model.DangKyDaDuyet</span>
                     </div>
                     <div class="w-10 h-10 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -150,7 +150,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
                     </div>
                 </div>
                 <div class="mt-4 pt-3 flex items-center justify-between">
-                    <span class="font-label-sm text-label-sm text-on-surface-variant">Thành công</span>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">ThÃ nh cÃ´ng</span>
                 </div>
             </div>
 
@@ -158,7 +158,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
             <div class="group relative flex flex-col justify-between p-5 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-200">
                 <div class="flex items-start justify-between">
                     <div class="flex flex-col gap-1">
-                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Lịch học sắp tới</span>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Lá»‹ch há»c sáº¯p tá»›i</span>
                         <span class="font-display-lg text-display-lg text-on-surface leading-tight mt-1">@Model.BuoiHocSapToi</span>
                     </div>
                     <div class="w-10 h-10 rounded-lg bg-surface-container-low text-secondary flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -166,22 +166,22 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
                     </div>
                 </div>
                 <div class="mt-4 pt-3 flex items-center justify-between">
-                    <span class="font-label-sm text-label-sm text-on-surface-variant">Các cơ sở</span>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">CÃ¡c cÆ¡ sá»Ÿ</span>
                 </div>
             </div>
         </section>
 
-        <!-- Full-Width "Recent Activity" (Hoạt động gần đây) Section -->
+        <!-- Full-Width "Recent Activity" (Hoáº¡t Ä‘á»™ng gáº§n Ä‘Ã¢y) Section -->
         <section class="rounded-lg bg-surface-container-lowest shadow-sm overflow-hidden flex flex-col">
             <!-- Header Section with Controls -->
-            <div class="p-5 lg:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="p-4 md:p-5 lg:p-4 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-2">
                         <span class="material-symbols-outlined text-secondary text-[22px]">history</span>
-                        <h2 class="font-headline-md text-headline-md text-on-surface tracking-tight">Hoạt động đăng ký gần đây</h2>
+                        <h2 class="font-headline-md text-headline-md text-on-surface tracking-tight">Hoáº¡t Ä‘á»™ng Ä‘Äƒng kÃ½ gáº§n Ä‘Ã¢y</h2>
                     </div>
                     <p class="font-body-md text-body-md text-on-surface-variant">
-                        Danh sách các đăng ký học phần được cập nhật tự động
+                        Danh sÃ¡ch cÃ¡c Ä‘Äƒng kÃ½ há»c pháº§n Ä‘Æ°á»£c cáº­p nháº­t tá»± Ä‘á»™ng
                     </p>
                 </div>
             </div>
@@ -191,11 +191,11 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
                 <table class="w-full text-left font-body-md text-body-md">
                     <thead>
                         <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
-                            <th class="py-3.5 px-6 font-semibold">Sinh viên</th>
-                            <th class="py-3.5 px-6 font-semibold">Lớp học</th>
-                            <th class="py-3.5 px-6 font-semibold">Thời gian ĐK</th>
-                            <th class="py-3.5 px-6 font-semibold text-center">Trạng thái</th>
-                            <th class="py-3.5 px-6 font-semibold text-right">Ngày xử lý</th>
+                            <th class="py-3.5 px-6 font-semibold">Sinh viÃªn</th>
+                            <th class="py-3.5 px-6 font-semibold">Lá»›p há»c</th>
+                            <th class="py-3.5 px-6 font-semibold">Thá»i gian ÄK</th>
+                            <th class="py-3.5 px-6 font-semibold text-center">Tráº¡ng thÃ¡i</th>
+                            <th class="py-3.5 px-6 font-semibold text-right">NgÃ y xá»­ lÃ½</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-surface-container" id="activityTableBody">
@@ -225,12 +225,12 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
                                     </span>
                                 </td>
                                 <td class="py-4 px-6 whitespace-nowrap text-center">
-                                    @if(item.TrangThai == "Chờ duyệt") {
+                                    @if(item.TrangThai == "Chá» duyá»‡t") {
                                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container-highest text-on-surface-variant font-medium">
                                             <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-                                            Chờ duyệt
+                                            Chá» duyá»‡t
                                         </span>
-                                    } else if (item.TrangThai == "Đã duyệt" || item.TrangThai == "Đã đóng học phí" || item.TrangThai == "Đang học") {
+                                    } else if (item.TrangThai == "ÄÃ£ duyá»‡t" || item.TrangThai == "ÄÃ£ Ä‘Ã³ng há»c phÃ­" || item.TrangThai == "Äang há»c") {
                                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-tertiary-fixed text-on-tertiary-fixed font-medium">
                                             <span class="w-1.5 h-1.5 rounded-full bg-on-tertiary-container"></span>
                                             @item.TrangThai
@@ -243,7 +243,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
                                     }
                                 </td>
                                 <td class="py-4 px-6 whitespace-nowrap text-right font-label-sm text-label-sm text-on-surface-variant">
-                                    @(item.NgayXuLy.HasValue ? item.NgayXuLy.Value.ToString("dd/MM/yyyy") : "Chưa XL")
+                                    @(item.NgayXuLy.HasValue ? item.NgayXuLy.Value.ToString("dd/MM/yyyy") : "ChÆ°a XL")
                                 </td>
                             </tr>
                         }
@@ -254,19 +254,19 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
             <!-- Table Bottom Footer & Pagination -->
             <div class="p-4 px-6 bg-surface flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant">
-                    <span class="">Hiển thị 5 dòng dữ liệu mỗi trang</span>
+                    <span class="">Hiá»ƒn thá»‹ 5 dÃ²ng dá»¯ liá»‡u má»—i trang</span>
                 </div>
                 <div class="flex items-center gap-2">
                     @if (Model.CurrentPage > 1)
                     {
                         <a href="?page=@(Model.CurrentPage - 1)" class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md text-label-md shadow-xs transition-colors">
-                            Trang trước
+                            Trang trÆ°á»›c
                         </a>
                     }
                     else
                     {
                         <span class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface-variant font-label-md text-label-md shadow-xs cursor-not-allowed">
-                            Trang trước
+                            Trang trÆ°á»›c
                         </span>
                     }
 
@@ -288,4 +288,5 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
             </div>
         </section>
     </div>
+
 
