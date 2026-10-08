@@ -10,6 +10,6 @@ obj/
 
 .vs/
 
-appsettings*.json
-!appsettings.example.json
+
+
 *.sql
