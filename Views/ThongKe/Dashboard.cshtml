@@ -1,0 +1,291 @@
+@*
+Họ và tên: Nguyễn Tùng Dương
+Mã sinh viên: 23103100003
+Nội dung thực hiện: Giao diện Dashboard (Module 5)
+*@
+
+@model QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.ViewModels.DashboardVM
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="flex flex-col w-full gap-space-lg">
+        <!-- Top Navigation & Action Banner -->
+        <section class="flex flex-col xl:flex-row xl:items-center justify-between gap-space-md">
+            <div class="flex flex-col gap-1">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container font-label-sm text-label-sm uppercase tracking-wider font-semibold">Cổng Thông Tin Đào Tạo</span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim"></span>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">Khu vực Hà Nội & Nam Định</span>
+                </div>
+                <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Bảng điều khiển quản trị</h1>
+                <p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1.5">
+                    <span class="">Chào mừng trở lại,</span>
+                    <strong class="text-on-surface font-label-lg">Giáo vụ (SV5)</strong>
+                    <span class="text-outline-variant">•</span>
+                    <span class="material-symbols-outlined text-[16px] text-on-surface-variant">schedule</span>
+                    <span class="">Cập nhật lần cuối: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</span>
+                </p>
+            </div>
+            <!-- Quick Action Controls -->
+            <div class="flex flex-wrap items-center gap-2.5">
+                <button class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md shadow-sm hover:bg-surface-container-low transition-all" onclick="window.location.reload()" type="button">
+                    <span class="material-symbols-outlined text-[18px] text-on-surface-variant transition-transform duration-500">sync</span>
+                    <span class="">Làm mới dữ liệu</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 8 High-Density Key Metrics (4x2 Responsive Grid) -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+            <!-- Card 1: Total Programs -->
+            <div class="group relative flex flex-col justify-between p-5 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-200">
+                <div class="flex items-start justify-between">
+                    <div class="flex flex-col gap-1">
+                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Tổng chương trình đào tạo</span>
+                        <span class="font-display-lg text-display-lg text-on-surface leading-tight mt-1">@Model.TongSoCTDT</span>
+                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-surface-container-low text-secondary flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <span class="material-symbols-outlined text-[22px]">auto_stories</span>
+                    </div>
+                </div>
+                <div class="mt-4 pt-3 flex items-center justify-between">
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">Hệ chính quy</span>
+                </div>
+            </div>
+
+            <!-- Card 2: Total Classes -->
+            <div class="group relative flex flex-col justify-between p-5 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-200">
+                <div class="flex items-start justify-between">
+                    <div class="flex flex-col gap-1">
+                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Tổng số lớp học</span>
+                        <span class="font-display-lg text-display-lg text-on-surface leading-tight mt-1">@Model.TongSoLop</span>
+                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-surface-container-low text-on-primary-fixed-variant flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <span class="material-symbols-outlined text-[22px]">domain</span>
+                    </div>
+                </div>
+                <div class="mt-4 pt-3 flex items-center justify-between">
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">Toàn trường</span>
+                </div>
+            </div>
+
+            <!-- Card 3: Active Classes -->
+            <div class="group relative flex flex-col justify-between p-5 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-200">
+                <div class="flex items-start justify-between">
+                    <div class="flex flex-col gap-1">
+                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Lớp đang mở đăng ký</span>
+                        <span class="font-display-lg text-display-lg text-on-surface leading-tight mt-1">@Model.LopDangMo</span>
+                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-secondary-container/20 text-on-secondary-container flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <span class="material-symbols-outlined text-[22px]">play_circle</span>
+                    </div>
+                </div>
+                <div class="mt-4 pt-3 flex items-center justify-between">
+                    <span class="font-label-sm text-label-sm text-on-secondary-container font-medium">Sẵn sàng nhận học viên</span>
+                </div>
+            </div>
+
+            <!-- Card 4: Total Students -->
+            <div class="group relative flex flex-col justify-between p-5 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-200">
+                <div class="flex items-start justify-between">
+                    <div class="flex flex-col gap-1">
+                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Tổng số sinh viên</span>
+                        <span class="font-display-lg text-display-lg text-on-surface leading-tight mt-1">@Model.TongSoHocVien</span>
+                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-surface-container-low text-secondary flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <span class="material-symbols-outlined text-[22px]">school</span>
+                    </div>
+                </div>
+                <div class="mt-4 pt-3 flex items-center justify-between">
+                    <span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed">
+                        @Model.HocVienHoanThanh SV hoàn thành
+                    </span>
+                </div>
+            </div>
+
+            <!-- Card 5: Total Registrations -->
+            <div class="group relative flex flex-col justify-between p-5 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-200">
+                <div class="flex items-start justify-between">
+                    <div class="flex flex-col gap-1">
+                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Tổng lượt đăng ký</span>
+                        <span class="font-display-lg text-display-lg text-on-surface leading-tight mt-1">@Model.TongSoDangKy</span>
+                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-surface-container-low text-on-surface flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <span class="material-symbols-outlined text-[22px]">assignment</span>
+                    </div>
+                </div>
+                <div class="mt-4 pt-3 flex items-center justify-between">
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">Lượt tín chỉ</span>
+                </div>
+            </div>
+
+            <!-- Card 6: Pending Registrations -->
+            <div class="group relative flex flex-col justify-between p-5 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-200">
+                <div class="flex items-start justify-between">
+                    <div class="flex flex-col gap-1">
+                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Đăng ký chờ duyệt</span>
+                        <span class="font-display-lg text-display-lg text-on-surface leading-tight mt-1">@Model.DangKyChoDuyet</span>
+                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-secondary-fixed/40 text-on-secondary-fixed-variant flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <span class="material-symbols-outlined text-[22px]">hourglass_top</span>
+                    </div>
+                </div>
+                <div class="mt-4 pt-3 flex items-center justify-between">
+                    <span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-medium">
+                        Cần xử lý
+                    </span>
+                </div>
+            </div>
+
+            <!-- Card 7: Approved Registrations -->
+            <div class="group relative flex flex-col justify-between p-5 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-200">
+                <div class="flex items-start justify-between">
+                    <div class="flex flex-col gap-1">
+                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Đăng ký đã duyệt</span>
+                        <span class="font-display-lg text-display-lg text-on-surface leading-tight mt-1">@Model.DangKyDaDuyet</span>
+                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <span class="material-symbols-outlined text-[22px]">check_circle</span>
+                    </div>
+                </div>
+                <div class="mt-4 pt-3 flex items-center justify-between">
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">Thành công</span>
+                </div>
+            </div>
+
+            <!-- Card 8: Upcoming Schedules -->
+            <div class="group relative flex flex-col justify-between p-5 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-200">
+                <div class="flex items-start justify-between">
+                    <div class="flex flex-col gap-1">
+                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Lịch học sắp tới</span>
+                        <span class="font-display-lg text-display-lg text-on-surface leading-tight mt-1">@Model.BuoiHocSapToi</span>
+                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-surface-container-low text-secondary flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <span class="material-symbols-outlined text-[22px]">calendar_month</span>
+                    </div>
+                </div>
+                <div class="mt-4 pt-3 flex items-center justify-between">
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">Các cơ sở</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Full-Width "Recent Activity" (Hoạt động gần đây) Section -->
+        <section class="rounded-lg bg-surface-container-lowest shadow-sm overflow-hidden flex flex-col">
+            <!-- Header Section with Controls -->
+            <div class="p-5 lg:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex flex-col gap-1">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary text-[22px]">history</span>
+                        <h2 class="font-headline-md text-headline-md text-on-surface tracking-tight">Hoạt động đăng ký gần đây</h2>
+                    </div>
+                    <p class="font-body-md text-body-md text-on-surface-variant">
+                        Danh sách các đăng ký học phần được cập nhật tự động
+                    </p>
+                </div>
+            </div>
+
+            <!-- Activity Feed Table Container -->
+            <div class="overflow-x-auto w-full">
+                <table class="w-full text-left font-body-md text-body-md">
+                    <thead>
+                        <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+                            <th class="py-3.5 px-6 font-semibold">Sinh viên</th>
+                            <th class="py-3.5 px-6 font-semibold">Lớp học</th>
+                            <th class="py-3.5 px-6 font-semibold">Thời gian ĐK</th>
+                            <th class="py-3.5 px-6 font-semibold text-center">Trạng thái</th>
+                            <th class="py-3.5 px-6 font-semibold text-right">Ngày xử lý</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-surface-container" id="activityTableBody">
+                        @foreach (var item in Model.HoatDongGanDay)
+                        {
+                            <tr class="activity-row hover:bg-surface-container-low/60 transition-colors">
+                                <td class="py-4 px-6 whitespace-nowrap">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed font-label-md font-bold">
+                                            @item.HocVien.HoTen.Substring(0, 1)
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <span class="font-label-md text-label-md text-on-surface">@item.HocVien.HoTen</span>
+                                            <span class="font-label-sm text-label-sm text-on-surface-variant font-mono">HV: @item.HocVien.MaHocVien</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6 min-w-[260px]">
+                                    <div class="flex flex-col">
+                                        <span class="text-on-surface">@item.LopHoc.TenLop</span>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6 whitespace-nowrap">
+                                    <span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[14px]">schedule</span>
+                                        @item.NgayDangKy.ToString("dd/MM/yyyy HH:mm")
+                                    </span>
+                                </td>
+                                <td class="py-4 px-6 whitespace-nowrap text-center">
+                                    @if(item.TrangThai == "Chờ duyệt") {
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container-highest text-on-surface-variant font-medium">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                                            Chờ duyệt
+                                        </span>
+                                    } else if (item.TrangThai == "Đã duyệt" || item.TrangThai == "Đã đóng học phí" || item.TrangThai == "Đang học") {
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-tertiary-fixed text-on-tertiary-fixed font-medium">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-on-tertiary-container"></span>
+                                            @item.TrangThai
+                                        </span>
+                                    } else {
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-error-container text-error font-medium">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                                            @item.TrangThai
+                                        </span>
+                                    }
+                                </td>
+                                <td class="py-4 px-6 whitespace-nowrap text-right font-label-sm text-label-sm text-on-surface-variant">
+                                    @(item.NgayXuLy.HasValue ? item.NgayXuLy.Value.ToString("dd/MM/yyyy") : "Chưa XL")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table Bottom Footer & Pagination -->
+            <div class="p-4 px-6 bg-surface flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant">
+                    <span class="">Hiển thị 5 dòng dữ liệu mỗi trang</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    @if (Model.CurrentPage > 1)
+                    {
+                        <a href="?page=@(Model.CurrentPage - 1)" class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md text-label-md shadow-xs transition-colors">
+                            Trang trước
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface-variant font-label-md text-label-md shadow-xs cursor-not-allowed">
+                            Trang trước
+                        </span>
+                    }
+
+                    <span class="font-label-md text-label-md px-2 text-on-surface">@Model.CurrentPage / @Model.TotalPages</span>
+                    
+                    @if (Model.CurrentPage < Model.TotalPages)
+                    {
+                        <a href="?page=@(Model.CurrentPage + 1)" class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md text-label-md shadow-xs transition-colors">
+                            Trang sau
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface-variant font-label-md text-label-md shadow-xs cursor-not-allowed">
+                            Trang sau
+                        </span>
+                    }
+                </div>
+            </div>
+        </section>
+    </div>
+

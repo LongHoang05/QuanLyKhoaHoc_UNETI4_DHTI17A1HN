@@ -1,0 +1,65 @@
+@* 
+Họ và tên: Nguyễn Tùng Dương
+Mã sinh viên: 23103100003
+Nội dung thực hiện: Form vào điểm (Module 5)
+*@
+@model QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Models.KetQuaHocTap
+@{ ViewData["Title"] = "Vào Điểm Mới"; }
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card p-4">
+            <h5 class="mb-4 fw-bold text-dark border-bottom pb-2">Nhập điểm học viên</h5>
+            
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small text-muted">Mã Đăng Ký (Học viên)</label>
+                    <input asp-for="MaDangKy" class="form-control form-control-sm" placeholder="Nhập mã ĐK (Vd: 1)" />
+                    <span asp-validation-for="MaDangKy" class="text-danger small"></span>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small text-muted">Điểm Chuyên Cần (0-10)</label>
+                        <input asp-for="DiemChuyenCan" type="number" step="0.1" class="form-control form-control-sm" />
+                        <span asp-validation-for="DiemChuyenCan" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small text-muted">Điểm Cuối Khóa (0-10)</label>
+                        <input asp-for="DiemCuoiKhoa" type="number" step="0.1" class="form-control form-control-sm" />
+                        <span asp-validation-for="DiemCuoiKhoa" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small text-muted">Điểm Tổng Kết (Auto-calculated)</label>
+                    <input class="form-control form-control-sm bg-light" disabled placeholder="Hệ thống tự tính (30% CC + 70% CK)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small text-muted d-block">Kết quả cuối cùng</label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" asp-for="KetQua" value="Hoàn thành" id="rbPass" checked>
+                        <label class="form-check-label" for="rbPass">Hoàn thành</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" asp-for="KetQua" value="Không hoàn thành" id="rbFail">
+                        <label class="form-check-label text-danger" for="rbFail">Không hoàn thành</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold small text-muted">Nhận xét của Giáo vụ</label>
+                    <textarea asp-for="NhanXet" class="form-control form-control-sm" rows="3"></textarea>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="/KetQuaHocTap/Index" class="btn btn-outline-secondary btn-sm px-4">Hủy</a>
+                    <button type="submit" class="btn btn-primary btn-sm px-4">Lưu Điểm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,355 @@
+@*
+Họ và tên: Nguyễn Tùng Dương
+Mã sinh viên: 23103100003
+Nội dung thực hiện: Danh sách Kết quả học tập (Module 5)
+*@
+
+@model IEnumerable<QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Models.KetQuaHocTap>
+@{
+    ViewData["Title"] = "Kết quả học tập";
+}
+
+@if (TempData["Success"] != null)
+    {
+        <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50" role="alert">
+            <span class="font-medium">Thành công!</span> @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50" role="alert">
+            <span class="font-medium">Lỗi:</span> @TempData["Error"]
+        </div>
+    }
+
+    <div class="flex flex-col w-full gap-6">
+        <!-- Top Page Header -->
+        <div class="flex flex-col gap-space-sm mb-space-lg">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+                <div class="flex flex-col gap-1">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm uppercase tracking-wider">Học kỳ 1 • 2024-2025</span>
+                        <span class="flex items-center gap-1 font-label-sm text-label-sm text-tertiary-fixed-dim">
+                            <span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim inline-block animate-pulse"></span>
+                            Hệ thống chấm điểm mở
+                        </span>
+                    </div>
+                    <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Quản lý Kết quả học tập</h1>
+                    <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+                        Hệ thống tổng hợp điểm quá trình, điểm thi kết thúc học phần và xét chuẩn đầu ra học phần UNETI
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Stats summary badges banner -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md mt-space-xs">
+                <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex items-center justify-between">
+                    <div class="flex flex-col">
+                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Tổng số sinh viên</span>
+                        <span class="font-headline-lg text-headline-lg text-on-surface mt-0.5">@ViewBag.TotalRecords</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[24px] text-primary">badge</span>
+                    </div>
+                </div>
+                <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex items-center justify-between">
+                    <div class="flex flex-col">
+                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Đạt yêu cầu (Pass)</span>
+                        <div class="flex items-baseline gap-2 mt-0.5">
+                            <span class="font-headline-lg text-headline-lg text-on-tertiary-container">@ViewBag.PassCount</span>
+                            @{
+                                double passPercent = ViewBag.TotalRecords > 0 ? (double)ViewBag.PassCount / ViewBag.TotalRecords * 100 : 0;
+                            }
+                            <span class="font-label-md text-label-md px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-bold">@passPercent.ToString("0.0")%</span>
+                        </div>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-tertiary-container/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[24px] text-on-tertiary-container">check_circle</span>
+                    </div>
+                </div>
+                <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex items-center justify-between">
+                    <div class="flex flex-col">
+                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Cần thi lại (Fail)</span>
+                        <div class="flex items-baseline gap-2 mt-0.5">
+                            <span class="font-headline-lg text-headline-lg text-error">@ViewBag.FailCount</span>
+                            @{
+                                double failPercent = ViewBag.TotalRecords > 0 ? (double)ViewBag.FailCount / ViewBag.TotalRecords * 100 : 0;
+                            }
+                            <span class="font-label-md text-label-md px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-bold">@failPercent.ToString("0.0")%</span>
+                        </div>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-error-container/40 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[24px] text-error">warning</span>
+                    </div>
+                </div>
+                <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex items-center justify-between">
+                    <div class="flex flex-col">
+                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Điểm trung bình lớp</span>
+                        <div class="flex items-baseline gap-2 mt-0.5">
+                            <span class="font-headline-lg text-headline-lg text-primary">@(((double)ViewBag.AverageScore).ToString("0.00"))</span>
+                        </div>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-secondary-fixed flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[24px] text-on-secondary-fixed">monitoring</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2-Panel Layout: Panel 1 (List ~68%) and Panel 2 (Sticky Form ~32%) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+            <!-- PANEL 1: Grading List -->
+            <div class="lg:col-span-8 flex flex-col gap-space-md">
+                <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+                    <div class="px-space-lg py-space-md bg-surface-container-lowest flex items-center justify-between border-b border-surface-container-low">
+                        <div class="flex flex-col">
+                            <span class="font-headline-sm text-headline-sm text-on-surface">Bảng điểm học phần chi tiết</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-label-sm text-label-sm px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant">
+                                Tỷ lệ: CC (30%) + Thi (70%)
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left" id="gradesTable">
+                            <thead>
+                                <tr class="bg-surface-container-low font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-b border-surface-container-low">
+                                    <th class="py-3 px-4">Mã ĐK</th>
+                                    <th class="py-3 px-4">Sinh viên & MSSV</th>
+                                    <th class="py-3 px-3">Lớp HP</th>
+                                    <th class="py-3 px-3 text-center">CC (30%)</th>
+                                    <th class="py-3 px-3 text-center">Thi (70%)</th>
+                                    <th class="py-3 px-3 text-center">Tổng kết</th>
+                                    <th class="py-3 px-3 text-center">Kết quả</th>
+                                    <th class="py-3 px-4 text-center">Sửa</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-surface-container font-body-md text-body-md text-on-surface">
+                                @foreach(var kq in Model)
+                                {
+                                    <tr class="hover:bg-surface-container-low/60 transition-colors student-row border-b border-surface-container-low" 
+                                        data-id="@kq.MaKetQua"
+                                        data-reg="DK-@kq.MaDangKy"
+                                        data-name="@kq.DangKyHoc.HocVien.HoTen"
+                                        data-mssv="@kq.DangKyHoc.HocVien.MaHocVien"
+                                        data-att="@kq.DiemChuyenCan"
+                                        data-exam="@kq.DiemCuoiKhoa"
+                                        data-note="@kq.NhanXet"
+                                        data-res="@(kq.KetQua == "Hoàn thành" ? "pass" : "fail")">
+                                        <td class="py-3.5 px-4 font-mono font-label-md text-label-md text-secondary">DK-@kq.MaDangKy</td>
+                                        <td class="py-3.5 px-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="flex flex-col min-w-0">
+                                                    <span class="font-label-lg text-label-lg text-on-surface truncate">@kq.DangKyHoc.HocVien.HoTen</span>
+                                                    <span class="font-label-sm text-label-sm text-on-surface-variant font-mono">MSSV: @kq.DangKyHoc.HocVien.MaHocVien</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-3.5 px-3">
+                                            <span class="px-2 py-0.5 rounded bg-surface-container font-label-sm text-label-sm text-on-surface truncate">@kq.DangKyHoc.LopHoc.TenLop</span>
+                                        </td>
+                                        <td class="py-3.5 px-3 text-center font-mono">@kq.DiemChuyenCan</td>
+                                        <td class="py-3.5 px-3 text-center font-mono">@kq.DiemCuoiKhoa</td>
+                                        <td class="py-3.5 px-3 text-center font-mono font-headline-sm text-headline-sm text-primary">@kq.DiemTongKet.ToString("0.00")</td>
+                                        <td class="py-3.5 px-3 text-center">
+                                            @if(kq.KetQua == "Hoàn thành")
+                                            {
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-full font-label-sm text-label-sm bg-tertiary-container text-on-tertiary font-bold tracking-wide">Đạt (Pass)</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-full font-label-sm text-label-sm bg-error text-on-error font-bold tracking-wide">Trượt (Fail)</span>
+                                            }
+                                        </td>
+                                        <td class="py-3.5 px-4 text-center">
+                                            <button class="p-1.5 rounded-lg hover:bg-surface-container text-primary transition-colors border border-outline-variant/30" onclick="selectStudent(this)" title="Chọn và sửa điểm" type="button">
+                                                <span class="material-symbols-outlined text-[18px]">edit_note</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="px-space-lg py-space-md bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-sm border-t border-surface-container">
+                        <span class="font-body-sm text-body-sm text-on-surface-variant">Hiển thị 5 dòng mỗi trang</span>
+                        <div class="flex items-center gap-1 select-none">
+                            @if (ViewBag.CurrentPage > 1)
+                            {
+                                <a href="?page=@(ViewBag.CurrentPage - 1)" class="px-2.5 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface shadow-sm hover:bg-surface-container font-label-md text-label-md">
+                                    <span class="material-symbols-outlined text-[16px] align-middle">chevron_left</span>
+                                    <span class="">Trước</span>
+                                </a>
+                            }
+                            
+                            <span class="px-4 py-1.5 rounded-lg bg-primary-container text-on-primary shadow-sm font-semibold text-sm">@ViewBag.CurrentPage / @ViewBag.TotalPages</span>
+                            
+                            @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                            {
+                                <a href="?page=@(ViewBag.CurrentPage + 1)" class="px-2.5 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md text-label-md shadow-sm">
+                                    <span class="">Tiếp</span>
+                                    <span class="material-symbols-outlined text-[16px] align-middle">chevron_right</span>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL 2: Grade Entry Form -->
+            <div class="lg:col-span-4 sticky top-20">
+                <div class="bg-surface-container-lowest rounded-xl shadow-md p-space-lg flex flex-col gap-space-md">
+                    <!-- Form Header -->
+                    <div class="flex items-start justify-between">
+                        <div class="flex flex-col">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+                                <h2 class="font-headline-md text-headline-md text-on-surface">Nhập & Cập nhật điểm</h2>
+                            </div>
+                            <span class="font-label-sm text-label-sm text-on-surface-variant mt-1">Cập nhật điểm thành phần và kết quả học phần</span>
+                        </div>
+                    </div>
+
+                    <form class="flex flex-col gap-space-md mt-space-xs" action="/KetQuaHocTap/EditPost" method="post">
+                        <input type="hidden" id="formMaKetQua" name="maKetQua" />
+                        
+                        <!-- Registration ID & Student Info -->
+                        <div class="flex flex-col gap-1.5">
+                            <label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant flex items-center justify-between">
+                                <span class="">Mã đăng ký & Sinh viên</span>
+                            </label>
+                            <div class="relative">
+                                <input class="w-full h-10 px-3 pr-9 rounded-lg bg-surface-container-low font-body-sm text-body-sm text-on-surface font-medium focus:outline-none cursor-not-allowed" id="formRegId" readonly type="text" placeholder="Chọn sinh viên bên bảng...">
+                                <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-[18px] text-outline">lock</span>
+                            </div>
+                        </div>
+
+                        <!-- Attendance & Final Exam Grid -->
+                        <div class="grid grid-cols-2 gap-space-sm">
+                            <div class="flex flex-col gap-1.5">
+                                <label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant flex items-center gap-1">
+                                    <span class="">Chuyên cần (30%)</span>
+                                </label>
+                                <input name="diemChuyenCan" class="w-full h-10 px-3 rounded-lg bg-surface font-mono font-headline-sm text-headline-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/30" id="inputAtt" max="10" min="0" oninput="calculateTotalScore()" step="0.1" type="number" value="">
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant flex items-center gap-1">
+                                    <span class="">Thi KTHP (70%)</span>
+                                </label>
+                                <input name="diemCuoiKhoa" class="w-full h-10 px-3 rounded-lg bg-surface font-mono font-headline-sm text-headline-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/30" id="inputExam" max="10" min="0" oninput="calculateTotalScore()" step="0.1" type="number" value="">
+                            </div>
+                        </div>
+
+                        <!-- Total Score -->
+                        <div class="flex flex-col gap-1.5">
+                            <label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant flex items-center justify-between">
+                                <span class="">Điểm tổng kết</span>
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <input class="w-32 h-11 px-3.5 rounded-lg bg-surface-container font-mono font-headline-lg text-headline-lg text-error text-center font-bold focus:outline-none cursor-not-allowed" id="inputTotal" readonly type="text" value="">
+                                <div class="flex flex-col">
+                                    <span class="font-label-sm text-label-sm text-on-surface-variant" id="formulaHint">Tự động tính (30/70)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Final Result Radio Options -->
+                        <div class="flex flex-col gap-2 pt-1">
+                            <label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">
+                                Kết luận kết quả học phần
+                            </label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="relative flex items-center gap-2.5 p-3 rounded-lg bg-surface hover:bg-surface-container cursor-pointer transition-colors border border-outline-variant/30">
+                                    <input class="accent-on-tertiary-container w-4 h-4" id="radioPass" name="ketQua" type="radio" value="pass">
+                                    <div class="flex flex-col">
+                                        <span class="font-label-md text-label-md text-on-tertiary-container font-bold">Đạt (Pass)</span>
+                                    </div>
+                                </label>
+                                <label class="relative flex items-center gap-2.5 p-3 rounded-lg bg-surface hover:bg-surface-container cursor-pointer transition-colors border border-outline-variant/30">
+                                    <input class="accent-error w-4 h-4" id="radioFail" name="ketQua" type="radio" value="fail">
+                                    <div class="flex flex-col">
+                                        <span class="font-label-md text-label-md text-error font-bold">Trượt (Fail)</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Staff Comments -->
+                        <div class="flex flex-col gap-1.5">
+                            <label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant flex items-center justify-between">
+                                <span class="">Ý kiến cán bộ / Ghi chú</span>
+                            </label>
+                            <textarea name="nhanXet" class="w-full p-3 rounded-lg bg-surface font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/30 resize-none" id="inputNote" rows="2"></textarea>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex items-center gap-space-sm pt-space-xs">
+                            <button class="flex-1 h-10 px-4 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg hover:bg-primary-container transition-all shadow-sm flex items-center justify-center gap-1.5" type="submit">
+                                <span class="material-symbols-outlined text-[18px]">save</span>
+                                <span class="">Lưu điểm</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+    function calculateTotalScore() {
+      const attVal = parseFloat(document.getElementById('inputAtt').value) || 0;
+      const examVal = parseFloat(document.getElementById('inputExam').value) || 0;
+      
+      const total = (attVal * 0.3) + (examVal * 0.7);
+      const totalFixed = total.toFixed(2);
+      
+      const totalInput = document.getElementById('inputTotal');
+      totalInput.value = totalFixed;
+
+      const formulaHint = document.getElementById('formulaHint');
+      formulaHint.textContent = `CC: ${attVal} x 0.3 + Thi: ${examVal} x 0.7`;
+
+      const isPass = total >= 4.0 && examVal >= 3.0;
+      const radioPass = document.getElementById('radioPass');
+      const radioFail = document.getElementById('radioFail');
+
+      if (isPass) {
+        radioPass.checked = true;
+        totalInput.className = "w-32 h-11 px-3.5 rounded-lg bg-surface-container font-mono font-headline-lg text-headline-lg text-primary text-center font-bold focus:outline-none cursor-not-allowed";
+      } else {
+        radioFail.checked = true;
+        totalInput.className = "w-32 h-11 px-3.5 rounded-lg bg-surface-container font-mono font-headline-lg text-headline-lg text-error text-center font-bold focus:outline-none cursor-not-allowed";
+      }
+    }
+
+    function selectStudent(btn) {
+      const row = btn.closest('.student-row');
+      if (!row) return;
+
+      document.querySelectorAll('.student-row').forEach(r => {
+        r.classList.remove('bg-surface-container-high/40');
+      });
+
+      row.classList.add('bg-surface-container-high/40');
+
+      const id = row.getAttribute('data-id');
+      const name = row.getAttribute('data-name');
+      const mssv = row.getAttribute('data-mssv');
+      const att = row.getAttribute('data-att');
+      const exam = row.getAttribute('data-exam');
+      const note = row.getAttribute('data-note') || '';
+
+      document.getElementById('formMaKetQua').value = id;
+      document.getElementById('formRegId').value = `${name} (MSSV: ${mssv})`;
+      document.getElementById('inputAtt').value = att;
+      document.getElementById('inputExam').value = exam;
+      document.getElementById('inputNote').value = note;
+
+      calculateTotalScore();
+    }
+</script>

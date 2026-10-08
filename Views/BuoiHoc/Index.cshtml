@@ -1,0 +1,267 @@
+@*
+Họ và tên: Nguyễn Tùng Dương
+Mã sinh viên: 23103100003
+Nội dung thực hiện: Danh sách Lịch học (Module 5)
+*@
+
+@model IEnumerable<QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Models.BuoiHoc>
+@{
+    ViewData["Title"] = "Quản lý Lịch học";
+}
+
+@if (TempData["Success"] != null)
+    {
+        <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50" role="alert">
+            <span class="font-medium">Thành công!</span> @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50" role="alert">
+            <span class="font-medium">Lỗi:</span> @TempData["Error"]
+        </div>
+    }
+
+    <div class="flex flex-col w-full gap-6">
+        <!-- Top Action & View Header Bar -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-surface-container-lowest p-6 rounded-xl shadow-sm">
+            <div class="flex flex-col gap-1">
+                <div class="flex items-center gap-2">
+                    <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Quản lý Lịch học</h1>
+                    <span class="px-2.5 py-0.5 rounded-full bg-surface-container-high font-label-sm text-label-sm text-on-surface-variant font-medium">Học kỳ 1 • 2024-2025</span>
+                </div>
+                <p class="font-body-md text-body-md text-on-surface-variant">
+                    Theo dõi tiến độ giảng dạy, kiểm soát phòng thực hành và điều phối lịch học các học phần UNETI.
+                </p>
+            </div>
+            <!-- Action Group -->
+            <div class="flex flex-wrap items-center gap-3">
+                <!-- Search Input -->
+                <div class="relative flex items-center min-w-[260px]">
+                    <span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">search</span>
+                    <input class="w-full bg-surface-container-lowest font-body-md text-body-md text-on-surface pl-9 pr-4 py-2 rounded-lg shadow-sm placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-secondary/20 border border-outline-variant/30" placeholder="Tìm theo mã lớp, giảng viên, phòng..." type="text">
+                </div>
+                <!-- Filter Action Button -->
+                <button class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-surface-container-low text-on-surface hover:bg-surface-container transition-colors font-label-md text-label-md shadow-sm border border-outline-variant/30">
+                    <span class="material-symbols-outlined text-[18px]">tune</span>
+                    <span class="">Bộ lọc</span>
+                </button>
+            </div>
+        </div>
+        <!-- Main Workspace Split: 70% Left (List) & 30% Right (Form) -->
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+            <!-- SECTION A: Schedule List -->
+            <section class="xl:col-span-8 flex flex-col bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+                <!-- Section Header & Filter Tabs -->
+                <div class="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface-container-lowest border-b border-surface-container-low">
+                    <div class="flex items-center gap-3">
+                        <h2 class="font-headline-sm text-headline-sm text-on-surface">Lịch học học kỳ hiện tại</h2>
+                        <span class="px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm font-semibold">
+                            Tổng cộng @ViewBag.TotalRecords ca học
+                        </span>
+                    </div>
+                </div>
+                <!-- Table Container -->
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-surface-container-low text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
+                                <th class="py-3.5 px-4 font-semibold">Lớp & Học phần</th>
+                                <th class="py-3.5 px-4 font-semibold">Giảng viên</th>
+                                <th class="py-3.5 px-4 font-semibold">Phòng học & Cơ sở</th>
+                                <th class="py-3.5 px-4 font-semibold">Thời gian ca học</th>
+                                <th class="py-3.5 px-4 font-semibold text-center">Trạng thái</th>
+                                <th class="py-3.5 px-4 font-semibold text-right">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y-0 text-on-surface font-body-md text-body-md">
+                            @foreach (var buoi in Model)
+                            {
+                                <tr class="hover:bg-surface-container-low/60 transition-colors border-b border-surface-container-low">
+                                    <td class="py-3.5 px-4">
+                                        <div class="flex flex-col">
+                                            <span class="font-label-lg text-label-lg text-on-surface font-semibold">@buoi.LopHoc.TenLop</span>
+                                            <span class="font-label-sm text-label-sm text-on-surface-variant font-mono">Giới hạn sĩ số: @buoi.LopHoc.SiSoToiDa</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3.5 px-4">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-8 h-8 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-md text-label-md font-bold flex items-center justify-center">
+                                                @buoi.GiangVien.Substring(0, 1).ToUpper()
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="font-label-md text-label-md font-semibold text-on-surface">@buoi.GiangVien</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3.5 px-4">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="material-symbols-outlined text-[18px] text-secondary">meeting_room</span>
+                                            <div>
+                                                <span class="font-label-md text-label-md font-semibold text-on-surface block">@buoi.PhongHoc</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3.5 px-4 font-mono text-body-sm">
+                                        <div class="flex flex-col">
+                                            <span class="text-on-surface font-medium">@buoi.ThoiGianBatDau.ToString("HH:mm") - @buoi.ThoiGianKetThuc.ToString("HH:mm")</span>
+                                            <span class="text-on-surface-variant font-label-sm text-label-sm">@buoi.ThoiGianBatDau.ToString("dd/MM/yyyy")</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center">
+                                        @if (buoi.TrangThai == "Đã lên lịch")
+                                        {
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container text-on-secondary-container font-label-sm text-label-sm font-semibold">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                                                Đã lên lịch
+                                            </span>
+                                        }
+                                        else if (buoi.TrangThai == "Đã hoàn thành")
+                                        {
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-low text-on-tertiary-container font-label-sm text-label-sm font-semibold">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-on-tertiary-container"></span>
+                                                Hoàn thành
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                                                @buoi.TrangThai
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="py-3.5 px-4 text-right">
+                                        <div class="flex items-center justify-end gap-1">
+                                            @if (buoi.TrangThai == "Đã lên lịch")
+                                            {
+                                                <form asp-action="HoanThanh" method="post" style="display:inline;">
+                                                    <input type="hidden" name="id" value="@buoi.MaBuoiHoc" />
+                                                    <button type="submit" class="p-1.5 text-secondary hover:text-on-tertiary-container hover:bg-surface-container rounded-lg transition-colors border border-outline-variant/30" title="Đánh dấu hoàn thành">
+                                                        <span class="material-symbols-outlined text-[20px]">check_circle</span>
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <button class="p-1.5 text-on-tertiary-container cursor-default" title="Đã ghi nhận giảng dạy">
+                                                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">task_alt</span>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Table Footer / Pagination -->
+                <div class="p-4 bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-4 font-body-sm text-body-sm text-on-surface-variant">
+                    <div class="flex items-center gap-2">
+                        <span class="">Hiển thị 5 dòng mỗi trang</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        @if (ViewBag.CurrentPage > 1)
+                        {
+                            <a href="?page=@(ViewBag.CurrentPage - 1)" class="px-2.5 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface shadow-sm hover:bg-surface-container font-label-md text-label-md">
+                                <span class="material-symbols-outlined text-[16px] align-middle">chevron_left</span>
+                                <span class="">Trước</span>
+                            </a>
+                        }
+                        
+                        <span class="px-4 py-1.5 rounded-lg bg-primary-container text-on-primary shadow-sm font-semibold text-sm">@ViewBag.CurrentPage / @ViewBag.TotalPages</span>
+                        
+                        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                        {
+                            <a href="?page=@(ViewBag.CurrentPage + 1)" class="px-2.5 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md text-label-md shadow-sm">
+                                <span class="">Tiếp</span>
+                                <span class="material-symbols-outlined text-[16px] align-middle">chevron_right</span>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </section>
+            <!-- SECTION B: Create Schedule Form -->
+            <section class="xl:col-span-4 flex flex-col bg-surface-container-lowest rounded-xl shadow-sm p-6 sticky top-20">
+                <!-- Header Section B -->
+                <div class="flex items-start gap-3 pb-5 bg-surface-container-lowest border-b border-surface-container-low">
+                    <div class="w-10 h-10 rounded-xl bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[22px]">calendar_add_on</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <h3 class="font-headline-sm text-headline-sm text-on-surface">Tạo lịch học mới</h3>
+                        <span class="font-body-sm text-body-sm text-on-surface-variant">Phân bổ giảng viên & phòng học theo ca</span>
+                    </div>
+                </div>
+                <!-- Form Layout -->
+                <form class="flex flex-col gap-4 mt-4" asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <!-- Class Selector -->
+                    <div class="flex flex-col gap-1.5">
+                        <label class="font-label-md text-label-md text-on-surface font-semibold flex items-center gap-1">
+                            <span class="">Lớp học phần</span>
+                            <span class="text-error">*</span>
+                        </label>
+                        <div class="relative">
+                            <select name="MaLop" class="w-full bg-surface-container-low font-body-md text-body-md text-on-surface px-3 py-2 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-secondary/20 pr-8 border border-outline-variant/30" required>
+                                <option disabled selected value="">-- Chọn lớp học phần --</option>
+                                @foreach(var lop in ViewBag.LopHocList)
+                                {
+                                    <option value="@lop.MaLop">@lop.TenLop</option>
+                                }
+                            </select>
+                            <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[18px]">expand_more</span>
+                        </div>
+                    </div>
+                    <!-- Instructor Selector -->
+                    <div class="flex flex-col gap-1.5">
+                        <label class="font-label-md text-label-md text-on-surface font-semibold flex items-center gap-1">
+                            <span class="">Giảng viên giảng dạy</span>
+                            <span class="text-error">*</span>
+                        </label>
+                        <input name="GiangVien" class="w-full bg-surface-container-low font-body-md text-body-md text-on-surface px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/20 border border-outline-variant/30" placeholder="Tên giảng viên..." required type="text">
+                    </div>
+                    <!-- Times (Start & End) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="flex flex-col gap-1.5">
+                            <label class="font-label-sm text-label-sm text-on-surface font-semibold">Bắt đầu <span class="text-error">*</span></label>
+                            <input name="ThoiGianBatDau" class="w-full bg-surface-container-low font-body-sm text-body-sm text-on-surface px-2.5 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/20 border border-outline-variant/30" required type="datetime-local" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")">
+                        </div>
+                        <div class="flex flex-col gap-1.5">
+                            <label class="font-label-sm text-label-sm text-on-surface font-semibold">Kết thúc <span class="text-error">*</span></label>
+                            <input name="ThoiGianKetThuc" class="w-full bg-surface-container-low font-body-sm text-body-sm text-on-surface px-2.5 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/20 border border-outline-variant/30" required type="datetime-local" value="@DateTime.Now.AddHours(2).ToString("yyyy-MM-ddTHH:mm")">
+                        </div>
+                    </div>
+                    <!-- Room Input -->
+                    <div class="flex flex-col gap-1.5">
+                        <label class="font-label-md text-label-md text-on-surface font-semibold flex items-center gap-1">
+                            <span class="">Phòng học & Cơ sở</span>
+                            <span class="text-error">*</span>
+                        </label>
+                        <div class="relative">
+                            <input name="PhongHoc" class="w-full bg-surface-container-low font-body-md text-body-md text-on-surface px-3 py-2 rounded-lg placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-secondary/20 border border-outline-variant/30" placeholder="Ví dụ: P.305 - Nhà HA8" required type="text">
+                            <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">location_on</span>
+                        </div>
+                    </div>
+                    <!-- Nội dung -->
+                    <div class="flex flex-col gap-1.5">
+                        <label class="font-label-md text-label-md text-on-surface font-semibold">Nội dung</label>
+                        <input name="NoiDung" class="w-full bg-surface-container-low font-body-md text-body-md text-on-surface px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/20 border border-outline-variant/30" type="text" placeholder="Bài 1...">
+                    </div>
+                    <!-- Notes -->
+                    <div class="flex flex-col gap-1.5">
+                        <label class="font-label-md text-label-md text-on-surface font-semibold">Ghi chú & Yêu cầu thiết bị</label>
+                        <textarea name="GhiChu" class="w-full bg-surface-container-low font-body-md text-body-md text-on-surface p-3 rounded-lg placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-secondary/20 border border-outline-variant/30 resize-none" placeholder="Yêu cầu máy chiếu..." rows="2"></textarea>
+                    </div>
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col gap-2 pt-2">
+                        <button class="w-full py-2.5 px-4 rounded-lg bg-primary-container text-on-primary font-label-lg text-label-lg font-semibold flex items-center justify-center gap-2 hover:bg-inverse-surface shadow-sm transition-all" type="submit">
+                            <span class="material-symbols-outlined text-[20px]">save</span>
+                            <span class="">Lưu lịch học</span>
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+

@@ -1,0 +1,15 @@
+﻿bin/
+obj/
+*.docx
+*.pdf
+*.user
+.idea/
+.vscode/
+*.suo
+*.sln.docstates
+
+.vs/
+
+appsettings*.json
+!appsettings.example.json
+*.sql

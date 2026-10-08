@@ -1,0 +1,66 @@
+@* 
+Họ và tên: Nguyễn Tùng Dương
+Mã sinh viên: 23103100003
+Nội dung thực hiện: Giao diện Xếp lịch học (Module 5)
+*@
+@model QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Models.BuoiHoc
+@{ ViewData["Title"] = "Xếp Lịch Học Mới"; }
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card p-4">
+            <h5 class="mb-4 fw-bold text-dark border-bottom pb-2">Thông tin buổi học</h5>
+            
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small text-muted">Lớp học</label>
+                        <!-- Trong thực tế chỗ này sẽ dùng select dropdown ViewBag.MaLop -->
+                        <input asp-for="MaLop" class="form-control form-control-sm" placeholder="Nhập Mã Lớp (Ví dụ: 1)" />
+                        <span asp-validation-for="MaLop" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small text-muted">Giảng viên</label>
+                        <input asp-for="GiangVien" class="form-control form-control-sm" />
+                        <span asp-validation-for="GiangVien" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small text-muted">Thời gian bắt đầu</label>
+                        <input asp-for="ThoiGianBatDau" type="datetime-local" class="form-control form-control-sm" />
+                        <span asp-validation-for="ThoiGianBatDau" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small text-muted">Thời gian kết thúc</label>
+                        <input asp-for="ThoiGianKetThuc" type="datetime-local" class="form-control form-control-sm" />
+                        <span asp-validation-for="ThoiGianKetThuc" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small text-muted">Phòng học</label>
+                        <input asp-for="PhongHoc" class="form-control form-control-sm" />
+                        <span asp-validation-for="PhongHoc" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small text-muted">Nội dung học</label>
+                    <textarea asp-for="NoiDung" class="form-control form-control-sm" rows="2"></textarea>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label fw-semibold small text-muted">Ghi chú</label>
+                    <textarea asp-for="GhiChu" class="form-control form-control-sm" rows="2"></textarea>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="/BuoiHoc/Index" class="btn btn-outline-secondary btn-sm px-4">Hủy</a>
+                    <button type="submit" class="btn btn-primary btn-sm px-4">Xác nhận xếp lịch</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
