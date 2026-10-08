@@ -66,7 +66,7 @@ namespace QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Migrations
 
                     b.HasIndex("MaLop");
 
-                    b.ToTable("BuoiHocs");
+                    b.ToTable("BuoiHocs", (string)null);
 
                     b.HasData(
                         new
@@ -460,7 +460,7 @@ namespace QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Migrations
 
                     b.HasKey("MaChuongTrinh");
 
-                    b.ToTable("ChuongTrinhDaoTaos");
+                    b.ToTable("ChuongTrinhDaoTaos", (string)null);
 
                     b.HasData(
                         new
@@ -550,7 +550,7 @@ namespace QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Migrations
 
                     b.HasIndex("MaLop");
 
-                    b.ToTable("DangKyHocs");
+                    b.ToTable("DangKyHocs", (string)null);
 
                     b.HasData(
                         new
@@ -1170,7 +1170,7 @@ namespace QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Migrations
 
                     b.HasIndex("MaTaiKhoan");
 
-                    b.ToTable("HocViens");
+                    b.ToTable("HocViens", (string)null);
 
                     b.HasData(
                         new
@@ -1631,7 +1631,7 @@ namespace QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Migrations
 
                     b.HasIndex("MaDangKy");
 
-                    b.ToTable("KetQuaHocTaps");
+                    b.ToTable("KetQuaHocTaps", (string)null);
 
                     b.HasData(
                         new
@@ -1895,7 +1895,7 @@ namespace QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Migrations
 
                     b.HasIndex("MaChuongTrinh");
 
-                    b.ToTable("LopHocs");
+                    b.ToTable("LopHocs", (string)null);
 
                     b.HasData(
                         new
@@ -2197,7 +2197,7 @@ namespace QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Migrations
                     b.HasIndex("TenDangNhap")
                         .IsUnique();
 
-                    b.ToTable("TaiKhoans");
+                    b.ToTable("TaiKhoans", (string)null);
 
                     b.HasData(
                         new

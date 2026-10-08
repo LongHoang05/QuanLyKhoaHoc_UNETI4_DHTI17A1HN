@@ -9,7 +9,7 @@
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <style>
-        @@layer base {
+        @layer base {
             html, body { margin: 0; padding: 0; }
             body { overscroll-behavior: none; }
             main > :first-child { margin-top: 0 !important; }
@@ -36,48 +36,63 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const currentPath = window.location.pathname.toLowerCase();
-            const links = document.querySelectorAll('header nav a');
+            const links = document.querySelectorAll('.nav-link');
             
             links.forEach(link => {
                 const href = link.getAttribute('href').toLowerCase();
                 if (currentPath === href || (currentPath === '/' && href === '/thongke/dashboard')) {
-                    link.className = 'px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all duration-150 bg-inverse-surface text-on-primary font-label-lg shadow-xs';
+                    link.className = 'nav-link px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all duration-150 bg-inverse-surface text-on-primary font-label-lg shadow-xs';
                     const icon = link.querySelector('span.material-symbols-outlined');
                     if(icon) {
                         icon.classList.add('text-secondary-container');
                     }
                 }
             });
+
+            // Mobile menu toggle
+            const menuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (menuBtn && mobileMenu) {
+                menuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
         });
     </script>
 </head>
 <body class="bg-surface font-body-md text-on-surface antialiased">
     <header class="sticky top-0 z-50 w-full bg-primary-container shadow-md border-b border-inverse-surface select-none">
-        <div class="w-full px-6 flex items-center justify-between h-16 gap-6">
-            <div class="flex items-center gap-8">
+        <div class="w-full px-4 md:px-6 flex items-center justify-between h-16 gap-4">
+            <div class="flex items-center gap-4 md:gap-8">
+                <!-- Hamburger Menu for Mobile -->
+                <button id="mobile-menu-btn" class="md:hidden flex items-center justify-center p-2 rounded-lg text-primary-fixed-dim hover:bg-inverse-surface hover:text-on-primary transition-colors">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                
                 <div class="flex items-center gap-3 shrink-0">
                     <div class="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center shadow-xs">
                         <span class="material-symbols-outlined text-on-secondary text-[22px]">school</span>
                     </div>
-                    <div class="flex flex-col">
+                    <div class="flex flex-col hidden sm:flex">
                         <span class="font-headline-sm text-headline-sm text-on-primary tracking-tight font-bold">UNETI ADMIN</span>
                         <span class="font-label-sm text-label-sm text-primary-fixed-dim uppercase tracking-wider">Đại học KT-KTCN</span>
                     </div>
                 </div>
+                
                 <nav class="hidden md:flex items-center gap-1.5">
-                    <a class="px-3.5 py-2 rounded-lg flex items-center gap-2 font-body-md text-body-md text-primary-fixed-dim hover:bg-inverse-surface hover:text-on-primary transition-all duration-150" href="/ThongKe/Dashboard">
+                    <a class="nav-link px-3.5 py-2 rounded-lg flex items-center gap-2 font-body-md text-body-md text-primary-fixed-dim hover:bg-inverse-surface hover:text-on-primary transition-all duration-150" href="/ThongKe/Dashboard">
                         <span class="material-symbols-outlined text-[18px]">dashboard</span>
                         <span>Dashboard</span>
                     </a>
-                    <a class="px-3.5 py-2 rounded-lg flex items-center gap-2 font-body-md text-body-md text-primary-fixed-dim hover:bg-inverse-surface hover:text-on-primary transition-all duration-150" href="/BuoiHoc/Index">
+                    <a class="nav-link px-3.5 py-2 rounded-lg flex items-center gap-2 font-body-md text-body-md text-primary-fixed-dim hover:bg-inverse-surface hover:text-on-primary transition-all duration-150" href="/BuoiHoc/Index">
                         <span class="material-symbols-outlined text-[18px]">calendar_month</span>
                         <span>Quản lý Lịch học</span>
                     </a>
-                    <a class="px-3.5 py-2 rounded-lg flex items-center gap-2 font-body-md text-body-md text-primary-fixed-dim hover:bg-inverse-surface hover:text-on-primary transition-all duration-150" href="/KetQuaHocTap/Index">
+                    <a class="nav-link px-3.5 py-2 rounded-lg flex items-center gap-2 font-body-md text-body-md text-primary-fixed-dim hover:bg-inverse-surface hover:text-on-primary transition-all duration-150" href="/KetQuaHocTap/Index">
                         <span class="material-symbols-outlined text-[18px]">workspace_premium</span>
                         <span>Kết quả học tập</span>
                     </a>
-                    <a class="px-3.5 py-2 rounded-lg flex items-center gap-2 font-body-md text-body-md text-primary-fixed-dim hover:bg-inverse-surface hover:text-on-primary transition-all duration-150" href="/ThongKe/Index">
+                    <a class="nav-link px-3.5 py-2 rounded-lg flex items-center gap-2 font-body-md text-body-md text-primary-fixed-dim hover:bg-inverse-surface hover:text-on-primary transition-all duration-150" href="/ThongKe/Index">
                         <span class="material-symbols-outlined text-[18px]">bar_chart</span>
                         <span>Báo cáo Thống kê</span>
                     </a>
@@ -96,20 +111,42 @@
                         </div>
                         <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-tertiary-fixed"></span>
                     </div>
-                    <div class="flex flex-col text-left">
+                    <div class="flex flex-col text-left hidden sm:flex">
                         <span class="font-label-md text-label-md text-on-primary leading-tight font-semibold">Giáo vụ (SV5)</span>
                         <span class="font-label-sm text-label-sm text-tertiary-fixed leading-none">Trực tuyến</span>
                     </div>
                 </div>
                 <a class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-primary-fixed-dim hover:bg-inverse-surface hover:text-on-primary font-label-md text-label-md transition-colors" href="#">
                     <span class="material-symbols-outlined text-[18px]">logout</span>
-                    <span class="hidden sm:inline">Đăng xuất</span>
+                    <span class="hidden lg:inline">Đăng xuất</span>
                 </a>
             </div>
         </div>
+        
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="hidden md:hidden w-full bg-primary-container border-t border-inverse-surface px-4 py-3">
+            <nav class="flex flex-col gap-2">
+                <a class="nav-link px-3.5 py-2 rounded-lg flex items-center gap-2 font-body-md text-body-md text-primary-fixed-dim hover:bg-inverse-surface hover:text-on-primary transition-all duration-150" href="/ThongKe/Dashboard">
+                    <span class="material-symbols-outlined text-[18px]">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a class="nav-link px-3.5 py-2 rounded-lg flex items-center gap-2 font-body-md text-body-md text-primary-fixed-dim hover:bg-inverse-surface hover:text-on-primary transition-all duration-150" href="/BuoiHoc/Index">
+                    <span class="material-symbols-outlined text-[18px]">calendar_month</span>
+                    <span>Quản lý Lịch học</span>
+                </a>
+                <a class="nav-link px-3.5 py-2 rounded-lg flex items-center gap-2 font-body-md text-body-md text-primary-fixed-dim hover:bg-inverse-surface hover:text-on-primary transition-all duration-150" href="/KetQuaHocTap/Index">
+                    <span class="material-symbols-outlined text-[18px]">workspace_premium</span>
+                    <span>Kết quả học tập</span>
+                </a>
+                <a class="nav-link px-3.5 py-2 rounded-lg flex items-center gap-2 font-body-md text-body-md text-primary-fixed-dim hover:bg-inverse-surface hover:text-on-primary transition-all duration-150" href="/ThongKe/Index">
+                    <span class="material-symbols-outlined text-[18px]">bar_chart</span>
+                    <span>Báo cáo Thống kê</span>
+                </a>
+            </nav>
+        </div>
     </header>
 
-    <main class="relative min-h-screen bg-surface px-6 py-6">
+    <main class="relative min-h-screen bg-surface px-3 py-3 md:px-6 md:py-6">
         @RenderBody()
     </main>
 

@@ -1,10 +1,10 @@
-﻿<!-- 
-Há» vÃ  tÃªn: Nguyá»…n TÃ¹ng DÆ°Æ¡ng
-MÃ£ sinh viÃªn: 23103100003
-Ná»™i dung thá»±c hiá»‡n: Module 5 - Giao diá»‡n BÃ¡o cÃ¡o Thá»‘ng kÃª
+<!-- 
+Họ và tên: Nguyễn Tùng Dương
+Mã sinh viên: 23103100003
+Nội dung thực hiện: Module 5 - Giao diện Báo cáo Thống kê
 -->
 @{
-    ViewData["Title"] = "BÃ¡o cÃ¡o Thá»‘ng kÃª";
+    ViewData["Title"] = "Báo cáo Thống kê";
     var doanhThu = ViewBag.DoanhThuTheoThang as IEnumerable<QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.ViewModels.ThongKeDoanhThuVM>;
     var tyLe = ViewBag.TyLeLapDay as IEnumerable<QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.ViewModels.TyLeLapDayVM>;
     var dkTrangThai = ViewBag.DKTheoTrangThai as IEnumerable<dynamic>;
@@ -18,13 +18,13 @@ Ná»™i dung thá»±c hiá»‡n: Module 5 - Giao diá»‡n BÃ¡o cÃ¡o Th
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
             <div class="flex flex-col">
                 <div class="flex items-center gap-2">
-                    <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">BÃ¡o cÃ¡o Thá»‘ng kÃª</h1>
+                    <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Báo cáo Thống kê</h1>
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-secondary-fixed text-on-secondary-fixed">
-                        Dá»¯ liá»‡u thá»i gian thá»±c
+                        Dữ liệu thời gian thực
                     </span>
                 </div>
                 <p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
-                    Tá»•ng há»£p chá»‰ sá»‘ tÃ i chÃ­nh há»c phÃ­, tá»· lá»‡ láº¥p Ä‘áº§y lá»›p, tiáº¿n Ä‘á»™ Ä‘Äƒng kÃ½ vÃ  cháº¥t lÆ°á»£ng Ä‘Ã o táº¡o
+                    Tổng hợp chỉ số tài chính học phí, tỷ lệ lấp đầy lớp, tiến độ đăng ký và chất lượng đào tạo
                 </p>
             </div>
             <!-- Header Action Controls -->
@@ -33,21 +33,21 @@ Ná»™i dung thá»±c hiá»‡n: Module 5 - Giao diá»‡n BÃ¡o cÃ¡o Th
                 <div class="relative inline-flex items-center">
                     <span class="material-symbols-outlined absolute left-3 text-[18px] text-on-surface-variant pointer-events-none">calendar_today</span>
                     <select class="h-10 pl-9 pr-8 bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded-lg shadow-sm border border-outline-variant focus:outline-none focus:ring-2 focus:ring-secondary/20 appearance-none cursor-pointer">
-                        <option selected="">Há»c ká»³ 1 â€¢ 2024 - 2025</option>
-                        <option>Há»c ká»³ 2 â€¢ 2023 - 2024</option>
-                        <option>Há»c ká»³ HÃ¨ â€¢ 2023 - 2024</option>
+                        <option selected="">Học kỳ 1 • 2024 - 2025</option>
+                        <option>Học kỳ 2 • 2023 - 2024</option>
+                        <option>Học kỳ Hè • 2023 - 2024</option>
                     </select>
                     <span class="material-symbols-outlined absolute right-2.5 text-[18px] text-on-surface-variant pointer-events-none">expand_more</span>
                 </div>
                 <!-- Export Action -->
                 <button class="h-10 px-3.5 bg-surface-container-lowest hover:bg-surface-container text-on-surface font-label-md text-label-md rounded-lg shadow-sm border border-outline-variant flex items-center gap-1.5 transition-colors" type="button">
                     <span class="material-symbols-outlined text-[18px] text-secondary">file_download</span>
-                    <span class="">Xuáº¥t file PDF/Excel</span>
+                    <span class="">Xuất file PDF/Excel</span>
                 </button>
                 <!-- Refresh Action -->
                 <button class="h-10 px-3.5 bg-primary-container hover:bg-inverse-surface text-on-primary font-label-md text-label-md rounded-lg shadow-sm flex items-center gap-1.5 transition-all" type="button">
                     <span class="material-symbols-outlined text-[18px] text-secondary-container">sync</span>
-                    <span class="">LÃ m má»›i dá»¯ liá»‡u</span>
+                    <span class="">Làm mới dữ liệu</span>
                 </button>
             </div>
         </div>
@@ -55,20 +55,20 @@ Ná»™i dung thá»±c hiá»‡n: Module 5 - Giao diá»‡n BÃ¡o cÃ¡o Th
         <!-- Main Grid Layout: 2 Columns, 6 Compact UI Cards -->
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-5 w-full">
             
-            <!-- Card 1: Doanh thu theo ThÃ¡ng -->
+            <!-- Card 1: Doanh thu theo Tháng -->
             <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 p-5 flex flex-col justify-between">
                 <div>
                     <div class="flex items-start justify-between mb-4">
                         <div class="flex flex-col">
                             <div class="flex items-center gap-2">
                                 <span class="material-symbols-outlined text-[20px] text-secondary">payments</span>
-                                <h2 class="font-headline-sm text-headline-sm text-on-surface">Doanh thu theo ThÃ¡ng</h2>
+                                <h2 class="font-headline-sm text-headline-sm text-on-surface">Doanh thu theo Tháng</h2>
                             </div>
-                            <span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Thu chi ngÃ¢n sÃ¡ch há»c phÃ­ theo niÃªn khÃ³a</span>
+                            <span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Thu chi ngân sách học phí theo niên khóa</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="font-label-md text-label-md text-on-surface bg-surface-container-low px-2.5 py-1 rounded-md">
-                                Tá»•ng cá»™ng: <strong class="font-semibold text-secondary">@string.Format("{0:N0}", doanhThu?.Sum(d => d.TongDoanhThu) ?? 0) â‚«</strong>
+                                Tổng cộng: <strong class="font-semibold text-secondary">@string.Format("{0:N0}", doanhThu?.Sum(d => d.TongDoanhThu) ?? 0) ₫</strong>
                             </span>
                         </div>
                     </div>
@@ -76,9 +76,9 @@ Ná»™i dung thá»±c hiá»‡n: Module 5 - Giao diá»‡n BÃ¡o cÃ¡o Th
                         <table class="w-full text-left">
                             <thead>
                                 <tr class="bg-surface-container-low text-on-surface-variant font-label-md text-[11px] tracking-wider uppercase border-b border-outline-variant/30">
-                                    <th class="py-2.5 px-3">ThÃ¡ng</th>
-                                    <th class="py-2.5 px-3 text-right">Há»c phÃ­ thu Ä‘Æ°á»£c</th>
-                                    <th class="py-2.5 px-3 text-right">Tá»· lá»‡ hoÃ n thÃ nh</th>
+                                    <th class="py-2.5 px-3">Tháng</th>
+                                    <th class="py-2.5 px-3 text-right">Học phí thu được</th>
+                                    <th class="py-2.5 px-3 text-right">Tỷ lệ hoàn thành</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-outline-variant/20 font-body-sm text-body-sm text-on-surface">
@@ -87,8 +87,8 @@ Ná»™i dung thá»±c hiá»‡n: Module 5 - Giao diá»‡n BÃ¡o cÃ¡o Th
                                     @foreach(var item in doanhThu)
                                     {
                                         <tr class="hover:bg-surface-container-low/50 transition-colors">
-                                            <td class="py-2 px-3 font-label-md">ThÃ¡ng @item.Thang</td>
-                                            <td class="py-2 px-3 text-right font-medium">@string.Format("{0:N0}", item.TongDoanhThu) â‚«</td>
+                                            <td class="py-2 px-3 font-label-md">Tháng @item.Thang</td>
+                                            <td class="py-2 px-3 text-right font-medium">@string.Format("{0:N0}", item.TongDoanhThu) ₫</td>
                                             <td class="py-2 px-3 text-right"><span class="font-label-sm text-on-tertiary-container bg-tertiary-fixed/20 px-2 py-0.5 rounded">100%</span></td>
                                         </tr>
                                     }
@@ -99,26 +99,26 @@ Ná»™i dung thá»±c hiá»‡n: Module 5 - Giao diá»‡n BÃ¡o cÃ¡o Th
                 </div>
             </div>
 
-            <!-- Card 2: Tá»· lá»‡ Láº¥p Ä‘áº§y Lá»›p há»c -->
+            <!-- Card 2: Tỷ lệ Lấp đầy Lớp học -->
             <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 p-5 flex flex-col justify-between">
                 <div>
                     <div class="flex items-start justify-between mb-4">
                         <div class="flex flex-col">
                             <div class="flex items-center gap-2">
                                 <span class="material-symbols-outlined text-[20px] text-secondary">pie_chart</span>
-                                <h2 class="font-headline-sm text-headline-sm text-on-surface">Tá»· lá»‡ Láº¥p Ä‘áº§y Lá»›p há»c</h2>
+                                <h2 class="font-headline-sm text-headline-sm text-on-surface">Tỷ lệ Lấp đầy Lớp học</h2>
                             </div>
-                            <span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Sá»©c chá»©a phÃ²ng há»c vÃ  kháº£ nÄƒng Ä‘Ã¡p á»©ng</span>
+                            <span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Sức chứa phòng học và khả năng đáp ứng</span>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left">
                             <thead>
                                 <tr class="bg-surface-container-low text-on-surface-variant font-label-md text-[11px] tracking-wider uppercase border-b border-outline-variant/30">
-                                    <th class="py-2.5 px-3">Lá»›p há»c pháº§n</th>
-                                    <th class="py-2.5 px-2 text-center">Tá»‘i Ä‘a</th>
-                                    <th class="py-2.5 px-2 text-center">Hiá»‡n táº¡i</th>
-                                    <th class="py-2.5 px-3 w-40">Tá»· lá»‡</th>
+                                    <th class="py-2.5 px-3">Lớp học phần</th>
+                                    <th class="py-2.5 px-2 text-center">Tối đa</th>
+                                    <th class="py-2.5 px-2 text-center">Hiện tại</th>
+                                    <th class="py-2.5 px-3 w-40">Tỷ lệ</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-outline-variant/20 font-body-sm text-body-sm text-on-surface">
@@ -151,16 +151,16 @@ Ná»™i dung thá»±c hiá»‡n: Module 5 - Giao diá»‡n BÃ¡o cÃ¡o Th
                 </div>
             </div>
 
-            <!-- Card 3: Thá»‘ng kÃª ÄÄƒng kÃ½ theo Tráº¡ng thÃ¡i -->
+            <!-- Card 3: Thống kê Đăng ký theo Trạng thái -->
             <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 p-5 flex flex-col justify-between">
                 <div>
                     <div class="flex items-start justify-between mb-3">
                         <div class="flex flex-col">
                             <div class="flex items-center gap-2">
                                 <span class="material-symbols-outlined text-[20px] text-secondary">assignment_turned_in</span>
-                                <h2 class="font-headline-sm text-headline-sm text-on-surface">Thá»‘ng kÃª ÄÄƒng kÃ½ theo Tráº¡ng thÃ¡i</h2>
+                                <h2 class="font-headline-sm text-headline-sm text-on-surface">Thống kê Đăng ký theo Trạng thái</h2>
                             </div>
-                            <span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Tiáº¿n Ä‘á»™ phÃª duyá»‡t tÃ­n chá»‰ há»c pháº§n</span>
+                            <span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Tiến độ phê duyệt tín chỉ học phần</span>
                         </div>
                     </div>
                     
@@ -169,11 +169,11 @@ Ná»™i dung thá»±c hiá»‡n: Module 5 - Giao diá»‡n BÃ¡o cÃ¡o Th
                         {
                             @foreach(var item in dkTrangThai)
                             {
-                                string colorRing = item.Ten == "ÄÃ£ duyá»‡t" || item.Ten == "ÄÃ£ Ä‘Ã³ng há»c phÃ­" || item.Ten == "Äang há»c" ? "bg-tertiary-fixed-dim ring-tertiary-fixed/30" :
-                                             (item.Ten == "ÄÃ£ há»§y" || item.Ten == "Tá»« chá»‘i" ? "bg-error ring-error-container" : "bg-secondary-container ring-secondary-fixed/50");
+                                string colorRing = item.Ten == "Đã duyệt" || item.Ten == "Đã đóng học phí" || item.Ten == "Đang học" ? "bg-tertiary-fixed-dim ring-tertiary-fixed/30" :
+                                             (item.Ten == "Đã hủy" || item.Ten == "Từ chối" ? "bg-error ring-error-container" : "bg-secondary-container ring-secondary-fixed/50");
                                 
-                                string colorText = item.Ten == "ÄÃ£ duyá»‡t" || item.Ten == "ÄÃ£ Ä‘Ã³ng há»c phÃ­" || item.Ten == "Äang há»c" ? "text-on-tertiary-container bg-tertiary-fixed/30" :
-                                             (item.Ten == "ÄÃ£ há»§y" || item.Ten == "Tá»« chá»‘i" ? "text-error bg-error-container" : "text-on-secondary-container bg-secondary-fixed");
+                                string colorText = item.Ten == "Đã duyệt" || item.Ten == "Đã đóng học phí" || item.Ten == "Đang học" ? "text-on-tertiary-container bg-tertiary-fixed/30" :
+                                             (item.Ten == "Đã hủy" || item.Ten == "Từ chối" ? "text-error bg-error-container" : "text-on-secondary-container bg-secondary-fixed");
 
                                 <div class="p-3 rounded-lg bg-surface-container-low flex items-center justify-between">
                                     <div class="flex items-center gap-3">
@@ -185,7 +185,7 @@ Ná»™i dung thá»±c hiá»‡n: Module 5 - Giao diá»‡n BÃ¡o cÃ¡o Th
                                     <div class="flex items-center gap-3">
                                         <span class="font-headline-sm text-headline-sm font-bold text-on-surface">@item.SoLuong</span>
                                         <span class="inline-flex items-center text-label-sm font-label-sm px-2 py-0.5 rounded @colorText">
-                                            Há»“ sÆ¡
+                                            Hồ sơ
                                         </span>
                                     </div>
                                 </div>
@@ -195,16 +195,16 @@ Ná»™i dung thá»±c hiá»‡n: Module 5 - Giao diá»‡n BÃ¡o cÃ¡o Th
                 </div>
             </div>
 
-            <!-- Card 4: Top Lá»›p há»c pháº§n ÄÄƒng kÃ½ Nhiá»u nháº¥t -->
+            <!-- Card 4: Top Lớp học phần Đăng ký Nhiều nhất -->
             <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 p-5 flex flex-col justify-between">
                 <div>
                     <div class="flex items-start justify-between mb-4">
                         <div class="flex flex-col">
                             <div class="flex items-center gap-2">
                                 <span class="material-symbols-outlined text-[20px] text-secondary">military_tech</span>
-                                <h2 class="font-headline-sm text-headline-sm text-on-surface">Top Lá»›p há»c pháº§n ÄÄƒng kÃ½ Nhiá»u nháº¥t</h2>
+                                <h2 class="font-headline-sm text-headline-sm text-on-surface">Top Lớp học phần Đăng ký Nhiều nhất</h2>
                             </div>
-                            <span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Xáº¿p háº¡ng nhu cáº§u tÃ­n chá»‰ sinh viÃªn</span>
+                            <span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Xếp hạng nhu cầu tín chỉ sinh viên</span>
                         </div>
                     </div>
                     <div class="space-y-2">
@@ -242,25 +242,25 @@ Ná»™i dung thá»±c hiá»‡n: Module 5 - Giao diá»‡n BÃ¡o cÃ¡o Th
                 </div>
             </div>
 
-            <!-- Card 5: Äiá»ƒm Trung bÃ¬nh Káº¿t thÃºc theo Lá»›p -->
+            <!-- Card 5: Điểm Trung bình Kết thúc theo Lớp -->
             <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 p-5 flex flex-col justify-between">
                 <div>
                     <div class="flex items-start justify-between mb-4">
                         <div class="flex flex-col">
                             <div class="flex items-center gap-2">
                                 <span class="material-symbols-outlined text-[20px] text-secondary">school</span>
-                                <h2 class="font-headline-sm text-headline-sm text-on-surface">Äiá»ƒm Trung bÃ¬nh Káº¿t thÃºc theo Lá»›p</h2>
+                                <h2 class="font-headline-sm text-headline-sm text-on-surface">Điểm Trung bình Kết thúc theo Lớp</h2>
                             </div>
-                            <span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">ÄÃ¡nh giÃ¡ chuáº©n Ä‘áº§u ra vÃ  cháº¥t lÆ°á»£ng mÃ´n</span>
+                            <span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Đánh giá chuẩn đầu ra và chất lượng môn</span>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left">
                             <thead>
                                 <tr class="bg-surface-container-low text-on-surface-variant font-label-md text-[11px] tracking-wider uppercase border-b border-outline-variant/30">
-                                    <th class="py-2.5 px-3">Lá»›p há»c pháº§n</th>
-                                    <th class="py-2.5 px-2 text-center">Äiá»ƒm TB</th>
-                                    <th class="py-2.5 px-3 text-right">ÄÃ¡nh giÃ¡</th>
+                                    <th class="py-2.5 px-3">Lớp học phần</th>
+                                    <th class="py-2.5 px-2 text-center">Điểm TB</th>
+                                    <th class="py-2.5 px-3 text-right">Đánh giá</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-outline-variant/20 font-body-sm text-body-sm text-on-surface">
@@ -273,16 +273,16 @@ Ná»™i dung thá»±c hiá»‡n: Module 5 - Giao diá»‡n BÃ¡o cÃ¡o Th
                                             <td class="py-2.5 px-2 text-center font-bold text-on-tertiary-container bg-tertiary-fixed/20 rounded">@(((double)item.DiemTB).ToString("0.0"))</td>
                                             <td class="py-2.5 px-3 text-right">
                                                 @if(item.DiemTB >= 8.0) {
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-label-sm font-label-sm bg-tertiary-fixed/40 text-on-tertiary-container font-medium">Xuáº¥t sáº¯c</span>
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-label-sm font-label-sm bg-tertiary-fixed/40 text-on-tertiary-container font-medium">Xuất sắc</span>
                                                 }
                                                 else if (item.DiemTB >= 6.5) {
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-label-sm font-label-sm bg-secondary-fixed text-on-secondary-fixed font-medium">KhÃ¡</span>
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-label-sm font-label-sm bg-secondary-fixed text-on-secondary-fixed font-medium">Khá</span>
                                                 }
                                                 else if (item.DiemTB >= 4.0) {
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container text-on-surface-variant font-medium">Äáº¡t</span>
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container text-on-surface-variant font-medium">Đạt</span>
                                                 }
                                                 else {
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-label-sm font-label-sm bg-error-container text-error font-medium">KÃ©m</span>
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-label-sm font-label-sm bg-error-container text-error font-medium">Kém</span>
                                                 }
                                             </td>
                                         </tr>
@@ -294,16 +294,16 @@ Ná»™i dung thá»±c hiá»‡n: Module 5 - Giao diá»‡n BÃ¡o cÃ¡o Th
                 </div>
             </div>
 
-            <!-- Card 6: PhÃ¢n bá»• Lá»‹ch há»c theo ThÃ¡ng -->
+            <!-- Card 6: Phân bổ Lịch học theo Tháng -->
             <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 p-5 flex flex-col justify-between">
                 <div>
                     <div class="flex items-start justify-between mb-2">
                         <div class="flex flex-col">
                             <div class="flex items-center gap-2">
                                 <span class="material-symbols-outlined text-[20px] text-secondary">bar_chart</span>
-                                <h2 class="font-headline-sm text-headline-sm text-on-surface">PhÃ¢n bá»• Lá»‹ch há»c theo ThÃ¡ng</h2>
+                                <h2 class="font-headline-sm text-headline-sm text-on-surface">Phân bổ Lịch học theo Tháng</h2>
                             </div>
-                            <span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Sá»‘ ca há»c tá»• chá»©c giáº£ng dáº¡y trá»±c tiáº¿p</span>
+                            <span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Số ca học tổ chức giảng dạy trực tiếp</span>
                         </div>
                     </div>
                     <!-- CSS Bar Chart Visualization -->
@@ -338,5 +338,4 @@ Ná»™i dung thá»±c hiá»‡n: Module 5 - Giao diá»‡n BÃ¡o cÃ¡o Th
 
         </div>
     </div>
-
 
