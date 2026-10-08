@@ -21,6 +21,13 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
+// Tự động kiểm tra và tạo CSDL (Auto-Migrate) nếu chưa có
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
