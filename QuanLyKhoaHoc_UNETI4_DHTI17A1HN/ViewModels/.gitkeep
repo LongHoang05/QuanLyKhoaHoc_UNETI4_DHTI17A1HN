@@ -1,0 +1,2 @@
+# Thư mục ViewModels: Nơi chứa các class ViewModel dùng để truyền dữ liệu giữa Controller và View
+# Ví dụ: DangNhapViewModel.cs, LopHocFilterViewModel.cs, ThongKeDashboardViewModel.cs
