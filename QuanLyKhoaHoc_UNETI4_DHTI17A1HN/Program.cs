@@ -1,80 +1,55 @@
-// Họ và tên: Nguyễn Hoàng Long
-// Mã sinh viên: 23103100046
-// Nội dung thực hiện: Khung dự án - cấu hình DbContext và Session dùng chung
+using Microsoft.EntityFrameworkCore;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
 
-using Microsoft.EntityFrameworkCore;                  // [THÊM]
-using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;           // [THÊM]
+var builder = WebApplication.CreateBuilder(args);
 
-namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN
+// ========================================================
+// 1. Cấu hình DbContext kết nối SQL Server
+// ========================================================
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+    ?? "Server=.;Database=QuanLyKhoaHoc_UNETI4_DB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true";
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+// ========================================================
+// 2. Cấu hình Session & Cookie cho đăng nhập / phân quyền
+// ========================================================
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+    options.IdleTimeout = TimeSpan.FromMinutes(60);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
-            // Add services to the container.
-            builder.Services.AddControllersWithViews();
+// Đăng ký dịch vụ Controllers with Views
+builder.Services.AddControllersWithViews();
 
-            // [THÊM] DbContext (SQL Server) dùng chung cho cả nhóm
-            builder.Services.AddDbContext<KhoaHocDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+var app = builder.Build();
 
-            // [THÊM] Session: lưu MaTaiKhoan, HoTen, VaiTro khi đăng nhập
-            builder.Services.AddDistributedMemoryCache();
-            builder.Services.AddSession(options =>
-            {
-                options.IdleTimeout = TimeSpan.FromMinutes(30);
-                options.Cookie.HttpOnly = true;
-                options.Cookie.IsEssential = true;
-            });
-
-
-            // ===================== ĐĂNG KÝ DỊCH VỤ TỪNG MODULE =====================
-            // Mỗi người CHỈ thêm dòng vào vùng của mình. Ví dụ: builder.Services.AddScoped<ILopHocService, LopHocService>();
-
-            // ===== MODULE 1 (Vũ Đình Trường) =====
-
-            // ===== MODULE 2 (Nguyễn Đình Kiên) =====
-
-            // ===== MODULE 3 (Nguyễn Đức Linh) =====
-
-            // ===== MODULE 4 (Nguyễn Hoàng Long) =====
-
-            // ===== MODULE 5 (Nguyễn Tùng Dương) =====
-
-            // ===================== HẾT VÙNG ĐĂNG KÝ DỊCH VỤ =====================
-
-            var app = builder.Build();
-            // Tự áp Migration và nạp dữ liệu mẫu khi khởi động
-            using (var scope = app.Services.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<KhoaHocDbContext>();
-                TrinhNapDuLieu.NapDuLieu(db);
-            }
-
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
-
-            app.UseHttpsRedirection();
-            app.UseRouting();
-
-            app.UseSession();   // [THÊM] phải đặt sau UseRouting và trước UseAuthorization
-
-            app.UseAuthorization();
-
-            app.MapStaticAssets();
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}")
-                .WithStaticAssets();
-
-            app.Run();
-        }
-    }
+// ========================================================
+// 4. Cấu hình Middleware HTTP pipeline
+// ========================================================
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 }
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+// Bật Session (bắt buộc đặt trước UseAuthorization)
+app.UseSession();
+
+app.UseAuthorization();
+
+// Route mặc định
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();

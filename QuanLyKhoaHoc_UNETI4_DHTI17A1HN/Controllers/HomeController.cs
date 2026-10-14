@@ -1,17 +1,25 @@
-// Họ và tên: Nguyễn Hoàng Long
-// Mã sinh viên: 23103100046
-// Nội dung thực hiện: Khung dự án - HomeController mặc định
-
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
-using System.Diagnostics;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 {
+    /// <summary>
+    /// Controller Trang chủ - Giới thiệu Đề tài và Bảng phân chia công việc nhóm
+    /// Nhóm UNETI 4 - Lớp DHTI17A1HN
+    /// </summary>
     public class HomeController : Controller
     {
+        private readonly ILogger<HomeController> _logger;
+
+        public HomeController(ILogger<HomeController> logger)
+        {
+            _logger = logger;
+        }
+
         public IActionResult Index()
         {
+            // Trang chủ tổng quan dự án, dẫn tới các Module của 5 thành viên
             return View();
         }
 

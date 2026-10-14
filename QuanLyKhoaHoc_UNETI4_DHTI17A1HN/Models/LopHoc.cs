@@ -1,0 +1,98 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
+{
+    // ========================================================
+    // Họ và tên: Nguyễn Đình Kiên
+    // Mã sinh viên: 23103100020
+    // Phụ trách: Module 2 - Quản lý lớp học, Tìm kiếm, Lọc, Sắp xếp, Phân trang
+    // ========================================================
+    [Table("LopHoc")]
+    public class LopHoc
+    {
+        [Key]
+        [Display(Name = "Mã lớp")]
+        public int MaLopHoc { get; set; }
+
+        [Required(ErrorMessage = "Tên lớp không được để trống")]
+        [StringLength(200)]
+        [Display(Name = "Tên lớp học")]
+        public string TenLop { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Vui lòng chọn khóa học/chương trình đào tạo")]
+        [Display(Name = "Khóa học")]
+        public int MaKhoaHoc { get; set; }
+
+        [Display(Name = "Giảng viên phụ trách")]
+        public int? MaGiangVien { get; set; }
+
+        [StringLength(200)]
+        [Display(Name = "Tên giảng viên")]
+        public string? TenGiangVien { get; set; }
+
+        [StringLength(100)]
+        [Display(Name = "Trình độ đầu vào")]
+        public string? TrinhDoDauVao { get; set; } // Cơ bản, Trung cấp, Nâng cao
+
+        [Required(ErrorMessage = "Sĩ số tối đa phải > 0")]
+        [Range(1, 500, ErrorMessage = "Sĩ số tối đa từ 1 đến 500")]
+        [Display(Name = "Sĩ số tối đa")]
+        public int SiSoToiDa { get; set; } = 30;
+
+        [Required(ErrorMessage = "Số buổi học phải > 0")]
+        [Range(1, 200, ErrorMessage = "Số buổi học từ 1 đến 200")]
+        [Display(Name = "Số buổi học")]
+        public int SoBuoiHoc { get; set; } = 12;
+
+        [Required(ErrorMessage = "Học phí không được để trống")]
+        [Range(0, 100000000, ErrorMessage = "Học phí phải >= 0")]
+        [Display(Name = "Học phí (VNĐ)")]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal HocPhi { get; set; }
+
+        [Required(ErrorMessage = "Ngày bắt đầu đăng ký bắt buộc")]
+        [Display(Name = "Ngày mở đăng ký")]
+        [DataType(DataType.Date)]
+        public DateTime NgayBatDauDangKy { get; set; } = DateTime.Today;
+
+        [Required(ErrorMessage = "Hạn đăng ký bắt buộc")]
+        [Display(Name = "Hạn chót đăng ký")]
+        [DataType(DataType.Date)]
+        public DateTime HanDangKy { get; set; } = DateTime.Today.AddDays(15);
+
+        [Required(ErrorMessage = "Ngày khai giảng bắt buộc")]
+        [Display(Name = "Ngày khai giảng")]
+        [DataType(DataType.Date)]
+        public DateTime NgayKhaiGiang { get; set; } = DateTime.Today.AddDays(20);
+
+        [StringLength(1000)]
+        [Display(Name = "Mô tả lớp học")]
+        public string? MoTa { get; set; }
+
+        [StringLength(1000)]
+        [Display(Name = "Yêu cầu đối với học viên")]
+        public string? YeuCauHocVien { get; set; }
+
+        [StringLength(50)]
+        [Display(Name = "Trạng thái")]
+        public string TrangThai { get; set; } = "Đang mở đăng ký"; // Chưa mở, Đang mở đăng ký, Tạm dừng, Đã đóng đăng ký
+
+        [StringLength(100)]
+        [Display(Name = "Phòng học")]
+        public string? PhongHoc { get; set; }
+
+        [Display(Name = "Ngày tạo")]
+        public DateTime NgayTao { get; set; } = DateTime.Now;
+
+        // Navigation properties
+        [ForeignKey("MaKhoaHoc")]
+        public virtual KhoaHoc? KhoaHoc { get; set; }
+
+        [ForeignKey("MaGiangVien")]
+        public virtual GiangVien? GiangVien { get; set; }
+
+        public virtual ICollection<DangKyHoc> DangKyHocs { get; set; } = new List<DangKyHoc>();
+        public virtual ICollection<BuoiHoc> BuoiHocs { get; set; } = new List<BuoiHoc>();
+    }
+}

@@ -1,8 +1,224 @@
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Khung Dự Án & Phân Công Nhiệm Vụ 5 Thành Viên";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container py-4">
+    <!-- Header Banner -->
+    <div class="p-4 mb-4 bg-primary text-white rounded-3 shadow">
+        <div class="row align-items-center">
+            <div class="col-md-9">
+                <span class="badge bg-warning text-dark mb-2 px-3 py-2 fw-bold">BÀI TẬP LỚN MÔN THỰC HÀNH LẬP TRÌNH .NET</span>
+                <h1 class="display-6 fw-bold">Khung Dự Án: Quản Lý Đăng Ký Khóa Học & Học Viên</h1>
+                <p class="lead mb-1">Cấu trúc: ASP.NET Core 10 MVC | Entity Framework Core 10 | SQL Server</p>
+                <p class="mb-0 text-white-50">Nhóm: <strong>UNETI 4</strong> | Lớp: <strong>DHTI17A1HN</strong> | Hệ thống: <strong>5 Module độc lập cho 5 sinh viên</strong></p>
+            </div>
+            <div class="col-md-3 text-end d-none d-md-block">
+                <i class="bi bi-mortarboard-fill display-1 opacity-50"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert cảnh báo quan trọng về Migration & Code cá nhân -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="alert alert-warning border-warning h-100 d-flex align-items-start mb-0" role="alert">
+                <i class="bi bi-exclamation-triangle-fill fs-3 me-3 text-warning"></i>
+                <div>
+                    <strong>QUY TẮC MIGRATION (ĐỂ KHÔNG BỊ XUNG ĐỘT GIT):</strong>
+                    <p class="small mb-1">Dự án đã có sẵn Migration nền tảng <code>InitialCreate</code> cùng toàn bộ Models và Seed Data.</p>
+                    <p class="small mb-0 fw-bold text-danger">Mọi thành viên KHÔNG ĐƯỢC chạy "Add-Migration". Mỗi người chỉ cần mở Terminal gõ duy nhất lệnh:</p>
+                    <code class="bg-dark text-warning p-1 rounded d-inline-block mt-1">dotnet ef database update</code>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="alert alert-info border-info h-100 d-flex align-items-start mb-0" role="alert">
+                <i class="bi bi-git fs-3 me-3 text-info"></i>
+                <div>
+                    <strong>QUY TẮC PHÂN CHIA CODE & COMMIT:</strong>
+                    <p class="small mb-1">Dự án chỉ chứa <strong>Models</strong> và <strong>DbContext</strong> dùng chung. Controller, View, Service của module nào thì thành viên đó <strong>tự tạo file mới</strong> trong branch của mình.</p>
+                    <p class="small mb-0">Cú pháp commit: <code>[Mã SV] [Module] Nội dung công việc</code></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách 5 Module cho 5 Sinh viên -->
+    <h3 class="fw-bold text-secondary mb-3"><i class="bi bi-list-task me-2"></i>Chi Tiết File Cần Tự Tạo Cho Từng Thành Viên</h3>
+    <div class="row g-4 mb-5">
+        
+        <!-- Sinh viên 1: Module 1 -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-primary shadow-sm">
+                <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
+                    <span>MODULE 1</span>
+                    <span class="badge bg-light text-primary">Vũ Đình Trường</span>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted"><strong>Mã SV:</strong> <code>23103100026</code></h6>
+                    <p class="card-text fw-bold text-primary mb-2">Đăng nhập, Phân quyền & Chương trình đào tạo</p>
+                    
+                    <div class="small bg-light p-2 rounded mb-2 border">
+                        <strong class="text-dark">Models có sẵn:</strong><br/>
+                        <code>TaiKhoan</code>, <code>DanhMucKhoaHoc</code>, <code>KhoaHoc</code>
+                    </div>
+
+                    <div class="small">
+                        <strong class="text-danger">File tự tạo trong branch:</strong>
+                        <ul class="ps-3 mb-0 text-muted">
+                            <li><code>Controllers/TaiKhoanController.cs</code></li>
+                            <li><code>Controllers/ChuongTrinhDaoTaoController.cs</code></li>
+                            <li><code>Views/TaiKhoan/DangNhap.cshtml</code></li>
+                            <li><code>Views/ChuongTrinhDaoTao/Index.cshtml</code></li>
+                            <li><code>Views/ChuongTrinhDaoTao/Create.cshtml</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sinh viên 2: Module 2 -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-success shadow-sm">
+                <div class="card-header bg-success text-white fw-bold d-flex justify-content-between align-items-center">
+                    <span>MODULE 2</span>
+                    <span class="badge bg-light text-success">Nguyễn Đình Kiên</span>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted"><strong>Mã SV:</strong> <code>23103100020</code></h6>
+                    <p class="card-text fw-bold text-success mb-2">Quản lý lớp học & Tìm kiếm, Lọc, Phân trang LINQ</p>
+                    
+                    <div class="small bg-light p-2 rounded mb-2 border">
+                        <strong class="text-dark">Models có sẵn:</strong><br/>
+                        <code>LopHoc</code>, <code>GiangVien</code>, <code>KhoaHoc</code>
+                    </div>
+
+                    <div class="small">
+                        <strong class="text-danger">File tự tạo trong branch:</strong>
+                        <ul class="ps-3 mb-0 text-muted">
+                            <li><code>Controllers/LopHocController.cs</code></li>
+                            <li><code>Views/LopHoc/Index.cshtml</code></li>
+                            <li><code>Views/LopHoc/Create.cshtml</code></li>
+                            <li><code>Views/LopHoc/Edit.cshtml</code></li>
+                            <li><code>Views/LopHoc/Details.cshtml</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sinh viên 3: Module 3 -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-warning shadow-sm">
+                <div class="card-header bg-warning text-dark fw-bold d-flex justify-content-between align-items-center">
+                    <span>MODULE 3</span>
+                    <span class="badge bg-dark text-white">Nguyễn Đức Linh</span>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted"><strong>Mã SV:</strong> <code>23103100042</code></h6>
+                    <p class="card-text fw-bold text-dark mb-2">Hồ sơ học viên & Đăng ký lớp học</p>
+                    
+                    <div class="small bg-light p-2 rounded mb-2 border">
+                        <strong class="text-dark">Models có sẵn:</strong><br/>
+                        <code>HocVien</code>, <code>DangKyHoc</code>, <code>LopHoc</code>
+                    </div>
+
+                    <div class="small">
+                        <strong class="text-danger">File tự tạo trong branch:</strong>
+                        <ul class="ps-3 mb-0 text-muted">
+                            <li><code>Controllers/HocVienController.cs</code></li>
+                            <li><code>Views/HocVien/HoSoCaNhan.cshtml</code></li>
+                            <li><code>Views/HocVien/LopDangMo.cshtml</code></li>
+                            <li><code>Views/HocVien/LichSuDangKy.cshtml</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sinh viên 4: Module 4 -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-danger shadow-sm">
+                <div class="card-header bg-danger text-white fw-bold d-flex justify-content-between align-items-center">
+                    <span>MODULE 4</span>
+                    <span class="badge bg-light text-danger">Nguyễn Hoàng Long</span>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted"><strong>Mã SV:</strong> <code>23103100046</code></h6>
+                    <p class="card-text fw-bold text-danger mb-2">Tiếp nhận duyệt đăng ký & Quản lý học phí</p>
+                    
+                    <div class="small bg-light p-2 rounded mb-2 border">
+                        <strong class="text-dark">Models có sẵn:</strong><br/>
+                        <code>DangKyHoc</code>, <code>ThanhToan</code>, <code>LopHoc</code>
+                    </div>
+
+                    <div class="small">
+                        <strong class="text-danger">File tự tạo trong branch:</strong>
+                        <ul class="ps-3 mb-0 text-muted">
+                            <li><code>Controllers/QuanLyDangKyController.cs</code></li>
+                            <li><code>Views/QuanLyDangKy/Index.cshtml</code></li>
+                            <li><code>Views/QuanLyDangKy/DuyetDon.cshtml</code></li>
+                            <li><code>Views/QuanLyDangKy/ThuHocPhi.cshtml</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sinh viên 5: Module 5 -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-info shadow-sm">
+                <div class="card-header bg-info text-white fw-bold d-flex justify-content-between align-items-center">
+                    <span>MODULE 5</span>
+                    <span class="badge bg-light text-info">Nguyễn Tùng Dương</span>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted"><strong>Mã SV:</strong> <code>23103100003</code></h6>
+                    <p class="card-text fw-bold text-info mb-2">Lịch học, Trùng lịch, Điểm & Thống kê LINQ</p>
+                    
+                    <div class="small bg-light p-2 rounded mb-2 border">
+                        <strong class="text-dark">Models có sẵn:</strong><br/>
+                        <code>BuoiHoc</code>, <code>KetQuaHocTap</code>
+                    </div>
+
+                    <div class="small">
+                        <strong class="text-danger">File tự tạo trong branch:</strong>
+                        <ul class="ps-3 mb-0 text-muted">
+                            <li><code>Controllers/LichHocController.cs</code></li>
+                            <li><code>Controllers/BaoCaoThongKeController.cs</code></li>
+                            <li><code>Views/LichHoc/Index.cshtml</code></li>
+                            <li><code>Views/LichHoc/XepLich.cshtml</code></li>
+                            <li><code>Views/BaoCaoThongKe/Dashboard.cshtml</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hướng dẫn tạo branch & pull request -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-dark shadow-sm bg-white">
+                <div class="card-header bg-dark text-white fw-bold">
+                    <i class="bi bi-terminal me-1"></i> LỆNH GIT CHO TỪNG BẠN
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-2">1. Clone & tạo branch làm bài riêng:</p>
+                    <div class="p-2 bg-light border rounded mb-2 font-monospace small">
+                        git checkout -b feature/m[X]-[ten-sv]
+                    </div>
+                    <p class="small text-muted mb-2">2. Cập nhật database mẫu:</p>
+                    <div class="p-2 bg-light border rounded mb-2 font-monospace small">
+                        dotnet ef database update
+                    </div>
+                    <p class="small text-muted mb-2">3. Sau khi code xong commit & push:</p>
+                    <div class="p-2 bg-light border rounded font-monospace small">
+                        git add .<br/>
+                        git commit -m "[MaSV] [Module X] Noi dung"<br/>
+                        git push origin feature/m[X]-[ten-sv]
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </div>
