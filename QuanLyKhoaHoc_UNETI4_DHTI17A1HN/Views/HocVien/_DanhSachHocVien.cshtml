@@ -1,0 +1,126 @@
+﻿@model List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.HocVien>
+
+<!-- Partial View: _DanhSachHocVien.cshtml (Theo đúng bài giảng AJAX Slide 391) -->
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+            <tr>
+                <th class="text-center" style="width: 70px;">Mã HV</th>
+                <th>Thông Tin Học Viên</th>
+                <th>Liên Hệ</th>
+                <th>Giới Tính / Ngày Sinh</th>
+                <th>Trình Độ</th>
+                <th class="text-center">Lớp Đã ĐK</th>
+                <th class="text-center">Trạng Thái</th>
+                <th class="text-center" style="width: 170px;">Hành Động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model == null || !Model.Any())
+            {
+                <tr>
+                    <td colspan="8" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                        Không tìm thấy học viên nào phù hợp với từ khóa tìm kiếm.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="text-center fw-bold text-muted">#@item.MaHocVien</td>
+                        <td>
+                            <div class="fw-bold text-dark">@item.HoTen</div>
+                            <div class="small text-muted">
+                                @if (item.TaiKhoan != null && !string.IsNullOrEmpty(item.TaiKhoan.TenDangNhap))
+                                {
+                                    <span class="badge bg-light text-primary border me-1">
+                                        <i class="bi bi-person-fill"></i> @item.TaiKhoan.TenDangNhap
+                                    </span>
+                                }
+                                <span title="Ngày tham gia"><i class="bi bi-clock-history"></i> @item.NgayTao.ToString("dd/MM/yyyy")</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div><i class="bi bi-envelope text-primary me-1"></i>@item.Email</div>
+                            @if (!string.IsNullOrEmpty(item.SoDienThoai))
+                            {
+                                <div class="small text-muted"><i class="bi bi-telephone text-success me-1"></i>@item.SoDienThoai</div>
+                            }
+                            else
+                            {
+                                <div class="small text-muted fst-italic">Chưa có SĐT</div>
+                            }
+                        </td>
+                        <td>
+                            <div>@(item.GioiTinh ?? "Không rõ")</div>
+                            <div class="small text-muted">
+                                @(item.NgaySinh.HasValue ? item.NgaySinh.Value.ToString("dd/MM/yyyy") : "Chưa cập nhật")
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">
+                                @(item.TrinhDoHocVan ?? "Chưa rõ")
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-info text-dark rounded-pill px-3 py-2">
+                                <i class="bi bi-journal-check me-1"></i>@(item.DangKyHocs?.Count ?? 0) lớp
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            @if (item.TrangThai)
+                            {
+                                <span class="badge bg-success-subtle text-success border border-success px-3 py-2 rounded-pill">
+                                    <i class="bi bi-check-circle-fill me-1"></i>Hoạt động
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2 rounded-pill">
+                                    <i class="bi bi-lock-fill me-1"></i>Đã khóa
+                                </span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm">
+                                <!-- Xem chi tiết -->
+                                <a asp-action="Details" asp-route-id="@item.MaHocVien" 
+                                   class="btn btn-outline-info" title="Xem chi tiết lý lịch">
+                                    <i class="bi bi-eye-fill"></i>
+                                </a>
+
+                                <!-- Chỉnh sửa -->
+                                <a asp-action="Edit" asp-route-id="@item.MaHocVien" 
+                                   class="btn btn-outline-primary" title="Chỉnh sửa thông tin">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+
+                                <!-- Đổi trạng thái Bật/Tắt -->
+                                <form asp-action="ToggleStatus" asp-route-id="@item.MaHocVien" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-outline-warning" 
+                                            title="@(item.TrangThai ? "Khóa học viên" : "Mở khóa học viên")"
+                                            onclick="return confirm('Bạn có chắc muốn đổi trạng thái của học viên @item.HoTen?');">
+                                        <i class="bi @(item.TrangThai ? "bi-lock" : "bi-unlock")"></i>
+                                    </button>
+                                </form>
+
+                                <!-- Xóa -->
+                                <form asp-action="Delete" asp-route-id="@item.MaHocVien" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-outline-danger" title="Xóa học viên"
+                                            onclick="return confirm('CẢNH BÁO: Bạn có chắc chắn muốn xóa học viên @item.HoTen?');">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

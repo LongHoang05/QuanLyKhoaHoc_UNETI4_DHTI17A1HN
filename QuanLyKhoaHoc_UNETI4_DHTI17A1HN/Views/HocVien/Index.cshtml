@@ -1,0 +1,122 @@
+﻿@model List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.HocVien>
+@{
+    ViewData["Title"] = "Quản Lý Danh Sách Học Viên";
+    var vaiTroHienTai = Context.Session.GetString("VaiTro");
+    var hoTenHienTai = Context.Session.GetString("HoTen");
+}
+
+<div class="container-fluid py-2">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="fw-bold text-primary mb-1">
+                <i class="bi bi-people-fill me-2"></i>Quản Lý Danh Sách Học Viên
+            </h2>
+            <p class="text-muted mb-0 small">
+                Module 3: Quản lý học viên | Sinh viên: <strong>Nguyễn Đức Linh (23103100042)</strong>
+            </p>
+        </div>
+        <div>
+            <a asp-action="Create" class="btn btn-primary shadow-sm">
+                <i class="bi bi-person-plus-fill me-1"></i> Thêm Học Viên Mới
+            </a>
+        </div>
+    </div>
+
+    <!-- Thanh thông tin Phiên làm việc (Session) & Chuyển đổi kiểm thử theo Slide 1.7 -->
+    <div class="alert alert-light border shadow-sm p-3 mb-3 d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-secondary p-2"><i class="bi bi-shield-lock-fill me-1"></i>Phiên Session:</span>
+            <span>Đang đăng nhập: <strong>@hoTenHienTai</strong> (<span class="badge bg-primary">@vaiTroHienTai</span>)</span>
+        </div>
+        <div class="btn-group btn-group-sm">
+            <span class="input-group-text bg-white small border-0 text-muted">Chuyển vai trò test:</span>
+            <a asp-action="DangNhapThuNghiem" asp-route-role="GiaoVu" class="btn btn-outline-success">
+                <i class="bi bi-person-badge"></i> Giáo vụ (GiaoVu)
+            </a>
+            <a asp-action="DangNhapThuNghiem" asp-route-role="Admin" class="btn btn-outline-primary">
+                <i class="bi bi-shield-check"></i> Quản trị viên (Admin)
+            </a>
+            <a asp-action="DangNhapThuNghiem" asp-route-role="HocVien" class="btn btn-outline-warning">
+                <i class="bi bi-mortarboard"></i> Học viên (Bị chặn)
+            </a>
+        </div>
+    </div>
+
+    <!-- Thanh Tìm Kiếm Bằng jQuery AJAX (Theo đúng Slide 385 & Slide 395 của giảng viên) -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <label class="form-label fw-semibold small text-secondary">
+                        <i class="bi bi-search me-1"></i> Tìm kiếm học viên tức thì (Nhập đến đâu tìm đến đó bằng jQuery AJAX):
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-search text-primary"></i></span>
+                        <input type="text" id="keyword" class="form-control" 
+                               placeholder="Nhập họ tên, email, số điện thoại hoặc địa chỉ để tìm kiếm..." autocomplete="off" />
+                        <button type="button" id="btnTimKiem" class="btn btn-primary">
+                            <i class="bi bi-search me-1"></i> Tìm Kiếm
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end mt-3 mt-md-0">
+                    <span class="badge bg-light text-dark border p-2 small">
+                        <i class="bi bi-lightning-charge-fill text-warning me-1"></i> AJAX Live Search
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vùng hiển thị kết quả danh sách học viên (Cập nhật không reload trang qua jQuery AJAX) -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-secondary">
+                <i class="bi bi-table me-2"></i>Danh Sách Học Viên (<span id="soLuongHV">@Model.Count</span> học viên)
+            </h5>
+            <small class="text-muted"><i class="bi bi-check2-circle text-success me-1"></i>Đồng bộ trực tiếp qua Repository</small>
+        </div>
+        <div class="card-body p-0" id="ketQua">
+            <!-- Render danh sách ban đầu qua PartialView (Slide 391) -->
+            <partial name="_DanhSachHocVien" model="Model" />
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Mã jQuery AJAX Tìm kiếm tức thì theo đúng Slide 385, 387 và 395 của bài giảng -->
+    <script>
+        $(document).ready(function () {
+            // Hàm thực thi AJAX gửi Request lên Controller và cập nhật #ketQua (Slide 387)
+            function thucHienTimKiem() {
+                var keyword = $("#keyword").val();
+
+                $.ajax({
+                    url: "/HocVien/TimKiemAjax",
+                    type: "GET",
+                    data: {
+                        keyword: keyword
+                    },
+                    success: function (result) {
+                        // Cập nhật kết quả vào vùng #ketQua mà không làm tải lại trang
+                        $("#ketQua").html(result);
+                    },
+                    error: function () {
+                        console.log("Lỗi xảy ra khi gọi AJAX tìm kiếm.");
+                    }
+                });
+            }
+
+            // 1. Tìm kiếm tức thì khi người dùng gõ phím - sự kiện keyup (Theo Slide 395)
+            $("#keyword").keyup(function () {
+                thucHienTimKiem();
+            });
+
+            // 2. Tìm kiếm khi bấm nút Tìm kiếm - sự kiện click (Theo Slide 385)
+            $("#btnTimKiem").click(function () {
+                thucHienTimKiem();
+            });
+        });
+    </script>
+}
