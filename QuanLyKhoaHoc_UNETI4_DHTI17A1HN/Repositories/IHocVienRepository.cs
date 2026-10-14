@@ -1,4 +1,4 @@
-﻿using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
 {
@@ -34,7 +34,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         Task SaveAsync();
 
         // Tìm kiếm LINQ phục vụ AJAX Search (Theo Slide 119 - 121 & Slide 389)
-        Task<List<HocVien>> SearchAsync(string? keyword);
+        Task<List<HocVien>> SearchAsync(string? keyword, string? searchType = null);
         Task<List<HocVien>> SearchTrangThaiAsync(bool? trangThai);
 
         // Phân trang LINQ Skip/Take

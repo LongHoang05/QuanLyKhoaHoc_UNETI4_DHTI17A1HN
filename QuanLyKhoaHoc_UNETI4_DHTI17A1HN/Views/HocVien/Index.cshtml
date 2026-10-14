@@ -1,4 +1,4 @@
-﻿@model List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.HocVien>
+@model List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.HocVien>
 @{
     ViewData["Title"] = "Quản Lý Danh Sách Học Viên";
     var vaiTroHienTai = Context.Session.GetString("VaiTro");
@@ -46,22 +46,36 @@
     <!-- Thanh Tìm Kiếm Bằng jQuery AJAX (Theo đúng Slide 385 & Slide 395 của giảng viên) -->
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <label class="form-label fw-semibold small text-secondary">
-                        <i class="bi bi-search me-1"></i> Tìm kiếm học viên tức thì (Nhập đến đâu tìm đến đó bằng jQuery AJAX):
+            <div class="row g-2 align-items-center">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small text-secondary mb-1">
+                        <i class="bi bi-funnel me-1"></i> Tiêu chí tìm kiếm:
+                    </label>
+                    <select id="searchType" class="form-select">
+                        <option value="all" selected>🔍 Tất cả thông tin</option>
+                        <option value="name">👤 Theo Họ và Tên</option>
+                        <option value="email">✉️ Theo Email</option>
+                        <option value="phone">📞 Theo Số điện thoại</option>
+                    </select>
+                </div>
+                <div class="col-md-7">
+                    <label class="form-label fw-semibold small text-secondary mb-1">
+                        <i class="bi bi-search me-1"></i> Nhập từ khóa tìm kiếm tức thì (jQuery AJAX Live Search):
                     </label>
                     <div class="input-group">
                         <span class="input-group-text bg-light"><i class="bi bi-search text-primary"></i></span>
                         <input type="text" id="keyword" class="form-control" 
-                               placeholder="Nhập họ tên, email, số điện thoại hoặc địa chỉ để tìm kiếm..." autocomplete="off" />
+                               placeholder="Gõ từ khóa để lọc học viên tức thì..." autocomplete="off" />
+                        <button type="button" id="btnXoaLoc" class="btn btn-outline-secondary" title="Xóa từ khóa lọc">
+                            <i class="bi bi-x-circle"></i> Xóa
+                        </button>
                         <button type="button" id="btnTimKiem" class="btn btn-primary">
                             <i class="bi bi-search me-1"></i> Tìm Kiếm
                         </button>
                     </div>
                 </div>
-                <div class="col-md-4 text-end mt-3 mt-md-0">
-                    <span class="badge bg-light text-dark border p-2 small">
+                <div class="col-md-2 text-md-end mt-2 mt-md-0">
+                    <span class="badge bg-light text-dark border p-2 small d-inline-block">
                         <i class="bi bi-lightning-charge-fill text-warning me-1"></i> AJAX Live Search
                     </span>
                 </div>
@@ -85,37 +99,111 @@
 </div>
 
 @section Scripts {
-    <!-- Mã jQuery AJAX Tìm kiếm tức thì theo đúng Slide 385, 387 và 395 của bài giảng -->
+    <!-- Mã jQuery AJAX Tìm kiếm tức thì & Đổi trạng thái theo đúng giáo trình Slide 385, 387 và 395 -->
     <script>
         $(document).ready(function () {
+            var debounceTimer = null;
+            var currentAjaxRequest = null;
+
             // Hàm thực thi AJAX gửi Request lên Controller và cập nhật #ketQua (Slide 387)
             function thucHienTimKiem() {
                 var keyword = $("#keyword").val();
+                var searchType = $("#searchType").val();
 
-                $.ajax({
+                // Hủy request trước nếu đang chạy dở để tránh xung đột kết quả (Race condition)
+                if (currentAjaxRequest && currentAjaxRequest.readyState !== 4) {
+                    currentAjaxRequest.abort();
+                }
+
+                currentAjaxRequest = $.ajax({
                     url: "/HocVien/TimKiemAjax",
                     type: "GET",
                     data: {
-                        keyword: keyword
+                        keyword: keyword,
+                        searchType: searchType
                     },
                     success: function (result) {
-                        // Cập nhật kết quả vào vùng #ketQua mà không làm tải lại trang
+                        // Cập nhật kết quả vào vùng #ketQua mà không làm tải lại trang (Slide 387)
                         $("#ketQua").html(result);
+
+                        // Cập nhật số lượng học viên hiển thị trên tiêu đề
+                        var soLuongMoi = $("#soLuongKetQuaMoi").val();
+                        if (soLuongMoi !== undefined) {
+                            $("#soLuongHV").text(soLuongMoi);
+                        }
                     },
-                    error: function () {
-                        console.log("Lỗi xảy ra khi gọi AJAX tìm kiếm.");
+                    error: function (xhr, status) {
+                        if (status !== "abort") {
+                            console.log("Lỗi xảy ra khi gọi AJAX tìm kiếm.");
+                        }
                     }
                 });
             }
 
-            // 1. Tìm kiếm tức thì khi người dùng gõ phím - sự kiện keyup (Theo Slide 395)
-            $("#keyword").keyup(function () {
+            // 1. Tìm kiếm tức thì khi gõ phím hoặc thay đổi input (hỗ trợ cả bộ gõ tiếng Việt Unikey/EVKey)
+            $("#keyword").on("input keyup", function () {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(function () {
+                    thucHienTimKiem();
+                }, 200); // Debounce 200ms để tìm mượt mà, không bị gián đoạn khi gõ
+            });
+
+            // 2. Thay đổi tiêu chí tìm kiếm (Họ tên / Email / SĐT)
+            $("#searchType").change(function () {
                 thucHienTimKiem();
             });
 
-            // 2. Tìm kiếm khi bấm nút Tìm kiếm - sự kiện click (Theo Slide 385)
+            // 3. Bấm nút Tìm kiếm
             $("#btnTimKiem").click(function () {
                 thucHienTimKiem();
+            });
+
+            // 4. Bấm nút Xóa lọc
+            $("#btnXoaLoc").click(function () {
+                $("#keyword").val("");
+                thucHienTimKiem();
+            });
+
+            // 5. Xử lý nút Đổi trạng thái (Khóa / Mở khóa) bằng AJAX tức thì (Bảo vệ tính toàn vẹn)
+            $(document).on("click", ".btn-toggle-status", function (e) {
+                e.preventDefault();
+                var btn = $(this);
+                var id = btn.data("id");
+                var name = btn.data("name");
+
+                if (confirm("Bạn có chắc chắn muốn thay đổi trạng thái hoạt động (Khóa / Mở khóa) của học viên '" + name + "'?")) {
+                    $.ajax({
+                        url: "/HocVien/ToggleStatusAjax",
+                        type: "POST",
+                        data: { id: id },
+                        success: function (res) {
+                            if (res.success) {
+                                // Tải lại danh sách tức thì qua AJAX để cập nhật trạng thái mới nhất
+                                thucHienTimKiem();
+                            } else {
+                                alert(res.message);
+                            }
+                        },
+                        error: function () {
+                            // Fallback nếu AJAX gặp sự cố
+                            window.location.href = "/HocVien/ToggleStatus/" + id;
+                        }
+                    });
+                }
+            });
+
+            // 6. Xử lý nút Xóa học viên an toàn
+            $(document).on("click", ".btn-delete-hocvien", function (e) {
+                e.preventDefault();
+                var id = $(this).data("id");
+                var name = $(this).data("name");
+
+                if (confirm("CẢNH BÁO: Bạn có chắc chắn muốn xóa học viên '" + name + "'? Thao tác này không thể hoàn tác!")) {
+                    // Tạo form POST động để gửi yêu cầu xóa
+                    var form = $('<form action="/HocVien/Delete/' + id + '" method="post"></form>');
+                    $('body').append(form);
+                    form.submit();
+                }
             });
         });
     </script>

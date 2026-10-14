@@ -1,4 +1,4 @@
-﻿using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
 {
@@ -18,7 +18,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
         /// <summary>
         /// Tìm kiếm học viên phục vụ AJAX Live Search (Slide 389)
         /// </summary>
-        Task<List<HocVien>> TimKiemHocVienAsync(string? keyword);
+        Task<List<HocVien>> TimKiemHocVienAsync(string? keyword, string? searchType = null);
 
         /// <summary>
         /// Lấy chi tiết thông tin học viên kèm lịch sử đăng ký khóa học
@@ -41,12 +41,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
         Task<(bool Success, string? ErrorMessage)> CapNhatHocVienAsync(HocVien hocVien);
 
         /// <summary>
-        /// Nghiệp vụ xóa học viên: Kiểm tra ràng buộc khóa ngoại (không xóa nếu đã có đơn đăng ký lớp học)
+        /// Nghiệp vụ xóa học viên: Kiểm tra toàn vẹn CSDL, chặn xóa nếu học viên đã có lịch sử đăng ký học
         /// </summary>
         Task<(bool Success, string? ErrorMessage)> XoaHocVienAsync(int id);
 
         /// <summary>
-        /// Đổi trạng thái hoạt động của học viên (Khóa / Mở khóa)
+        /// Nghiệp vụ bật/tắt trạng thái hoạt động (Khóa / Mở khóa)
         /// </summary>
         Task<(bool Success, string? ErrorMessage)> DoiTrangThaiAsync(int id);
     }

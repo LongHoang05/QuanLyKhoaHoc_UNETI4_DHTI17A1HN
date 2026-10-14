@@ -1,4 +1,4 @@
-﻿@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.HocVien
+@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.HocVien
 @{
     ViewData["Title"] = $"Chỉnh Sửa Học Viên - {Model.HoTen}";
 }
@@ -90,11 +90,11 @@
 
                             <div class="col-md-6">
                                 <label asp-for="NgaySinh" class="form-label fw-semibold">
-                                    Ngày sinh
+                                    Ngày sinh <span class="text-danger">*</span>
                                 </label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
-                                    <input asp-for="NgaySinh" class="form-control" type="date" />
+                                    <input asp-for="NgaySinh" class="form-control" type="date" required />
                                 </div>
                                 <span asp-validation-for="NgaySinh" class="text-danger small"></span>
                             </div>
@@ -174,4 +174,3 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
-

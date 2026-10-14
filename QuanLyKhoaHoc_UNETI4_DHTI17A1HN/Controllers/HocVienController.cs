@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services;
 
@@ -99,9 +99,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         // Nhận keyword từ jQuery $.ajax(), gọi Service -> Repo và trả PartialView
         // ========================================================
         [HttpGet]
-        public async Task<IActionResult> TimKiemAjax(string? keyword)
+        public async Task<IActionResult> TimKiemAjax(string? keyword, string? searchType)
         {
-            var danhSach = await _hocVienService.TimKiemHocVienAsync(keyword);
+            var danhSach = await _hocVienService.TimKiemHocVienAsync(keyword, searchType);
             return PartialView("_DanhSachHocVien", danhSach);
         }
 
@@ -149,6 +149,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             if (!CoQuyenQuanTri(out var redirectResult))
             {
                 return redirectResult!;
+            }
+
+            if (!hocVien.NgaySinh.HasValue)
+            {
+                ModelState.AddModelError(nameof(HocVien.NgaySinh), "Ngày tháng năm sinh không được để trống.");
             }
 
             if (!ModelState.IsValid)
@@ -206,6 +211,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return NotFound();
             }
 
+            if (!hocVien.NgaySinh.HasValue)
+            {
+                ModelState.AddModelError(nameof(HocVien.NgaySinh), "Ngày tháng năm sinh không được để trống.");
+            }
+
             if (!ModelState.IsValid)
             {
                 return View(hocVien);
@@ -251,9 +261,21 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
         // ========================================================
         // 7. ACTION TOGGLE STATUS: ĐỔI TRẠNG THÁI HOẠT ĐỘNG
+        // Hỗ trợ cả AJAX (không load lại trang) và HTTP Request thông thường
         // ========================================================
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleStatusAjax(int id)
+        {
+            if (!CoQuyenQuanTri(out _))
+            {
+                return Json(new { success = false, message = "Bạn không có quyền thực hiện thao tác này." });
+            }
+
+            var (success, error) = await _hocVienService.DoiTrangThaiAsync(id);
+            return Json(new { success, message = error ?? "Đã đổi trạng thái học viên thành công!" });
+        }
+
+        [HttpGet, HttpPost]
         public async Task<IActionResult> ToggleStatus(int id)
         {
             if (!CoQuyenQuanTri(out var redirectResult))

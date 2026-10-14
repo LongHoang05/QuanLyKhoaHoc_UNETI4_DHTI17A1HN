@@ -1,13 +1,12 @@
-﻿using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
 {
     // ========================================================
     // Họ và tên: Nguyễn Đức Linh - MSV: 23103100042
-    // Module 3: Tầng Service Quản lý Học viên
-    // Đảm nhiệm toàn bộ quy tắc nghiệp vụ doanh nghiệp (Business Logic Layer)
-    // Luồng: Controller -> Service -> Repository -> ApplicationDbContext
+    // Module 3: Cài đặt HocVienService
+    // Xử lý các quy tắc nghiệp vụ doanh nghiệp (Business Validation, Data Integrity)
     // ========================================================
     public class HocVienService : IHocVienService
     {
@@ -23,9 +22,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
             return await _hocVienRepo.GetAllAsync();
         }
 
-        public async Task<List<HocVien>> TimKiemHocVienAsync(string? keyword)
+        public async Task<List<HocVien>> TimKiemHocVienAsync(string? keyword, string? searchType = null)
         {
-            return await _hocVienRepo.SearchAsync(keyword);
+            return await _hocVienRepo.SearchAsync(keyword, searchType);
         }
 
         public async Task<HocVien?> GetChiTietHocVienAsync(int? id)
@@ -48,18 +47,20 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
                 return (false, "Email này đã được sử dụng bởi một học viên khác trong hệ thống.");
             }
 
-            // 2. Quy tắc nghiệp vụ doanh nghiệp: Kiểm tra ngày sinh và độ tuổi tối thiểu
-            if (hocVien.NgaySinh.HasValue)
+            // 2. Quy tắc nghiệp vụ doanh nghiệp: Kiểm tra ngày sinh bắt buộc và độ tuổi tối thiểu
+            if (!hocVien.NgaySinh.HasValue)
             {
-                if (hocVien.NgaySinh.Value.Date > DateTime.Today)
-                {
-                    return (false, "Ngày sinh không được lớn hơn ngày hiện tại.");
-                }
+                return (false, "Vui lòng nhập ngày tháng năm sinh của học viên.");
+            }
 
-                if (hocVien.NgaySinh.Value.Date > DateTime.Today.AddYears(-6))
-                {
-                    return (false, "Học viên phải từ 6 tuổi trở lên.");
-                }
+            if (hocVien.NgaySinh.Value.Date > DateTime.Today)
+            {
+                return (false, "Ngày sinh không được lớn hơn ngày hiện tại.");
+            }
+
+            if (hocVien.NgaySinh.Value.Date > DateTime.Today.AddYears(-6))
+            {
+                return (false, "Học viên phải từ 6 tuổi trở lên.");
             }
 
             // 3. Chuẩn hóa dữ liệu đầu vào
@@ -77,7 +78,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
 
         public async Task<(bool Success, string? ErrorMessage)> CapNhatHocVienAsync(HocVien hocVien)
         {
-            // 1. Kiểm tra tồn tại
+            // 1. Kiểm tra sự tồn tại của học viên
             var existing = await _hocVienRepo.GetByIdAsync(hocVien.MaHocVien);
             if (existing == null)
             {
@@ -90,18 +91,20 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
                 return (false, "Email này đã được sử dụng bởi một học viên khác.");
             }
 
-            // 3. Kiểm tra ngày sinh hợp lệ
-            if (hocVien.NgaySinh.HasValue)
+            // 3. Kiểm tra ngày sinh bắt buộc và hợp lệ
+            if (!hocVien.NgaySinh.HasValue)
             {
-                if (hocVien.NgaySinh.Value.Date > DateTime.Today)
-                {
-                    return (false, "Ngày sinh không được lớn hơn ngày hiện tại.");
-                }
+                return (false, "Vui lòng nhập ngày tháng năm sinh của học viên.");
+            }
 
-                if (hocVien.NgaySinh.Value.Date > DateTime.Today.AddYears(-6))
-                {
-                    return (false, "Học viên phải từ 6 tuổi trở lên.");
-                }
+            if (hocVien.NgaySinh.Value.Date > DateTime.Today)
+            {
+                return (false, "Ngày sinh không được lớn hơn ngày hiện tại.");
+            }
+
+            if (hocVien.NgaySinh.Value.Date > DateTime.Today.AddYears(-6))
+            {
+                return (false, "Học viên phải từ 6 tuổi trở lên.");
             }
 
             // 4. Cập nhật các trường thông tin được phép sửa (bảo vệ trường nhạy cảm MaHocVien, NgayTao, MaTaiKhoan)

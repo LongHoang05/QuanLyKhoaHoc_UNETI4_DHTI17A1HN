@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 
@@ -6,8 +6,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
 {
     // ========================================================
     // Họ và tên: Nguyễn Đức Linh - MSV: 23103100042
-    // Module 3: Repository triển khai truy vấn EF Core 10
-    // Chuẩn theo giáo trình bài giảng khoa CNTT UNETI (Slide 105, 119)
+    // Module 3: Cài đặt HocVienRepository
+    // Chuẩn theo giáo trình bài giảng khoa CNTT UNETI (Slide 107, 121, 389)
     // ========================================================
     public class HocVienRepository : IHocVienRepository
     {
@@ -111,7 +111,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         }
 
         // Tìm kiếm LINQ phục vụ AJAX Search (Theo Slide 121 & Slide 389)
-        public async Task<List<HocVien>> SearchAsync(string? keyword)
+        // Tìm kiếm LINQ phục vụ AJAX Search (Theo Slide 121 & Slide 389)
+        public async Task<List<HocVien>> SearchAsync(string? keyword, string? searchType = null)
         {
             var query = _context.HocViens
                 .Include(h => h.TaiKhoan)
@@ -121,11 +122,41 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             if (!string.IsNullOrWhiteSpace(keyword))
             {
                 keyword = keyword.Trim().ToLower();
-                query = query.Where(h =>
-                    h.HoTen.ToLower().Contains(keyword) ||
-                    h.Email.ToLower().Contains(keyword) ||
-                    (h.SoDienThoai != null && h.SoDienThoai.Contains(keyword)) ||
-                    (h.DiaChi != null && h.DiaChi.ToLower().Contains(keyword)));
+
+                if (searchType == "name")
+                {
+                    // Tìm kiếm riêng theo Họ và Tên
+                    query = query.Where(h => h.HoTen.ToLower().Contains(keyword));
+                }
+                else if (searchType == "email")
+                {
+                    // Tìm kiếm riêng theo Email
+                    query = query.Where(h => h.Email.ToLower().Contains(keyword));
+                }
+                else if (searchType == "phone")
+                {
+                    // Tìm kiếm riêng theo Số điện thoại
+                    query = query.Where(h => h.SoDienThoai != null && h.SoDienThoai.Contains(keyword));
+                }
+                else
+                {
+                    // Tìm kiếm thông minh tổng hợp (Tránh tình trạng tìm chữ 'mai' bị dính đuôi 'gmail.com')
+                    if (keyword.Contains("@"))
+                    {
+                        query = query.Where(h =>
+                            h.Email.ToLower().Contains(keyword) ||
+                            h.HoTen.ToLower().Contains(keyword));
+                    }
+                    else
+                    {
+                        query = query.Where(h =>
+                            h.HoTen.ToLower().Contains(keyword) ||
+                            (h.SoDienThoai != null && h.SoDienThoai.Contains(keyword)) ||
+                            (h.DiaChi != null && h.DiaChi.ToLower().Contains(keyword)) ||
+                            EF.Functions.Like(h.Email, $"{keyword}%") ||
+                            EF.Functions.Like(h.Email, $"%{keyword}%@%"));
+                    }
+                }
             }
 
             return await query.OrderByDescending(h => h.NgayTao).ToListAsync();
@@ -150,17 +181,18 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             string? keyword, bool? trangThai, int pageIndex, int pageSize)
         {
             var query = _context.HocViens
-                .Include(h => h.TaiKhoan)
                 .Include(h => h.DangKyHocs)
+                .Include(h => h.TaiKhoan)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(keyword))
             {
-                keyword = keyword.Trim().ToLower();
+                var kw = keyword.Trim().ToLower();
                 query = query.Where(h =>
-                    h.HoTen.ToLower().Contains(keyword) ||
-                    h.Email.ToLower().Contains(keyword) ||
-                    (h.SoDienThoai != null && h.SoDienThoai.Contains(keyword)));
+                    h.HoTen.ToLower().Contains(kw) ||
+                    h.Email.ToLower().Contains(kw) ||
+                    (h.SoDienThoai != null && h.SoDienThoai.Contains(kw)) ||
+                    (h.DiaChi != null && h.DiaChi.ToLower().Contains(kw)));
             }
 
             if (trangThai.HasValue)
@@ -168,14 +200,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 query = query.Where(h => h.TrangThai == trangThai.Value);
             }
 
-            int total = await query.CountAsync();
+            query = query.OrderByDescending(h => h.NgayTao);
+            int totalCount = await query.CountAsync();
+
             var items = await query
-                .OrderByDescending(h => h.NgayTao)
                 .Skip((pageIndex - 1) * pageSize)
                 .Take(pageSize)
+                .AsNoTracking()
                 .ToListAsync();
 
-            return (items, total);
+            return (items, totalCount);
         }
     }
 }

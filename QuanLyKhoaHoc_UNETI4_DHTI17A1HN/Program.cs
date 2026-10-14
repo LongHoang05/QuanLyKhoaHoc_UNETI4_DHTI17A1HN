@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +27,13 @@ builder.Services.AddSession(options =>
 
 // Đăng ký dịch vụ Controllers with Views
 builder.Services.AddControllersWithViews();
+
+// ========================================================
+// 3. Đăng ký Dependency Injection (Repository & Service)
+// ========================================================
+// Module 3 - Nguyễn Đức Linh (23103100042)
+builder.Services.AddScoped<IHocVienRepository, HocVienRepository>();
+builder.Services.AddScoped<IHocVienService, HocVienService>();
 
 var app = builder.Build();
 
