@@ -37,6 +37,16 @@ namespace QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Controllers
                 .Take(pageSize)
                 .ToListAsync();
 
+            var danhSachBuoiHoc = await _context.BuoiHocs
+                .Include(b => b.LopHoc)
+                .OrderBy(b => b.ThoiGianBatDau)
+                .Take(5)
+                .ToListAsync();
+
+            int totalCoDiem = await _context.KetQuaHocTaps.CountAsync();
+            int soHoanThanh = await _context.KetQuaHocTaps.CountAsync(k => k.KetQua == "Hoàn thành");
+            double tyLeHT = totalCoDiem > 0 ? Math.Round((double)soHoanThanh / totalCoDiem * 100, 1) : 0;
+
             var vm = new DashboardVM
             {
                 TongSoCTDT = await _context.ChuongTrinhDaoTaos.CountAsync(),
@@ -47,13 +57,28 @@ namespace QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Controllers
                 DangKyChoDuyet = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Chờ duyệt"),
                 DangKyDaDuyet = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Đã duyệt"),
                 BuoiHocSapToi = await _context.BuoiHocs.CountAsync(b => b.ThoiGianBatDau > DateTime.Now && b.TrangThai == "Đã lên lịch"),
-                HocVienHoanThanh = await _context.KetQuaHocTaps.CountAsync(k => k.KetQua == "Hoàn thành"),
+                HocVienHoanThanh = soHoanThanh,
+                TyLeHoanThanh = tyLeHT,
+                DanhSachBuoiHoc = danhSachBuoiHoc,
                 HoatDongGanDay = recentActivities,
                 CurrentPage = page,
                 TotalPages = totalPages
             };
 
             return View(vm);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DuyetNhanh(int id)
+        {
+            var dangKy = await _context.DangKyHocs.FindAsync(id);
+            if (dangKy != null)
+            {
+                dangKy.TrangThai = "Đã duyệt";
+                dangKy.NgayXuLy = DateTime.Now;
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Dashboard));
         }
 
         public async Task<IActionResult> Index()

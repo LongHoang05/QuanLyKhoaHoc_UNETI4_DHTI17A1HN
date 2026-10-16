@@ -1,396 +1,403 @@
 @*
 Họ và tên: Nguyễn Tùng Dương
 Mã sinh viên: 23103100003
-Nội dung thực hiện: Giao diện Dashboard (Module 5)
+Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
 *@
 
 @model QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.ViewModels.DashboardVM
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = "Dashboard - Tổng quan";
 }
 
-<div class="flex flex-col w-full gap-8">
-    <!-- Top Navigation & Action Banner -->
-    <section class="flex flex-col lg:flex-row lg:items-end justify-between gap-5 pb-2">
-        <div class="flex flex-col gap-2">
-            <div class="flex items-center gap-2.5">
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold ring-1 ring-indigo-500/15">
-                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse"></span>
-                    Cổng Thông Tin Đào Tạo
+<div class="flex flex-col gap-y-6">
+    <!-- 1. Action Strip (Prep.vn Style) -->
+    <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-surface-white p-5 rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)]">
+        <div class="flex flex-col gap-1">
+            <h1 class="font-headline-lg-mobile lg:font-headline-lg text-brand-deep tracking-tight font-extrabold flex items-center gap-2">
+                Chào buổi sáng, Nguyễn Tùng Dương <span class="text-2xl animate-bounce">👋</span>
+            </h1>
+            <div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm flex-wrap">
+                <span class="relative flex h-2.5 w-2.5">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-warning-amber opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-warning-amber"></span>
                 </span>
-                <span class="text-slate-300">•</span>
-                <span class="text-xs text-slate-500 font-medium flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[15px] text-slate-400">location_on</span>
-                    Khu vực Hà Nội &amp; Nam Định
+                <span>
+                    Hôm nay có <strong class="text-brand-deep font-semibold">@Model.DangKyChoDuyet yêu cầu</strong> đang chờ duyệt, 
+                    <strong class="text-primary-container font-semibold">@Model.BuoiHocSapToi buổi học</strong> sắp tới cần giám sát.
                 </span>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Bảng điều khiển quản trị</h1>
-            <p class="text-xs sm:text-sm text-slate-500 flex flex-wrap items-center gap-1.5">
-                <span class="">Chào mừng trở lại,</span>
-                <strong class="text-slate-800 font-semibold">Giáo vụ (SV5)</strong>
-                <span class="text-slate-300">•</span>
-                <span class="material-symbols-outlined text-[15px] text-slate-400">schedule</span>
-                <span class="">Cập nhật lần cuối: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</span>
-            </p>
         </div>
-        <!-- Quick Action Controls -->
-        <div class="flex flex-wrap items-center gap-2.5">
-            <div class="relative inline-block text-left">
-                <button class="inline-flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200/80 text-slate-700 text-xs font-semibold shadow-xs hover:bg-slate-50 hover:border-slate-300 transition-all duration-150" id="semesterDropdownBtn" type="button">
-                    <span class="material-symbols-outlined text-[17px] text-indigo-600">calendar_today</span>
-                    <span class="">HK1 - 2024-2025</span>
-                    <span class="material-symbols-outlined text-[17px] text-slate-400">expand_more</span>
-                </button>
-            </div>
-            <button class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200/80 text-slate-700 text-xs font-semibold shadow-xs hover:bg-slate-50 hover:border-slate-300 transition-all duration-150 group" id="refreshDataBtn" type="button">
-                <span class="material-symbols-outlined text-[17px] text-slate-500 group-hover:rotate-180 transition-transform duration-500" id="refreshIcon">sync</span>
-                <span class="">Làm mới dữ liệu</span>
+        <div class="flex items-center flex-wrap gap-2.5">
+            <button onclick="location.reload()" class="border border-border-standard bg-surface-white hover:bg-canvas-base text-brand-deep font-label-md text-label-md px-3.5 py-2 rounded-xl shadow-xs inline-flex items-center gap-2 transition-all cursor-pointer" type="button">
+                <span class="material-symbols-outlined text-[17px] text-outline">sync</span>
+                <span>Đồng bộ dữ liệu</span>
             </button>
-            <button class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold shadow-md shadow-slate-950/20 hover:bg-slate-800 hover:shadow-lg transition-all duration-150 ring-1 ring-slate-800" type="button">
-                <span class="material-symbols-outlined text-[17px] text-emerald-400">table_view</span>
-                <span class="">Xuất báo cáo Excel</span>
-            </button>
+            <a href="/ThongKe/Index" class="border border-border-standard bg-surface-white hover:bg-canvas-base text-brand-deep font-label-md text-label-md px-3.5 py-2 rounded-xl shadow-xs inline-flex items-center gap-2 transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-[17px] text-outline">bar_chart</span>
+                <span>Báo cáo thống kê</span>
+            </a>
+            <a href="/BuoiHoc/Create" class="bg-secondary-container hover:bg-secondary text-surface-white font-label-md text-label-md px-4 py-2 rounded-xl shadow-sm hover:shadow-md inline-flex items-center gap-1.5 transition-all transform hover:-translate-y-0.5 cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]">add</span>
+                <span>+ Lên lịch buổi học</span>
+            </a>
         </div>
     </section>
 
-    <!-- 8 High-Density Key Metrics (4x2 Responsive Grid) -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Card 1: Total Programs -->
-        <div class="group relative flex flex-col justify-between p-5 rounded-2xl bg-white border border-slate-200/70 shadow-xs hover:shadow-lg hover:border-indigo-100 hover:-translate-y-0.5 transition-all duration-200">
-            <div class="flex items-start justify-between">
-                <div class="flex flex-col">
-                    <span class="text-xs uppercase tracking-wider font-semibold text-slate-500">Tổng CTĐT</span>
-                    <span class="text-3xl font-extrabold text-slate-900 tracking-tight mt-2 font-mono">@Model.TongSoCTDT</span>
-                </div>
-                <div class="w-10 h-10 rounded-xl bg-indigo-50/80 text-indigo-600 flex items-center justify-center ring-1 ring-indigo-500/10 group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-[21px]">auto_stories</span>
+    <!-- 2. 4-Column Stats Bento Grid -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- Card 1: Tổng CTĐT -->
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] hover:shadow-[0_8px_24px_rgba(0,104,255,0.08)] transition-all flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-outline font-label-md text-label-md">Tổng chương trình ĐT</span>
+                <div class="w-9 h-9 rounded-xl bg-surface-container-low flex items-center justify-center text-primary-container">
+                    <span class="material-symbols-outlined text-[20px]">menu_book</span>
                 </div>
             </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-medium">
-                    <span class="material-symbols-outlined text-[13px]">add</span> +2 ngành mới
-                </span>
-                <span class="text-slate-400 font-medium">Hệ chính quy</span>
-            </div>
-        </div>
-
-        <!-- Card 2: Total Classes -->
-        <div class="group relative flex flex-col justify-between p-5 rounded-2xl bg-white border border-slate-200/70 shadow-xs hover:shadow-lg hover:border-slate-300 hover:-translate-y-0.5 transition-all duration-200">
-            <div class="flex items-start justify-between">
-                <div class="flex flex-col">
-                    <span class="text-xs uppercase tracking-wider font-semibold text-slate-500">Tổng số lớp học</span>
-                    <span class="text-3xl font-extrabold text-slate-900 tracking-tight mt-2 font-mono">@Model.TongSoLop</span>
-                </div>
-                <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center ring-1 ring-slate-300/40 group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-[21px]">domain</span>
-                </div>
-            </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-medium">
-                    <span class="material-symbols-outlined text-[13px]">account_balance</span> 8 khoa đào tạo
-                </span>
-                <span class="text-slate-400 font-medium">Toàn trường</span>
-            </div>
-        </div>
-
-        <!-- Card 3: Active Classes -->
-        <div class="group relative flex flex-col justify-between p-5 rounded-2xl bg-white border border-slate-200/70 shadow-xs hover:shadow-lg hover:border-sky-100 hover:-translate-y-0.5 transition-all duration-200">
-            <div class="flex items-start justify-between">
-                <div class="flex flex-col">
-                    <span class="text-xs uppercase tracking-wider font-semibold text-slate-500">Lớp đang mở</span>
-                    <span class="text-3xl font-extrabold text-slate-900 tracking-tight mt-2 font-mono">@Model.LopDangMo</span>
-                </div>
-                <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center ring-1 ring-sky-500/10 group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-[21px]">play_circle</span>
-                </div>
-            </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 font-semibold">
-                    <span class="material-symbols-outlined text-[13px]">trending_up</span> Tỷ lệ mở cao
-                </span>
-                <span class="text-sky-700 font-medium">Đang giảng dạy</span>
-            </div>
-        </div>
-
-        <!-- Card 4: Total Students -->
-        <div class="group relative flex flex-col justify-between p-5 rounded-2xl bg-white border border-slate-200/70 shadow-xs hover:shadow-lg hover:border-emerald-100 hover:-translate-y-0.5 transition-all duration-200">
-            <div class="flex items-start justify-between">
-                <div class="flex flex-col">
-                    <span class="text-xs uppercase tracking-wider font-semibold text-slate-500">Tổng số sinh viên</span>
-                    <span class="text-3xl font-extrabold text-slate-900 tracking-tight mt-2 font-mono">@Model.TongSoHocVien</span>
-                </div>
-                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center ring-1 ring-emerald-500/15 group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-[21px]">school</span>
-                </div>
-            </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold">
-                    <span class="material-symbols-outlined text-[13px]">north_east</span> Tăng trưởng
-                </span>
-                <span class="text-slate-400 font-medium">Hệ ĐH</span>
-            </div>
-        </div>
-
-        <!-- Card 5: Total Registrations -->
-        <div class="group relative flex flex-col justify-between p-5 rounded-2xl bg-white border border-slate-200/70 shadow-xs hover:shadow-lg hover:border-violet-100 hover:-translate-y-0.5 transition-all duration-200">
-            <div class="flex items-start justify-between">
-                <div class="flex flex-col">
-                    <span class="text-xs uppercase tracking-wider font-semibold text-slate-500">Tổng lượt đăng ký</span>
-                    <span class="text-3xl font-extrabold text-slate-900 tracking-tight mt-2 font-mono">@Model.TongSoDangKy</span>
-                </div>
-                <div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center ring-1 ring-violet-500/10 group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-[21px]">assignment</span>
-                </div>
-            </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 font-medium">
-                    <span class="material-symbols-outlined text-[13px]">event_repeat</span> Kỳ đăng ký
-                </span>
-                <span class="text-slate-400 font-medium">Lượt tín chỉ</span>
-            </div>
-        </div>
-
-        <!-- Card 6: Pending Registrations -->
-        <div class="group relative flex flex-col justify-between p-5 rounded-2xl bg-white border border-slate-200/70 shadow-xs hover:shadow-lg hover:border-amber-100 hover:-translate-y-0.5 transition-all duration-200">
-            <div class="flex items-start justify-between">
-                <div class="flex flex-col">
-                    <span class="text-xs uppercase tracking-wider font-semibold text-slate-500">Đăng ký chờ duyệt</span>
-                    <span class="text-3xl font-extrabold text-amber-600 tracking-tight mt-2 font-mono">@Model.DangKyChoDuyet</span>
-                </div>
-                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center ring-1 ring-amber-500/15 group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-[21px]">hourglass_top</span>
-                </div>
-            </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 font-semibold">
-                    <span class="material-symbols-outlined text-[13px]">pending_actions</span> Cần xử lý
-                </span>
-                <span class="text-slate-400 font-medium">Ưu tiên xét duyệt</span>
-            </div>
-        </div>
-
-        <!-- Card 7: Approved Registrations -->
-        <div class="group relative flex flex-col justify-between p-5 rounded-2xl bg-white border border-slate-200/70 shadow-xs hover:shadow-lg hover:border-emerald-100 hover:-translate-y-0.5 transition-all duration-200">
-            <div class="flex items-start justify-between">
-                <div class="flex flex-col">
-                    <span class="text-xs uppercase tracking-wider font-semibold text-slate-500">Đăng ký đã duyệt</span>
-                    <span class="text-3xl font-extrabold text-slate-900 tracking-tight mt-2 font-mono">@Model.DangKyDaDuyet</span>
-                </div>
-                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center ring-1 ring-emerald-500/15 group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-[21px]">check_circle</span>
-                </div>
-            </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold">
-                    <span class="material-symbols-outlined text-[13px]">verified</span> Tỷ lệ cao
-                </span>
-                <span class="text-slate-400 font-medium">Thành công</span>
-            </div>
-        </div>
-
-        <!-- Card 8: Upcoming Schedules -->
-        <div class="group relative flex flex-col justify-between p-5 rounded-2xl bg-white border border-slate-200/70 shadow-xs hover:shadow-lg hover:border-blue-100 hover:-translate-y-0.5 transition-all duration-200">
-            <div class="flex items-start justify-between">
-                <div class="flex flex-col">
-                    <span class="text-xs uppercase tracking-wider font-semibold text-slate-500">Lịch học sắp tới</span>
-                    <span class="text-3xl font-extrabold text-slate-900 tracking-tight mt-2 font-mono">@Model.BuoiHocSapToi</span>
-                </div>
-                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center ring-1 ring-blue-500/10 group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-[21px]">calendar_month</span>
-                </div>
-            </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-medium">
-                    <span class="material-symbols-outlined text-[13px]">schedule</span> Tuần tới
-                </span>
-                <span class="text-slate-400 font-medium truncate max-w-[110px]" title="Các cơ sở">Các cơ sở</span>
-            </div>
-        </div>
-    </section>
-
-    <!-- Visual Analytics & Operational Overview Bento Ribbon -->
-    <section class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <!-- Progress Indicator Card -->
-        <div class="p-6 rounded-2xl bg-white border border-slate-200/70 shadow-xs flex flex-col justify-between">
             <div>
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex flex-col">
-                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tiến độ kỳ học HK1</span>
-                        <span class="text-lg font-bold text-slate-900 mt-0.5">Tuần đào tạo 11 / 18</span>
-                    </div>
-                    <div class="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                        <span class="material-symbols-outlined text-[20px]">timelapse</span>
-                    </div>
+                <div class="font-display text-[30px] leading-8 text-brand-deep tracking-tight tabular-nums font-black mb-2 font-mono">
+                    @Model.TongSoCTDT
                 </div>
-                <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden p-0.5">
-                    <div class="bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-600 h-2 rounded-full transition-all duration-500 shadow-xs" style="width: 61.1%"></div>
-                </div>
-            </div>
-            <div class="flex items-center justify-between mt-5 pt-3 border-t border-slate-100 text-xs text-slate-500">
-                <span class="">Bắt đầu: <strong class="font-semibold text-slate-700">15/08/2024</strong></span>
-                <span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-semibold font-mono">Đã qua 61.1%</span>
-                <span class="">Kết thúc: <strong class="font-semibold text-slate-700">28/12/2024</strong></span>
-            </div>
-        </div>
-        <!-- Active Campus Distribution -->
-        <div class="p-6 rounded-2xl bg-white border border-slate-200/70 shadow-xs flex flex-col justify-between">
-            <div>
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex flex-col">
-                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Phân bổ sinh viên theo cơ sở</span>
-                        <span class="text-lg font-bold text-slate-900 mt-0.5">2 Địa điểm đào tạo chính</span>
-                    </div>
-                    <div class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
-                        <span class="material-symbols-outlined text-[20px]">location_on</span>
-                    </div>
-                </div>
-                <div class="space-y-3">
-                    <div>
-                        <div class="flex justify-between text-xs mb-1.5">
-                            <span class="text-slate-600 font-medium">Cơ sở Hà Nội (Minh Khai / Lĩnh Nam)</span>
-                            <span class="font-bold text-slate-900 font-mono">2,610 SV <span class="text-slate-400 font-normal">(67.8%)</span></span>
-                        </div>
-                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                            <div class="bg-indigo-600 h-2 rounded-full transition-all duration-500" style="width: 67.8%"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between text-xs mb-1.5">
-                            <span class="text-slate-600 font-medium">Cơ sở Nam Định (Trần Hưng Đạo)</span>
-                            <span class="font-bold text-slate-900 font-mono">1,240 SV <span class="text-slate-400 font-normal">(32.2%)</span></span>
-                        </div>
-                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                            <div class="bg-sky-500 h-2 rounded-full transition-all duration-500" style="width: 32.2%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Quick Help & Fast Links -->
-        <div class="p-6 rounded-2xl bg-white border border-slate-200/70 shadow-xs flex flex-col justify-between">
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <div class="flex flex-col">
-                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Hỗ trợ thao tác nhanh</span>
-                        <span class="text-lg font-bold text-slate-900">Tài liệu &amp; Hotline</span>
-                    </div>
-                    <div class="w-9 h-9 rounded-xl bg-sky-50 flex items-center justify-center text-sky-600">
-                        <span class="material-symbols-outlined text-[21px]">support_agent</span>
-                    </div>
-                </div>
-                <p class="text-xs text-slate-500 mt-2 leading-relaxed">
-                    Hệ thống tự động đồng bộ thời khóa biểu với máy chủ Phòng Đào tạo UNETI mỗi 15 phút.
-                </p>
-            </div>
-            <div class="flex items-center gap-2 mt-4 pt-3 border-t border-slate-100">
-                <a class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200/80 text-slate-700 hover:bg-slate-100 transition-colors" href="#">
-                    <span class="material-symbols-outlined text-[15px] text-indigo-600">menu_book</span> Sổ tay Giáo vụ
-                </a>
-                <a class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200/80 text-slate-700 hover:bg-slate-100 transition-colors" href="#">
-                    <span class="material-symbols-outlined text-[15px] text-slate-500">terminal</span> Nhật ký Server
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Full-Width "Recent Activity" (Hoạt động gần đây) Section -->
-    <section class="rounded-2xl bg-white border border-slate-200/70 shadow-xs overflow-hidden flex flex-col">
-        <!-- Header Section with Controls -->
-        <div class="p-5 lg:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100">
-            <div class="flex flex-col gap-1">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-[18px]">history</span>
-                    </div>
-                    <h2 class="text-lg font-bold text-slate-900 tracking-tight">Hoạt động đăng ký gần đây</h2>
-                </div>
-                <p class="text-xs text-slate-500">
-                    Danh sách các đăng ký học phần được cập nhật tự động
-                </p>
-            </div>
-            <!-- Search & Filters Container -->
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <div class="relative min-w-[260px]">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
-                    <input class="w-full h-9 pl-9 pr-3 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-800 placeholder:text-slate-400 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" id="activitySearchInput" placeholder="Tìm theo sinh viên, giảng viên, môn..." type="text">
-                </div>
-                <div class="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200/60 self-start sm:self-auto gap-1">
-                    <button class="activity-filter-btn px-3 py-1 rounded-lg text-xs font-semibold transition-all bg-white text-slate-900 shadow-xs" data-category="all">Tất cả</button>
-                    <button class="activity-filter-btn px-3 py-1 rounded-lg text-xs font-medium transition-all text-slate-600 hover:text-slate-900" data-category="Chờ duyệt">Chờ duyệt</button>
-                    <button class="activity-filter-btn px-3 py-1 rounded-lg text-xs font-medium transition-all text-slate-600 hover:text-slate-900" data-category="Đã duyệt">Đã duyệt</button>
+                <div class="inline-flex items-center gap-1 bg-success-emerald/10 text-success-emerald font-label-sm text-label-sm px-2 py-0.5 rounded-full font-semibold">
+                    <span class="material-symbols-outlined text-[14px]">school</span>
+                    <span>Hệ đào tạo UNETI</span>
                 </div>
             </div>
         </div>
 
-        <!-- Activity Feed Table Container -->
-        <div class="overflow-x-auto w-full">
-            <table class="w-full text-left text-xs">
-                <thead>
-                    <tr class="bg-slate-50/75 border-b border-slate-100 text-slate-500 uppercase tracking-wider font-semibold">
-                        <th class="py-3 px-6">Sinh viên</th>
-                        <th class="py-3 px-6">Hành động &amp; Chi tiết</th>
-                        <th class="py-3 px-6">Lớp học phần</th>
-                        <th class="py-3 px-6">Thời gian ĐK</th>
-                        <th class="py-3 px-6 text-center">Trạng thái</th>
-                        <th class="py-3 px-6 text-right">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100" id="activityTableBody">
-                    @foreach (var item in Model.HoatDongGanDay)
+        <!-- Card 2: Sinh viên đăng ký -->
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] hover:shadow-[0_8px_24px_rgba(0,104,255,0.08)] transition-all flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-outline font-label-md text-label-md">Tổng số sinh viên</span>
+                <div class="w-9 h-9 rounded-xl bg-surface-container-low flex items-center justify-center text-primary-container">
+                    <span class="material-symbols-outlined text-[20px]">groups</span>
+                </div>
+            </div>
+            <div>
+                <div class="flex items-baseline gap-1.5 mb-1.5">
+                    <span class="font-display text-[30px] leading-8 text-brand-deep tracking-tight tabular-nums font-black font-mono">
+                        @Model.TongSoHocVien
+                    </span>
+                    <span class="text-outline font-body-sm text-body-sm">/ @Model.TongSoLop lớp học</span>
+                </div>
+                <div class="w-full bg-border-subtle h-2 rounded-full overflow-hidden mb-2">
+                    <div class="h-full bg-gradient-to-r from-primary to-primary-container rounded-full" style="width: @(Model.TongSoCTDT > 0 ? Math.Min(100, Model.TongSoLop * 12) : 50)%"></div>
+                </div>
+                <div class="text-primary-container font-label-sm text-label-sm font-semibold flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">play_circle</span>
+                    <span>@Model.LopDangMo lớp đang mở đăng ký</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3: Chờ phê duyệt -->
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] hover:shadow-[0_8px_24px_rgba(0,104,255,0.08)] transition-all flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-outline font-label-md text-label-md">Chờ phê duyệt</span>
+                <div class="w-9 h-9 rounded-xl bg-warning-amber/10 flex items-center justify-center text-warning-amber">
+                    <span class="material-symbols-outlined text-[20px]">pending_actions</span>
+                </div>
+            </div>
+            <div>
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="font-display text-[30px] leading-8 text-brand-deep tracking-tight tabular-nums font-black font-mono">
+                        @Model.DangKyChoDuyet
+                    </span>
+                    @if (Model.DangKyChoDuyet > 0)
                     {
-                        <tr class="activity-row hover:bg-slate-50/70 transition-colors" data-category="@item.TrangThai">
-                            <td class="py-3.5 px-6 whitespace-nowrap">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-200/60 flex items-center justify-center text-indigo-700 font-bold text-xs">
-                                        @item.HocVien.HoTen.Substring(0, 1)
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-warning-amber opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-warning-amber"></span>
+                        </span>
+                    }
+                </div>
+                <div class="inline-flex items-center gap-1 bg-warning-amber/10 text-secondary font-label-sm text-label-sm px-2 py-0.5 rounded-full font-semibold">
+                    <span class="material-symbols-outlined text-[13px]">priority_high</span>
+                    <span>@Model.DangKyDaDuyet lượt đã được duyệt</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 4: Tỷ lệ hoàn thành khóa học -->
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] hover:shadow-[0_8px_24px_rgba(0,104,255,0.08)] transition-all flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-outline font-label-md text-label-md">Kết quả hoàn thành</span>
+                <div class="w-9 h-9 rounded-xl bg-success-emerald/10 flex items-center justify-center text-success-emerald">
+                    <span class="material-symbols-outlined text-[20px]">workspace_premium</span>
+                </div>
+            </div>
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="font-display text-[30px] leading-8 text-brand-deep tracking-tight tabular-nums font-black mb-1 font-mono">
+                        @Model.TyLeHoanThanh%
+                    </div>
+                    <div class="text-outline font-body-sm text-body-sm">
+                        @Model.HocVienHoanThanh HV đạt chuẩn
+                    </div>
+                </div>
+                <div class="relative w-12 h-12 flex-shrink-0">
+                    <svg class="w-12 h-12 -rotate-90" viewBox="0 0 36 36">
+                        <path class="text-border-standard" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+                        <path class="text-success-emerald" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="@Model.TyLeHoanThanh, 100" stroke-linecap="round" stroke-width="3.5"></path>
+                    </svg>
+                    <span class="absolute inset-0 flex items-center justify-center font-label-sm text-[10px] text-brand-deep font-bold font-mono">
+                        @(Math.Round(Model.TyLeHoanThanh))%
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. Middle Split Section (Lịch học Module 5 & Phân tích Đào tạo) -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left: Lịch Lớp Học Phần Sắp Tới (Module 5 BuoiHoc) -->
+        <div class="lg:col-span-2 bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border-subtle">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary-container">calendar_clock</span>
+                    <h2 class="font-headline-sm text-headline-sm text-brand-deep font-bold">Lịch Lớp Học Phần Sắp Tới</h2>
+                </div>
+                <a href="/BuoiHoc/Index" class="text-xs text-primary-container hover:text-primary font-semibold flex items-center gap-1">
+                    Xem tất cả lịch học <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </a>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                @if (Model.DanhSachBuoiHoc != null && Model.DanhSachBuoiHoc.Any())
+                {
+                    @foreach (var buoi in Model.DanhSachBuoiHoc)
+                    {
+                        var isSapDienRa = buoi.ThoiGianBatDau > DateTime.Now && buoi.ThoiGianBatDau <= DateTime.Now.AddDays(7);
+                        <div class="border @(isSapDienRa ? "border-primary-fixed bg-surface-container-low/40" : "border-border-standard bg-surface-white") rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-surface-container-low/70 transition-colors">
+                            <div class="flex items-start gap-3">
+                                <div class="px-2.5 py-1.5 rounded-lg @(isSapDienRa ? "bg-primary-container/10 text-primary-container" : "bg-surface-container-high text-on-surface-variant") font-label-sm text-label-sm font-bold flex-shrink-0 whitespace-nowrap mt-0.5 text-center font-mono">
+                                    @buoi.ThoiGianBatDau.ToString("HH:mm") - @buoi.ThoiGianKetThuc.ToString("HH:mm")<br>
+                                    <span class="text-[10px] font-normal">@buoi.ThoiGianBatDau.ToString("dd/MM/yyyy")</span>
+                                </div>
+                                <div class="flex flex-col gap-1 min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h3 class="font-headline-sm text-[15px] font-bold text-brand-deep truncate">
+                                            @(buoi.LopHoc != null ? buoi.LopHoc.TenLop : "Buổi học mã #" + buoi.MaBuoiHoc)
+                                        </h3>
+                                        <span class="px-2 py-0.5 rounded-md bg-surface-white text-brand-deep font-label-sm text-label-sm border border-border-standard">
+                                            Phòng @buoi.PhongHoc
+                                        </span>
                                     </div>
-                                    <div class="flex flex-col">
-                                        <span class="font-semibold text-slate-900">@item.HocVien.HoTen</span>
-                                        <span class="text-[11px] text-slate-400 font-mono">HV: @item.HocVien.MaHocVien</span>
+                                    <div class="flex items-center gap-4 text-outline font-body-sm text-body-sm flex-wrap">
+                                        <span class="flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[15px]">person</span> GV: @buoi.GiangVien
+                                        </span>
+                                        @if (!string.IsNullOrEmpty(buoi.NoiDung))
+                                        {
+                                            <span class="flex items-center gap-1 truncate max-w-xs text-on-surface-variant">
+                                                <span class="material-symbols-outlined text-[15px]">description</span> @buoi.NoiDung
+                                            </span>
+                                        }
                                     </div>
                                 </div>
-                            </td>
-                            <td class="py-3.5 px-6 min-w-[260px]">
-                                <div class="flex flex-col">
-                                    <span class="text-slate-800 font-medium">Đăng ký lớp học</span>
-                                    <span class="text-[11px] text-slate-400">@item.LopHoc.TenLop</span>
-                                </div>
-                            </td>
-                            <td class="py-3.5 px-6 whitespace-nowrap">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium">
-                                    <span class="material-symbols-outlined text-[14px] text-indigo-600">code</span>
-                                    @item.LopHoc.TenLop
-                                </span>
-                            </td>
-                            <td class="py-3.5 px-6 whitespace-nowrap">
-                                <span class="text-slate-500 flex items-center gap-1 font-mono text-[11px]">
-                                    <span class="material-symbols-outlined text-[14px] text-slate-400">schedule</span>
-                                    @item.NgayDangKy.ToString("dd/MM/yyyy HH:mm")
-                                </span>
-                            </td>
-                            <td class="py-3.5 px-6 whitespace-nowrap text-center">
-                                @if(item.TrangThai == "Chờ duyệt") {
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] bg-amber-50 text-amber-700 ring-1 ring-amber-500/20 font-semibold">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                        Chờ duyệt
-                                    </span>
-                                } else if (item.TrangThai == "Đã duyệt" || item.TrangThai == "Đang học") {
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500/20 font-semibold">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                        @item.TrangThai
-                                    </span>
-                                } else {
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] bg-rose-50 text-rose-700 ring-1 ring-rose-500/20 font-semibold">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                                        @item.TrangThai
+                            </div>
+                            <div class="flex items-center gap-2 md:flex-col md:items-end flex-shrink-0">
+                                @if (buoi.TrangThai == "Đã lên lịch")
+                                {
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success-emerald/10 text-success-emerald font-label-sm text-label-sm font-semibold">
+                                        <span class="h-2 w-2 rounded-full bg-success-emerald animate-pulse"></span>@buoi.TrangThai
                                     </span>
                                 }
-                            </td>
-                            <td class="py-3.5 px-6 whitespace-nowrap text-right">
-                                <button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 font-semibold transition-colors" type="button">
-                                    <span class="">Xử lý</span>
-                                    <span class="material-symbols-outlined text-[15px]">chevron_right</span>
-                                </button>
+                                else if (buoi.TrangThai == "Đã hoàn thành")
+                                {
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold">
+                                        <span class="h-2 w-2 rounded-full bg-outline"></span>@buoi.TrangThai
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-danger-crimson/10 text-danger-crimson font-label-sm text-label-sm font-semibold">
+                                        <span class="h-2 w-2 rounded-full bg-danger-crimson"></span>@buoi.TrangThai
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="py-8 text-center text-outline flex flex-col items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-4xl text-outline/50">calendar_month</span>
+                        <p class="font-medium text-xs">Chưa có buổi học nào được lên lịch.</p>
+                        <a href="/BuoiHoc/Create" class="text-xs text-primary-container font-semibold hover:underline">+ Tạo lịch buổi học mới</a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Right: Hiệu suất & Phân tích Đào tạo -->
+        <div class="lg:col-span-1 bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between gap-5">
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-secondary-container flex items-center justify-center text-surface-white shadow-xs">
+                            <span class="material-symbols-outlined text-base">insights</span>
+                        </div>
+                        <div>
+                            <h2 class="font-headline-sm text-headline-sm text-brand-deep font-bold leading-tight">Chỉ Số Đào Tạo</h2>
+                            <span class="text-outline font-label-sm text-label-sm">Thống kê tự động từ DB</span>
+                        </div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded-full bg-primary-container/10 text-primary-container font-label-sm text-label-sm font-semibold">Module 5</span>
+                </div>
+
+                <div class="flex flex-col items-center justify-center py-2 text-center">
+                    <div class="relative w-36 h-36 flex items-center justify-center">
+                        <svg class="w-36 h-36 -rotate-90" viewBox="0 0 100 100">
+                            <circle class="text-border-subtle" cx="50" cy="50" fill="transparent" r="42" stroke="currentColor" stroke-width="8"></circle>
+                            <circle class="transition-all duration-1000 ease-out text-primary-container" cx="50" cy="50" fill="transparent" r="42" stroke="currentColor" stroke-dasharray="263.89" stroke-dashoffset="@(263.89 * (1 - Model.TyLeHoanThanh / 100.0))" stroke-linecap="round" stroke-width="8"></circle>
+                        </svg>
+                        <div class="absolute flex flex-col items-center">
+                            <span class="font-display text-[32px] font-black text-brand-deep tabular-nums leading-none font-mono">
+                                @Model.TyLeHoanThanh%
+                            </span>
+                            <span class="font-label-sm text-[11px] text-outline font-medium mt-1">Hoàn thành</span>
+                        </div>
+                    </div>
+                    <p class="font-label-md text-label-md text-brand-deep font-semibold mt-3">Tỷ lệ học viên hoàn thành môn</p>
+                    <p class="font-body-sm text-body-sm text-outline mt-0.5">Dựa trên kết quả học tập đã nhập điểm</p>
+                </div>
+            </div>
+
+            <div class="relative bg-gradient-to-br from-surface-container-low via-surface-container/60 to-surface-white border border-primary-fixed rounded-xl p-4 overflow-hidden">
+                <div class="flex items-center gap-1.5 text-primary-container font-label-sm text-label-sm font-bold uppercase tracking-wider mb-1">
+                    <span class="material-symbols-outlined text-[15px]">tips_and_updates</span>
+                    <span>Thông tin vận hành</span>
+                </div>
+                <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                    Hiện có <strong>@Model.LopDangMo lớp</strong> đang mở đăng ký. Đảm bảo lịch trình buổi học và phòng máy được phân bổ trước ngày khai giảng.
+                </p>
+                <a class="mt-3 inline-flex items-center gap-1 font-label-md text-label-md font-bold text-primary-container hover:text-primary transition-colors group" href="/BuoiHoc/Index">
+                    <span>Xem danh sách lịch học</span>
+                    <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. Data Table Section: Hoạt động đăng ký gần đây -->
+    <section class="bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col gap-4">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-3 border-b border-border-subtle">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-primary-container/10 text-primary-container flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[18px]">history</span>
+                </div>
+                <div>
+                    <h2 class="font-headline-sm text-headline-sm text-brand-deep font-bold">Hoạt động đăng ký học phần</h2>
+                    <span class="text-xs text-outline">Dữ liệu từ bảng Đăng ký học (cập nhật mới nhất)</span>
+                </div>
+            </div>
+
+            <!-- Search & Filters Container -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px] pointer-events-none">search</span>
+                    <input id="activitySearchInput" class="pl-9 pr-3 py-1.5 rounded-xl border border-border-standard text-brand-deep placeholder:text-outline font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container w-full sm:w-60" placeholder="Tìm sinh viên, lớp..." type="text">
+                </div>
+                <div class="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl overflow-x-auto">
+                    <button class="activity-filter-btn px-2.5 py-1 rounded-lg font-label-sm text-label-sm bg-surface-white text-primary-container font-bold shadow-xs whitespace-nowrap cursor-pointer" data-category="all" type="button">Tất cả</button>
+                    <button class="activity-filter-btn px-2.5 py-1 rounded-lg font-label-sm text-label-sm text-outline hover:text-brand-deep whitespace-nowrap cursor-pointer" data-category="Chờ duyệt" type="button">Chờ duyệt (@Model.DangKyChoDuyet)</button>
+                    <button class="activity-filter-btn px-2.5 py-1 rounded-lg font-label-sm text-label-sm text-outline hover:text-brand-deep whitespace-nowrap cursor-pointer" data-category="Đã duyệt" type="button">Đã duyệt (@Model.DangKyDaDuyet)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="w-full overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[840px]">
+                <thead>
+                    <tr class="border-b border-border-standard bg-canvas-base/60 text-outline font-label-sm text-label-sm uppercase tracking-wider">
+                        <th class="py-3 px-4">Sinh viên</th>
+                        <th class="py-3 px-4">Lớp học phần đăng ký</th>
+                        <th class="py-3 px-4">Thời gian đăng ký</th>
+                        <th class="py-3 px-4 text-center">Trạng thái</th>
+                        <th class="py-3 px-4 text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle font-body-sm text-body-sm" id="activityTableBody">
+                    @if (Model.HoatDongGanDay != null && Model.HoatDongGanDay.Any())
+                    {
+                        @foreach (var item in Model.HoatDongGanDay)
+                        {
+                            <tr class="activity-row hover:bg-canvas-base/80 transition-colors" data-category="@item.TrangThai">
+                                <td class="py-3 px-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-primary-container/10 text-primary-container font-bold flex items-center justify-center font-label-md text-label-md flex-shrink-0">
+                                            @(item.HocVien != null && !string.IsNullOrEmpty(item.HocVien.HoTen) ? item.HocVien.HoTen.Substring(0, 1) : "H")
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <span class="font-headline-sm text-brand-deep font-semibold text-[14px]">
+                                                @(item.HocVien != null ? item.HocVien.HoTen : "Học viên #" + item.MaHocVien)
+                                            </span>
+                                            <span class="font-mono text-outline text-[11px] tabular-nums">
+                                                MSSV: @(item.HocVien != null ? item.HocVien.MaHocVien.ToString() : "N/A")
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <div class="flex flex-col">
+                                        <span class="font-semibold text-brand-deep">
+                                            @(item.LopHoc != null ? item.LopHoc.TenLop : "Lớp #" + item.MaLop)
+                                        </span>
+                                        <span class="text-outline text-[12px] font-mono">
+                                            GV: @(item.LopHoc != null ? item.LopHoc.GiangVien : "Chưa xếp")
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <span class="font-mono text-outline text-[12px] flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[14px]">schedule</span>
+                                        @item.NgayDangKy.ToString("dd/MM/yyyy HH:mm")
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-center">
+                                    @if (item.TrangThai == "Chờ duyệt")
+                                    {
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-warning-amber/10 text-secondary font-label-sm text-label-sm font-semibold">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-warning-amber animate-pulse"></span>Chờ duyệt
+                                        </span>
+                                    }
+                                    else if (item.TrangThai == "Đã duyệt" || item.TrangThai == "Đã đóng học phí" || item.TrangThai == "Đang học")
+                                    {
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-success-emerald/10 text-success-emerald font-label-sm text-label-sm font-semibold">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-success-emerald"></span>@item.TrangThai
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-error-container text-danger-crimson font-label-sm text-label-sm font-semibold">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-danger-crimson"></span>@item.TrangThai
+                                        </span>
+                                    }
+                                </td>
+                                <td class="py-3 px-4 text-right">
+                                    <div class="inline-flex items-center gap-1">
+                                        @if (item.TrangThai == "Chờ duyệt")
+                                        {
+                                            <form asp-controller="ThongKe" asp-action="DuyetNhanh" asp-route-id="@item.MaDangKy" method="post" class="inline">
+                                                <button class="p-1 rounded-lg text-outline hover:text-success-emerald hover:bg-success-emerald/10 transition-colors cursor-pointer" title="Duyệt nhanh" type="submit">
+                                                    <span class="material-symbols-outlined text-[19px]">check_circle</span>
+                                                </button>
+                                            </form>
+                                        }
+                                        <a href="/KetQuaHocTap/Index" class="p-1 rounded-lg text-outline hover:text-primary-container hover:bg-surface-container-low transition-colors" title="Xem kết quả">
+                                            <span class="material-symbols-outlined text-[19px]">visibility</span>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="py-8 text-center text-outline">
+                                Không có dữ liệu hoạt động đăng ký.
                             </td>
                         </tr>
                     }
@@ -398,42 +405,39 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
             </table>
         </div>
 
-        <!-- Table Bottom Footer & Pagination -->
-        <div class="p-4 px-6 bg-slate-50/70 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-            <div class="flex items-center gap-2 text-slate-500">
-                <span class="">Dữ liệu trang @Model.CurrentPage / @Model.TotalPages</span>
-                <span class="">•</span>
-                <span class="inline-flex items-center gap-1.5 text-emerald-600 font-medium">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Đồng bộ thời gian thực
-                </span>
-            </div>
-            <div class="flex items-center gap-2">
+        <!-- Pagination Footer -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-border-subtle font-body-sm text-body-sm text-outline">
+            <span class="tabular-nums">
+                Trang <strong class="text-brand-deep font-semibold">@Model.CurrentPage</strong> / <strong class="text-brand-deep font-semibold">@Model.TotalPages</strong>
+            </span>
+            <div class="inline-flex items-center gap-1">
                 @if (Model.CurrentPage > 1)
                 {
-                    <a href="?page=@(Model.CurrentPage - 1)" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200/80 text-slate-700 hover:bg-slate-50 font-semibold shadow-xs transition-colors">
-                        Trang trước
+                    <a href="?page=@(Model.CurrentPage - 1)" class="px-2.5 py-1 rounded-lg border border-border-standard text-brand-deep hover:bg-canvas-base transition-colors font-label-md text-label-md">
+                        Trước
                     </a>
                 }
                 else
                 {
-                    <span class="px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200/80 text-slate-400 font-semibold shadow-xs cursor-not-allowed">
-                        Trang trước
+                    <span class="px-2.5 py-1 rounded-lg border border-border-standard text-outline/40 font-label-md text-label-md cursor-not-allowed">
+                        Trước
                     </span>
                 }
 
-                <span class="font-mono text-xs px-2 text-slate-600 font-semibold">@Model.CurrentPage / @Model.TotalPages</span>
-                
+                <span class="px-2.5 py-1 rounded-lg bg-primary-container text-surface-white font-label-md text-label-md font-bold font-mono">
+                    @Model.CurrentPage
+                </span>
+
                 @if (Model.CurrentPage < Model.TotalPages)
                 {
-                    <a href="?page=@(Model.CurrentPage + 1)" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200/80 text-slate-700 hover:bg-slate-50 font-semibold shadow-xs transition-colors">
-                        Trang sau
+                    <a href="?page=@(Model.CurrentPage + 1)" class="px-2.5 py-1 rounded-lg border border-border-standard text-brand-deep hover:bg-canvas-base transition-colors font-label-md text-label-md">
+                        Sau
                     </a>
                 }
                 else
                 {
-                    <span class="px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200/80 text-slate-400 font-semibold shadow-xs cursor-not-allowed">
-                        Trang sau
+                    <span class="px-2.5 py-1 rounded-lg border border-border-standard text-outline/40 font-label-md text-label-md cursor-not-allowed">
+                        Sau
                     </span>
                 }
             </div>
@@ -443,60 +447,44 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5)
 
 @section Scripts {
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // 1. Refresh Button Rotation Micro-interaction
-    const refreshBtn = document.getElementById('refreshDataBtn');
-    const refreshIcon = document.getElementById('refreshIcon');
-    if (refreshBtn && refreshIcon) {
-      refreshBtn.addEventListener('click', () => {
-        refreshIcon.classList.add('rotate-180');
-        refreshBtn.setAttribute('disabled', 'true');
-        setTimeout(() => {
-          refreshIcon.classList.remove('rotate-180');
-          refreshBtn.removeAttribute('disabled');
-        }, 600);
-      });
-    }
+    document.addEventListener('DOMContentLoaded', () => {
+        // 1. Live Filter by Category for Recent Activities Table
+        const filterBtns = document.querySelectorAll('.activity-filter-btn');
+        const rows = document.querySelectorAll('.activity-row');
 
-    // 2. Tab Filtering logic for Recent Activity Table
-    const filterButtons = document.querySelectorAll('.activity-filter-btn');
-    const activityRows = document.querySelectorAll('.activity-row');
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => {
+                    b.className = 'activity-filter-btn px-2.5 py-1 rounded-lg font-label-sm text-label-sm text-outline hover:text-brand-deep whitespace-nowrap cursor-pointer';
+                });
+                btn.className = 'activity-filter-btn px-2.5 py-1 rounded-lg font-label-sm text-label-sm bg-surface-white text-primary-container font-bold shadow-xs whitespace-nowrap cursor-pointer';
 
-    filterButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        filterButtons.forEach(b => {
-          b.classList.remove('bg-white', 'text-slate-900', 'shadow-xs', 'font-semibold');
-          b.classList.add('text-slate-600', 'font-medium');
+                const cat = btn.getAttribute('data-category');
+                rows.forEach(r => {
+                    if (cat === 'all' || r.getAttribute('data-category') === cat) {
+                        r.style.display = '';
+                    } else {
+                        r.style.display = 'none';
+                    }
+                });
+            });
         });
-        btn.classList.add('bg-white', 'text-slate-900', 'shadow-xs', 'font-semibold');
-        btn.classList.remove('text-slate-600', 'font-medium');
 
-        const category = btn.getAttribute('data-category');
-        activityRows.forEach(row => {
-          if (category === 'all' || row.getAttribute('data-category') === category) {
-            row.style.display = '';
-          } else {
-            row.style.display = 'none';
-          }
-        });
-      });
+        // 2. Search Input filtering
+        const searchInput = document.getElementById('activitySearchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const q = e.target.value.toLowerCase().trim();
+                rows.forEach(r => {
+                    const txt = r.innerText.toLowerCase();
+                    if (txt.includes(q)) {
+                        r.style.display = '';
+                    } else {
+                        r.style.display = 'none';
+                    }
+                });
+            });
+        }
     });
-
-    // 3. Search Bar Live Filtering
-    const searchInput = document.getElementById('activitySearchInput');
-    if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase().trim();
-        activityRows.forEach(row => {
-          const rowText = row.innerText.toLowerCase();
-          if (rowText.includes(query)) {
-            row.style.display = '';
-          } else {
-            row.style.display = 'none';
-          }
-        });
-      });
-    }
-  });
 </script>
 }
