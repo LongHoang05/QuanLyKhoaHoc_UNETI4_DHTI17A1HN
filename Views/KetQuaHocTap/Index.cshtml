@@ -1,355 +1,597 @@
 @*
 Họ và tên: Nguyễn Tùng Dương
 Mã sinh viên: 23103100003
-Nội dung thực hiện: Danh sách Kết quả học tập (Module 5)
+Nội dung thực hiện: Quản lý kết quả học tập (Module 5) - Phong cách Prep.vn
 *@
 
 @model IEnumerable<QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Models.KetQuaHocTap>
 @{
     ViewData["Title"] = "Kết quả học tập";
+    int total = ViewBag.TotalRecords ?? 0;
+    int pass = ViewBag.PassCount ?? 0;
+    int fail = ViewBag.FailCount ?? 0;
+    double passRate = total > 0 ? Math.Round((double)pass / total * 100, 1) : 0;
+    int countA = ViewBag.CountA ?? 0;
+    int countB = ViewBag.CountB ?? 0;
+    int countC = ViewBag.CountC ?? 0;
+    int countD = ViewBag.CountD ?? 0;
+    int countF = ViewBag.CountF ?? 0;
+    double avgScore = ViewBag.AverageScore ?? 0;
+
+    Func<double, (string Chu, string BadgeClass)> getGradeLetter = (score) => {
+        if (score >= 9.0) return ("A+", "bg-emerald-50 text-success-emerald border-emerald-200");
+        if (score >= 8.5) return ("A", "bg-blue-50 text-primary-container border-blue-200");
+        if (score >= 8.0) return ("B+", "bg-emerald-50 text-success-emerald border-emerald-200");
+        if (score >= 7.0) return ("B", "bg-sky-50 text-sky-700 border-sky-200");
+        if (score >= 6.5) return ("C+", "bg-surface-container-high text-on-surface-variant border-border-standard");
+        if (score >= 5.5) return ("C", "bg-surface-container-low text-on-surface-variant border-border-subtle");
+        if (score >= 5.0) return ("D+", "bg-amber-50 text-amber-700 border-amber-200");
+        if (score >= 4.0) return ("D", "bg-amber-50 text-warning-amber border-amber-200");
+        return ("F", "bg-rose-50 text-danger-crimson border-rose-200");
+    };
+
+    var ketQuaList = Model?.ToList() ?? new List<QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Models.KetQuaHocTap>();
 }
 
+<!-- Flash Alerts -->
 @if (TempData["Success"] != null)
-    {
-        <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50" role="alert">
-            <span class="font-medium">Thành công!</span> @TempData["Success"]
+{
+    <div class="p-4 mb-2 text-sm text-emerald-800 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between shadow-xs">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-emerald-600">check_circle</span>
+            <span class="font-medium">@TempData["Success"]</span>
         </div>
-    }
-    @if (TempData["Error"] != null)
-    {
-        <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50" role="alert">
-            <span class="font-medium">Lỗi:</span> @TempData["Error"]
+        <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-800">
+            <span class="material-symbols-outlined text-base">close</span>
+        </button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="p-4 mb-2 text-sm text-rose-800 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-between shadow-xs">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-rose-600">error</span>
+            <span class="font-medium">@TempData["Error"]</span>
         </div>
-    }
+        <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-800">
+            <span class="material-symbols-outlined text-base">close</span>
+        </button>
+    </div>
+}
 
-    <div class="flex flex-col w-full gap-3 md:gap-4 md:gap-4 md:p-6">
-        <!-- Top Page Header -->
-        <div class="flex flex-col gap-space-sm mb-space-lg">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
-                <div class="flex flex-col gap-1">
-                    <div class="flex items-center gap-2">
-                        <span class="px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm uppercase tracking-wider">Học kỳ 1 • 2024-2025</span>
-                        <span class="flex items-center gap-1 font-label-sm text-label-sm text-tertiary-fixed-dim">
-                            <span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim inline-block animate-pulse"></span>
-                            Hệ thống chấm điểm mở
+<div class="flex flex-col gap-y-6">
+    <!-- Top Header Bar -->
+    <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-surface-white p-5 rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)]">
+        <div class="flex flex-col gap-1">
+            <div class="flex items-center gap-2 text-outline font-body-sm text-body-sm">
+                <span>Đào tạo UNETI</span>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <span class="text-primary-container font-label-md text-label-md">Điểm học phần</span>
+            </div>
+            <h1 class="font-headline-lg-mobile lg:font-headline-lg text-brand-deep tracking-tight font-extrabold">
+                Kết quả học tập
+            </h1>
+            <p class="font-body-sm text-body-sm text-outline">
+                Tổng hợp điểm quá trình (CC 30%), điểm thi kết thúc (70%) và xét chuẩn đầu ra học phần UNETI.
+            </p>
+        </div>
+
+        <div class="flex items-center flex-wrap gap-2.5">
+            <a href="/KetQuaHocTap/Create" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-border-standard bg-surface-white hover:bg-canvas-base text-brand-deep font-label-md text-label-md transition-all shadow-xs cursor-pointer">
+                <span class="material-symbols-outlined text-primary-container text-[18px]">add_circle</span>
+                <span>+ Nhập điểm mới</span>
+            </a>
+            <button type="button" onclick="window.print()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-border-standard bg-surface-white hover:bg-canvas-base text-brand-deep font-label-md text-label-md transition-all shadow-xs cursor-pointer">
+                <span class="material-symbols-outlined text-secondary text-[18px]">download</span>
+                <span>Xuất bảng điểm</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- ROW 1: 4-Column Stats Bento Grid (Prep.vn Style) -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- Card 1: Tổng sinh viên -->
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] hover:shadow-md transition-shadow flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+                <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Tổng SV có điểm</span>
+                <div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary-container">
+                    <span class="material-symbols-outlined text-[22px]">group</span>
+                </div>
+            </div>
+            <div>
+                <div class="font-display text-[30px] leading-8 text-brand-deep tracking-tight mb-1 tabular-nums font-mono font-black">
+                    @total
+                </div>
+                <div class="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
+                    <span class="material-symbols-outlined text-[16px] text-outline">tune</span>
+                    <span>Theo dõi @ViewBag.TotalLop lớp học phần</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 2: Tỷ lệ qua môn -->
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] hover:shadow-md transition-shadow flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+                <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Tỷ lệ qua môn</span>
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-success-emerald flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[22px]">check_circle</span>
+                </div>
+            </div>
+            <div>
+                <div class="flex items-baseline justify-between mb-2">
+                    <span class="font-display text-[30px] leading-8 text-brand-deep tracking-tight tabular-nums font-mono font-black">
+                        @passRate%
+                    </span>
+                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-success-emerald">
+                        @pass đạt / @total SV
+                    </span>
+                </div>
+                <div class="w-full bg-border-subtle rounded-full h-2 overflow-hidden">
+                    <div class="bg-success-emerald h-2 rounded-full transition-all duration-500" style="width: @passRate%"></div>
+                </div>
+                <span class="font-body-sm text-body-sm text-outline block mt-1.5">Điểm TB toàn khóa: <strong class="text-brand-deep">@avgScore</strong></span>
+            </div>
+        </div>
+
+        <!-- Card 3: Xếp loại Giỏi / Xuất sắc -->
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] hover:shadow-md transition-shadow flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+                <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Xếp loại Giỏi (A/A+)</span>
+                <div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary-container">
+                    <span class="material-symbols-outlined text-[22px]">emoji_events</span>
+                </div>
+            </div>
+            <div>
+                <div class="font-display text-[30px] leading-8 text-brand-deep tracking-tight mb-1 tabular-nums font-mono font-black">
+                    @(total > 0 ? Math.Round((double)countA / total * 100, 1) : 0)%
+                </div>
+                <div class="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
+                    <span class="material-symbols-outlined text-[16px] text-primary-container">workspace_premium</span>
+                    <span>@countA sinh viên đạt điểm A / A+</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 4: Cảnh báo học vụ -->
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] hover:shadow-md transition-shadow flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-1.5">
+                    <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Cảnh báo học vụ</span>
+                    @if (fail > 0)
+                    {
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-danger-crimson opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-danger-crimson"></span>
                         </span>
-                    </div>
-                    <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Quản lý Kết quả học tập</h1>
-                    <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
-                        Hệ thống tổng hợp điểm quá trình, điểm thi kết thúc học phần và xét chuẩn đầu ra học phần UNETI
-                    </p>
+                    }
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-danger-crimson">
+                    <span class="material-symbols-outlined text-[22px]">warning</span>
                 </div>
             </div>
-            
-            <!-- Stats summary badges banner -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md mt-space-xs">
-                <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex items-center justify-between">
-                    <div class="flex flex-col">
-                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Tổng số sinh viên</span>
-                        <span class="font-headline-lg text-headline-lg text-on-surface mt-0.5">@ViewBag.TotalRecords</span>
-                    </div>
-                    <div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center">
-                        <span class="material-symbols-outlined text-[24px] text-primary">badge</span>
-                    </div>
+            <div>
+                <div class="font-display text-[30px] leading-8 text-danger-crimson tracking-tight mb-1 tabular-nums font-mono font-black">
+                    @fail
                 </div>
-                <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex items-center justify-between">
-                    <div class="flex flex-col">
-                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Đạt yêu cầu (Pass)</span>
-                        <div class="flex items-baseline gap-2 mt-0.5">
-                            <span class="font-headline-lg text-headline-lg text-on-tertiary-container">@ViewBag.PassCount</span>
-                            @{
-                                double passPercent = ViewBag.TotalRecords > 0 ? (double)ViewBag.PassCount / ViewBag.TotalRecords * 100 : 0;
-                            }
-                            <span class="font-label-md text-label-md px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-bold">@passPercent.ToString("0.0")%</span>
-                        </div>
-                    </div>
-                    <div class="w-12 h-12 rounded-xl bg-tertiary-container/10 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-[24px] text-on-tertiary-container">check_circle</span>
-                    </div>
-                </div>
-                <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex items-center justify-between">
-                    <div class="flex flex-col">
-                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Cần thi lại (Fail)</span>
-                        <div class="flex items-baseline gap-2 mt-0.5">
-                            <span class="font-headline-lg text-headline-lg text-error">@ViewBag.FailCount</span>
-                            @{
-                                double failPercent = ViewBag.TotalRecords > 0 ? (double)ViewBag.FailCount / ViewBag.TotalRecords * 100 : 0;
-                            }
-                            <span class="font-label-md text-label-md px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-bold">@failPercent.ToString("0.0")%</span>
-                        </div>
-                    </div>
-                    <div class="w-12 h-12 rounded-xl bg-error-container/40 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-[24px] text-error">warning</span>
-                    </div>
-                </div>
-                <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex items-center justify-between">
-                    <div class="flex flex-col">
-                        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Điểm trung bình lớp</span>
-                        <div class="flex items-baseline gap-2 mt-0.5">
-                            <span class="font-headline-lg text-headline-lg text-primary">@(((double)ViewBag.AverageScore).ToString("0.00"))</span>
-                        </div>
-                    </div>
-                    <div class="w-12 h-12 rounded-xl bg-secondary-fixed flex items-center justify-center">
-                        <span class="material-symbols-outlined text-[24px] text-on-secondary-fixed">monitoring</span>
-                    </div>
+                <div class="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
+                    <span class="material-symbols-outlined text-[16px] text-danger-crimson">error_outline</span>
+                    <span class="truncate">@(fail > 0 ? "Chưa hoàn thành hoặc điểm F" : "Không có sinh viên trượt môn")</span>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- 2-Panel Layout: Panel 1 (List ~68%) and Panel 2 (Sticky Form ~32%) -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
-            <!-- PANEL 1: Grading List -->
-            <div class="lg:col-span-8 flex flex-col gap-space-md">
-                <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
-                    <div class="px-space-lg py-space-md bg-surface-container-lowest flex items-center justify-between border-b border-surface-container-low">
-                        <div class="flex flex-col">
-                            <span class="font-headline-sm text-headline-sm text-on-surface">Bảng điểm học phần chi tiết</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="font-label-sm text-label-sm px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant">
-                                Tỷ lệ: CC (30%) + Thi (70%)
-                            </span>
-                        </div>
+    <!-- ROW 2: Middle Split Section (Bảng Điểm & Phổ Điểm) -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <!-- LEFT 2 COLUMNS: Bảng Điểm Chi Tiết Lớp Học Phần -->
+        <div class="lg:col-span-2 bg-surface-white rounded-2xl p-5 lg:p-6 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col gap-4">
+            <!-- Toolbar Header: Filter by Class & Search -->
+            <form method="get" class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-border-subtle">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-2.5">
+                    <!-- Dropdown Lớp học -->
+                    <div class="relative min-w-[240px]">
+                        <select name="maLop" onchange="this.form.submit()" class="w-full pl-3 pr-8 py-1.5 bg-surface-container-low border border-border-standard rounded-xl font-label-md text-label-md text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary-container/20 cursor-pointer appearance-none">
+                            <option value="">-- Tất cả các lớp học phần --</option>
+                            @if (ViewBag.LopHocList != null)
+                            {
+                                @foreach (var lop in (List<QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Models.LopHoc>)ViewBag.LopHocList)
+                                {
+                                    if (ViewBag.SelectedMaLop != null && (int)ViewBag.SelectedMaLop == lop.MaLop)
+                                    {
+                                        <option value="@lop.MaLop" selected>@lop.TenLop</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@lop.MaLop">@lop.TenLop</option>
+                                    }
+                                }
+                            }
+                        </select>
+                        <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-[18px]">expand_more</span>
                     </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left" id="gradesTable">
-                            <thead>
-                                <tr class="bg-surface-container-low font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-b border-surface-container-low">
-                                    <th class="py-3 px-4">Mã ĐK</th>
-                                    <th class="py-3 px-4">Sinh viên & MSSV</th>
-                                    <th class="py-3 px-3">Lớp HP</th>
-                                    <th class="py-3 px-3 text-center">CC (30%)</th>
-                                    <th class="py-3 px-3 text-center">Thi (70%)</th>
-                                    <th class="py-3 px-3 text-center">Tổng kết</th>
-                                    <th class="py-3 px-3 text-center">Kết quả</th>
-                                    <th class="py-3 px-4 text-center">Sửa</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-surface-container font-body-md text-body-md text-on-surface">
-                                @foreach(var kq in Model)
+                    <!-- Client Filter Pills -->
+                    <div class="flex items-center bg-surface-container-low p-1 rounded-xl border border-border-subtle">
+                        <button type="button" class="filter-tab px-2.5 py-1 rounded-lg font-label-sm text-label-sm bg-surface-white text-primary-container font-semibold shadow-xs cursor-pointer" data-filter="all">Tất cả (@total)</button>
+                        <button type="button" class="filter-tab px-2.5 py-1 rounded-lg font-label-sm text-label-sm text-on-surface-variant hover:text-brand-deep font-medium transition-colors cursor-pointer" data-filter="pass">Đã qua (@pass)</button>
+                        <button type="button" class="filter-tab px-2.5 py-1 rounded-lg font-label-sm text-label-sm text-danger-crimson hover:bg-red-50 font-medium transition-colors cursor-pointer" data-filter="fail">Học lại (@fail)</button>
+                    </div>
+                </div>
+
+                <!-- Search Input -->
+                <div class="relative flex items-center">
+                    <span class="material-symbols-outlined absolute left-3 text-outline text-[18px]">search</span>
+                    <input name="search" value="@ViewBag.Search" class="w-full sm:w-48 pl-9 pr-3 py-1.5 bg-canvas-base border border-border-standard rounded-xl font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary transition-all" placeholder="Tìm tên, MSSV..." type="text"/>
+                </div>
+            </form>
+
+            <!-- Spreadsheet Grade Table -->
+            <div class="border border-border-standard rounded-xl overflow-hidden shadow-2xs">
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse text-left min-w-[700px]">
+                        <thead>
+                            <tr class="bg-surface-container-low text-xs font-semibold text-on-surface-variant uppercase tracking-wider border-b border-border-standard">
+                                <th class="py-3 px-3 text-center w-12 font-mono">STT</th>
+                                <th class="py-3 px-4 min-w-[200px]">Sinh viên</th>
+                                <th class="py-3 px-3 text-right tabular-nums w-20">CC <span class="text-outline font-normal">(30%)</span></th>
+                                <th class="py-3 px-3 text-right tabular-nums w-20">CK <span class="text-outline font-normal">(70%)</span></th>
+                                <th class="py-3 px-3 text-right tabular-nums w-24">T.Kết <span class="text-outline font-normal">(TK10)</span></th>
+                                <th class="py-3 px-3 text-center w-20">Điểm chữ</th>
+                                <th class="py-3 px-3 text-center w-28">Trạng thái</th>
+                                <th class="py-3 px-3 text-center w-20">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-border-subtle font-body-sm text-body-sm" id="gradeTableBody">
+                            @if (ketQuaList.Any())
+                            {
+                                int stt = 1;
+                                @foreach (var item in ketQuaList)
                                 {
-                                    <tr class="hover:bg-surface-container-low/60 transition-colors student-row border-b border-surface-container-low" 
-                                        data-id="@kq.MaKetQua"
-                                        data-reg="DK-@kq.MaDangKy"
-                                        data-name="@kq.DangKyHoc.HocVien.HoTen"
-                                        data-mssv="@kq.DangKyHoc.HocVien.MaHocVien"
-                                        data-att="@kq.DiemChuyenCan"
-                                        data-exam="@kq.DiemCuoiKhoa"
-                                        data-note="@kq.NhanXet"
-                                        data-res="@(kq.KetQua == "Hoàn thành" ? "pass" : "fail")">
-                                        <td class="py-3.5 px-4 font-mono font-label-md text-label-md text-secondary">DK-@kq.MaDangKy</td>
+                                    var gradeInfo = getGradeLetter(item.DiemTongKet);
+                                    var isPass = item.KetQua == "Hoàn thành";
+                                    var hvName = item.DangKyHoc?.HocVien?.HoTen ?? "Học viên #" + item.DangKyHoc?.MaHocVien;
+                                    var mssv = item.DangKyHoc?.HocVien?.MaHocVien.ToString() ?? "N/A";
+                                    var lopName = item.DangKyHoc?.LopHoc?.TenLop ?? "Lớp #" + item.DangKyHoc?.MaLop;
+
+                                    <tr class="grade-row hover:bg-canvas-base/80 transition-colors @(!isPass ? "bg-red-50/20" : "")" data-status="@(isPass ? "pass" : "fail")">
+                                        <td class="py-3.5 px-3 text-center text-outline tabular-nums font-mono text-xs">
+                                            @(stt < 10 ? "0" + stt : stt.ToString())
+                                        </td>
                                         <td class="py-3.5 px-4">
                                             <div class="flex items-center gap-3">
+                                                <div class="w-8 h-8 rounded-full @(isPass ? "bg-primary-container/10 text-primary-container" : "bg-danger-crimson/10 text-danger-crimson") font-bold text-xs flex items-center justify-center shrink-0">
+                                                    @(!string.IsNullOrEmpty(hvName) ? hvName.Substring(0, 1).ToUpper() : "H")
+                                                </div>
                                                 <div class="flex flex-col min-w-0">
-                                                    <span class="font-label-lg text-label-lg text-on-surface truncate">@kq.DangKyHoc.HocVien.HoTen</span>
-                                                    <span class="font-label-sm text-label-sm text-on-surface-variant font-mono">MSSV: @kq.DangKyHoc.HocVien.MaHocVien</span>
+                                                    <span class="font-label-md text-label-md text-brand-deep truncate font-semibold">@hvName</span>
+                                                    <div class="flex items-center gap-1.5 text-outline text-xs">
+                                                        <span class="font-mono tabular-nums">MS: @mssv</span>
+                                                        <span>•</span>
+                                                        <span class="truncate max-w-[130px]" title="@lopName">@lopName</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="py-3.5 px-3">
-                                            <span class="px-2 py-0.5 rounded bg-surface-container font-label-sm text-label-sm text-on-surface truncate">@kq.DangKyHoc.LopHoc.TenLop</span>
+                                        <td class="py-3.5 px-3 text-right font-mono tabular-nums text-brand-deep">
+                                            @item.DiemChuyenCan.ToString("0.0")
                                         </td>
-                                        <td class="py-3.5 px-3 text-center font-mono">@kq.DiemChuyenCan</td>
-                                        <td class="py-3.5 px-3 text-center font-mono">@kq.DiemCuoiKhoa</td>
-                                        <td class="py-3.5 px-3 text-center font-mono font-headline-sm text-headline-sm text-primary">@kq.DiemTongKet.ToString("0.00")</td>
+                                        <td class="py-3.5 px-3 text-right font-mono tabular-nums @(item.DiemCuoiKhoa < 5.0 ? "text-danger-crimson font-medium" : "text-brand-deep")">
+                                            @item.DiemCuoiKhoa.ToString("0.0")
+                                        </td>
+                                        <td class="py-3.5 px-3 text-right font-mono tabular-nums @(isPass ? "text-primary-container font-bold text-sm" : "text-danger-crimson font-bold text-sm")">
+                                            @item.DiemTongKet.ToString("0.0")
+                                        </td>
                                         <td class="py-3.5 px-3 text-center">
-                                            @if(kq.KetQua == "Hoàn thành")
+                                            <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-bold border @gradeInfo.BadgeClass">
+                                                @gradeInfo.Chu
+                                            </span>
+                                        </td>
+                                        <td class="py-3.5 px-3 text-center">
+                                            @if (isPass)
                                             {
-                                                <span class="inline-flex items-center px-2.5 py-1 rounded-full font-label-sm text-label-sm bg-tertiary-container text-on-tertiary font-bold tracking-wide">Đạt (Pass)</span>
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-success-emerald">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-success-emerald"></span>Hoàn thành
+                                                </span>
                                             }
                                             else
                                             {
-                                                <span class="inline-flex items-center px-2.5 py-1 rounded-full font-label-sm text-label-sm bg-error text-on-error font-bold tracking-wide">Trượt (Fail)</span>
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-danger-crimson">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-danger-crimson"></span>Học lại
+                                                </span>
                                             }
                                         </td>
-                                        <td class="py-3.5 px-4 text-center">
-                                            <button class="p-1.5 rounded-lg hover:bg-surface-container text-primary transition-colors border border-outline-variant/30" onclick="selectStudent(this)" title="Chọn và sửa điểm" type="button">
-                                                <span class="material-symbols-outlined text-[18px]">edit_note</span>
+                                        <td class="py-3.5 px-3 text-center">
+                                            <button type="button" onclick="openEditModal(@item.MaKetQua, '@hvName', @item.DiemChuyenCan, @item.DiemCuoiKhoa, '@item.NhanXet', '@(isPass ? "pass" : "fail")')" class="p-1.5 rounded-lg text-outline hover:text-primary-container hover:bg-surface-container transition-colors cursor-pointer" title="Cập nhật điểm">
+                                                <span class="material-symbols-outlined text-[18px]">edit</span>
                                             </button>
                                         </td>
                                     </tr>
+                                    stt++;
                                 }
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- Pagination -->
-                    <div class="px-space-lg py-space-md bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-sm border-t border-surface-container">
-                        <span class="font-body-sm text-body-sm text-on-surface-variant">Hiển thị 5 dòng mỗi trang</span>
-                        <div class="flex items-center gap-1 select-none">
-                            @if (ViewBag.CurrentPage > 1)
-                            {
-                                <a href="?page=@(ViewBag.CurrentPage - 1)" class="px-2.5 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface shadow-sm hover:bg-surface-container font-label-md text-label-md">
-                                    <span class="material-symbols-outlined text-[16px] align-middle">chevron_left</span>
-                                    <span class="">Trước</span>
-                                </a>
                             }
-                            
-                            <span class="px-4 py-1.5 rounded-lg bg-primary-container text-on-primary shadow-sm font-semibold text-sm">@ViewBag.CurrentPage / @ViewBag.TotalPages</span>
-                            
-                            @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                            else
                             {
-                                <a href="?page=@(ViewBag.CurrentPage + 1)" class="px-2.5 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md text-label-md shadow-sm">
-                                    <span class="">Tiếp</span>
-                                    <span class="material-symbols-outlined text-[16px] align-middle">chevron_right</span>
-                                </a>
+                                <tr>
+                                    <td colspan="8" class="py-8 text-center text-outline">
+                                        Không tìm thấy kết quả học tập nào.
+                                    </td>
+                                </tr>
                             }
-                        </div>
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
-            </div>
 
-            <!-- PANEL 2: Grade Entry Form -->
-            <div class="lg:col-span-4 sticky top-20">
-                <div class="bg-surface-container-lowest rounded-xl shadow-md p-space-lg flex flex-col gap-space-md">
-                    <!-- Form Header -->
-                    <div class="flex items-start justify-between">
-                        <div class="flex flex-col">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
-                                <h2 class="font-headline-md text-headline-md text-on-surface">Nhập & Cập nhật điểm</h2>
-                            </div>
-                            <span class="font-label-sm text-label-sm text-on-surface-variant mt-1">Cập nhật điểm thành phần và kết quả học phần</span>
-                        </div>
+                <!-- Table Footer / Pagination -->
+                <div class="bg-surface-container-low px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-border-standard">
+                    <div class="flex items-center gap-2 font-body-sm text-body-sm text-outline">
+                        <span>Hiển thị <strong class="text-brand-deep font-semibold">@ketQuaList.Count</strong> / <strong class="text-brand-deep font-semibold">@total</strong> sinh viên</span>
+                        <span>•</span>
+                        <span>Điểm TB: <strong class="text-primary-container font-mono font-bold">@avgScore</strong></span>
                     </div>
 
-                    <form class="flex flex-col gap-space-md mt-space-xs" action="/KetQuaHocTap/EditPost" method="post">
-                        <input type="hidden" id="formMaKetQua" name="maKetQua" />
-                        
-                        <!-- Registration ID & Student Info -->
-                        <div class="flex flex-col gap-1.5">
-                            <label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant flex items-center justify-between">
-                                <span class="">Mã đăng ký & Sinh viên</span>
-                            </label>
-                            <div class="relative">
-                                <input class="w-full h-10 px-3 pr-9 rounded-lg bg-surface-container-low font-body-sm text-body-sm text-on-surface font-medium focus:outline-none cursor-not-allowed" id="formRegId" readonly type="text" placeholder="Chọn sinh viên bên bảng...">
-                                <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-[18px] text-outline">lock</span>
-                            </div>
-                        </div>
+                    <!-- Pagination Links -->
+                    <div class="flex items-center gap-1 font-label-md text-label-md">
+                        @if (ViewBag.CurrentPage > 1)
+                        {
+                            <a href="?maLop=@ViewBag.SelectedMaLop&search=@ViewBag.Search&page=@(ViewBag.CurrentPage - 1)" class="w-8 h-8 rounded-lg flex items-center justify-center text-outline hover:bg-surface-white hover:text-brand-deep transition-colors">
+                                <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="w-8 h-8 rounded-lg flex items-center justify-center text-outline/40 cursor-not-allowed">
+                                <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+                            </span>
+                        }
 
-                        <!-- Attendance & Final Exam Grid -->
-                        <div class="grid grid-cols-2 gap-space-sm">
-                            <div class="flex flex-col gap-1.5">
-                                <label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant flex items-center gap-1">
-                                    <span class="">Chuyên cần (30%)</span>
-                                </label>
-                                <input name="diemChuyenCan" class="w-full h-10 px-3 rounded-lg bg-surface font-mono font-headline-sm text-headline-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/30" id="inputAtt" max="10" min="0" oninput="calculateTotalScore()" step="0.1" type="number" value="">
-                            </div>
-                            <div class="flex flex-col gap-1.5">
-                                <label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant flex items-center gap-1">
-                                    <span class="">Thi KTHP (70%)</span>
-                                </label>
-                                <input name="diemCuoiKhoa" class="w-full h-10 px-3 rounded-lg bg-surface font-mono font-headline-sm text-headline-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/30" id="inputExam" max="10" min="0" oninput="calculateTotalScore()" step="0.1" type="number" value="">
-                            </div>
-                        </div>
+                        <span class="px-3 py-1 rounded-lg bg-primary-container text-surface-white font-bold font-mono text-xs">
+                            @ViewBag.CurrentPage / @ViewBag.TotalPages
+                        </span>
 
-                        <!-- Total Score -->
-                        <div class="flex flex-col gap-1.5">
-                            <label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant flex items-center justify-between">
-                                <span class="">Điểm tổng kết</span>
-                            </label>
-                            <div class="flex items-center gap-2">
-                                <input class="w-32 h-11 px-3.5 rounded-lg bg-surface-container font-mono font-headline-lg text-headline-lg text-error text-center font-bold focus:outline-none cursor-not-allowed" id="inputTotal" readonly type="text" value="">
-                                <div class="flex flex-col">
-                                    <span class="font-label-sm text-label-sm text-on-surface-variant" id="formulaHint">Tự động tính (30/70)</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Final Result Radio Options -->
-                        <div class="flex flex-col gap-2 pt-1">
-                            <label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">
-                                Kết luận kết quả học phần
-                            </label>
-                            <div class="grid grid-cols-2 gap-2">
-                                <label class="relative flex items-center gap-2.5 p-3 rounded-lg bg-surface hover:bg-surface-container cursor-pointer transition-colors border border-outline-variant/30">
-                                    <input class="accent-on-tertiary-container w-4 h-4" id="radioPass" name="ketQua" type="radio" value="pass">
-                                    <div class="flex flex-col">
-                                        <span class="font-label-md text-label-md text-on-tertiary-container font-bold">Đạt (Pass)</span>
-                                    </div>
-                                </label>
-                                <label class="relative flex items-center gap-2.5 p-3 rounded-lg bg-surface hover:bg-surface-container cursor-pointer transition-colors border border-outline-variant/30">
-                                    <input class="accent-error w-4 h-4" id="radioFail" name="ketQua" type="radio" value="fail">
-                                    <div class="flex flex-col">
-                                        <span class="font-label-md text-label-md text-error font-bold">Trượt (Fail)</span>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Staff Comments -->
-                        <div class="flex flex-col gap-1.5">
-                            <label class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant flex items-center justify-between">
-                                <span class="">Ý kiến cán bộ / Ghi chú</span>
-                            </label>
-                            <textarea name="nhanXet" class="w-full p-3 rounded-lg bg-surface font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/30 resize-none" id="inputNote" rows="2"></textarea>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="flex items-center gap-space-sm pt-space-xs">
-                            <button class="flex-1 h-10 px-4 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg hover:bg-primary-container transition-all shadow-sm flex items-center justify-center gap-1.5" type="submit">
-                                <span class="material-symbols-outlined text-[18px]">save</span>
-                                <span class="">Lưu điểm</span>
-                            </button>
-                        </div>
-                    </form>
+                        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                        {
+                            <a href="?maLop=@ViewBag.SelectedMaLop&search=@ViewBag.Search&page=@(ViewBag.CurrentPage + 1)" class="w-8 h-8 rounded-lg flex items-center justify-center text-outline hover:bg-surface-white hover:text-brand-deep transition-colors">
+                                <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="w-8 h-8 rounded-lg flex items-center justify-center text-outline/40 cursor-not-allowed">
+                                <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                            </span>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- RIGHT 1 COLUMN: Phổ Điểm (Grade Distribution) & Khuyến Nghị Học Vụ -->
+        <div class="lg:col-span-1 flex flex-col gap-6">
+            <!-- Top Card: Phổ Điểm Lớp Học Phần -->
+            <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col gap-4">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <h3 class="font-headline-sm text-headline-sm text-brand-deep font-bold">Phổ Điểm (Grade Distribution)</h3>
+                        </div>
+                        <p class="font-body-sm text-body-sm text-outline mt-0.5">Tỉ lệ phân bố điểm chữ hệ thống</p>
+                    </div>
+                    <span class="material-symbols-outlined text-outline text-[20px]">bar_chart</span>
+                </div>
+
+                <!-- Grade Bars -->
+                <div class="flex flex-col gap-3 pt-1">
+                    <!-- Grade A -->
+                    <div class="flex flex-col gap-1">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-semibold text-brand-deep">Loại A <span class="font-normal text-outline">(8.5 – 10.0)</span></span>
+                            <span class="font-mono font-semibold text-brand-deep">
+                                @(total > 0 ? Math.Round((double)countA / total * 100, 1) : 0)% • <span class="text-outline">@countA SV</span>
+                            </span>
+                        </div>
+                        <div class="w-full bg-border-subtle rounded-full h-2.5 overflow-hidden">
+                            <div class="bg-primary-container h-2.5 rounded-full transition-all duration-500" style="width: @(total > 0 ? (double)countA / total * 100 : 0)%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Grade B -->
+                    <div class="flex flex-col gap-1">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-semibold text-brand-deep">Loại B <span class="font-normal text-outline">(7.0 – 8.4)</span></span>
+                            <span class="font-mono font-semibold text-brand-deep">
+                                @(total > 0 ? Math.Round((double)countB / total * 100, 1) : 0)% • <span class="text-outline">@countB SV</span>
+                            </span>
+                        </div>
+                        <div class="w-full bg-border-subtle rounded-full h-2.5 overflow-hidden">
+                            <div class="bg-surface-tint h-2.5 rounded-full transition-all duration-500" style="width: @(total > 0 ? (double)countB / total * 100 : 0)%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Grade C -->
+                    <div class="flex flex-col gap-1">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-semibold text-brand-deep">Loại C <span class="font-normal text-outline">(5.5 – 6.9)</span></span>
+                            <span class="font-mono font-semibold text-brand-deep">
+                                @(total > 0 ? Math.Round((double)countC / total * 100, 1) : 0)% • <span class="text-outline">@countC SV</span>
+                            </span>
+                        </div>
+                        <div class="w-full bg-border-subtle rounded-full h-2.5 overflow-hidden">
+                            <div class="bg-tertiary-container h-2.5 rounded-full transition-all duration-500" style="width: @(total > 0 ? (double)countC / total * 100 : 0)%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Grade D -->
+                    <div class="flex flex-col gap-1">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-semibold text-brand-deep">Loại D <span class="font-normal text-outline">(4.0 – 5.4)</span></span>
+                            <span class="font-mono font-semibold text-brand-deep">
+                                @(total > 0 ? Math.Round((double)countD / total * 100, 1) : 0)% • <span class="text-outline">@countD SV</span>
+                            </span>
+                        </div>
+                        <div class="w-full bg-border-subtle rounded-full h-2.5 overflow-hidden">
+                            <div class="bg-warning-amber h-2.5 rounded-full transition-all duration-500" style="width: @(total > 0 ? (double)countD / total * 100 : 0)%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Grade F -->
+                    <div class="flex flex-col gap-1">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-semibold text-danger-crimson">Loại F <span class="font-normal text-outline">(&lt; 4.0 - Học lại)</span></span>
+                            <span class="font-mono font-semibold text-danger-crimson">
+                                @(total > 0 ? Math.Round((double)countF / total * 100, 1) : 0)% • <span class="text-outline">@countF SV</span>
+                            </span>
+                        </div>
+                        <div class="w-full bg-border-subtle rounded-full h-2.5 overflow-hidden">
+                            <div class="bg-danger-crimson h-2.5 rounded-full transition-all duration-500" style="width: @(total > 0 ? (double)countF / total * 100 : 0)%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-2 pt-3 border-t border-border-subtle flex items-center gap-2">
+                    <span class="material-symbols-outlined text-success-emerald text-[18px]">verified</span>
+                    <span class="font-label-sm text-label-sm text-outline">Đánh giá theo quy chế đào tạo UNETI</span>
+                </div>
+            </div>
+
+            <!-- Bottom Card: Phân Tích & Khuyến Nghị Học Vụ -->
+            <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col gap-4">
+                <div class="flex items-center justify-between">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-high text-primary-container font-label-sm text-label-sm font-semibold">
+                        <span class="material-symbols-outlined text-[16px]">tips_and_updates</span>
+                        <span>Khuyến nghị học vụ</span>
+                    </div>
+                </div>
+
+                <!-- Insight Box -->
+                <div class="bg-gradient-to-br from-surface-container-low via-surface-white to-red-50/40 border border-surface-container-high rounded-xl p-4 flex flex-col gap-2.5">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-lg bg-secondary-fixed flex items-center justify-center text-secondary-container">
+                            <span class="material-symbols-outlined text-[16px]">lightbulb</span>
+                        </div>
+                        <h4 class="font-label-md text-label-md text-brand-deep font-semibold">Theo dõi kết quả đầu ra</h4>
+                    </div>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                        Hiện có <strong class="text-danger-crimson font-semibold">@fail sinh viên</strong> chưa đạt chuẩn hoàn thành. Giáo vụ và giảng viên cần rà soát điểm chuyên cần và điểm thi bổ sung trước khi khóa sổ điểm học phần.
+                    </p>
+                </div>
+
+                <!-- Action Button -->
+                <div class="flex flex-col gap-2 pt-1">
+                    <a href="/KetQuaHocTap/Create" class="w-full bg-primary-container hover:bg-primary text-surface-white font-label-md text-label-md py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-xs transition-all">
+                        <span class="material-symbols-outlined text-[18px]">add</span>
+                        <span>Nhập điểm học phần mới</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Modal Chỉnh Sửa Điểm Nhanh -->
+<div id="editGradeModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <!-- Modal Header -->
+        <div class="p-5 border-b border-border-subtle flex items-center justify-between bg-canvas-base/50">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-primary-container/10 text-primary-container flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[20px]">edit_note</span>
+                </div>
+                <div>
+                    <h3 class="font-headline-sm text-headline-sm text-brand-deep font-bold">Cập Nhật Điểm Sinh Viên</h3>
+                    <span id="modalStudentName" class="text-xs text-outline font-medium">Nguyễn Văn A</span>
+                </div>
+            </div>
+            <button type="button" onclick="closeEditModal()" class="text-outline hover:text-brand-deep p-1 rounded-lg hover:bg-canvas-base transition-colors">
+                <span class="material-symbols-outlined text-xl">close</span>
+            </button>
+        </div>
+
+        <!-- Form Edit -->
+        <form asp-action="EditPost" method="post" class="p-5 flex flex-col gap-4">
+            <input type="hidden" name="maKetQua" id="modalMaKetQua" />
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="flex flex-col gap-1.5">
+                    <label class="font-label-md text-label-md text-brand-deep font-semibold">Điểm CC (30%)</label>
+                    <input type="number" step="0.1" min="0" max="10" name="diemChuyenCan" id="modalDiemCC" class="w-full bg-canvas-base font-body-sm text-body-sm text-on-surface px-3 py-2 rounded-xl border border-border-standard focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary font-mono" required />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="font-label-md text-label-md text-brand-deep font-semibold">Điểm CK (70%)</label>
+                    <input type="number" step="0.1" min="0" max="10" name="diemCuoiKhoa" id="modalDiemCK" class="w-full bg-canvas-base font-body-sm text-body-sm text-on-surface px-3 py-2 rounded-xl border border-border-standard focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary font-mono" required />
+                </div>
+            </div>
+
+            <!-- Kết quả xét chuẩn -->
+            <div class="flex flex-col gap-1.5">
+                <label class="font-label-md text-label-md text-brand-deep font-semibold">Kết quả học phần</label>
+                <div class="relative">
+                    <select name="ketQua" id="modalKetQua" class="w-full bg-canvas-base font-body-sm text-body-sm text-on-surface px-3 py-2 rounded-xl border border-border-standard focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary appearance-none pr-8 cursor-pointer">
+                        <option value="pass">Hoàn thành (Đạt chuẩn)</option>
+                        <option value="fail">Không hoàn thành (Học lại)</option>
+                    </select>
+                    <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-[18px]">expand_more</span>
+                </div>
+            </div>
+
+            <!-- Nhận xét -->
+            <div class="flex flex-col gap-1.5">
+                <label class="font-label-md text-label-md text-brand-deep font-semibold">Nhận xét giảng viên</label>
+                <textarea name="nhanXet" id="modalNhanXet" rows="2" class="w-full bg-canvas-base font-body-sm text-body-sm text-on-surface p-3 rounded-xl border border-border-standard focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary resize-none" placeholder="Đánh giá quá trình học tập..."></textarea>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-3 border-t border-border-subtle flex items-center justify-end gap-2.5">
+                <button type="button" onclick="closeEditModal()" class="px-4 py-2 rounded-xl border border-border-standard text-outline hover:text-brand-deep hover:bg-canvas-base font-label-md text-label-md transition-colors cursor-pointer">
+                    Hủy bỏ
+                </button>
+                <button type="submit" class="px-4 py-2 rounded-xl bg-primary-container hover:bg-primary text-surface-white font-label-md text-label-md font-bold shadow-xs transition-colors cursor-pointer flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[18px]">save</span>
+                    <span>Lưu kết quả</span>
+                </button>
+            </div>
+        </form>
     </div>
+</div>
 
-
+@section Scripts {
 <script>
-    function calculateTotalScore() {
-      const attVal = parseFloat(document.getElementById('inputAtt').value) || 0;
-      const examVal = parseFloat(document.getElementById('inputExam').value) || 0;
-      
-      const total = (attVal * 0.3) + (examVal * 0.7);
-      const totalFixed = total.toFixed(2);
-      
-      const totalInput = document.getElementById('inputTotal');
-      totalInput.value = totalFixed;
-
-      const formulaHint = document.getElementById('formulaHint');
-      formulaHint.textContent = `CC: ${attVal} x 0.3 + Thi: ${examVal} x 0.7`;
-
-      const isPass = total >= 4.0 && examVal >= 3.0;
-      const radioPass = document.getElementById('radioPass');
-      const radioFail = document.getElementById('radioFail');
-
-      if (isPass) {
-        radioPass.checked = true;
-        totalInput.className = "w-32 h-11 px-3.5 rounded-lg bg-surface-container font-mono font-headline-lg text-headline-lg text-primary text-center font-bold focus:outline-none cursor-not-allowed";
-      } else {
-        radioFail.checked = true;
-        totalInput.className = "w-32 h-11 px-3.5 rounded-lg bg-surface-container font-mono font-headline-lg text-headline-lg text-error text-center font-bold focus:outline-none cursor-not-allowed";
-      }
+    function openEditModal(maKetQua, hoTen, cc, ck, nhanXet, status) {
+        document.getElementById('modalMaKetQua').value = maKetQua;
+        document.getElementById('modalStudentName').innerText = hoTen;
+        document.getElementById('modalDiemCC').value = cc;
+        document.getElementById('modalDiemCK').value = ck;
+        document.getElementById('modalNhanXet').value = nhanXet || '';
+        document.getElementById('modalKetQua').value = status;
+        document.getElementById('editGradeModal').classList.remove('hidden');
     }
 
-    function selectStudent(btn) {
-      const row = btn.closest('.student-row');
-      if (!row) return;
-
-      document.querySelectorAll('.student-row').forEach(r => {
-        r.classList.remove('bg-surface-container-high/40');
-      });
-
-      row.classList.add('bg-surface-container-high/40');
-
-      const id = row.getAttribute('data-id');
-      const name = row.getAttribute('data-name');
-      const mssv = row.getAttribute('data-mssv');
-      const att = row.getAttribute('data-att');
-      const exam = row.getAttribute('data-exam');
-      const note = row.getAttribute('data-note') || '';
-
-      document.getElementById('formMaKetQua').value = id;
-      document.getElementById('formRegId').value = `${name} (MSSV: ${mssv})`;
-      document.getElementById('inputAtt').value = att;
-      document.getElementById('inputExam').value = exam;
-      document.getElementById('inputNote').value = note;
-
-      calculateTotalScore();
+    function closeEditModal() {
+        document.getElementById('editGradeModal').classList.add('hidden');
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Filter tabs (All, Pass, Fail)
+        const tabs = document.querySelectorAll('.filter-tab');
+        const rows = document.querySelectorAll('.grade-row');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => {
+                    t.className = 'filter-tab px-2.5 py-1 rounded-lg font-label-sm text-label-sm text-on-surface-variant hover:text-brand-deep font-medium transition-colors cursor-pointer';
+                });
+                tab.className = 'filter-tab px-2.5 py-1 rounded-lg font-label-sm text-label-sm bg-surface-white text-primary-container font-semibold shadow-xs cursor-pointer';
+
+                const filter = tab.getAttribute('data-filter');
+                rows.forEach(r => {
+                    const rowStatus = r.getAttribute('data-status');
+                    if (filter === 'all' || rowStatus === filter) {
+                        r.style.display = '';
+                    } else {
+                        r.style.display = 'none';
+                    }
+                });
+            });
+        });
+    });
 </script>
+}

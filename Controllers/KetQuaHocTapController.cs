@@ -21,14 +21,27 @@ namespace QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(int page = 1)
+        public async Task<IActionResult> Index(int? maLop, string? search, int page = 1)
         {
-            int pageSize = 5;
+            int pageSize = 8;
             var query = _context.KetQuaHocTaps
                 .Include(k => k.DangKyHoc)
                 .ThenInclude(d => d.HocVien)
                 .Include(k => k.DangKyHoc)
-                .ThenInclude(d => d.LopHoc);
+                .ThenInclude(d => d.LopHoc)
+                .AsQueryable();
+
+            if (maLop.HasValue && maLop.Value > 0)
+            {
+                query = query.Where(k => k.DangKyHoc.MaLop == maLop.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                string s = search.ToLower().Trim();
+                query = query.Where(k => k.DangKyHoc.HocVien.HoTen.ToLower().Contains(s) || 
+                                         k.DangKyHoc.HocVien.MaHocVien.ToString().Contains(s));
+            }
 
             int totalRecords = await query.CountAsync();
             int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
@@ -44,13 +57,26 @@ namespace QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Controllers
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
             ViewBag.TotalRecords = totalRecords;
+            ViewBag.SelectedMaLop = maLop;
+            ViewBag.Search = search;
 
-            // Thống kê
-            ViewBag.PassCount = await _context.KetQuaHocTaps.CountAsync(k => k.KetQua == "Hoàn thành");
-            ViewBag.FailCount = await _context.KetQuaHocTaps.CountAsync(k => k.KetQua == "Không hoàn thành");
+            // Thống kê kết quả
+            ViewBag.PassCount = await query.CountAsync(k => k.KetQua == "Hoàn thành");
+            ViewBag.FailCount = await query.CountAsync(k => k.KetQua == "Không hoàn thành");
             
-            var allScores = await _context.KetQuaHocTaps.Select(k => k.DiemTongKet).ToListAsync();
-            ViewBag.AverageScore = allScores.Any() ? allScores.Average() : 0;
+            var allScores = await query.Select(k => k.DiemTongKet).ToListAsync();
+            ViewBag.AverageScore = allScores.Any() ? Math.Round(allScores.Average(), 2) : 0;
+
+            // Phổ điểm (Grade Distribution)
+            ViewBag.CountA = allScores.Count(d => d >= 8.5);
+            ViewBag.CountB = allScores.Count(d => d >= 7.0 && d < 8.5);
+            ViewBag.CountC = allScores.Count(d => d >= 5.5 && d < 7.0);
+            ViewBag.CountD = allScores.Count(d => d >= 4.0 && d < 5.5);
+            ViewBag.CountF = allScores.Count(d => d < 4.0);
+
+            // Danh sách các lớp học
+            ViewBag.LopHocList = await _context.LopHocs.ToListAsync();
+            ViewBag.TotalLop = await _context.LopHocs.CountAsync();
 
             return View(ketQuas);
         }
