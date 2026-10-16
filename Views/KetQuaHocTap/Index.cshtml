@@ -1,597 +1,682 @@
 @*
 Họ và tên: Nguyễn Tùng Dương
 Mã sinh viên: 23103100003
-Nội dung thực hiện: Quản lý kết quả học tập (Module 5) - Phong cách Prep.vn
+Nội dung thực hiện: Module 5 - Quản lý Kết quả học tập CRUD chuẩn phong cách Prep.vn
 *@
 
 @model IEnumerable<QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Models.KetQuaHocTap>
 @{
     ViewData["Title"] = "Kết quả học tập";
-    int total = ViewBag.TotalRecords ?? 0;
-    int pass = ViewBag.PassCount ?? 0;
-    int fail = ViewBag.FailCount ?? 0;
-    double passRate = total > 0 ? Math.Round((double)pass / total * 100, 1) : 0;
+
+    int totalGraded = ViewBag.TotalGraded ?? 0;
+    int passCount = ViewBag.PassCount ?? 0;
+    int failCount = ViewBag.FailCount ?? 0;
+    double avgScore = ViewBag.AverageScore ?? 0;
+    double passRate = ViewBag.PassRate ?? 0;
+
     int countA = ViewBag.CountA ?? 0;
     int countB = ViewBag.CountB ?? 0;
     int countC = ViewBag.CountC ?? 0;
     int countD = ViewBag.CountD ?? 0;
     int countF = ViewBag.CountF ?? 0;
-    double avgScore = ViewBag.AverageScore ?? 0;
 
-    Func<double, (string Chu, string BadgeClass)> getGradeLetter = (score) => {
-        if (score >= 9.0) return ("A+", "bg-emerald-50 text-success-emerald border-emerald-200");
-        if (score >= 8.5) return ("A", "bg-blue-50 text-primary-container border-blue-200");
-        if (score >= 8.0) return ("B+", "bg-emerald-50 text-success-emerald border-emerald-200");
-        if (score >= 7.0) return ("B", "bg-sky-50 text-sky-700 border-sky-200");
-        if (score >= 6.5) return ("C+", "bg-surface-container-high text-on-surface-variant border-border-standard");
-        if (score >= 5.5) return ("C", "bg-surface-container-low text-on-surface-variant border-border-subtle");
-        if (score >= 5.0) return ("D+", "bg-amber-50 text-amber-700 border-amber-200");
-        if (score >= 4.0) return ("D", "bg-amber-50 text-warning-amber border-amber-200");
-        return ("F", "bg-rose-50 text-danger-crimson border-rose-200");
-    };
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalRecords = ViewBag.TotalRecords ?? 0;
+    int pageSize = 8;
+    int startRecord = totalRecords == 0 ? 0 : (currentPage - 1) * pageSize + 1;
+    int endRecord = Math.Min(currentPage * pageSize, totalRecords);
 
-    var ketQuaList = Model?.ToList() ?? new List<QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Models.KetQuaHocTap>();
+    var lopHocs = ViewBag.LopHocList as IEnumerable<QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Models.LopHoc> ?? new List<QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Models.LopHoc>();
+    var eligibleDangKys = ViewBag.EligibleDangKys as IEnumerable<QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Models.DangKyHoc> ?? new List<QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Models.DangKyHoc>();
+
+    int? selectedMaLop = ViewBag.SelectedMaLop;
+    string selectedKetQua = ViewBag.SelectedKetQua as string ?? "";
+    string search = ViewBag.Search as string ?? "";
 }
 
-<!-- Flash Alerts -->
+<!-- Alert Notification -->
 @if (TempData["Success"] != null)
 {
-    <div class="p-4 mb-2 text-sm text-emerald-800 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between shadow-xs">
-        <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-emerald-600">check_circle</span>
-            <span class="font-medium">@TempData["Success"]</span>
+    <div id="toast-success" class="mb-4 flex items-center justify-between p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 shadow-sm animate-fade-in">
+        <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-success-emerald text-[22px]">check_circle</span>
+            <span class="font-label-md text-label-md font-semibold">@TempData["Success"]</span>
         </div>
-        <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-800">
-            <span class="material-symbols-outlined text-base">close</span>
+        <button onclick="document.getElementById('toast-success').remove()" class="text-emerald-600 hover:text-emerald-900">
+            <span class="material-symbols-outlined text-[18px]">close</span>
         </button>
     </div>
 }
 @if (TempData["Error"] != null)
 {
-    <div class="p-4 mb-2 text-sm text-rose-800 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-between shadow-xs">
-        <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-rose-600">error</span>
-            <span class="font-medium">@TempData["Error"]</span>
+    <div id="toast-error" class="mb-4 flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-2xl text-danger-crimson shadow-sm animate-fade-in">
+        <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-danger-crimson text-[22px]">error</span>
+            <span class="font-label-md text-label-md font-semibold">@TempData["Error"]</span>
         </div>
-        <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-800">
-            <span class="material-symbols-outlined text-base">close</span>
+        <button onclick="document.getElementById('toast-error').remove()" class="text-red-500 hover:text-red-800">
+            <span class="material-symbols-outlined text-[18px]">close</span>
         </button>
     </div>
 }
 
 <div class="flex flex-col gap-y-6">
-    <!-- Top Header Bar -->
+    <!-- Contextual Sub-Header & Controls -->
     <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-surface-white p-5 rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)]">
-        <div class="flex flex-col gap-1">
-            <div class="flex items-center gap-2 text-outline font-body-sm text-body-sm">
-                <span>Đào tạo UNETI</span>
-                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-primary-container font-label-md text-label-md">Điểm học phần</span>
+        <div class="flex items-center gap-space-sm min-w-0">
+            <div class="flex flex-col">
+                <div class="flex items-center gap-1.5 text-outline font-label-sm text-label-sm tracking-wide">
+                    <span>ĐÀO TẠO UNETI</span>
+                    <span class="material-symbols-outlined text-[13px]">chevron_right</span>
+                    <span class="text-primary-container font-semibold">ĐIỂM SỐ & CHỨNG CHỈ</span>
+                </div>
+                <h1 class="font-headline-md text-headline-md text-brand-deep tracking-tight truncate font-extrabold mt-0.5">
+                    Kết quả học tập
+                </h1>
             </div>
-            <h1 class="font-headline-lg-mobile lg:font-headline-lg text-brand-deep tracking-tight font-extrabold">
-                Kết quả học tập
-            </h1>
-            <p class="font-body-sm text-body-sm text-outline">
-                Tổng hợp điểm quá trình (CC 30%), điểm thi kết thúc (70%) và xét chuẩn đầu ra học phần UNETI.
-            </p>
+            <span class="bg-primary/10 text-primary font-label-sm text-label-sm px-2.5 py-0.5 rounded-full ml-2 hidden sm:inline-block font-semibold">
+                HK1 2024-2025
+            </span>
         </div>
 
         <div class="flex items-center flex-wrap gap-2.5">
-            <a href="/KetQuaHocTap/Create" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-border-standard bg-surface-white hover:bg-canvas-base text-brand-deep font-label-md text-label-md transition-all shadow-xs cursor-pointer">
-                <span class="material-symbols-outlined text-primary-container text-[18px]">add_circle</span>
-                <span>+ Nhập điểm mới</span>
-            </a>
-            <button type="button" onclick="window.print()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-border-standard bg-surface-white hover:bg-canvas-base text-brand-deep font-label-md text-label-md transition-all shadow-xs cursor-pointer">
-                <span class="material-symbols-outlined text-secondary text-[18px]">download</span>
-                <span>Xuất bảng điểm</span>
+            <button onclick="exportTableToCSV('bang-diem-sinh-vien.csv')" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-3.5 py-2 rounded-xl transition-all shadow-xs cursor-pointer">
+                <span class="material-symbols-outlined text-[18px] text-primary">file_download</span>
+                <span class="hidden sm:inline">Xuất bảng điểm Excel</span>
+            </button>
+            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-secondary-container hover:bg-secondary text-surface-white font-label-md text-label-md px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition-transform active:scale-95 cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                <span>+ Vào điểm mới</span>
             </button>
         </div>
     </section>
 
-    <!-- ROW 1: 4-Column Stats Bento Grid (Prep.vn Style) -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <!-- Card 1: Tổng sinh viên -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] hover:shadow-md transition-shadow flex flex-col justify-between">
-            <div class="flex items-center justify-between mb-3">
-                <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Tổng SV có điểm</span>
-                <div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary-container">
-                    <span class="material-symbols-outlined text-[22px]">group</span>
-                </div>
-            </div>
+    <!-- Quick Analytics Stats Row (3 Cards) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- Stat 1 -->
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_1px_3px_rgba(0,22,86,0.04),0_8px_24px_-4px_rgba(0,22,86,0.06)] flex items-center justify-between">
             <div>
-                <div class="font-display text-[30px] leading-8 text-brand-deep tracking-tight mb-1 tabular-nums font-mono font-black">
-                    @total
+                <span class="font-label-sm text-label-sm text-outline tracking-wider uppercase block mb-1">Tổng học viên có điểm</span>
+                <div class="flex items-baseline gap-2">
+                    <span class="font-metric-stat text-metric-stat text-brand-deep tabular-nums">@totalGraded</span>
+                    <span class="font-body-sm text-body-sm text-outline">học viên</span>
                 </div>
-                <div class="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
-                    <span class="material-symbols-outlined text-[16px] text-outline">tune</span>
-                    <span>Theo dõi @ViewBag.TotalLop lớp học phần</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Card 2: Tỷ lệ qua môn -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] hover:shadow-md transition-shadow flex flex-col justify-between">
-            <div class="flex items-center justify-between mb-3">
-                <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Tỷ lệ qua môn</span>
-                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-success-emerald flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[22px]">check_circle</span>
-                </div>
-            </div>
-            <div>
-                <div class="flex items-baseline justify-between mb-2">
-                    <span class="font-display text-[30px] leading-8 text-brand-deep tracking-tight tabular-nums font-mono font-black">
-                        @passRate%
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-success-emerald bg-[#10B981]/10 px-2 py-0.5 rounded-full">
+                        <span class="w-1.5 h-1.5 rounded-full bg-success-emerald animate-pulse"></span>
+                        @passCount Đạt
                     </span>
-                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-success-emerald">
-                        @pass đạt / @total SV
-                    </span>
+                    <span class="font-body-sm text-body-sm text-outline">/ @failCount Chưa đạt</span>
                 </div>
-                <div class="w-full bg-border-subtle rounded-full h-2 overflow-hidden">
-                    <div class="bg-success-emerald h-2 rounded-full transition-all duration-500" style="width: @passRate%"></div>
-                </div>
-                <span class="font-body-sm text-body-sm text-outline block mt-1.5">Điểm TB toàn khóa: <strong class="text-brand-deep">@avgScore</strong></span>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-[26px]">school</span>
             </div>
         </div>
 
-        <!-- Card 3: Xếp loại Giỏi / Xuất sắc -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] hover:shadow-md transition-shadow flex flex-col justify-between">
-            <div class="flex items-center justify-between mb-3">
-                <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Xếp loại Giỏi (A/A+)</span>
-                <div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary-container">
-                    <span class="material-symbols-outlined text-[22px]">emoji_events</span>
-                </div>
-            </div>
+        <!-- Stat 2 -->
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_1px_3px_rgba(0,22,86,0.04),0_8px_24px_-4px_rgba(0,22,86,0.06)] flex items-center justify-between">
             <div>
-                <div class="font-display text-[30px] leading-8 text-brand-deep tracking-tight mb-1 tabular-nums font-mono font-black">
-                    @(total > 0 ? Math.Round((double)countA / total * 100, 1) : 0)%
+                <span class="font-label-sm text-label-sm text-outline tracking-wider uppercase block mb-1">Điểm trung bình toàn khóa</span>
+                <div class="flex items-baseline gap-2">
+                    <span class="font-metric-stat text-metric-stat text-brand-deep tabular-nums">@avgScore.ToString("F2")</span>
+                    <span class="font-body-sm text-body-sm text-outline">/ 10</span>
                 </div>
-                <div class="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
-                    <span class="material-symbols-outlined text-[16px] text-primary-container">workspace_premium</span>
-                    <span>@countA sinh viên đạt điểm A / A+</span>
+                <div class="flex items-center gap-1.5 mt-2">
+                    <span class="font-label-sm text-label-sm text-primary font-bold">Loại A: @countA SV</span>
+                    <span class="font-body-sm text-body-sm text-outline">(B: @countB, C: @countC)</span>
                 </div>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-secondary-container/10 flex items-center justify-center text-secondary-container">
+                <span class="material-symbols-outlined text-[26px]">grade</span>
             </div>
         </div>
 
-        <!-- Card 4: Cảnh báo học vụ -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] hover:shadow-md transition-shadow flex flex-col justify-between">
-            <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-1.5">
-                    <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Cảnh báo học vụ</span>
-                    @if (fail > 0)
+        <!-- Stat 3 -->
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_1px_3px_rgba(0,22,86,0.04),0_8px_24px_-4px_rgba(0,22,86,0.06)] flex items-center justify-between">
+            <div class="min-w-0 pr-2">
+                <span class="font-label-sm text-label-sm text-outline tracking-wider uppercase block mb-1">Tỷ lệ hoàn thành</span>
+                <p class="font-headline-sm text-headline-sm text-brand-deep truncate">
+                    @passRate% Đạt chuẩn
+                </p>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="font-label-md text-label-md text-success-emerald font-bold tabular-nums">@(totalGraded > 0 ? passCount : 0) Đạt</span>
+                    <span class="font-body-sm text-body-sm text-outline">(Đạt chuẩn đầu ra UNETI)</span>
+                </div>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-tertiary/10 flex items-center justify-center text-tertiary flex-shrink-0">
+                <span class="material-symbols-outlined text-[26px]">workspace_premium</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter & Operation Toolbar -->
+    <div class="bg-surface-white rounded-2xl p-4 border border-border-subtle shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4">
+        <form method="get" action="/KetQuaHocTap/Index" class="flex flex-wrap items-center gap-3 w-full lg:w-auto" id="filter-form">
+            <!-- Search Field -->
+            <div class="relative flex-1 sm:w-80">
+                <span class="material-symbols-outlined text-outline absolute left-3 top-1/2 -translate-y-1/2 text-[18px]">search</span>
+                <input name="search" value="@search" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-8 py-2 rounded-xl text-on-surface font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" id="table-search" placeholder="Tìm theo tên SV, mã SV, lớp học..." type="text"/>
+                @if (!string.IsNullOrEmpty(search))
+                {
+                    <a href="/KetQuaHocTap/Index" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface">
+                        <span class="material-symbols-outlined text-[16px]">cancel</span>
+                    </a>
+                }
+            </div>
+
+            <!-- Filter Dropdown: Lớp học -->
+            <div class="relative">
+                <select name="maLop" onchange="document.getElementById('filter-form').submit()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
+                    <option value="">Tất cả Lớp học</option>
+                    @foreach (var lop in lopHocs)
                     {
-                        <span class="relative flex h-2 w-2">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-danger-crimson opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-danger-crimson"></span>
-                        </span>
+                        <!option value="@lop.MaLop" @(selectedMaLop == lop.MaLop ? "selected" : "")>@lop.TenLop</!option>
                     }
-                </div>
-                <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-danger-crimson">
-                    <span class="material-symbols-outlined text-[22px]">warning</span>
-                </div>
+                </select>
+                <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
             </div>
-            <div>
-                <div class="font-display text-[30px] leading-8 text-danger-crimson tracking-tight mb-1 tabular-nums font-mono font-black">
-                    @fail
-                </div>
-                <div class="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
-                    <span class="material-symbols-outlined text-[16px] text-danger-crimson">error_outline</span>
-                    <span class="truncate">@(fail > 0 ? "Chưa hoàn thành hoặc điểm F" : "Không có sinh viên trượt môn")</span>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- ROW 2: Middle Split Section (Bảng Điểm & Phổ Điểm) -->
-    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <!-- LEFT 2 COLUMNS: Bảng Điểm Chi Tiết Lớp Học Phần -->
-        <div class="lg:col-span-2 bg-surface-white rounded-2xl p-5 lg:p-6 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col gap-4">
-            <!-- Toolbar Header: Filter by Class & Search -->
-            <form method="get" class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-border-subtle">
-                <div class="flex flex-col sm:flex-row sm:items-center gap-2.5">
-                    <!-- Dropdown Lớp học -->
-                    <div class="relative min-w-[240px]">
-                        <select name="maLop" onchange="this.form.submit()" class="w-full pl-3 pr-8 py-1.5 bg-surface-container-low border border-border-standard rounded-xl font-label-md text-label-md text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary-container/20 cursor-pointer appearance-none">
-                            <option value="">-- Tất cả các lớp học phần --</option>
-                            @if (ViewBag.LopHocList != null)
-                            {
-                                @foreach (var lop in (List<QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Models.LopHoc>)ViewBag.LopHocList)
-                                {
-                                    if (ViewBag.SelectedMaLop != null && (int)ViewBag.SelectedMaLop == lop.MaLop)
+            <!-- Filter Dropdown: Kết quả -->
+            <div class="relative">
+                <select name="ketQua" onchange="document.getElementById('filter-form').submit()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
+                    <option value="">Kết quả: Tất cả</option>
+                    <!option value="Hoàn thành" @(selectedKetQua == "Hoàn thành" ? "selected" : "")>● Hoàn thành (Đạt)</!option>
+                    <!option value="Không hoàn thành" @(selectedKetQua == "Không hoàn thành" ? "selected" : "")>○ Không hoàn thành</!option>
+                </select>
+                <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
+            </div>
+        </form>
+
+        <div class="flex items-center gap-2 w-full lg:w-auto justify-end">
+            <a href="/KetQuaHocTap/Index" class="p-2 border border-border-standard rounded-xl text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors" title="Làm mới bảng">
+                <span class="material-symbols-outlined text-[20px] block">refresh</span>
+            </a>
+            <button onclick="openDrawer('create')" class="bg-primary hover:bg-[#0047b3] text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]">add</span>
+                <span>Vào điểm mới</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Data Table Container -->
+    <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-[0_1px_3px_rgba(0,22,86,0.04),0_8px_24px_-4px_rgba(0,22,86,0.06)] overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse" id="crud-table">
+                <thead>
+                    <tr class="bg-surface-container-low/70 border-b border-border-subtle font-label-sm text-label-sm text-outline tracking-wider uppercase">
+                        <th class="p-4 pl-6 w-12 text-center">
+                            <input class="rounded border-border-standard text-primary focus:ring-primary h-4 w-4 cursor-pointer" type="checkbox" id="select-all"/>
+                        </th>
+                        <th class="py-4 px-4">Học viên</th>
+                        <th class="py-4 px-4 min-w-[200px]">Lớp học</th>
+                        <th class="py-4 px-3 text-center">Chuyên cần (30%)</th>
+                        <th class="py-4 px-3 text-center">Cuối khóa (70%)</th>
+                        <th class="py-4 px-3 text-center">Tổng kết</th>
+                        <th class="py-4 px-3 text-center">Xếp loại</th>
+                        <th class="py-4 px-4">Kết quả</th>
+                        <th class="py-4 px-6 text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle font-body-sm text-body-sm">
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="9" class="py-12 text-center text-outline">
+                                <span class="material-symbols-outlined text-4xl block mb-2 text-outline/50">grading</span>
+                                Chưa có dữ liệu điểm học viên phù hợp với bộ lọc hiện tại.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model)
+                        {
+                            var hv = item.DangKyHoc?.HocVien;
+                            var lop = item.DangKyHoc?.LopHoc;
+                            double score = item.DiemTongKet;
+                            string grade = score >= 8.5 ? "A" : score >= 7.0 ? "B" : score >= 5.5 ? "C" : score >= 4.0 ? "D" : "F";
+                            string gradeColor = grade == "A" ? "text-emerald-700 bg-emerald-50 border-emerald-200" :
+                                               grade == "B" ? "text-blue-700 bg-blue-50 border-blue-200" :
+                                               grade == "C" ? "text-amber-700 bg-amber-50 border-amber-200" :
+                                               grade == "D" ? "text-orange-700 bg-orange-50 border-orange-200" :
+                                               "text-red-700 bg-red-50 border-red-200";
+
+                            <tr class="hover:bg-surface-container-low/50 transition-colors group"
+                                data-id="@item.MaKetQua"
+                                data-madangky="@item.MaDangKy"
+                                data-hoten="@(hv?.HoTen ?? "")"
+                                data-mahv="@(hv?.MaHocVien.ToString() ?? "")"
+                                data-tenlop="@(lop?.TenLop ?? "")"
+                                data-cc="@item.DiemChuyenCan"
+                                data-ck="@item.DiemCuoiKhoa"
+                                data-tk="@item.DiemTongKet"
+                                data-nhanxet="@item.NhanXet"
+                                data-ketqua="@item.KetQua">
+                                <td class="p-4 pl-6 text-center">
+                                    <input class="rounded border-border-standard text-primary focus:ring-primary h-4 w-4 row-checkbox cursor-pointer" type="checkbox"/>
+                                </td>
+                                <td class="py-4 px-4">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center flex-shrink-0">
+                                            @(hv != null && !string.IsNullOrEmpty(hv.HoTen) ? hv.HoTen.Substring(0, 1).ToUpper() : "HV")
+                                        </div>
+                                        <div>
+                                            <div class="font-label-md text-label-md text-brand-deep font-semibold">
+                                                @(hv?.HoTen ?? $"Mã ĐK #{item.MaDangKy}")
+                                            </div>
+                                            <div class="text-outline text-[12px] font-mono">
+                                                MSHV: @(hv?.MaHocVien ?? 0)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-4">
+                                    <div class="font-label-md text-label-md text-brand-deep font-semibold">
+                                        @(lop?.TenLop ?? "Không xác định")
+                                    </div>
+                                    <div class="text-outline text-[12px] truncate max-w-xs">
+                                        @(item.NhanXet ?? "Ghi nhận chuẩn")
+                                    </div>
+                                </td>
+                                <td class="py-4 px-3 text-center font-mono font-semibold text-brand-deep">
+                                    @item.DiemChuyenCan.ToString("F1")
+                                </td>
+                                <td class="py-4 px-3 text-center font-mono font-semibold text-brand-deep">
+                                    @item.DiemCuoiKhoa.ToString("F1")
+                                </td>
+                                <td class="py-4 px-3 text-center">
+                                    <span class="inline-block bg-primary/10 text-primary font-bold font-mono px-2.5 py-1 rounded-lg text-sm tabular-nums">
+                                        @item.DiemTongKet.ToString("F2")
+                                    </span>
+                                </td>
+                                <td class="py-4 px-3 text-center">
+                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg font-bold font-mono text-xs border @gradeColor">
+                                        @grade
+                                    </span>
+                                </td>
+                                <td class="py-4 px-4">
+                                    @if (item.KetQua == "Hoàn thành")
                                     {
-                                        <option value="@lop.MaLop" selected>@lop.TenLop</option>
+                                        <span class="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-success-emerald bg-[#10B981]/10 px-2.5 py-1 rounded-full font-semibold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-success-emerald"></span>
+                                            Hoàn thành
+                                        </span>
                                     }
                                     else
                                     {
-                                        <option value="@lop.MaLop">@lop.TenLop</option>
+                                        <span class="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-danger-crimson bg-red-100 px-2.5 py-1 rounded-full font-semibold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-danger-crimson"></span>
+                                            Không hoàn thành
+                                        </span>
                                     }
-                                }
-                            }
-                        </select>
-                        <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-[18px]">expand_more</span>
-                    </div>
-
-                    <!-- Client Filter Pills -->
-                    <div class="flex items-center bg-surface-container-low p-1 rounded-xl border border-border-subtle">
-                        <button type="button" class="filter-tab px-2.5 py-1 rounded-lg font-label-sm text-label-sm bg-surface-white text-primary-container font-semibold shadow-xs cursor-pointer" data-filter="all">Tất cả (@total)</button>
-                        <button type="button" class="filter-tab px-2.5 py-1 rounded-lg font-label-sm text-label-sm text-on-surface-variant hover:text-brand-deep font-medium transition-colors cursor-pointer" data-filter="pass">Đã qua (@pass)</button>
-                        <button type="button" class="filter-tab px-2.5 py-1 rounded-lg font-label-sm text-label-sm text-danger-crimson hover:bg-red-50 font-medium transition-colors cursor-pointer" data-filter="fail">Học lại (@fail)</button>
-                    </div>
-                </div>
-
-                <!-- Search Input -->
-                <div class="relative flex items-center">
-                    <span class="material-symbols-outlined absolute left-3 text-outline text-[18px]">search</span>
-                    <input name="search" value="@ViewBag.Search" class="w-full sm:w-48 pl-9 pr-3 py-1.5 bg-canvas-base border border-border-standard rounded-xl font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary transition-all" placeholder="Tìm tên, MSSV..." type="text"/>
-                </div>
-            </form>
-
-            <!-- Spreadsheet Grade Table -->
-            <div class="border border-border-standard rounded-xl overflow-hidden shadow-2xs">
-                <div class="overflow-x-auto">
-                    <table class="w-full border-collapse text-left min-w-[700px]">
-                        <thead>
-                            <tr class="bg-surface-container-low text-xs font-semibold text-on-surface-variant uppercase tracking-wider border-b border-border-standard">
-                                <th class="py-3 px-3 text-center w-12 font-mono">STT</th>
-                                <th class="py-3 px-4 min-w-[200px]">Sinh viên</th>
-                                <th class="py-3 px-3 text-right tabular-nums w-20">CC <span class="text-outline font-normal">(30%)</span></th>
-                                <th class="py-3 px-3 text-right tabular-nums w-20">CK <span class="text-outline font-normal">(70%)</span></th>
-                                <th class="py-3 px-3 text-right tabular-nums w-24">T.Kết <span class="text-outline font-normal">(TK10)</span></th>
-                                <th class="py-3 px-3 text-center w-20">Điểm chữ</th>
-                                <th class="py-3 px-3 text-center w-28">Trạng thái</th>
-                                <th class="py-3 px-3 text-center w-20">Thao tác</th>
+                                </td>
+                                <td class="py-4 px-6 text-right">
+                                    <div class="inline-flex items-center gap-1">
+                                        <button onclick="viewScoreDetails(@item.MaKetQua)" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container-low transition-colors cursor-pointer" title="Xem chi tiết">
+                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                        </button>
+                                        <button onclick="openEditDrawerFromRow(this)" class="p-1.5 rounded-lg text-outline hover:text-secondary-container hover:bg-surface-container-low transition-colors cursor-pointer" title="Chỉnh sửa điểm">
+                                            <span class="material-symbols-outlined text-[18px]">edit</span>
+                                        </button>
+                                        <button onclick="confirmDelete(@item.MaKetQua, '@(hv?.HoTen ?? "") - @(lop?.TenLop ?? "")')" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50 transition-colors cursor-pointer" title="Xóa kết quả">
+                                            <span class="material-symbols-outlined text-[18px]">delete</span>
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody class="divide-y divide-border-subtle font-body-sm text-body-sm" id="gradeTableBody">
-                            @if (ketQuaList.Any())
-                            {
-                                int stt = 1;
-                                @foreach (var item in ketQuaList)
-                                {
-                                    var gradeInfo = getGradeLetter(item.DiemTongKet);
-                                    var isPass = item.KetQua == "Hoàn thành";
-                                    var hvName = item.DangKyHoc?.HocVien?.HoTen ?? "Học viên #" + item.DangKyHoc?.MaHocVien;
-                                    var mssv = item.DangKyHoc?.HocVien?.MaHocVien.ToString() ?? "N/A";
-                                    var lopName = item.DangKyHoc?.LopHoc?.TenLop ?? "Lớp #" + item.DangKyHoc?.MaLop;
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
 
-                                    <tr class="grade-row hover:bg-canvas-base/80 transition-colors @(!isPass ? "bg-red-50/20" : "")" data-status="@(isPass ? "pass" : "fail")">
-                                        <td class="py-3.5 px-3 text-center text-outline tabular-nums font-mono text-xs">
-                                            @(stt < 10 ? "0" + stt : stt.ToString())
-                                        </td>
-                                        <td class="py-3.5 px-4">
-                                            <div class="flex items-center gap-3">
-                                                <div class="w-8 h-8 rounded-full @(isPass ? "bg-primary-container/10 text-primary-container" : "bg-danger-crimson/10 text-danger-crimson") font-bold text-xs flex items-center justify-center shrink-0">
-                                                    @(!string.IsNullOrEmpty(hvName) ? hvName.Substring(0, 1).ToUpper() : "H")
-                                                </div>
-                                                <div class="flex flex-col min-w-0">
-                                                    <span class="font-label-md text-label-md text-brand-deep truncate font-semibold">@hvName</span>
-                                                    <div class="flex items-center gap-1.5 text-outline text-xs">
-                                                        <span class="font-mono tabular-nums">MS: @mssv</span>
-                                                        <span>•</span>
-                                                        <span class="truncate max-w-[130px]" title="@lopName">@lopName</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="py-3.5 px-3 text-right font-mono tabular-nums text-brand-deep">
-                                            @item.DiemChuyenCan.ToString("0.0")
-                                        </td>
-                                        <td class="py-3.5 px-3 text-right font-mono tabular-nums @(item.DiemCuoiKhoa < 5.0 ? "text-danger-crimson font-medium" : "text-brand-deep")">
-                                            @item.DiemCuoiKhoa.ToString("0.0")
-                                        </td>
-                                        <td class="py-3.5 px-3 text-right font-mono tabular-nums @(isPass ? "text-primary-container font-bold text-sm" : "text-danger-crimson font-bold text-sm")">
-                                            @item.DiemTongKet.ToString("0.0")
-                                        </td>
-                                        <td class="py-3.5 px-3 text-center">
-                                            <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-bold border @gradeInfo.BadgeClass">
-                                                @gradeInfo.Chu
-                                            </span>
-                                        </td>
-                                        <td class="py-3.5 px-3 text-center">
-                                            @if (isPass)
-                                            {
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-success-emerald">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-success-emerald"></span>Hoàn thành
-                                                </span>
-                                            }
-                                            else
-                                            {
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-danger-crimson">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-danger-crimson"></span>Học lại
-                                                </span>
-                                            }
-                                        </td>
-                                        <td class="py-3.5 px-3 text-center">
-                                            <button type="button" onclick="openEditModal(@item.MaKetQua, '@hvName', @item.DiemChuyenCan, @item.DiemCuoiKhoa, '@item.NhanXet', '@(isPass ? "pass" : "fail")')" class="p-1.5 rounded-lg text-outline hover:text-primary-container hover:bg-surface-container transition-colors cursor-pointer" title="Cập nhật điểm">
-                                                <span class="material-symbols-outlined text-[18px]">edit</span>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    stt++;
-                                }
+        <!-- Pagination Toolbar -->
+        <div class="p-4 px-6 border-t border-border-subtle bg-surface-white flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="font-body-sm text-body-sm text-outline">
+                Hiển thị <span class="font-semibold text-brand-deep tabular-nums">@startRecord-@endRecord</span> trên <span class="font-semibold text-brand-deep tabular-nums">@totalRecords</span> kết quả
+            </div>
+            <div class="flex items-center gap-1.5">
+                <a href="/KetQuaHocTap/Index?page=@(currentPage - 1)&maLop=@selectedMaLop&ketQua=@selectedKetQua&search=@search" 
+                   class="p-1.5 rounded-lg border border-border-standard text-outline hover:bg-surface-container-low @(currentPage <= 1 ? "opacity-40 pointer-events-none" : "")">
+                    <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                </a>
+                @for (int p = 1; p <= totalPages; p++)
+                {
+                    if (p == currentPage)
+                    {
+                        <span class="w-8 h-8 rounded-lg bg-primary text-surface-white font-label-md text-label-md font-bold flex items-center justify-center">@p</span>
+                    }
+                    else if (p <= 3 || p == totalPages || Math.Abs(p - currentPage) <= 1)
+                    {
+                        <a href="/KetQuaHocTap/Index?page=@p&maLop=@selectedMaLop&ketQua=@selectedKetQua&search=@search" 
+                           class="w-8 h-8 rounded-lg border border-border-standard text-brand-deep hover:bg-surface-container-low font-label-md text-label-md flex items-center justify-center">@p</a>
+                    }
+                    else if (p == 4 && totalPages > 5)
+                    {
+                        <span class="px-1 text-outline font-body-sm">...</span>
+                    }
+                }
+                <a href="/KetQuaHocTap/Index?page=@(currentPage + 1)&maLop=@selectedMaLop&ketQua=@selectedKetQua&search=@search" 
+                   class="p-1.5 rounded-lg border border-border-standard text-outline hover:bg-surface-container-low @(currentPage >= totalPages ? "opacity-40 pointer-events-none" : "")">
+                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- RIGHT SLIDE-OVER DRAWER (CREATE / UPDATE SCORE FORM) -->
+<div class="fixed inset-0 z-50 overflow-hidden hidden transition-all duration-300" id="drawer-container">
+    <!-- Overlay Backdrop -->
+    <div class="absolute inset-0 bg-brand-deep/40 backdrop-blur-xs transition-opacity duration-300" id="drawer-backdrop" onclick="closeDrawer()"></div>
+    <div class="absolute inset-y-0 right-0 max-w-full flex pl-10">
+        <div class="w-screen max-w-md bg-surface-white shadow-2xl border-l border-border-standard flex flex-col justify-between">
+            <!-- Drawer Header -->
+            <div class="p-6 border-b border-border-subtle flex items-start justify-between bg-surface-white">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-[22px]">workspace_premium</span>
+                        <h2 class="font-headline-sm text-headline-sm text-brand-deep" id="drawer-title">Nhập điểm học viên</h2>
+                    </div>
+                    <p class="font-body-sm text-body-sm text-outline mt-1" id="drawer-subtitle">
+                        Tính điểm tổng kết và ghi nhận hoàn thành khóa đào tạo.
+                    </p>
+                </div>
+                <button onclick="closeDrawer()" class="p-1.5 rounded-xl text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-[20px]">close</span>
+                </button>
+            </div>
+
+            <!-- Drawer Form Body -->
+            <form id="drawer-form" method="post" action="/KetQuaHocTap/Create" class="flex-1 overflow-y-auto p-6 space-y-5">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="maKetQua" id="drawer-maketqua" value="0"/>
+
+                <!-- Student Select (Create Mode) / Readonly Info (Edit Mode) -->
+                <div class="space-y-1.5" id="drawer-dangky-container">
+                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                        Học viên / Lớp đào tạo <span class="text-danger-crimson">*</span>
+                    </label>
+                    <div class="relative" id="drawer-select-wrapper">
+                        <select name="MaDangKy" id="drawer-madangky" required class="w-full appearance-none bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-md text-body-md text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                            @if (!eligibleDangKys.Any())
+                            {
+                                <option value="">Không có hồ sơ học viên đang học</option>
                             }
                             else
                             {
-                                <tr>
-                                    <td colspan="8" class="py-8 text-center text-outline">
-                                        Không tìm thấy kết quả học tập nào.
-                                    </td>
-                                </tr>
+                                @foreach (var dk in eligibleDangKys)
+                                {
+                                    <option value="@dk.MaDangKy">
+                                        @(dk.HocVien?.HoTen ?? $"HV #{dk.MaHocVien}") - @(dk.LopHoc?.TenLop ?? "")
+                                    </option>
+                                }
                             }
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Table Footer / Pagination -->
-                <div class="bg-surface-container-low px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-border-standard">
-                    <div class="flex items-center gap-2 font-body-sm text-body-sm text-outline">
-                        <span>Hiển thị <strong class="text-brand-deep font-semibold">@ketQuaList.Count</strong> / <strong class="text-brand-deep font-semibold">@total</strong> sinh viên</span>
-                        <span>•</span>
-                        <span>Điểm TB: <strong class="text-primary-container font-mono font-bold">@avgScore</strong></span>
+                        </select>
+                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">expand_more</span>
                     </div>
-
-                    <!-- Pagination Links -->
-                    <div class="flex items-center gap-1 font-label-md text-label-md">
-                        @if (ViewBag.CurrentPage > 1)
-                        {
-                            <a href="?maLop=@ViewBag.SelectedMaLop&search=@ViewBag.Search&page=@(ViewBag.CurrentPage - 1)" class="w-8 h-8 rounded-lg flex items-center justify-center text-outline hover:bg-surface-white hover:text-brand-deep transition-colors">
-                                <span class="material-symbols-outlined text-[16px]">chevron_left</span>
-                            </a>
-                        }
-                        else
-                        {
-                            <span class="w-8 h-8 rounded-lg flex items-center justify-center text-outline/40 cursor-not-allowed">
-                                <span class="material-symbols-outlined text-[16px]">chevron_left</span>
-                            </span>
-                        }
-
-                        <span class="px-3 py-1 rounded-lg bg-primary-container text-surface-white font-bold font-mono text-xs">
-                            @ViewBag.CurrentPage / @ViewBag.TotalPages
-                        </span>
-
-                        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
-                        {
-                            <a href="?maLop=@ViewBag.SelectedMaLop&search=@ViewBag.Search&page=@(ViewBag.CurrentPage + 1)" class="w-8 h-8 rounded-lg flex items-center justify-center text-outline hover:bg-surface-white hover:text-brand-deep transition-colors">
-                                <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-                            </a>
-                        }
-                        else
-                        {
-                            <span class="w-8 h-8 rounded-lg flex items-center justify-center text-outline/40 cursor-not-allowed">
-                                <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-                            </span>
-                        }
+                    <div id="drawer-readonly-student" class="hidden p-3 rounded-xl bg-surface-container-low border border-border-subtle">
+                        <div class="font-semibold text-brand-deep" id="readonly-student-name">Nguyễn Văn A</div>
+                        <div class="text-xs text-outline" id="readonly-student-class">Lớp CNTT01</div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- RIGHT 1 COLUMN: Phổ Điểm (Grade Distribution) & Khuyến Nghị Học Vụ -->
-        <div class="lg:col-span-1 flex flex-col gap-6">
-            <!-- Top Card: Phổ Điểm Lớp Học Phần -->
-            <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col gap-4">
-                <div class="flex items-start justify-between">
+                <!-- Score 1: Điểm Chuyên cần (30%) Stepper -->
+                <div class="space-y-1.5">
+                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                        Điểm chuyên cần (30%) <span class="text-danger-crimson">*</span>
+                    </label>
+                    <div class="flex items-center justify-between border border-border-standard rounded-xl p-2 bg-surface-container-low/40">
+                        <span class="font-body-sm text-body-sm text-on-surface-variant pl-2">Thang điểm 0 - 10</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="adjustScore('drawer-cc', -0.5)" class="w-8 h-8 rounded-lg bg-surface-white border border-border-standard flex items-center justify-center text-outline hover:text-brand-deep shadow-xs cursor-pointer">
+                                <span class="material-symbols-outlined text-[18px]">remove</span>
+                            </button>
+                            <input type="number" step="0.1" min="0" max="10" name="diemChuyenCan" id="drawer-cc" value="8.5" oninput="calculateTotalScore()" class="w-16 text-center font-mono font-bold text-brand-deep text-lg bg-transparent border-0 focus:outline-none"/>
+                            <button type="button" onclick="adjustScore('drawer-cc', 0.5)" class="w-8 h-8 rounded-lg bg-surface-white border border-border-standard flex items-center justify-center text-outline hover:text-brand-deep shadow-xs cursor-pointer">
+                                <span class="material-symbols-outlined text-[18px]">add</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Score 2: Điểm Cuối khóa (70%) Stepper -->
+                <div class="space-y-1.5">
+                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                        Điểm cuối khóa (70%) <span class="text-danger-crimson">*</span>
+                    </label>
+                    <div class="flex items-center justify-between border border-border-standard rounded-xl p-2 bg-surface-container-low/40">
+                        <span class="font-body-sm text-body-sm text-on-surface-variant pl-2">Thang điểm 0 - 10</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="adjustScore('drawer-ck', -0.5)" class="w-8 h-8 rounded-lg bg-surface-white border border-border-standard flex items-center justify-center text-outline hover:text-brand-deep shadow-xs cursor-pointer">
+                                <span class="material-symbols-outlined text-[18px]">remove</span>
+                            </button>
+                            <input type="number" step="0.1" min="0" max="10" name="diemCuoiKhoa" id="drawer-ck" value="8.0" oninput="calculateTotalScore()" class="w-16 text-center font-mono font-bold text-brand-deep text-lg bg-transparent border-0 focus:outline-none"/>
+                            <button type="button" onclick="adjustScore('drawer-ck', 0.5)" class="w-8 h-8 rounded-lg bg-surface-white border border-border-standard flex items-center justify-center text-outline hover:text-brand-deep shadow-xs cursor-pointer">
+                                <span class="material-symbols-outlined text-[18px]">add</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Auto-Calculated Total & Grade Box -->
+                <div class="p-4 rounded-xl bg-gradient-to-tr from-primary/5 to-primary-container/10 border border-primary/20 flex items-center justify-between">
                     <div>
-                        <div class="flex items-center gap-1.5">
-                            <h3 class="font-headline-sm text-headline-sm text-brand-deep font-bold">Phổ Điểm (Grade Distribution)</h3>
-                        </div>
-                        <p class="font-body-sm text-body-sm text-outline mt-0.5">Tỉ lệ phân bố điểm chữ hệ thống</p>
+                        <span class="text-xs uppercase font-bold text-primary block tracking-wider">Điểm tổng kết tự động</span>
+                        <span class="text-xs text-outline">Công thức: 30% CC + 70% CK</span>
                     </div>
-                    <span class="material-symbols-outlined text-outline text-[20px]">bar_chart</span>
-                </div>
-
-                <!-- Grade Bars -->
-                <div class="flex flex-col gap-3 pt-1">
-                    <!-- Grade A -->
-                    <div class="flex flex-col gap-1">
-                        <div class="flex items-center justify-between text-xs">
-                            <span class="font-semibold text-brand-deep">Loại A <span class="font-normal text-outline">(8.5 – 10.0)</span></span>
-                            <span class="font-mono font-semibold text-brand-deep">
-                                @(total > 0 ? Math.Round((double)countA / total * 100, 1) : 0)% • <span class="text-outline">@countA SV</span>
-                            </span>
-                        </div>
-                        <div class="w-full bg-border-subtle rounded-full h-2.5 overflow-hidden">
-                            <div class="bg-primary-container h-2.5 rounded-full transition-all duration-500" style="width: @(total > 0 ? (double)countA / total * 100 : 0)%"></div>
-                        </div>
-                    </div>
-
-                    <!-- Grade B -->
-                    <div class="flex flex-col gap-1">
-                        <div class="flex items-center justify-between text-xs">
-                            <span class="font-semibold text-brand-deep">Loại B <span class="font-normal text-outline">(7.0 – 8.4)</span></span>
-                            <span class="font-mono font-semibold text-brand-deep">
-                                @(total > 0 ? Math.Round((double)countB / total * 100, 1) : 0)% • <span class="text-outline">@countB SV</span>
-                            </span>
-                        </div>
-                        <div class="w-full bg-border-subtle rounded-full h-2.5 overflow-hidden">
-                            <div class="bg-surface-tint h-2.5 rounded-full transition-all duration-500" style="width: @(total > 0 ? (double)countB / total * 100 : 0)%"></div>
-                        </div>
-                    </div>
-
-                    <!-- Grade C -->
-                    <div class="flex flex-col gap-1">
-                        <div class="flex items-center justify-between text-xs">
-                            <span class="font-semibold text-brand-deep">Loại C <span class="font-normal text-outline">(5.5 – 6.9)</span></span>
-                            <span class="font-mono font-semibold text-brand-deep">
-                                @(total > 0 ? Math.Round((double)countC / total * 100, 1) : 0)% • <span class="text-outline">@countC SV</span>
-                            </span>
-                        </div>
-                        <div class="w-full bg-border-subtle rounded-full h-2.5 overflow-hidden">
-                            <div class="bg-tertiary-container h-2.5 rounded-full transition-all duration-500" style="width: @(total > 0 ? (double)countC / total * 100 : 0)%"></div>
-                        </div>
-                    </div>
-
-                    <!-- Grade D -->
-                    <div class="flex flex-col gap-1">
-                        <div class="flex items-center justify-between text-xs">
-                            <span class="font-semibold text-brand-deep">Loại D <span class="font-normal text-outline">(4.0 – 5.4)</span></span>
-                            <span class="font-mono font-semibold text-brand-deep">
-                                @(total > 0 ? Math.Round((double)countD / total * 100, 1) : 0)% • <span class="text-outline">@countD SV</span>
-                            </span>
-                        </div>
-                        <div class="w-full bg-border-subtle rounded-full h-2.5 overflow-hidden">
-                            <div class="bg-warning-amber h-2.5 rounded-full transition-all duration-500" style="width: @(total > 0 ? (double)countD / total * 100 : 0)%"></div>
-                        </div>
-                    </div>
-
-                    <!-- Grade F -->
-                    <div class="flex flex-col gap-1">
-                        <div class="flex items-center justify-between text-xs">
-                            <span class="font-semibold text-danger-crimson">Loại F <span class="font-normal text-outline">(&lt; 4.0 - Học lại)</span></span>
-                            <span class="font-mono font-semibold text-danger-crimson">
-                                @(total > 0 ? Math.Round((double)countF / total * 100, 1) : 0)% • <span class="text-outline">@countF SV</span>
-                            </span>
-                        </div>
-                        <div class="w-full bg-border-subtle rounded-full h-2.5 overflow-hidden">
-                            <div class="bg-danger-crimson h-2.5 rounded-full transition-all duration-500" style="width: @(total > 0 ? (double)countF / total * 100 : 0)%"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-2 pt-3 border-t border-border-subtle flex items-center gap-2">
-                    <span class="material-symbols-outlined text-success-emerald text-[18px]">verified</span>
-                    <span class="font-label-sm text-label-sm text-outline">Đánh giá theo quy chế đào tạo UNETI</span>
-                </div>
-            </div>
-
-            <!-- Bottom Card: Phân Tích & Khuyến Nghị Học Vụ -->
-            <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col gap-4">
-                <div class="flex items-center justify-between">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-high text-primary-container font-label-sm text-label-sm font-semibold">
-                        <span class="material-symbols-outlined text-[16px]">tips_and_updates</span>
-                        <span>Khuyến nghị học vụ</span>
-                    </div>
-                </div>
-
-                <!-- Insight Box -->
-                <div class="bg-gradient-to-br from-surface-container-low via-surface-white to-red-50/40 border border-surface-container-high rounded-xl p-4 flex flex-col gap-2.5">
                     <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-lg bg-secondary-fixed flex items-center justify-center text-secondary-container">
-                            <span class="material-symbols-outlined text-[16px]">lightbulb</span>
-                        </div>
-                        <h4 class="font-label-md text-label-md text-brand-deep font-semibold">Theo dõi kết quả đầu ra</h4>
+                        <span class="font-mono text-2xl font-black text-brand-deep tabular-nums" id="computed-score">8.15</span>
+                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg font-bold font-mono text-xs bg-primary text-surface-white shadow-xs" id="computed-grade">B</span>
                     </div>
-                    <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-                        Hiện có <strong class="text-danger-crimson font-semibold">@fail sinh viên</strong> chưa đạt chuẩn hoàn thành. Giáo vụ và giảng viên cần rà soát điểm chuyên cần và điểm thi bổ sung trước khi khóa sổ điểm học phần.
-                    </p>
                 </div>
 
-                <!-- Action Button -->
-                <div class="flex flex-col gap-2 pt-1">
-                    <a href="/KetQuaHocTap/Create" class="w-full bg-primary-container hover:bg-primary text-surface-white font-label-md text-label-md py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-xs transition-all">
-                        <span class="material-symbols-outlined text-[18px]">add</span>
-                        <span>Nhập điểm học phần mới</span>
-                    </a>
+                <!-- Radio: Kết quả cuối cùng -->
+                <div class="space-y-1.5">
+                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Kết quả công nhận</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="cursor-pointer border-2 border-success-emerald bg-emerald-50/50 rounded-xl p-3 flex items-center justify-center gap-2 transition-all" id="label-ketqua-pass">
+                            <input type="radio" name="ketQua" value="Hoàn thành" class="hidden" id="radio-ketqua-pass" checked/>
+                            <span class="material-symbols-outlined text-success-emerald text-[18px]">check_circle</span>
+                            <span class="font-label-md text-label-md text-success-emerald font-bold">Hoàn thành</span>
+                        </label>
+                        <label class="cursor-pointer border border-border-standard bg-surface-white rounded-xl p-3 flex items-center justify-center gap-2 hover:bg-surface-container-low transition-colors" id="label-ketqua-fail">
+                            <input type="radio" name="ketQua" value="Không hoàn thành" class="hidden" id="radio-ketqua-fail"/>
+                            <span class="material-symbols-outlined text-danger-crimson text-[18px]">cancel</span>
+                            <span class="font-label-md text-label-md text-on-surface-variant font-bold">Chưa đạt</span>
+                        </label>
+                    </div>
                 </div>
-            </div>
+
+                <!-- Textarea: Nhận xét của giáo vụ -->
+                <div class="space-y-1.5">
+                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Nhận xét của Giáo vụ</label>
+                    <textarea name="nhanXet" id="drawer-nhanxet" class="w-full bg-surface-white border border-border-standard rounded-xl p-3 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none" placeholder="Đánh giá thái độ học tập, bài thi cuối khóa..." rows="3">Học viên tham gia đầy đủ, hoàn thành tốt bài kiểm tra.</textarea>
+                </div>
+
+                <!-- AI Assistant Tip Widget -->
+                <div class="bg-primary/5 border border-primary/20 rounded-2xl p-3.5 flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-primary text-surface-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+                    </div>
+                    <div>
+                        <span class="font-label-sm text-label-sm text-primary uppercase tracking-wider block font-bold">Gợi ý từ AI Assistant</span>
+                        <p class="font-body-sm text-[12px] text-on-surface-variant mt-0.5 leading-relaxed">
+                            Điểm tổng kết ≥ 5.0 được xếp loại Đạt chuẩn đầu ra hoàn thành khóa học theo quy chế trung tâm UNETI.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Drawer Footer inside form -->
+                <div class="border-t border-border-subtle pt-4 flex items-center justify-end gap-3">
+                    <button type="button" onclick="closeDrawer()" class="border border-border-standard bg-surface-white hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-4 py-2.5 rounded-xl transition-colors cursor-pointer">
+                        Hủy bỏ
+                    </button>
+                    <button type="submit" class="bg-primary hover:bg-[#0047b3] text-surface-white font-label-md text-label-md px-5 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all cursor-pointer">
+                        <span class="material-symbols-outlined text-[18px]">save</span>
+                        <span id="drawer-submit-text">Lưu kết quả</span>
+                    </button>
+                </div>
+            </form>
         </div>
-    </section>
+    </div>
 </div>
 
-<!-- Modal Chỉnh Sửa Điểm Nhanh -->
-<div id="editGradeModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-        <!-- Modal Header -->
-        <div class="p-5 border-b border-border-subtle flex items-center justify-between bg-canvas-base/50">
-            <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-xl bg-primary-container/10 text-primary-container flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[20px]">edit_note</span>
-                </div>
-                <div>
-                    <h3 class="font-headline-sm text-headline-sm text-brand-deep font-bold">Cập Nhật Điểm Sinh Viên</h3>
-                    <span id="modalStudentName" class="text-xs text-outline font-medium">Nguyễn Văn A</span>
-                </div>
-            </div>
-            <button type="button" onclick="closeEditModal()" class="text-outline hover:text-brand-deep p-1 rounded-lg hover:bg-canvas-base transition-colors">
-                <span class="material-symbols-outlined text-xl">close</span>
-            </button>
+<!-- OVERLAY: DELETE CONFIRMATION MODAL -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-deep/40 backdrop-blur-xs hidden" id="delete-modal">
+    <div class="bg-surface-white max-w-md w-full rounded-2xl shadow-2xl border border-border-subtle p-6 space-y-4">
+        <div class="w-12 h-12 rounded-2xl bg-red-100 text-danger-crimson flex items-center justify-center">
+            <span class="material-symbols-outlined text-[28px]">delete_forever</span>
         </div>
-
-        <!-- Form Edit -->
-        <form asp-action="EditPost" method="post" class="p-5 flex flex-col gap-4">
-            <input type="hidden" name="maKetQua" id="modalMaKetQua" />
-
-            <div class="grid grid-cols-2 gap-3">
-                <div class="flex flex-col gap-1.5">
-                    <label class="font-label-md text-label-md text-brand-deep font-semibold">Điểm CC (30%)</label>
-                    <input type="number" step="0.1" min="0" max="10" name="diemChuyenCan" id="modalDiemCC" class="w-full bg-canvas-base font-body-sm text-body-sm text-on-surface px-3 py-2 rounded-xl border border-border-standard focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary font-mono" required />
-                </div>
-                <div class="flex flex-col gap-1.5">
-                    <label class="font-label-md text-label-md text-brand-deep font-semibold">Điểm CK (70%)</label>
-                    <input type="number" step="0.1" min="0" max="10" name="diemCuoiKhoa" id="modalDiemCK" class="w-full bg-canvas-base font-body-sm text-body-sm text-on-surface px-3 py-2 rounded-xl border border-border-standard focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary font-mono" required />
-                </div>
-            </div>
-
-            <!-- Kết quả xét chuẩn -->
-            <div class="flex flex-col gap-1.5">
-                <label class="font-label-md text-label-md text-brand-deep font-semibold">Kết quả học phần</label>
-                <div class="relative">
-                    <select name="ketQua" id="modalKetQua" class="w-full bg-canvas-base font-body-sm text-body-sm text-on-surface px-3 py-2 rounded-xl border border-border-standard focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary appearance-none pr-8 cursor-pointer">
-                        <option value="pass">Hoàn thành (Đạt chuẩn)</option>
-                        <option value="fail">Không hoàn thành (Học lại)</option>
-                    </select>
-                    <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-[18px]">expand_more</span>
-                </div>
-            </div>
-
-            <!-- Nhận xét -->
-            <div class="flex flex-col gap-1.5">
-                <label class="font-label-md text-label-md text-brand-deep font-semibold">Nhận xét giảng viên</label>
-                <textarea name="nhanXet" id="modalNhanXet" rows="2" class="w-full bg-canvas-base font-body-sm text-body-sm text-on-surface p-3 rounded-xl border border-border-standard focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary resize-none" placeholder="Đánh giá quá trình học tập..."></textarea>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="pt-3 border-t border-border-subtle flex items-center justify-end gap-2.5">
-                <button type="button" onclick="closeEditModal()" class="px-4 py-2 rounded-xl border border-border-standard text-outline hover:text-brand-deep hover:bg-canvas-base font-label-md text-label-md transition-colors cursor-pointer">
+        <div class="space-y-1.5">
+            <h3 class="font-headline-sm text-headline-sm text-brand-deep">Xóa kết quả học tập này?</h3>
+            <p class="font-body-sm text-body-sm text-outline leading-relaxed" id="delete-modal-msg">
+                Bạn có chắc chắn muốn xóa bản ghi điểm này?
+            </p>
+        </div>
+        <div class="bg-red-50 border border-red-200 rounded-xl p-3 flex items-start gap-2.5">
+            <span class="material-symbols-outlined text-danger-crimson text-[18px] flex-shrink-0 mt-0.5">warning</span>
+            <span class="font-body-sm text-[12px] text-danger-crimson font-medium">Hành động này mang tính vĩnh viễn và không thể hoàn tác sau khi xác nhận.</span>
+        </div>
+        
+        <form method="post" action="/KetQuaHocTap/DeletePost" id="delete-form">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" id="delete-id" value="0"/>
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button type="button" class="border border-border-standard text-brand-deep px-4 py-2 rounded-xl font-label-md text-label-md hover:bg-surface-container-low transition-colors cursor-pointer" onclick="closeDeleteModal()">
                     Hủy bỏ
                 </button>
-                <button type="submit" class="px-4 py-2 rounded-xl bg-primary-container hover:bg-primary text-surface-white font-label-md text-label-md font-bold shadow-xs transition-colors cursor-pointer flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-[18px]">save</span>
-                    <span>Lưu kết quả</span>
+                <button type="submit" class="bg-danger-crimson hover:bg-[#d93838] text-surface-white px-4 py-2 rounded-xl font-label-md text-label-md shadow-sm flex items-center gap-1.5 transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                    <span>Xóa vĩnh viễn</span>
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-@section Scripts {
 <script>
-    function openEditModal(maKetQua, hoTen, cc, ck, nhanXet, status) {
-        document.getElementById('modalMaKetQua').value = maKetQua;
-        document.getElementById('modalStudentName').innerText = hoTen;
-        document.getElementById('modalDiemCC').value = cc;
-        document.getElementById('modalDiemCK').value = ck;
-        document.getElementById('modalNhanXet').value = nhanXet || '';
-        document.getElementById('modalKetQua').value = status;
-        document.getElementById('editGradeModal').classList.remove('hidden');
+    // Micro-interactions for Drawer and Modal
+    const drawer = document.getElementById('drawer-container');
+    const drawerForm = document.getElementById('drawer-form');
+    const deleteModal = document.getElementById('delete-modal');
+
+    function openDrawer(mode) {
+        drawer.classList.remove('hidden');
+        if (mode === 'create') {
+            document.getElementById('drawer-title').innerText = 'Nhập điểm học viên';
+            document.getElementById('drawer-subtitle').innerText = 'Tính điểm tổng kết và ghi nhận hoàn thành khóa đào tạo.';
+            document.getElementById('drawer-submit-text').innerText = 'Lưu kết quả';
+            drawerForm.action = '/KetQuaHocTap/Create';
+            document.getElementById('drawer-maketqua').value = '0';
+
+            document.getElementById('drawer-select-wrapper').classList.remove('hidden');
+            document.getElementById('drawer-readonly-student').classList.add('hidden');
+            document.getElementById('drawer-cc').value = '8.5';
+            document.getElementById('drawer-ck').value = '8.0';
+            calculateTotalScore();
+        }
     }
 
-    function closeEditModal() {
-        document.getElementById('editGradeModal').classList.add('hidden');
+    function closeDrawer() {
+        drawer.classList.add('hidden');
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        // Filter tabs (All, Pass, Fail)
-        const tabs = document.querySelectorAll('.filter-tab');
-        const rows = document.querySelectorAll('.grade-row');
+    function adjustScore(inputId, delta) {
+        const input = document.getElementById(inputId);
+        let val = parseFloat(input.value) || 0;
+        val = Math.max(0, Math.min(10, Math.round((val + delta) * 10) / 10));
+        input.value = val.toFixed(1);
+        calculateTotalScore();
+    }
 
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(t => {
-                    t.className = 'filter-tab px-2.5 py-1 rounded-lg font-label-sm text-label-sm text-on-surface-variant hover:text-brand-deep font-medium transition-colors cursor-pointer';
-                });
-                tab.className = 'filter-tab px-2.5 py-1 rounded-lg font-label-sm text-label-sm bg-surface-white text-primary-container font-semibold shadow-xs cursor-pointer';
+    function calculateTotalScore() {
+        const cc = parseFloat(document.getElementById('drawer-cc').value) || 0;
+        const ck = parseFloat(document.getElementById('drawer-ck').value) || 0;
+        const total = Math.round((cc * 0.3 + ck * 0.7) * 100) / 100;
+        document.getElementById('computed-score').innerText = total.toFixed(2);
 
-                const filter = tab.getAttribute('data-filter');
-                rows.forEach(r => {
-                    const rowStatus = r.getAttribute('data-status');
-                    if (filter === 'all' || rowStatus === filter) {
-                        r.style.display = '';
-                    } else {
-                        r.style.display = 'none';
-                    }
-                });
-            });
-        });
+        let grade = 'F';
+        if (total >= 8.5) grade = 'A';
+        else if (total >= 7.0) grade = 'B';
+        else if (total >= 5.5) grade = 'C';
+        else if (total >= 4.0) grade = 'D';
+        document.getElementById('computed-grade').innerText = grade;
+
+        if (total >= 5.0) {
+            document.getElementById('radio-ketqua-pass').checked = true;
+            document.getElementById('label-ketqua-pass').className = 'cursor-pointer border-2 border-success-emerald bg-emerald-50/50 rounded-xl p-3 flex items-center justify-center gap-2 transition-all';
+            document.getElementById('label-ketqua-fail').className = 'cursor-pointer border border-border-standard bg-surface-white rounded-xl p-3 flex items-center justify-center gap-2 hover:bg-surface-container-low transition-colors';
+        } else {
+            document.getElementById('radio-ketqua-fail').checked = true;
+            document.getElementById('label-ketqua-fail').className = 'cursor-pointer border-2 border-danger-crimson bg-red-50/50 rounded-xl p-3 flex items-center justify-center gap-2 transition-all';
+            document.getElementById('label-ketqua-pass').className = 'cursor-pointer border border-border-standard bg-surface-white rounded-xl p-3 flex items-center justify-center gap-2 hover:bg-surface-container-low transition-colors';
+        }
+    }
+
+    function openEditDrawerFromRow(btn) {
+        const row = btn.closest('tr');
+        document.getElementById('drawer-title').innerText = 'Cập nhật kết quả';
+        document.getElementById('drawer-subtitle').innerText = 'Điều chỉnh điểm số và nhận xét đánh giá học viên.';
+        document.getElementById('drawer-submit-text').innerText = 'Cập nhật';
+        drawerForm.action = '/KetQuaHocTap/EditPost';
+
+        document.getElementById('drawer-maketqua').value = row.dataset.id;
+        document.getElementById('drawer-select-wrapper').classList.add('hidden');
+        document.getElementById('drawer-readonly-student').classList.remove('hidden');
+        document.getElementById('readonly-student-name').innerText = row.dataset.hoten || ('Học viên #' + row.dataset.mahv);
+        document.getElementById('readonly-student-class').innerText = 'Lớp: ' + (row.dataset.tenlop || '');
+
+        document.getElementById('drawer-cc').value = parseFloat(row.dataset.cc || 0).toFixed(1);
+        document.getElementById('drawer-ck').value = parseFloat(row.dataset.ck || 0).toFixed(1);
+        document.getElementById('drawer-nhanxet').value = row.dataset.nhanxet || '';
+
+        calculateTotalScore();
+        drawer.classList.remove('hidden');
+    }
+
+    function viewScoreDetails(id) {
+        const row = document.querySelector(`tr[data-id="${id}"]`);
+        if (row) openEditDrawerFromRow(row.querySelector('button[title="Chỉnh sửa điểm"]'));
+    }
+
+    function confirmDelete(id, studentInfo) {
+        document.getElementById('delete-id').value = id;
+        document.getElementById('delete-modal-msg').innerHTML = `Bạn có chắc chắn muốn xóa bản ghi kết quả của <strong class="text-brand-deep">${studentInfo}</strong>?`;
+        deleteModal.classList.remove('hidden');
+    }
+
+    function closeDeleteModal() {
+        deleteModal.classList.add('hidden');
+    }
+
+    // Select-all Checkbox
+    document.getElementById('select-all')?.addEventListener('change', function(e) {
+        document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = e.target.checked);
     });
+
+    // Client-side CSV Exporter
+    function exportTableToCSV(filename) {
+        let csv = [];
+        const rows = document.querySelectorAll("#crud-table tr");
+        for (let i = 0; i < rows.length; i++) {
+            let row = [], cols = rows[i].querySelectorAll("td, th");
+            for (let j = 1; j < cols.length - 1; j++) {
+                let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+                data = data.replace(/"/g, '""');
+                row.push('"' + data + '"');
+            }
+            csv.push(row.join(","));
+        }
+        const csvFile = new Blob(["\uFEFF" + csv.join("\n")], { type: "text/csv;charset=utf-8;" });
+        const downloadLink = document.createElement("a");
+        downloadLink.download = filename;
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
 </script>
-}

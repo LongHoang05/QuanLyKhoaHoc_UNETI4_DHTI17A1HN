@@ -1,66 +1,132 @@
-@* 
+@*
 Họ và tên: Nguyễn Tùng Dương
 Mã sinh viên: 23103100003
-Nội dung thực hiện: Giao diện Xếp lịch học (Module 5)
+Nội dung thực hiện: Module 5 - Form xếp lịch học mới chuẩn phong cách Prep.vn
 *@
+
 @model QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Models.BuoiHoc
-@{ ViewData["Title"] = "Xếp Lịch Học Mới"; }
+@{
+    ViewData["Title"] = "Xếp lịch học";
+    var lopHocs = ViewBag.LopHocList as IEnumerable<QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Models.LopHoc> ?? new List<QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Models.LopHoc>();
+}
 
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card p-4">
-            <h5 class="mb-4 fw-bold text-dark border-bottom pb-2">Thông tin buổi học</h5>
-            
-            <form asp-action="Create" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold small text-muted">Lớp học</label>
-                        <!-- Trong thực tế chỗ này sẽ dùng select dropdown ViewBag.MaLop -->
-                        <input asp-for="MaLop" class="form-control form-control-sm" placeholder="Nhập Mã Lớp (Ví dụ: 1)" />
-                        <span asp-validation-for="MaLop" class="text-danger small"></span>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold small text-muted">Giảng viên</label>
-                        <input asp-for="GiangVien" class="form-control form-control-sm" />
-                        <span asp-validation-for="GiangVien" class="text-danger small"></span>
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold small text-muted">Thời gian bắt đầu</label>
-                        <input asp-for="ThoiGianBatDau" type="datetime-local" class="form-control form-control-sm" />
-                        <span asp-validation-for="ThoiGianBatDau" class="text-danger small"></span>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold small text-muted">Thời gian kết thúc</label>
-                        <input asp-for="ThoiGianKetThuc" type="datetime-local" class="form-control form-control-sm" />
-                        <span asp-validation-for="ThoiGianKetThuc" class="text-danger small"></span>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold small text-muted">Phòng học</label>
-                        <input asp-for="PhongHoc" class="form-control form-control-sm" />
-                        <span asp-validation-for="PhongHoc" class="text-danger small"></span>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-semibold small text-muted">Nội dung học</label>
-                    <textarea asp-for="NoiDung" class="form-control form-control-sm" rows="2"></textarea>
-                </div>
-                
-                <div class="mb-4">
-                    <label class="form-label fw-semibold small text-muted">Ghi chú</label>
-                    <textarea asp-for="GhiChu" class="form-control form-control-sm" rows="2"></textarea>
-                </div>
-
-                <div class="d-flex justify-content-end gap-2">
-                    <a href="/BuoiHoc/Index" class="btn btn-outline-secondary btn-sm px-4">Hủy</a>
-                    <button type="submit" class="btn btn-primary btn-sm px-4">Xác nhận xếp lịch</button>
-                </div>
-            </form>
+<div class="max-w-3xl mx-auto flex flex-col gap-y-6">
+    <!-- Header Card -->
+    <div class="bg-surface-white p-6 rounded-2xl border border-border-subtle shadow-sm flex items-center justify-between">
+        <div>
+            <div class="flex items-center gap-1.5 text-outline font-label-sm text-label-sm tracking-wide">
+                <span>ĐÀO TẠO UNETI</span>
+                <span class="material-symbols-outlined text-[13px]">chevron_right</span>
+                <span>LỊCH HỌC</span>
+                <span class="material-symbols-outlined text-[13px]">chevron_right</span>
+                <span class="text-primary-container font-semibold">TẠO MỚI</span>
+            </div>
+            <h1 class="font-headline-md text-headline-md text-brand-deep tracking-tight font-extrabold mt-1">
+                Xếp lịch học mới
+            </h1>
+            <p class="font-body-sm text-body-sm text-outline mt-0.5">
+                Thiết lập phòng máy, giảng viên và thời gian học cho lớp đào tạo.
+            </p>
         </div>
+        <a href="/BuoiHoc/Index" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-border-standard text-brand-deep font-label-md text-label-md hover:bg-surface-container-low transition-colors">
+            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+            <span>Về danh sách</span>
+        </a>
+    </div>
+
+    <!-- Main Form Card -->
+    <div class="bg-surface-white p-8 rounded-2xl border border-border-subtle shadow-sm">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-danger-crimson text-sm font-medium">
+                <div asp-validation-summary="All"></div>
+            </div>
+        }
+
+        <form asp-action="Create" method="post" class="space-y-6">
+            @Html.AntiForgeryToken()
+
+            <!-- Lớp học -->
+            <div class="space-y-1.5">
+                <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                    Lớp học đào tạo <span class="text-danger-crimson">*</span>
+                </label>
+                <div class="relative">
+                    <select asp-for="MaLop" required class="w-full appearance-none bg-surface-white border border-border-standard rounded-xl px-4 py-3 font-body-md text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                        @foreach (var lop in lopHocs)
+                        {
+                            <option value="@lop.MaLop">@lop.TenLop (@(lop.SiSoToiDa) Học viên)</option>
+                        }
+                    </select>
+                    <span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">expand_more</span>
+                </div>
+                <span asp-validation-for="MaLop" class="text-danger-crimson text-xs"></span>
+            </div>
+
+            <!-- Phòng học & Giảng viên -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                        Phòng học / Phòng máy <span class="text-danger-crimson">*</span>
+                    </label>
+                    <div class="relative">
+                        <input asp-for="PhongHoc" required class="w-full bg-surface-white border border-border-standard rounded-xl px-4 py-3 font-mono font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary uppercase" placeholder="P.301, Lab CNTT..."/>
+                        <span class="material-symbols-outlined text-outline absolute right-3.5 top-1/2 -translate-y-1/2 text-[18px]">meeting_room</span>
+                    </div>
+                    <span asp-validation-for="PhongHoc" class="text-danger-crimson text-xs"></span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                        Giảng viên phụ trách <span class="text-danger-crimson">*</span>
+                    </label>
+                    <div class="relative">
+                        <input asp-for="GiangVien" required class="w-full bg-surface-white border border-border-standard rounded-xl px-4 py-3 font-body-md text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="ThS. Nguyễn Văn A..."/>
+                        <span class="material-symbols-outlined text-outline absolute right-3.5 top-1/2 -translate-y-1/2 text-[18px]">person</span>
+                    </div>
+                    <span asp-validation-for="GiangVien" class="text-danger-crimson text-xs"></span>
+                </div>
+            </div>
+
+            <!-- Thời gian -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                        Thời gian bắt đầu <span class="text-danger-crimson">*</span>
+                    </label>
+                    <input asp-for="ThoiGianBatDau" type="datetime-local" required class="w-full bg-surface-white border border-border-standard rounded-xl px-4 py-3 font-mono text-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
+                    <span asp-validation-for="ThoiGianBatDau" class="text-danger-crimson text-xs"></span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                        Thời gian kết thúc <span class="text-danger-crimson">*</span>
+                    </label>
+                    <input asp-for="ThoiGianKetThuc" type="datetime-local" required class="w-full bg-surface-white border border-border-standard rounded-xl px-4 py-3 font-mono text-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
+                    <span asp-validation-for="ThoiGianKetThuc" class="text-danger-crimson text-xs"></span>
+                </div>
+            </div>
+
+            <!-- Nội dung & Ghi chú -->
+            <div class="space-y-1.5">
+                <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Nội dung bài học</label>
+                <textarea asp-for="NoiDung" rows="2" class="w-full bg-surface-white border border-border-standard rounded-xl p-3.5 font-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none" placeholder="Nội dung tóm tắt buổi giảng..."></textarea>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Ghi chú</label>
+                <textarea asp-for="GhiChu" rows="2" class="w-full bg-surface-white border border-border-standard rounded-xl p-3.5 font-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none" placeholder="Ghi chú về thiết bị hoặc tài liệu..."></textarea>
+            </div>
+
+            <div class="pt-4 border-t border-border-subtle flex items-center justify-end gap-3">
+                <a href="/BuoiHoc/Index" class="border border-border-standard bg-surface-white hover:bg-surface-container-low text-brand-deep font-label-md px-5 py-2.5 rounded-xl transition-colors">
+                    Hủy bỏ
+                </a>
+                <button type="submit" class="bg-primary hover:bg-[#0047b3] text-surface-white font-label-md px-6 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all">
+                    <span class="material-symbols-outlined text-[18px]">save</span>
+                    <span>Lưu lịch học</span>
+                </button>
+            </div>
+        </form>
     </div>
 </div>
