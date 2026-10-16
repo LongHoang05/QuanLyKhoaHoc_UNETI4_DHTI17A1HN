@@ -166,6 +166,39 @@ namespace QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Controllers
             var totalCoDiem = await _context.KetQuaHocTaps.CountAsync();
             ViewBag.TyLeHoanThanh = totalCoDiem > 0 ? (double)(await _context.KetQuaHocTaps.CountAsync(k => k.KetQua == "Hoàn thành")) / totalCoDiem * 100 : 0;
 
+            // 12. Thống kê cấp cao phục vụ Dashboard & KPI
+            ViewBag.TongDoanhThu = await _context.DangKyHocs.Where(d => d.NgayDongHocPhi != null).SumAsync(d => (double?)d.SoTienDaDong) ?? 0;
+            ViewBag.TongBuoiHoc = await _context.BuoiHocs.CountAsync();
+            ViewBag.DangKyChoDuyet = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Chờ duyệt");
+            ViewBag.AvgLapDay = tyLe.Any() ? Math.Round(tyLe.Average(t => t.TyLe), 1) : 0;
+            ViewBag.TongChoHoc = await _context.LopHocs.SumAsync(l => (int?)l.SiSoToiDa) ?? 0;
+            ViewBag.ChoDaDangKy = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học");
+
+            // 13. Bảng xếp hạng giảng viên phụ trách
+            var lopList = await _context.LopHocs.ToListAsync();
+            var dkList = await _context.DangKyHocs.ToListAsync();
+            var kqList = await _context.KetQuaHocTaps.Include(k => k.DangKyHoc).ToListAsync();
+
+            ViewBag.TopGiangVien = lopList
+                .Where(l => !string.IsNullOrEmpty(l.GiangVien))
+                .GroupBy(l => l.GiangVien)
+                .Select(g => {
+                    var maLops = g.Select(x => x.MaLop).ToList();
+                    var svCount = dkList.Count(d => maLops.Contains(d.MaLop) && (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"));
+                    var scores = kqList.Where(k => maLops.Contains(k.DangKyHoc.MaLop)).Select(k => k.DiemTongKet).ToList();
+                    return new {
+                        GiangVien = g.Key,
+                        SoLop = g.Count(),
+                        MonHoc = string.Join(", ", g.Select(x => x.TenLop).Take(2)),
+                        SoSV = svCount,
+                        DiemTB = scores.Any() ? Math.Round(scores.Average(), 1) : 0,
+                        DanhGia = scores.Any() ? Math.Round(Math.Min(5.0, 3.5 + (scores.Average() / 10.0) * 1.5), 1) : 4.5
+                    };
+                })
+                .OrderByDescending(x => x.SoSV)
+                .Take(5)
+                .ToList();
+
             return View();
         }
     }
