@@ -21,25 +21,41 @@ namespace QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(int page = 1)
+        public async Task<IActionResult> Index()
         {
-            int pageSize = 5;
-            int totalRecords = await _context.BuoiHocs.CountAsync();
-            int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
-            if (page < 1) page = 1;
-            if (page > totalPages && totalPages > 0) page = totalPages;
-
             var buoiHocs = await _context.BuoiHocs
                 .Include(b => b.LopHoc)
-                .OrderByDescending(b => b.ThoiGianBatDau)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
+                .OrderBy(b => b.ThoiGianBatDau)
                 .ToListAsync();
-            
-            ViewBag.CurrentPage = page;
-            ViewBag.TotalPages = totalPages;
-            ViewBag.TotalRecords = totalRecords;
+
+            // Kiểm tra xung đột trùng lịch bằng LINQ
+            int soLoiTrung = 0;
+            for (int i = 0; i < buoiHocs.Count; i++)
+            {
+                for (int j = i + 1; j < buoiHocs.Count; j++)
+                {
+                    var b1 = buoiHocs[i];
+                    var b2 = buoiHocs[j];
+                    if (b1.TrangThai != "Đã hủy" && b2.TrangThai != "Đã hủy")
+                    {
+                        if ((b1.PhongHoc == b2.PhongHoc || b1.GiangVien == b2.GiangVien || b1.MaLop == b2.MaLop) &&
+                            (b1.ThoiGianBatDau < b2.ThoiGianKetThuc && b1.ThoiGianKetThuc > b2.ThoiGianBatDau))
+                        {
+                            soLoiTrung++;
+                        }
+                    }
+                }
+            }
+
+            ViewBag.SoLoiTrung = soLoiTrung;
+            ViewBag.TotalRecords = buoiHocs.Count;
+            ViewBag.SoThi = buoiHocs.Count(b => b.NoiDung != null && (b.NoiDung.ToLower().Contains("thi") || b.NoiDung.ToLower().Contains("kiểm tra")));
+            ViewBag.SoChinhKhoa = buoiHocs.Count(b => b.TrangThai != "Đã hủy");
             ViewBag.LopHocList = await _context.LopHocs.ToListAsync();
+
+            // Danh sách phòng học và giảng viên để hiển thị bộ lọc
+            ViewBag.DanhSachPhong = buoiHocs.Select(b => b.PhongHoc).Where(p => !string.IsNullOrEmpty(p)).Distinct().ToList();
+            ViewBag.DanhSachGiangVien = buoiHocs.Select(b => b.GiangVien).Where(g => !string.IsNullOrEmpty(g)).Distinct().ToList();
 
             return View(buoiHocs);
         }
@@ -133,6 +149,19 @@ namespace QuanLyDangKyKhoaHoc_UNETI04_TI17A1HN.Controllers
             await _context.SaveChangesAsync();
             
             TempData["Success"] = "Đã cập nhật trạng thái hoàn thành thành công.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Huy(int id)
+        {
+            var buoiHoc = await _context.BuoiHocs.FindAsync(id);
+            if (buoiHoc == null) return NotFound();
+
+            buoiHoc.TrangThai = "Đã hủy";
+            await _context.SaveChangesAsync();
+            
+            TempData["Success"] = "Đã hủy ca học thành công.";
             return RedirectToAction(nameof(Index));
         }
     }
