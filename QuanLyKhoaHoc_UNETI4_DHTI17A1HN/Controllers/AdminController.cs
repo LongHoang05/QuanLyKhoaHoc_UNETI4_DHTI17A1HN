@@ -1,4 +1,4 @@
-﻿// ========================================================
+// ========================================================
 // Họ và tên: Vũ Đình Trường
 // Mã sinh viên: 23103100026
 // Phụ trách: Module 1 - Trang Quản Trị Hệ Thống (Admin Dashboard)
@@ -16,16 +16,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
     {
         private readonly ITaiKhoanService _taiKhoanService;
         private readonly IChuongTrinhDaoTaoService _chuongTrinhService;
-        private readonly IGiangVienService _giangVienService;
 
         public AdminController(
             ITaiKhoanService taiKhoanService,
-            IChuongTrinhDaoTaoService chuongTrinhService,
-            IGiangVienService giangVienService)
+            IChuongTrinhDaoTaoService chuongTrinhService)
         {
             _taiKhoanService = taiKhoanService;
             _chuongTrinhService = chuongTrinhService;
-            _giangVienService = giangVienService;
         }
 
         // ========================================================
@@ -38,7 +35,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             var allAccounts = pagedAccounts.Items.ToList();
 
             var chuongTrinhs = await _chuongTrinhService.GetDanhSachAsync();
-            var giangViens = await _giangVienService.GetDanhSachAsync();
 
             ViewBag.TotalTaiKhoan = pagedAccounts.TotalCount;
             ViewBag.CountAdmin = allAccounts.Count(a => a.VaiTro == "Admin");
@@ -47,7 +43,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             ViewBag.CountLocked = allAccounts.Count(a => !a.TrangThai);
 
             ViewBag.TotalChuongTrinh = chuongTrinhs.Count;
-            ViewBag.TotalGiangVien = giangViens.Count;
 
             ViewBag.RecentAccounts = allAccounts.Take(5).ToList();
             ViewBag.RecentChuongTrinhs = chuongTrinhs.Take(5).ToList();

@@ -66,14 +66,7 @@
                     <span class="badge rounded-pill fw-bold" style="background: var(--primary-blush); color: #0369a1;">M1</span>
                 </a>
             </li>
-            @if (isAdmin || isGiaoVu)
-            {
-                <li>
-                    <a asp-controller="GiangVien" asp-action="Index" class="sidebar-link @(currentController == "GiangVien" ? "active" : "")">
-                        <span class="sidebar-link-left"><i class="bi bi-person-video3"></i> Hồ sơ Giảng viên</span>
-                    </a>
-                </li>
-            }
+
             @if (isAdmin)
             {
                 <li>
@@ -125,11 +118,7 @@
                         <li class="breadcrumb-item"><a asp-controller="ChuongTrinhDaoTao" asp-action="Index">Chương trình đào tạo (M1)</a></li>
                         @if (currentAction != "Index") { <li class="breadcrumb-item active">@currentAction</li> }
                     }
-                    else if (currentController == "GiangVien")
-                    {
-                        <li class="breadcrumb-item"><a asp-controller="GiangVien" asp-action="Index">Hồ sơ Giảng viên</a></li>
-                        @if (currentAction != "Index") { <li class="breadcrumb-item active">@currentAction</li> }
-                    }
+
                     else if (currentController == "TaiKhoan")
                     {
                         <li class="breadcrumb-item"><a asp-controller="TaiKhoan" asp-action="Index">Quản lý Tài khoản (M1)</a></li>

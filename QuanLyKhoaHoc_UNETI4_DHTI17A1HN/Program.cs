@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services;
@@ -32,11 +32,10 @@ builder.Services.AddHttpContextAccessor();
 // ========================================================
 builder.Services.AddScoped<ITaiKhoanRepository, TaiKhoanRepository>();
 builder.Services.AddScoped<IChuongTrinhDaoTaoRepository, ChuongTrinhDaoTaoRepository>();
-builder.Services.AddScoped<IGiangVienRepository, GiangVienRepository>();
 
 builder.Services.AddScoped<ITaiKhoanService, TaiKhoanService>();
 builder.Services.AddScoped<IChuongTrinhDaoTaoService, ChuongTrinhDaoTaoService>();
-builder.Services.AddScoped<IGiangVienService, GiangVienService>();
+
 
 // Đăng ký dịch vụ Controllers with Views
 builder.Services.AddControllersWithViews();

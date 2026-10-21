@@ -1,4 +1,4 @@
-﻿@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.ChuongTrinhDaoTao
+@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.ChuongTrinhDaoTao
 @using Microsoft.AspNetCore.Http
 @{
     ViewData["Title"] = "Chi Tiết Chương Trình Đào Tạo";
@@ -103,7 +103,7 @@
                                 <td>
                                     <span class="fw-bold text-dark">@lop.TenLop</span>
                                 </td>
-                                <td>@(lop.GiangVien?.HoTen ?? lop.TenGiangVien ?? "Chưa phân công")</td>
+                                <td>@(lop.TenGiangVien ?? "Chưa phân công")</td>
                                 <td>@lop.SiSoToiDa học viên</td>
                                 <td class="fw-bold text-primary">@lop.HocPhi.ToString("N0") VNĐ</td>
                                 <td>@lop.NgayKhaiGiang.ToString("dd/MM/yyyy")</td>
