@@ -258,6 +258,123 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                     context.SaveChanges();
                 }
             }
+
+            // 3. Bổ sung các tài khoản mẫu cho khớp với admin-tai-khoan.html nếu chưa có
+            if (context.TaiKhoans.Count() <= 3)
+            {
+                var taiKhoanThem = new List<TaiKhoan>
+                {
+                    new TaiKhoan
+                    {
+                        TenDangNhap = "giaovu_mai",
+                        MatKhau = "giaovu123",
+                        HoTen = "Nguyễn Thị Mai",
+                        Email = "mai.nt@uneti.edu.vn",
+                        VaiTro = "GiaoVu",
+                        TrangThai = true,
+                        NgayTao = DateTime.Today.AddDays(-40)
+                    },
+                    new TaiKhoan
+                    {
+                        TenDangNhap = "giaovu_hung",
+                        MatKhau = "giaovu123",
+                        HoTen = "Trần Văn Hùng",
+                        Email = "hung.tv@uneti.edu.vn",
+                        VaiTro = "GiaoVu",
+                        TrangThai = true,
+                        NgayTao = DateTime.Today.AddDays(-38)
+                    },
+                    new TaiKhoan
+                    {
+                        TenDangNhap = "admin_backup",
+                        MatKhau = "admin123",
+                        HoTen = "Phụ tá Quản trị",
+                        Email = "admin2@uneti.edu.vn",
+                        VaiTro = "Admin",
+                        TrangThai = true,
+                        NgayTao = DateTime.Today.AddDays(-35)
+                    },
+                    new TaiKhoan
+                    {
+                        TenDangNhap = "hocvien01",
+                        MatKhau = "123456",
+                        HoTen = "Nguyễn Văn An",
+                        Email = "an.nguyen@gmail.com",
+                        VaiTro = "HocVien",
+                        TrangThai = true,
+                        NgayTao = DateTime.Today.AddDays(-25)
+                    },
+                    new TaiKhoan
+                    {
+                        TenDangNhap = "hocvien02",
+                        MatKhau = "123456",
+                        HoTen = "Trần Minh Tuấn",
+                        Email = "tuan.tm@uneti.edu.vn",
+                        VaiTro = "HocVien",
+                        TrangThai = true,
+                        NgayTao = DateTime.Today.AddDays(-20)
+                    },
+                    new TaiKhoan
+                    {
+                        TenDangNhap = "hocvien03",
+                        MatKhau = "123456",
+                        HoTen = "Lê Thu Hà",
+                        Email = "ha.lt@gmail.com",
+                        VaiTro = "HocVien",
+                        TrangThai = true,
+                        NgayTao = DateTime.Today.AddDays(-18)
+                    },
+                    new TaiKhoan
+                    {
+                        TenDangNhap = "hocvien04",
+                        MatKhau = "123456",
+                        HoTen = "Phạm Quốc Bảo",
+                        Email = "bao.pq@gmail.com",
+                        VaiTro = "HocVien",
+                        TrangThai = true,
+                        NgayTao = DateTime.Today.AddDays(-15)
+                    },
+                    new TaiKhoan
+                    {
+                        TenDangNhap = "hocvien05",
+                        MatKhau = "123456",
+                        HoTen = "Lê Hoàng Nam",
+                        Email = "nam.lh@gmail.com",
+                        VaiTro = "HocVien",
+                        TrangThai = true,
+                        NgayTao = DateTime.Today.AddDays(-12)
+                    },
+                    new TaiKhoan
+                    {
+                        TenDangNhap = "hocvien_khoa",
+                        MatKhau = "123456",
+                        HoTen = "Phạm Viết Khang",
+                        Email = "khang.pv@gmail.com",
+                        VaiTro = "HocVien",
+                        TrangThai = false, // Tài khoản bị khóa chuẩn Mục 5.1
+                        NgayTao = DateTime.Today.AddDays(-10)
+                    }
+                };
+
+                context.TaiKhoans.AddRange(taiKhoanThem);
+                context.SaveChanges();
+
+                // Liên kết tài khoản với học viên theo Email
+                var allHocViens = context.HocViens.ToList();
+                var allTaiKhoans = context.TaiKhoans.ToList();
+                foreach (var hv in allHocViens)
+                {
+                    if (hv.MaTaiKhoan == null)
+                    {
+                        var tk = allTaiKhoans.FirstOrDefault(t => t.Email.ToLower() == hv.Email.ToLower());
+                        if (tk != null)
+                        {
+                            hv.MaTaiKhoan = tk.MaTaiKhoan;
+                        }
+                    }
+                }
+                context.SaveChanges();
+            }
         }
     }
 }

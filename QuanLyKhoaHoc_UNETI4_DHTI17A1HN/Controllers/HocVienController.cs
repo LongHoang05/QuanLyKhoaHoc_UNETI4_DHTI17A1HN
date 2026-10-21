@@ -10,12 +10,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
     // ========================================================
     // Họ và tên: Nguyễn Đức Linh - MSV: 23103100042
     // Module 3: HocVienController
+    // Quản lý 2 Tab chuẩn đề tài 16: TaiKhoan (Mục 5) & HocVien (Mục 7)
     // Chuẩn kiến trúc phân lớp: Controller -> Service -> Repository -> ApplicationDbContext
     // Kết hợp kỹ thuật jQuery AJAX và Phân quyền Session theo giáo trình UNETI
     // ========================================================
     public class HocVienController : Controller
     {
-        // Tiêm Service để xử lý quy tắc nghiệp vụ doanh nghiệp
         private readonly IHocVienService _hocVienService;
         private readonly ApplicationDbContext _context;
 
@@ -39,7 +39,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             {
                 HttpContext.Session.SetInt32("MaTaiKhoan", 2);
                 HttpContext.Session.SetString("TenDangNhap", "giaovu");
-                HttpContext.Session.SetString("HoTen", "Giáo vụ Trung tâm (Mặc định)");
+                HttpContext.Session.SetString("HoTen", "Giáo vụ Trung tâm");
                 HttpContext.Session.SetString("VaiTro", "GiaoVu");
                 vaiTro = "GiaoVu";
             }
@@ -96,7 +96,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         #endregion
 
         // ========================================================
-        // 1. ACTION INDEX: HIỂN THỊ DANH SÁCH (Controller -> Service -> Repository)
+        // 1. ACTION INDEX: HIỂN THỊ GIAO DIỆN CHÍNH 2 TAB (TaiKhoan & HocVien)
         // ========================================================
         public async Task<IActionResult> Index()
         {
@@ -105,23 +105,177 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return redirectResult!;
             }
 
-            var danhSach = await _hocVienService.GetDanhSachHocVienAsync();
-            return View(danhSach);
+            var accounts = await _hocVienService.GetDanhSachTaiKhoanAsync();
+            var students = await _hocVienService.GetDanhSachHocVienAsync();
+            var classes = await _hocVienService.GetDanhSachLopHocAsync();
+            var (tongHocVien, soGiaoVu, soAdmin, soBiKhoa) = await _hocVienService.GetThongKeAsync();
+
+            var viewModel = new HocVienIndexViewModel
+            {
+                DanhSachTaiKhoan = accounts,
+                DanhSachHocVien = students,
+                DanhSachLopHoc = classes,
+                TongSoHocVien = tongHocVien,
+                SoGiaoVu = soGiaoVu,
+                SoAdmin = soAdmin,
+                SoBiKhoa = soBiKhoa,
+                CurrentTab = "accounts"
+            };
+
+            return View(viewModel);
         }
 
         // ========================================================
-        // 2. ACTION TÌM KIẾM AJAX (Slide 385, 387, 389 PPTX)
-        // Nhận keyword từ jQuery $.ajax(), gọi Service -> Repo và trả PartialView
+        // 2. AJAX FILTER HỌC VIÊN: TÌM KIẾM + TRẠNG THÁI + LỌC THEO LỚP HỌC
         // ========================================================
         [HttpGet]
-        public async Task<IActionResult> TimKiemAjax(string? keyword, string? searchType)
+        public async Task<IActionResult> FilterHocVienAjax(string? keyword, string? status, int? maLopHoc)
         {
-            var danhSach = await _hocVienService.TimKiemHocVienAsync(keyword, searchType);
+            bool? trangThai = null;
+            if (status == "active") trangThai = true;
+            else if (status == "locked") trangThai = false;
+
+            var danhSach = await _hocVienService.TimKiemHocVienAsync(keyword, trangThai, maLopHoc);
             return PartialView("_DanhSachHocVien", danhSach);
         }
 
         // ========================================================
-        // 3. ACTION DETAILS: XEM CHI TIẾT
+        // 3. AJAX FILTER TÀI KHOẢN: TÌM KIẾM + VAI TRÒ + TRẠNG THÁI
+        // ========================================================
+        [HttpGet]
+        public async Task<IActionResult> FilterTaiKhoanAjax(string? keyword, string? role, string? status)
+        {
+            bool? trangThai = null;
+            if (status == "active") trangThai = true;
+            else if (status == "locked") trangThai = false;
+
+            string? vaiTro = null;
+            if (role == "Admin") vaiTro = "Admin";
+            else if (role == "Giáo vụ" || role == "GiaoVu") vaiTro = "GiaoVu";
+            else if (role == "Học viên" || role == "HocVien") vaiTro = "HocVien";
+
+            var danhSach = await _hocVienService.TimKiemTaiKhoanAsync(keyword, vaiTro, trangThai);
+            return PartialView("_DanhSachTaiKhoan", danhSach);
+        }
+
+        // ========================================================
+        // 4. AJAX LẤY CHI TIẾT HỌC VIÊN RENDER MODAL (Chuẩn admin-tai-khoan.html)
+        // ========================================================
+        [HttpGet]
+        public async Task<IActionResult> GetChiTietHocVienJson(int id)
+        {
+            var hv = await _hocVienService.GetChiTietHocVienAsync(id);
+            if (hv == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy học viên." });
+            }
+
+            var tenCacLop = hv.DangKyHocs != null && hv.DangKyHocs.Any()
+                ? string.Join(", ", hv.DangKyHocs.Where(d => d.LopHoc != null).Select(d => d.LopHoc!.TenLop))
+                : "Chưa đăng ký lớp";
+
+            var dto = new HocVienChiTietModalDto
+            {
+                MaHocVien = hv.MaHocVien,
+                MaTaiKhoan = hv.MaTaiKhoan,
+                HoTen = hv.HoTen,
+                NgaySinh = hv.NgaySinh.HasValue ? hv.NgaySinh.Value.ToString("yyyy-MM-dd") : "Chưa cập nhật",
+                GioiTinh = hv.GioiTinh ?? "Không rõ",
+                SoDienThoai = hv.SoDienThoai ?? "Chưa có",
+                Email = hv.Email,
+                DiaChi = hv.DiaChi ?? "Chưa cập nhật",
+                TrinhDoHocVan = hv.TrinhDoHocVan ?? "Chưa rõ",
+                NgheNghiep = hv.NgheNghiep ?? "Chưa có",
+                TrangThai = hv.TrangThai ? "Đang học" : "Đang bị khóa",
+                LopHocDangKy = tenCacLop
+            };
+
+            return Json(new { success = true, data = dto });
+        }
+
+        // ========================================================
+        // 5. AJAX KHÓA / MỞ KHÓA TÀI KHOẢN (Entity TaiKhoan - Mục 5.1)
+        // ========================================================
+        [HttpPost]
+        public async Task<IActionResult> ToggleTaiKhoanStatus(int id)
+        {
+            if (!CoQuyenQuanTri(out _))
+            {
+                return Json(new { success = false, message = "Bạn không có quyền quản trị." });
+            }
+
+            var (success, error, newStatus, username) = await _hocVienService.DoiTrangThaiTaiKhoanAsync(id);
+            return Json(new { success, message = error, newStatus, username });
+        }
+
+        // ========================================================
+        // 6. AJAX CẤP LẠI MẬT KHẨU TÀI KHOẢN
+        // ========================================================
+        [HttpPost]
+        public async Task<IActionResult> ResetMatKhau(int id, string? newPassword)
+        {
+            if (!CoQuyenQuanTri(out _))
+            {
+                return Json(new { success = false, message = "Bạn không có quyền quản trị." });
+            }
+
+            var (success, error) = await _hocVienService.ResetMatKhauTaiKhoanAsync(id, newPassword);
+            return Json(new { success, message = error ?? "Cấp lại mật khẩu thành công!" });
+        }
+
+        // ========================================================
+        // 7. AJAX THÊM TÀI KHOẢN MỚI TỪ MODAL
+        // ========================================================
+        [HttpPost]
+        public async Task<IActionResult> ThemNguoiDungAjax(ThemTaiKhoanViewModel model)
+        {
+            if (!CoQuyenQuanTri(out _))
+            {
+                return Json(new { success = false, message = "Bạn không có quyền quản trị." });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errors = string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                return Json(new { success = false, message = errors });
+            }
+
+            var (success, error) = await _hocVienService.ThemTaiKhoanMoiAsync(model);
+            return Json(new { success, message = error ?? $"Tạo tài khoản @{model.TenDangNhap} thành công!" });
+        }
+
+        // ========================================================
+        // 8. AJAX ĐỔI TRẠNG THÁI HỌC VIÊN
+        // ========================================================
+        [HttpPost]
+        public async Task<IActionResult> ToggleTrangThai(int id)
+        {
+            if (!CoQuyenQuanTri(out _))
+            {
+                return Json(new { success = false, message = "Bạn không có quyền thực hiện thao tác này." });
+            }
+
+            var (success, error, newStatus) = await _hocVienService.DoiTrangThaiAsync(id);
+            return Json(new { success, message = error, newStatus });
+        }
+
+        // ========================================================
+        // 9. AJAX XÓA HỌC VIÊN
+        // ========================================================
+        [HttpPost]
+        public async Task<IActionResult> DeleteAjax(int id)
+        {
+            if (!CoQuyenQuanTri(out _))
+            {
+                return Json(new { success = false, message = "Bạn không có quyền quản trị." });
+            }
+
+            var (success, error) = await _hocVienService.XoaHocVienAsync(id);
+            return Json(new { success, message = error ?? "Đã xóa học viên thành công!" });
+        }
+
+        // ========================================================
+        // 10. ACTION DETAILS: XEM CHI TIẾT ĐẦY ĐỦ
         // ========================================================
         public async Task<IActionResult> Details(int? id)
         {
@@ -130,22 +284,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return redirectResult!;
             }
 
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var hocVien = await _hocVienService.GetChiTietHocVienAsync(id);
-            if (hocVien == null)
-            {
-                return NotFound();
-            }
+            if (hocVien == null) return NotFound();
 
             return View(hocVien);
         }
 
         // ========================================================
-        // 4. ACTION CREATE: THÊM MỚI (Xử lý nghiệp vụ doanh nghiệp qua Service)
+        // 11. ACTION CREATE: THÊM MỚI HỌC VIÊN
         // ========================================================
         public IActionResult Create()
         {
@@ -176,7 +324,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return View(hocVien);
             }
 
-            // Gọi Service để thẩm định các quy tắc nghiệp vụ doanh nghiệp (Check trùng email, tuổi >= 6)
             var (success, error) = await _hocVienService.ThemHocVienAsync(hocVien);
             if (!success)
             {
@@ -189,7 +336,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         }
 
         // ========================================================
-        // 5. ACTION EDIT: CHỈNH SỬA
+        // 12. ACTION EDIT: CHỈNH SỬA HỌC VIÊN
         // ========================================================
         public async Task<IActionResult> Edit(int? id)
         {
@@ -198,16 +345,10 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return redirectResult!;
             }
 
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var hocVien = await _hocVienService.GetHocVienByIdAsync(id);
-            if (hocVien == null)
-            {
-                return NotFound();
-            }
+            if (hocVien == null) return NotFound();
 
             return View(hocVien);
         }
@@ -221,10 +362,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return redirectResult!;
             }
 
-            if (id != hocVien.MaHocVien)
-            {
-                return NotFound();
-            }
+            if (id != hocVien.MaHocVien) return NotFound();
 
             if (!hocVien.NgaySinh.HasValue)
             {
@@ -236,7 +374,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return View(hocVien);
             }
 
-            // Gọi Service để thẩm định nghiệp vụ (Kiểm tra trùng email người khác, kiểm tra ngày sinh)
             var (success, error) = await _hocVienService.CapNhatHocVienAsync(hocVien);
             if (!success)
             {
@@ -249,7 +386,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         }
 
         // ========================================================
-        // 6. ACTION DELETE: XÓA (Xử lý ràng buộc khóa ngoại qua Service)
+        // 13. ACTION DELETE: XÓA HỌC VIÊN TRUYỀN THỐNG
         // ========================================================
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -260,7 +397,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return redirectResult!;
             }
 
-            // Gọi Service để kiểm tra ràng buộc toàn vẹn CSDL
             var (success, error) = await _hocVienService.XoaHocVienAsync(id);
             if (!success)
             {
@@ -275,44 +411,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         }
 
         // ========================================================
-        // 7. ACTION TOGGLE STATUS: ĐỔI TRẠNG THÁI HOẠT ĐỘNG
-        // Hỗ trợ cả AJAX (không load lại trang) và HTTP Request thông thường
-        // ========================================================
-        [HttpPost]
-        public async Task<IActionResult> ToggleStatusAjax(int id)
-        {
-            if (!CoQuyenQuanTri(out _))
-            {
-                return Json(new { success = false, message = "Bạn không có quyền thực hiện thao tác này." });
-            }
-
-            var (success, error) = await _hocVienService.DoiTrangThaiAsync(id);
-            return Json(new { success, message = error ?? "Đã đổi trạng thái học viên thành công!" });
-        }
-
-        [HttpGet, HttpPost]
-        public async Task<IActionResult> ToggleStatus(int id)
-        {
-            if (!CoQuyenQuanTri(out var redirectResult))
-            {
-                return redirectResult!;
-            }
-
-            var (success, error) = await _hocVienService.DoiTrangThaiAsync(id);
-            if (!success)
-            {
-                TempData["Error"] = error;
-            }
-            else
-            {
-                TempData["Success"] = "Đã cập nhật trạng thái hoạt động của học viên!";
-            }
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        // ========================================================
-        // 6. ACTION PORTAL: CỔNG THÔNG TIN HỌC VIÊN (Chuẩn Giao_DIen_Test hoc-vien.html)
+        // 14. ACTION PORTAL: CỔNG THÔNG TIN HỌC VIÊN (Chuẩn Giao_DIen_Test hoc-vien.html)
         // ========================================================
         [HttpGet]
         public async Task<IActionResult> Portal()
@@ -332,7 +431,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             if (hocVien == null)
             {
-                // Mặc định lấy học viên đầu tiên trong database để test hiển thị
                 hocVien = await _context.HocViens
                     .Include(h => h.TaiKhoan)
                     .Include(h => h.DangKyHocs)

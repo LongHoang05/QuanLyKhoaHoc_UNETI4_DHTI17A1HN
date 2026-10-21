@@ -249,4 +249,81 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels
         public List<DangKyHoc> DanhSachDangKy { get; set; } = new List<DangKyHoc>();
         public List<ChuongTrinhDaoTao> ChuongTrinhs { get; set; } = new List<ChuongTrinhDaoTao>();
     }
+
+    /// <summary>
+    /// ViewModel chính cho trang Index Module 3 (Quản lý 2 Tab: TaiKhoan & HocVien chuẩn admin-tai-khoan.html)
+    /// </summary>
+    public class HocVienIndexViewModel
+    {
+        // Danh sách tài khoản cho Tab 1
+        public List<TaiKhoan> DanhSachTaiKhoan { get; set; } = new();
+
+        // Danh sách hồ sơ học viên cho Tab 2
+        public List<HocVien> DanhSachHocVien { get; set; } = new();
+
+        // Danh sách lớp học để đổ vào dropdown lọc theo lớp ở Tab 2
+        public List<LopHoc> DanhSachLopHoc { get; set; } = new();
+
+        // 4 Chỉ số mini stat cards
+        public int TongSoHocVien { get; set; }
+        public int SoGiaoVu { get; set; }
+        public int SoAdmin { get; set; }
+        public int SoBiKhoa { get; set; }
+
+        // Tab hiện tại đang chọn: 'accounts' (Tab 1) hoặc 'profiles' (Tab 2)
+        public string CurrentTab { get; set; } = "accounts";
+
+        // Mã lớp học đang lọc (nếu có)
+        public int? SelectedMaLopHoc { get; set; }
+    }
+
+    /// <summary>
+    /// ViewModel cho Modal Thêm Tài Khoản Mới (Entity TaiKhoan + HocVien)
+    /// </summary>
+    public class ThemTaiKhoanViewModel
+    {
+        [Required(ErrorMessage = "Tên đăng nhập không được để trống")]
+        [StringLength(100, ErrorMessage = "Tên đăng nhập không quá 100 ký tự")]
+        [Display(Name = "Tên đăng nhập")]
+        public string TenDangNhap { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Mật khẩu không được để trống")]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "Mật khẩu tối thiểu 6 ký tự")]
+        [Display(Name = "Mật khẩu")]
+        public string MatKhau { get; set; } = "123456";
+
+        [Required(ErrorMessage = "Họ và tên không được để trống")]
+        [StringLength(200, ErrorMessage = "Họ tên không quá 200 ký tự")]
+        [Display(Name = "Họ và tên")]
+        public string HoTen { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Email không được để trống")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        [StringLength(200)]
+        [Display(Name = "Email")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        [Display(Name = "Vai trò")]
+        public string VaiTro { get; set; } = "HocVien"; // Admin, GiaoVu, HocVien
+    }
+
+    /// <summary>
+    /// DTO chi tiết học viên trả về qua JSON để hiển thị Modal chuẩn admin-tai-khoan.html
+    /// </summary>
+    public class HocVienChiTietModalDto
+    {
+        public int MaHocVien { get; set; }
+        public int? MaTaiKhoan { get; set; }
+        public string HoTen { get; set; } = string.Empty;
+        public string? NgaySinh { get; set; }
+        public string? GioiTinh { get; set; }
+        public string? SoDienThoai { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public string? DiaChi { get; set; }
+        public string? TrinhDoHocVan { get; set; }
+        public string? NgheNghiep { get; set; }
+        public string TrangThai { get; set; } = string.Empty;
+        public string LopHocDangKy { get; set; } = "Chưa đăng ký lớp";
+    }
 }

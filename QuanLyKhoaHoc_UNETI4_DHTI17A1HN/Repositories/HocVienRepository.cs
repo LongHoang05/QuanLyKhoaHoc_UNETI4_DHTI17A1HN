@@ -8,6 +8,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
     // Họ và tên: Nguyễn Đức Linh - MSV: 23103100042
     // Module 3: Cài đặt HocVienRepository
     // Chuẩn theo giáo trình bài giảng khoa CNTT UNETI (Slide 107, 121, 389)
+    // Tối ưu hóa truy vấn Entity Framework Core, loại bỏ hoàn toàn code thừa
     // ========================================================
     public class HocVienRepository : IHocVienRepository
     {
@@ -18,11 +19,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             _context = context;
         }
 
+        #region 1. Nghiệp vụ Thực thể Học Viên (Entity HocVien)
         public List<HocVien> GetAll()
         {
             return _context.HocViens
                 .Include(h => h.TaiKhoan)
                 .Include(h => h.DangKyHocs)
+                    .ThenInclude(d => d.LopHoc)
                 .OrderByDescending(h => h.NgayTao)
                 .ToList();
         }
@@ -32,6 +35,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             return await _context.HocViens
                 .Include(h => h.TaiKhoan)
                 .Include(h => h.DangKyHocs)
+                    .ThenInclude(d => d.LopHoc)
                 .OrderByDescending(h => h.NgayTao)
                 .ToListAsync();
         }
@@ -110,68 +114,38 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             await _context.SaveChangesAsync();
         }
 
-        // Tìm kiếm LINQ phục vụ AJAX Search (Theo Slide 121 & Slide 389)
-        // Tìm kiếm LINQ phục vụ AJAX Search (Theo Slide 121 & Slide 389)
-        public async Task<List<HocVien>> SearchAsync(string? keyword, string? searchType = null)
+        // Tìm kiếm và Lọc học viên LINQ đa năng: Từ khóa + Trạng thái + Lọc theo Lớp Học
+        public async Task<List<HocVien>> SearchHocVienAsync(string? keyword, bool? trangThai = null, int? maLopHoc = null)
         {
             var query = _context.HocViens
                 .Include(h => h.TaiKhoan)
                 .Include(h => h.DangKyHocs)
+                    .ThenInclude(d => d.LopHoc)
                 .AsQueryable();
 
+            // 1. Lọc theo từ khóa tìm kiếm
             if (!string.IsNullOrWhiteSpace(keyword))
             {
                 keyword = keyword.Trim().ToLower();
-
-                if (searchType == "name")
-                {
-                    // Tìm kiếm riêng theo Họ và Tên
-                    query = query.Where(h => h.HoTen.ToLower().Contains(keyword));
-                }
-                else if (searchType == "email")
-                {
-                    // Tìm kiếm riêng theo Email
-                    query = query.Where(h => h.Email.ToLower().Contains(keyword));
-                }
-                else if (searchType == "phone")
-                {
-                    // Tìm kiếm riêng theo Số điện thoại
-                    query = query.Where(h => h.SoDienThoai != null && h.SoDienThoai.Contains(keyword));
-                }
-                else
-                {
-                    // Tìm kiếm thông minh tổng hợp (Tránh tình trạng tìm chữ 'mai' bị dính đuôi 'gmail.com')
-                    if (keyword.Contains("@"))
-                    {
-                        query = query.Where(h =>
-                            h.Email.ToLower().Contains(keyword) ||
-                            h.HoTen.ToLower().Contains(keyword));
-                    }
-                    else
-                    {
-                        query = query.Where(h =>
-                            h.HoTen.ToLower().Contains(keyword) ||
-                            (h.SoDienThoai != null && h.SoDienThoai.Contains(keyword)) ||
-                            (h.DiaChi != null && h.DiaChi.ToLower().Contains(keyword)) ||
-                            EF.Functions.Like(h.Email, $"{keyword}%") ||
-                            EF.Functions.Like(h.Email, $"%{keyword}%@%"));
-                    }
-                }
+                query = query.Where(h =>
+                    h.HoTen.ToLower().Contains(keyword) ||
+                    (h.SoDienThoai != null && h.SoDienThoai.Contains(keyword)) ||
+                    (h.DiaChi != null && h.DiaChi.ToLower().Contains(keyword)) ||
+                    (h.TaiKhoan != null && h.TaiKhoan.TenDangNhap.ToLower().Contains(keyword)) ||
+                    EF.Functions.Like(h.Email, $"{keyword}%") ||
+                    EF.Functions.Like(h.Email, $"%{keyword}%@%"));
             }
 
-            return await query.OrderByDescending(h => h.NgayTao).ToListAsync();
-        }
-
-        public async Task<List<HocVien>> SearchTrangThaiAsync(bool? trangThai)
-        {
-            var query = _context.HocViens
-                .Include(h => h.TaiKhoan)
-                .Include(h => h.DangKyHocs)
-                .AsQueryable();
-
+            // 2. Lọc theo trạng thái hoạt động (true: Đang hoạt động, false: Đang bị khóa)
             if (trangThai.HasValue)
             {
                 query = query.Where(h => h.TrangThai == trangThai.Value);
+            }
+
+            // 3. ĐẶC BIỆT: Lọc theo lớp học học viên đang đăng ký
+            if (maLopHoc.HasValue && maLopHoc.Value > 0)
+            {
+                query = query.Where(h => h.DangKyHocs.Any(d => d.MaLopHoc == maLopHoc.Value));
             }
 
             return await query.OrderByDescending(h => h.NgayTao).ToListAsync();
@@ -211,5 +185,71 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
 
             return (items, totalCount);
         }
+        #endregion
+
+        #region 2. Nghiệp vụ Thực thể Tài Khoản (Entity TaiKhoan) & Lớp Học
+        public async Task<List<TaiKhoan>> GetAllTaiKhoanAsync()
+        {
+            return await _context.TaiKhoans
+                .OrderByDescending(t => t.NgayTao)
+                .ToListAsync();
+        }
+
+        public async Task<List<TaiKhoan>> SearchTaiKhoanAsync(string? keyword, string? vaiTro = null, bool? trangThai = null)
+        {
+            var query = _context.TaiKhoans.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                keyword = keyword.Trim().ToLower();
+                query = query.Where(t =>
+                    t.TenDangNhap.ToLower().Contains(keyword) ||
+                    t.HoTen.ToLower().Contains(keyword) ||
+                    t.Email.ToLower().Contains(keyword));
+            }
+
+            if (!string.IsNullOrWhiteSpace(vaiTro))
+            {
+                query = query.Where(t => t.VaiTro == vaiTro);
+            }
+
+            if (trangThai.HasValue)
+            {
+                query = query.Where(t => t.TrangThai == trangThai.Value);
+            }
+
+            return await query.OrderByDescending(t => t.NgayTao).ToListAsync();
+        }
+
+        public async Task<TaiKhoan?> GetTaiKhoanByIdAsync(int id)
+        {
+            return await _context.TaiKhoans.FindAsync(id);
+        }
+
+        public async Task<bool> ExistsUsernameAsync(string username)
+        {
+            var cleanUsername = username.Trim().ToLower();
+            return await _context.TaiKhoans.AnyAsync(t => t.TenDangNhap.ToLower() == cleanUsername);
+        }
+
+        public async Task AddTaiKhoanAsync(TaiKhoan taiKhoan)
+        {
+            await _context.TaiKhoans.AddAsync(taiKhoan);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateTaiKhoanAsync(TaiKhoan taiKhoan)
+        {
+            _context.TaiKhoans.Update(taiKhoan);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<LopHoc>> GetAllLopHocAsync()
+        {
+            return await _context.LopHocs
+                .OrderBy(l => l.TenLop)
+                .ToListAsync();
+        }
+        #endregion
     }
 }

@@ -1,24 +1,26 @@
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
 {
     // ========================================================
     // Họ và tên: Nguyễn Đức Linh - MSV: 23103100042
-    // Module 3: Tầng Service Quản lý Học viên
+    // Module 3: Tầng Service Quản lý Học viên & Tài khoản (Mục 5 & 7)
     // Đảm nhiệm toàn bộ quy tắc nghiệp vụ doanh nghiệp (Business Logic Layer)
     // Luồng: Controller -> Service -> Repository -> ApplicationDbContext
     // ========================================================
     public interface IHocVienService
     {
+        #region 1. Nghiệp vụ Học Viên (HocVien)
         /// <summary>
         /// Lấy toàn bộ danh sách học viên
         /// </summary>
         Task<List<HocVien>> GetDanhSachHocVienAsync();
 
         /// <summary>
-        /// Tìm kiếm học viên phục vụ AJAX Live Search (Slide 389)
+        /// Tìm kiếm học viên phục vụ AJAX Live Search: Từ khóa, Trạng thái, và Lọc theo Lớp Học
         /// </summary>
-        Task<List<HocVien>> TimKiemHocVienAsync(string? keyword, string? searchType = null);
+        Task<List<HocVien>> TimKiemHocVienAsync(string? keyword, bool? trangThai = null, int? maLopHoc = null);
 
         /// <summary>
         /// Lấy chi tiết thông tin học viên kèm lịch sử đăng ký khóa học
@@ -46,8 +48,46 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
         Task<(bool Success, string? ErrorMessage)> XoaHocVienAsync(int id);
 
         /// <summary>
-        /// Nghiệp vụ bật/tắt trạng thái hoạt động (Khóa / Mở khóa)
+        /// Nghiệp vụ bật/tắt trạng thái hoạt động (Khóa / Mở khóa học viên)
         /// </summary>
-        Task<(bool Success, string? ErrorMessage)> DoiTrangThaiAsync(int id);
+        Task<(bool Success, string? ErrorMessage, bool NewStatus)> DoiTrangThaiAsync(int id);
+        #endregion
+
+        #region 2. Nghiệp vụ Tài Khoản (TaiKhoan) & Lớp Học
+        /// <summary>
+        /// Lấy danh sách tài khoản cho Tab 1
+        /// </summary>
+        Task<List<TaiKhoan>> GetDanhSachTaiKhoanAsync();
+
+        /// <summary>
+        /// Tìm kiếm và lọc tài khoản theo từ khóa, vai trò và trạng thái
+        /// </summary>
+        Task<List<TaiKhoan>> TimKiemTaiKhoanAsync(string? keyword, string? vaiTro = null, bool? trangThai = null);
+
+        /// <summary>
+        /// Khóa / Mở khóa tài khoản (Entity TaiKhoan - Mục 5.1)
+        /// </summary>
+        Task<(bool Success, string? ErrorMessage, bool NewStatus, string Username)> DoiTrangThaiTaiKhoanAsync(int id);
+
+        /// <summary>
+        /// Cấp lại mật khẩu cho tài khoản
+        /// </summary>
+        Task<(bool Success, string? ErrorMessage)> ResetMatKhauTaiKhoanAsync(int id, string? newPassword);
+
+        /// <summary>
+        /// Thêm mới tài khoản và tự động tạo hồ sơ học viên tương ứng nếu vai trò là Học viên
+        /// </summary>
+        Task<(bool Success, string? ErrorMessage)> ThemTaiKhoanMoiAsync(ThemTaiKhoanViewModel model);
+
+        /// <summary>
+        /// Lấy danh sách toàn bộ lớp học cho dropdown lọc
+        /// </summary>
+        Task<List<LopHoc>> GetDanhSachLopHocAsync();
+
+        /// <summary>
+        /// Lấy 4 chỉ số thống kê cho 4 mini stat cards trên đầu trang
+        /// </summary>
+        Task<(int TongHocVien, int SoGiaoVu, int SoAdmin, int SoBiKhoa)> GetThongKeAsync();
+        #endregion
     }
 }
