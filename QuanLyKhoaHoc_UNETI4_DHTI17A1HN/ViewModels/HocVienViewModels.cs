@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels
 {
@@ -236,5 +237,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels
 
         [Display(Name = "Trạng thái hoạt động")]
         public bool TrangThai { get; set; }
+    }
+
+    /// <summary>
+    /// ViewModel dùng cho Cổng Thông Tin Học Viên (Portal Học Viên - Chuẩn Giao_DIen_Test hoc-vien.html)
+    /// </summary>
+    public class CongHocVienViewModel
+    {
+        public HocVien HocVien { get; set; } = new HocVien();
+        public List<LopHoc> LopHocDangMos { get; set; } = new List<LopHoc>();
+        public List<DangKyHoc> DanhSachDangKy { get; set; } = new List<DangKyHoc>();
+        public List<ChuongTrinhDaoTao> ChuongTrinhs { get; set; } = new List<ChuongTrinhDaoTao>();
     }
 }

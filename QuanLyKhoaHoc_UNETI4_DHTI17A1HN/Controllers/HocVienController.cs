@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 {
@@ -14,10 +17,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
     {
         // Tiêm Service để xử lý quy tắc nghiệp vụ doanh nghiệp
         private readonly IHocVienService _hocVienService;
+        private readonly ApplicationDbContext _context;
 
-        public HocVienController(IHocVienService hocVienService)
+        public HocVienController(IHocVienService hocVienService, ApplicationDbContext context)
         {
             _hocVienService = hocVienService;
+            _context = context;
         }
 
         #region Helper Phân Quyền Session (Theo Slide 8-11 Bài Giảng Cookie & Session)
@@ -304,6 +309,55 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        // ========================================================
+        // 6. ACTION PORTAL: CỔNG THÔNG TIN HỌC VIÊN (Chuẩn Giao_DIen_Test hoc-vien.html)
+        // ========================================================
+        [HttpGet]
+        public async Task<IActionResult> Portal()
+        {
+            var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
+            HocVien? hocVien = null;
+
+            if (maTaiKhoan != null)
+            {
+                hocVien = await _context.HocViens
+                    .Include(h => h.TaiKhoan)
+                    .Include(h => h.DangKyHocs)
+                        .ThenInclude(d => d.LopHoc)
+                            .ThenInclude(l => l!.ChuongTrinhDaoTao)
+                    .FirstOrDefaultAsync(h => h.MaTaiKhoan == maTaiKhoan.Value);
+            }
+
+            if (hocVien == null)
+            {
+                // Mặc định lấy học viên đầu tiên trong database để test hiển thị
+                hocVien = await _context.HocViens
+                    .Include(h => h.TaiKhoan)
+                    .Include(h => h.DangKyHocs)
+                        .ThenInclude(d => d.LopHoc)
+                            .ThenInclude(l => l!.ChuongTrinhDaoTao)
+                    .FirstOrDefaultAsync() ?? new HocVien { HoTen = "Học viên Test", Email = "test@uneti.edu.vn" };
+            }
+
+            var lopHocDangMos = await _context.LopHocs
+                .Include(l => l.ChuongTrinhDaoTao)
+                .Include(l => l.GiangVien)
+                .Where(l => l.TrangThai == "Đang mở đăng ký")
+                .ToListAsync();
+
+            var chuongTrinhs = await _context.ChuongTrinhDaoTaos.Where(c => c.TrangThai).ToListAsync();
+
+            var viewModel = new CongHocVienViewModel
+            {
+                HocVien = hocVien,
+                LopHocDangMos = lopHocDangMos,
+                DanhSachDangKy = hocVien.DangKyHocs.ToList(),
+                ChuongTrinhs = chuongTrinhs
+            };
+
+            return View(viewModel);
         }
     }
 }

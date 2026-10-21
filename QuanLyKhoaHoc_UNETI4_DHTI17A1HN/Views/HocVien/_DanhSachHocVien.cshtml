@@ -1,18 +1,18 @@
 @model List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.HocVien>
 
-<!-- Partial View: _DanhSachHocVien.cshtml (Theo đúng bài giảng AJAX Slide 391) -->
+<!-- Partial View: _DanhSachHocVien.cshtml (Chuẩn Design System Floral Haven & Sky Blue) -->
 <div class="table-responsive">
-    <table class="table table-hover align-middle mb-0">
-        <thead class="table-light">
+    <table class="table table-custom align-middle mb-0">
+        <thead>
             <tr>
-                <th class="text-center" style="width: 70px;">Mã HV</th>
-                <th>Thông Tin Học Viên</th>
+                <th class="text-center" style="width: 75px;">Mã HV</th>
+                <th>Học Viên</th>
                 <th>Liên Hệ</th>
                 <th>Giới Tính / Ngày Sinh</th>
-                <th>Trình Độ</th>
+                <th>Trình Độ / Nghề Nghiệp</th>
                 <th class="text-center">Lớp Đã ĐK</th>
                 <th class="text-center">Trạng Thái</th>
-                <th class="text-center" style="width: 170px;">Hành Động</th>
+                <th class="text-center" style="width: 160px;">Thao Tác</th>
             </tr>
         </thead>
         <tbody>
@@ -20,8 +20,8 @@
             {
                 <tr>
                     <td colspan="8" class="text-center py-5 text-muted">
-                        <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
-                        Không tìm thấy học viên nào phù hợp với từ khóa tìm kiếm.
+                        <i class="bi bi-inbox fs-1 d-block mb-2" style="color: var(--primary-light);"></i>
+                        <span class="fw-semibold">Không tìm thấy học viên nào phù hợp với từ khóa tìm kiếm.</span>
                     </td>
                 </tr>
             }
@@ -30,95 +30,109 @@
                 <input type="hidden" id="soLuongKetQuaMoi" value="@Model.Count" />
                 foreach (var item in Model)
                 {
+                    var initialLetter = string.IsNullOrEmpty(item.HoTen) ? "H" : item.HoTen.Trim().Substring(item.HoTen.Trim().LastIndexOf(' ') + 1).Substring(0, 1).ToUpper();
                     <tr>
-                        <td class="text-center fw-bold text-muted">#@item.MaHocVien</td>
+                        <td class="text-center fw-bold text-muted">
+                            <span class="badge bg-light text-secondary border rounded-pill">#@item.MaHocVien</span>
+                        </td>
                         <td>
-                            <div class="fw-bold text-dark fs-6">@item.HoTen</div>
-                            <div class="d-flex flex-wrap gap-1 mt-1">
-                                @if (item.TaiKhoan != null && !string.IsNullOrEmpty(item.TaiKhoan.TenDangNhap))
-                                {
-                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle" title="Tài khoản hệ thống liên kết">
-                                        <i class="bi bi-person-badge-fill me-1"></i>TK: @item.TaiKhoan.TenDangNhap
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" title="Chưa liên kết tài khoản hệ thống">
-                                        <i class="bi bi-person-x me-1"></i>Chưa có TK
-                                    </span>
-                                }
-                                <span class="badge bg-light text-muted border" title="Ngày tạo hồ sơ học viên">
-                                    <i class="bi bi-calendar-event me-1"></i>Tham gia: @item.NgayTao.ToString("dd/MM/yyyy")
-                                </span>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="avatar-circle">
+                                    @initialLetter
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark fs-6">@item.HoTen</div>
+                                    <div class="d-flex flex-wrap gap-1 mt-1">
+                                        @if (item.TaiKhoan != null && !string.IsNullOrEmpty(item.TaiKhoan.TenDangNhap))
+                                        {
+                                            <span class="badge rounded-pill" style="background: var(--surface-container); color: var(--primary-rose); font-size: 0.7rem;" title="Tài khoản hệ thống liên kết">
+                                                <i class="bi bi-person-badge me-1"></i>@item.TaiKhoan.TenDangNhap
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-muted border rounded-pill" style="font-size: 0.7rem;" title="Chưa liên kết tài khoản hệ thống">
+                                                Chưa cấp TK
+                                            </span>
+                                        }
+                                        <span class="badge bg-light text-muted border rounded-pill" style="font-size: 0.7rem;" title="Ngày tạo hồ sơ">
+                                            @item.NgayTao.ToString("dd/MM/yyyy")
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </td>
                         <td>
-                            <div><i class="bi bi-envelope text-primary me-1"></i>@item.Email</div>
+                            <div class="text-dark small"><i class="bi bi-envelope text-primary me-1"></i>@item.Email</div>
                             @if (!string.IsNullOrEmpty(item.SoDienThoai))
                             {
-                                <div class="small text-muted"><i class="bi bi-telephone text-success me-1"></i>@item.SoDienThoai</div>
+                                <div class="small text-muted mt-1"><i class="bi bi-telephone text-success me-1"></i>@item.SoDienThoai</div>
                             }
                             else
                             {
-                                <div class="small text-muted fst-italic">Chưa có SĐT</div>
+                                <div class="small text-muted fst-italic mt-1">Chưa cập nhật SĐT</div>
                             }
                         </td>
                         <td>
-                            <div>@(item.GioiTinh ?? "Không rõ")</div>
+                            <div class="small fw-semibold text-dark">@(item.GioiTinh ?? "Không rõ")</div>
                             <div class="small text-muted">
-                                @(item.NgaySinh.HasValue ? item.NgaySinh.Value.ToString("dd/MM/yyyy") : "Chưa cập nhật")
+                                @(item.NgaySinh.HasValue ? item.NgaySinh.Value.ToString("dd/MM/yyyy") : "Chưa có ngày sinh")
                             </div>
                         </td>
                         <td>
-                            <span class="badge bg-light text-dark border">
+                            <span class="badge rounded-pill px-2 py-1" style="background: #f1f5f9; color: #475569; font-weight: 500;">
                                 @(item.TrinhDoHocVan ?? "Chưa rõ")
                             </span>
+                            @if (!string.IsNullOrEmpty(item.NgheNghiep))
+                            {
+                                <div class="small text-muted mt-1">@item.NgheNghiep</div>
+                            }
                         </td>
                         <td class="text-center">
-                            <span class="badge bg-info text-dark rounded-pill px-3 py-2">
-                                <i class="bi bi-journal-check me-1"></i>@(item.DangKyHocs?.Count ?? 0) lớp
+                            <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background: var(--surface-container); color: var(--primary-rose);">
+                                <i class="bi bi-mortarboard me-1"></i>@(item.DangKyHocs?.Count ?? 0) lớp
                             </span>
                         </td>
                         <td class="text-center" id="status-badge-@item.MaHocVien">
                             @if (item.TrangThai)
                             {
-                                <span class="badge bg-success-subtle text-success border border-success px-3 py-2 rounded-pill">
-                                    <i class="bi bi-check-circle-fill me-1"></i>Hoạt động
+                                <span class="status-pill active">
+                                    <span class="status-dot"></span>Đang học
                                 </span>
                             }
                             else
                             {
-                                <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2 rounded-pill">
-                                    <i class="bi bi-lock-fill me-1"></i>Đã khóa
+                                <span class="status-pill locked">
+                                    <span class="status-dot"></span>Tạm khóa
                                 </span>
                             }
                         </td>
                         <td class="text-center">
-                            <div class="btn-group btn-group-sm">
+                            <div class="d-inline-flex gap-1 align-items-center">
                                 <!-- Xem chi tiết -->
                                 <a asp-action="Details" asp-route-id="@item.MaHocVien" 
-                                   class="btn btn-outline-info" title="Xem chi tiết lý lịch">
+                                   class="btn-action-icon" title="Xem hồ sơ chi tiết">
                                     <i class="bi bi-eye-fill"></i>
                                 </a>
 
                                 <!-- Chỉnh sửa -->
                                 <a asp-action="Edit" asp-route-id="@item.MaHocVien" 
-                                   class="btn btn-outline-primary" title="Chỉnh sửa thông tin">
+                                   class="btn-action-icon" title="Chỉnh sửa thông tin">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
 
-                                <!-- Nút Đổi trạng thái Bật/Tắt (Mở khóa / Khóa) -->
+                                <!-- Nút Đổi trạng thái Bật/Tắt AJAX -->
                                 <button type="button" 
-                                        class="btn btn-outline-warning btn-toggle-status" 
+                                        class="btn-action-icon btn-toggle-status" 
                                         data-id="@item.MaHocVien" 
                                         data-name="@item.HoTen"
                                         title="@(item.TrangThai ? "Khóa tài khoản học viên" : "Mở khóa học viên")">
-                                    <i class="bi @(item.TrangThai ? "bi-lock" : "bi-unlock-fill")"></i>
+                                    <i class="bi @(item.TrangThai ? "bi-lock" : "bi-unlock-fill")" style="color: @(item.TrangThai ? "#d97706" : "#059669");"></i>
                                 </button>
 
                                 <!-- Nút Xóa học viên -->
                                 <button type="button" 
-                                        class="btn btn-outline-danger btn-delete-hocvien" 
+                                        class="btn-action-icon danger btn-delete-hocvien" 
                                         data-id="@item.MaHocVien" 
                                         data-name="@item.HoTen"
                                         title="Xóa học viên">

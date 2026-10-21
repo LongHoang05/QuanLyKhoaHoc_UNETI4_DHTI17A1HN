@@ -1,208 +1,270 @@
 @model List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.HocVien>
 @{
-    ViewData["Title"] = "Quản Lý Danh Sách Học Viên";
+    ViewData["Title"] = "Quản Lý Danh Sách Học Viên (Module 3)";
     var vaiTroHienTai = Context.Session.GetString("VaiTro");
     var hoTenHienTai = Context.Session.GetString("HoTen");
+    var totalStudents = Model?.Count ?? 0;
+    var activeStudents = Model?.Count(h => h.TrangThai) ?? 0;
+    var lockedStudents = Model?.Count(h => !h.TrangThai) ?? 0;
+    var hasAccountCount = Model?.Count(h => h.MaTaiKhoan != null) ?? 0;
 }
 
-<div class="container-fluid py-2">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
+<!-- 1. HERO BANNER CHUẨN DESIGN Giao_DIen_Test -->
+<div class="page-hero">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
         <div>
-            <h2 class="fw-bold text-primary mb-1">
-                <i class="bi bi-people-fill me-2"></i>Quản Lý Danh Sách Học Viên
-            </h2>
-            <p class="text-muted mb-0 small">
-                Module 3: Quản lý học viên | Sinh viên: <strong>Nguyễn Đức Linh (23103100042)</strong>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="hero-badge"><i class="bi bi-person-badge"></i> Entity HocVien & TaiKhoan</span>
+                <span class="small" style="color: #bae6fd;">Mục 7 Đề tài BTL UNETI • Module 3</span>
+            </div>
+            <h1 class="hero-title">Quản lý Hồ sơ & Danh sách Học viên</h1>
+            <p class="hero-subtitle">
+                Kiến trúc 3 tầng: <code>Controller -> Service -> Repository -> Database</code>. Bảo mật phân quyền Session, tìm kiếm jQuery AJAX Live Search không tải lại trang và quản lý lịch sử học tập.
             </p>
         </div>
-        <div>
-            <a asp-action="Create" class="btn btn-primary shadow-sm">
+        <div class="d-flex gap-2">
+            <a asp-action="Portal" class="btn btn-sm px-3 py-2 rounded-pill fw-semibold text-white" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); font-size: 0.82rem;">
+                <i class="bi bi-box-arrow-up-right me-1"></i> Mở Cổng Học Viên
+            </a>
+            <a asp-action="Create" class="btn btn-sm px-3 py-2 rounded-pill fw-semibold text-white shadow-sm" style="background: var(--primary-rose); border: 1px solid rgba(56,189,248,0.4); font-size: 0.82rem;">
                 <i class="bi bi-person-plus-fill me-1"></i> Thêm Học Viên Mới
             </a>
         </div>
     </div>
+</div>
 
-    <!-- Thanh thông tin Phiên làm việc (Session) & Chuyển đổi kiểm thử theo Slide 1.7 -->
-    <div class="alert alert-light border shadow-sm p-3 mb-3 d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-secondary p-2"><i class="bi bi-shield-lock-fill me-1"></i>Phiên Session:</span>
-            <span>Đang đăng nhập: <strong>@hoTenHienTai</strong> (<span class="badge bg-primary">@vaiTroHienTai</span>)</span>
-        </div>
-        <div class="btn-group btn-group-sm">
-            <span class="input-group-text bg-white small border-0 text-muted">Chuyển vai trò test:</span>
-            <a asp-action="DangNhapThuNghiem" asp-route-role="GiaoVu" class="btn btn-outline-success">
-                <i class="bi bi-person-badge"></i> Giáo vụ (GiaoVu)
-            </a>
-            <a asp-action="DangNhapThuNghiem" asp-route-role="Admin" class="btn btn-outline-primary">
-                <i class="bi bi-shield-check"></i> Quản trị viên (Admin)
-            </a>
-            <a asp-action="DangNhapThuNghiem" asp-route-role="HocVien" class="btn btn-outline-warning">
-                <i class="bi bi-mortarboard"></i> Học viên (Bị chặn)
-            </a>
-        </div>
-    </div>
-
-    <!-- Thanh Tìm Kiếm Bằng jQuery AJAX (Theo đúng Slide 385 & Slide 395 của giảng viên) -->
-    <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body">
-            <div class="row g-2 align-items-center">
-                <div class="col-md-3">
-                    <label class="form-label fw-semibold small text-secondary mb-1">
-                        <i class="bi bi-funnel me-1"></i> Tiêu chí tìm kiếm:
-                    </label>
-                    <select id="searchType" class="form-select">
-                        <option value="all" selected>🔍 Tất cả thông tin</option>
-                        <option value="name">👤 Theo Họ và Tên</option>
-                        <option value="email">✉️ Theo Email</option>
-                        <option value="phone">📞 Theo Số điện thoại</option>
-                    </select>
-                </div>
-                <div class="col-md-7">
-                    <label class="form-label fw-semibold small text-secondary mb-1">
-                        <i class="bi bi-search me-1"></i> Nhập từ khóa tìm kiếm tức thì (jQuery AJAX Live Search):
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light"><i class="bi bi-search text-primary"></i></span>
-                        <input type="text" id="keyword" class="form-control" 
-                               placeholder="Gõ từ khóa để lọc học viên tức thì..." autocomplete="off" />
-                        <button type="button" id="btnXoaLoc" class="btn btn-outline-secondary" title="Xóa từ khóa lọc">
-                            <i class="bi bi-x-circle"></i> Xóa
-                        </button>
-                        <button type="button" id="btnTimKiem" class="btn btn-primary">
-                            <i class="bi bi-search me-1"></i> Tìm Kiếm
-                        </button>
-                    </div>
-                </div>
-                <div class="col-md-2 text-md-end mt-2 mt-md-0">
-                    <span class="badge bg-light text-dark border p-2 small d-inline-block">
-                        <i class="bi bi-lightning-charge-fill text-warning me-1"></i> AJAX Live Search
-                    </span>
-                </div>
+<!-- 2. BỐN THẺ CHỈ SỐ NHANH TỐI GIẢN (MINI STAT CARDS) -->
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-sm-6">
+        <div class="mini-stat-card">
+            <div>
+                <div class="mini-stat-label">Tổng số Học viên</div>
+                <div class="mini-stat-num" style="color: var(--primary-rose);" id="statTotalStudents">@totalStudents</div>
+                <div class="small" style="font-size: 0.72rem; color: #15803d;"><i class="bi bi-check-circle me-1"></i>Đạt chuẩn hồ sơ BTL</div>
+            </div>
+            <div class="mini-stat-icon" style="background: var(--surface-container); color: var(--primary-rose);">
+                <i class="bi bi-mortarboard-fill"></i>
             </div>
         </div>
     </div>
 
-    <!-- Vùng hiển thị kết quả danh sách học viên (Cập nhật không reload trang qua jQuery AJAX) -->
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold text-secondary">
-                <i class="bi bi-table me-2"></i>Danh Sách Học Viên (<span id="soLuongHV">@Model.Count</span> học viên)
-            </h5>
-            <small class="text-muted"><i class="bi bi-check2-circle text-success me-1"></i>Đồng bộ trực tiếp qua Repository</small>
+    <div class="col-xl-3 col-sm-6">
+        <div class="mini-stat-card">
+            <div>
+                <div class="mini-stat-label">Đang theo học</div>
+                <div class="mini-stat-num" style="color: #15803d;" id="statActiveStudents">@activeStudents</div>
+                <div class="small text-muted" style="font-size: 0.72rem;">Trạng thái hoạt động</div>
+            </div>
+            <div class="mini-stat-icon" style="background: #dcfce7; color: #15803d;">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
         </div>
-        <div class="card-body p-0" id="ketQua">
-            <!-- Render danh sách ban đầu qua PartialView (Slide 391) -->
-            <partial name="_DanhSachHocVien" model="Model" />
+    </div>
+
+    <div class="col-xl-3 col-sm-6">
+        <div class="mini-stat-card">
+            <div>
+                <div class="mini-stat-label">Tạm khóa học viên</div>
+                <div class="mini-stat-num" style="color: #dc2626;" id="statLockedStudents">@lockedStudents</div>
+                <div class="small text-muted" style="font-size: 0.72rem;">Không được đăng ký mới</div>
+            </div>
+            <div class="mini-stat-icon" style="background: #fee2e2; color: #dc2626;">
+                <i class="bi bi-lock-fill"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-sm-6">
+        <div class="mini-stat-card">
+            <div>
+                <div class="mini-stat-label">Đã có Tài khoản</div>
+                <div class="mini-stat-num" style="color: #0369a1;">@hasAccountCount</div>
+                <div class="small text-muted" style="font-size: 0.72rem;">Liên kết Entity TaiKhoan</div>
+            </div>
+            <div class="mini-stat-icon" style="background: #e0f2fe; color: #0369a1;">
+                <i class="bi bi-person-check-fill"></i>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- 3. CONTENT CARD & BẢNG DỮ LIỆU TÌM KIẾM AJAX -->
+<div class="content-card">
+    
+    <!-- Toolbar Tìm kiếm & Lọc AJAX -->
+    <div class="toolbar">
+        <div class="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
+            <!-- Search Box AJAX -->
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="keyword" class="form-control form-control-sm" placeholder="Tìm tên, username, email, SĐT tức thì..." autocomplete="off">
+            </div>
+
+            <!-- Filter Tiêu chí tìm kiếm -->
+            <select id="searchType" class="form-select form-select-sm filter-select">
+                <option value="all" selected>-- Tất cả thông tin --</option>
+                <option value="name">Theo Họ và Tên</option>
+                <option value="email">Theo Email</option>
+                <option value="phone">Theo Số điện thoại</option>
+            </select>
+
+            <!-- Nút Xóa lọc -->
+            <button type="button" id="btnXoaLoc" class="btn btn-sm btn-outline-secondary rounded-pill px-3" style="font-size: 0.8rem;">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Xóa lọc
+            </button>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge rounded-pill" style="background: var(--surface-container); color: var(--primary-rose); font-size: 0.75rem;">
+                <i class="bi bi-lightning-charge-fill me-1"></i> jQuery AJAX Debounce 300ms
+            </span>
+            <div class="small text-muted">
+                Tổng cộng: <strong id="filterCount">@totalStudents</strong> học viên
+            </div>
+        </div>
+    </div>
+
+    <!-- Spinner Loading AJAX -->
+    <div id="loadingSpinner" class="text-center py-4 d-none">
+        <div class="spinner-border text-primary spinner-border-sm" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+        </div>
+        <span class="ms-2 text-muted small">Đang tìm kiếm dữ liệu học viên...</span>
+    </div>
+
+    <!-- Vùng hiển thị Danh Sách Học Viên qua AJAX PartialView -->
+    <div id="vungDanhSachHocVien">
+        @await Html.PartialAsync("_DanhSachHocVien", Model)
+    </div>
+</div>
+
 @section Scripts {
-    <!-- Mã jQuery AJAX Tìm kiếm tức thì & Đổi trạng thái theo đúng giáo trình Slide 385, 387 và 395 -->
     <script>
         $(document).ready(function () {
-            var debounceTimer = null;
-            var currentAjaxRequest = null;
+            let debounceTimer = null;
 
-            // Hàm thực thi AJAX gửi Request lên Controller và cập nhật #ketQua (Slide 387)
-            function thucHienTimKiem() {
-                var keyword = $("#keyword").val();
-                var searchType = $("#searchType").val();
+            // 1. Tìm kiếm jQuery AJAX Live Search khi gõ từ khóa (keyup)
+            $('#keyword').on('keyup', function () {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(function () {
+                    thucHienTimKiemAjax();
+                }, 300);
+            });
 
-                // Hủy request trước nếu đang chạy dở để tránh xung đột kết quả (Race condition)
-                if (currentAjaxRequest && currentAjaxRequest.readyState !== 4) {
-                    currentAjaxRequest.abort();
-                }
+            // Thay đổi tiêu chí tìm kiếm
+            $('#searchType').on('change', function () {
+                thucHienTimKiemAjax();
+            });
 
-                currentAjaxRequest = $.ajax({
-                    url: "/HocVien/TimKiemAjax",
-                    type: "GET",
+            // Nút xóa lọc
+            $('#btnXoaLoc').on('click', function () {
+                $('#keyword').val('');
+                $('#searchType').val('all');
+                thucHienTimKiemAjax();
+                $('#keyword').focus();
+            });
+
+            // Hàm gửi yêu cầu AJAX tìm kiếm
+            function thucHienTimKiemAjax() {
+                const keywordVal = $('#keyword').val();
+                const searchTypeVal = $('#searchType').val();
+
+                $('#loadingSpinner').removeClass('d-none');
+                $('#vungDanhSachHocVien').css('opacity', '0.4');
+
+                $.ajax({
+                    url: '@Url.Action("LiveSearch", "HocVien")',
+                    type: 'GET',
                     data: {
-                        keyword: keyword,
-                        searchType: searchType
+                        keyword: keywordVal,
+                        searchType: searchTypeVal
                     },
                     success: function (result) {
-                        // Cập nhật kết quả vào vùng #ketQua mà không làm tải lại trang (Slide 387)
-                        $("#ketQua").html(result);
+                        $('#vungDanhSachHocVien').html(result);
+                        $('#vungDanhSachHocVien').css('opacity', '1');
+                        $('#loadingSpinner').addClass('d-none');
 
-                        // Cập nhật số lượng học viên hiển thị trên tiêu đề
-                        var soLuongMoi = $("#soLuongKetQuaMoi").val();
-                        if (soLuongMoi !== undefined) {
-                            $("#soLuongHV").text(soLuongMoi);
-                        }
+                        const count = $('#soLuongKetQuaMoi').val() || 0;
+                        $('#filterCount').text(count);
                     },
-                    error: function (xhr, status) {
-                        if (status !== "abort") {
-                            console.log("Lỗi xảy ra khi gọi AJAX tìm kiếm.");
-                        }
+                    error: function (xhr) {
+                        $('#loadingSpinner').addClass('d-none');
+                        $('#vungDanhSachHocVien').css('opacity', '1');
+                        showToast("Lỗi tìm kiếm: " + (xhr.responseText || "Vui lòng kiểm tra lại kết nối"), "danger");
                     }
                 });
             }
 
-            // 1. Tìm kiếm tức thì khi gõ phím hoặc thay đổi input (hỗ trợ cả bộ gõ tiếng Việt Unikey/EVKey)
-            $("#keyword").on("input keyup", function () {
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(function () {
-                    thucHienTimKiem();
-                }, 200); // Debounce 200ms để tìm mượt mà, không bị gián đoạn khi gõ
-            });
-
-            // 2. Thay đổi tiêu chí tìm kiếm (Họ tên / Email / SĐT)
-            $("#searchType").change(function () {
-                thucHienTimKiem();
-            });
-
-            // 3. Bấm nút Tìm kiếm
-            $("#btnTimKiem").click(function () {
-                thucHienTimKiem();
-            });
-
-            // 4. Bấm nút Xóa lọc
-            $("#btnXoaLoc").click(function () {
-                $("#keyword").val("");
-                thucHienTimKiem();
-            });
-
-            // 5. Xử lý nút Đổi trạng thái (Khóa / Mở khóa) bằng AJAX tức thì (Bảo vệ tính toàn vẹn)
-            $(document).on("click", ".btn-toggle-status", function (e) {
+            // 2. Chức năng Đổi trạng thái Bật/Tắt (ToggleTrangThai) bằng AJAX
+            $(document).on('click', '.btn-toggle-status', function (e) {
                 e.preventDefault();
-                var btn = $(this);
-                var id = btn.data("id");
-                var name = btn.data("name");
+                const btn = $(this);
+                const maHocVien = btn.data('id');
+                const tenHocVien = btn.data('name');
 
-                if (confirm("Bạn có chắc chắn muốn thay đổi trạng thái hoạt động (Khóa / Mở khóa) của học viên '" + name + "'?")) {
+                btn.prop('disabled', true);
+
+                $.ajax({
+                    url: '@Url.Action("ToggleTrangThai", "HocVien")',
+                    type: 'POST',
+                    data: { id: maHocVien },
+                    success: function (res) {
+                        btn.prop('disabled', false);
+                        if (res.success) {
+                            const badgeCell = $('#status-badge-' + maHocVien);
+                            if (res.newStatus) {
+                                badgeCell.html(`
+                                    <span class="status-pill active">
+                                        <span class="status-dot"></span>Đang học
+                                    </span>
+                                `);
+                                btn.html('<i class="bi bi-lock" style="color: #d97706;"></i>');
+                                btn.attr('title', 'Khóa tài khoản học viên');
+                                showToast(`Đã mở khóa học viên: ${tenHocVien}`, 'success');
+                            } else {
+                                badgeCell.html(`
+                                    <span class="status-pill locked">
+                                        <span class="status-dot"></span>Tạm khóa
+                                    </span>
+                                `);
+                                btn.html('<i class="bi bi-unlock-fill" style="color: #059669;"></i>');
+                                btn.attr('title', 'Mở khóa học viên');
+                                showToast(`Đã tạm khóa học viên: ${tenHocVien}`, 'warning');
+                            }
+                        } else {
+                            showToast(res.message || 'Không thể thay đổi trạng thái', 'danger');
+                        }
+                    },
+                    error: function () {
+                        btn.prop('disabled', false);
+                        showToast('Lỗi kết nối máy chủ khi đổi trạng thái!', 'danger');
+                    }
+                });
+            });
+
+            // 3. Xóa học viên
+            $(document).on('click', '.btn-delete-hocvien', function (e) {
+                e.preventDefault();
+                const maHocVien = $(this).data('id');
+                const tenHocVien = $(this).data('name');
+
+                if (confirm(`Bạn có chắc chắn muốn xóa học viên "${tenHocVien}" (Mã #${maHocVien}) không?`)) {
                     $.ajax({
-                        url: "/HocVien/ToggleStatusAjax",
-                        type: "POST",
-                        data: { id: id },
+                        url: '@Url.Action("DeleteAjax", "HocVien")',
+                        type: 'POST',
+                        data: { id: maHocVien },
                         success: function (res) {
                             if (res.success) {
-                                // Tải lại danh sách tức thì qua AJAX để cập nhật trạng thái mới nhất
-                                thucHienTimKiem();
+                                showToast(res.message, 'success');
+                                thucHienTimKiemAjax();
                             } else {
-                                alert(res.message);
+                                showToast(res.message, 'danger');
                             }
                         },
                         error: function () {
-                            // Fallback nếu AJAX gặp sự cố
-                            window.location.href = "/HocVien/ToggleStatus/" + id;
+                            showToast('Lỗi khi gửi yêu cầu xóa học viên!', 'danger');
                         }
                     });
-                }
-            });
-
-            // 6. Xử lý nút Xóa học viên an toàn
-            $(document).on("click", ".btn-delete-hocvien", function (e) {
-                e.preventDefault();
-                var id = $(this).data("id");
-                var name = $(this).data("name");
-
-                if (confirm("CẢNH BÁO: Bạn có chắc chắn muốn xóa học viên '" + name + "'? Thao tác này không thể hoàn tác!")) {
-                    // Tạo form POST động để gửi yêu cầu xóa
-                    var form = $('<form action="/HocVien/Delete/' + id + '" method="post"></form>');
-                    $('body').append(form);
-                    form.submit();
                 }
             });
         });
