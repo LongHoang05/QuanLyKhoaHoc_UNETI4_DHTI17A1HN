@@ -1,0 +1,26 @@
+@{
+    ViewData["Title"] = "Từ chối quyền truy cập";
+}
+
+<div class="container py-5 text-center">
+    <div class="card border-0 shadow-sm mx-auto p-4" style="max-width: 550px; border-radius: 1rem;">
+        <div class="card-body">
+            <div class="mb-4">
+                <i class="bi bi-shield-lock-fill text-danger" style="font-size: 5rem;"></i>
+            </div>
+            <h2 class="fw-bold text-danger mb-2">Truy Cập Bị Từ Chối</h2>
+            <p class="text-muted mb-4">
+                Tài khoản của bạn không có quyền hạn cần thiết để truy cập vào phân hệ này.
+                Chức năng chỉ dành cho quản trị viên hoặc người dùng được phân quyền tương ứng.
+            </p>
+            <div class="d-flex justify-content-center gap-2">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-primary px-4 py-2">
+                    <i class="bi bi-house-door-fill me-1"></i> Về Trang Chủ
+                </a>
+                <a asp-controller="TaiKhoan" asp-action="DangNhap" class="btn btn-outline-secondary px-4 py-2">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Đổi Tài Khoản
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

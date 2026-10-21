@@ -1,0 +1,110 @@
+@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels.DangKyViewModel
+@{
+    ViewData["Title"] = "Đăng Ký Tài Khoản Học Viên";
+}
+
+<!--
+// ========================================================
+// Họ và tên: Vũ Đình Trường - MSV: 23103100026
+// Phụ trách: Module 1 - Giao diện Đăng ký tài khoản học viên
+// Chuẩn Prototype Giao_DIen_Test (Tone Xanh Da Trời & Trắng)
+// ========================================================
+-->
+
+<div class="row justify-content-center py-4">
+    <div class="col-md-7 col-lg-6">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid var(--border-color); background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px);">
+            <!-- Top Gradient Bar -->
+            <div style="height: 6px; background: linear-gradient(90deg, #0284c7, #38bdf8, #10b981);"></div>
+
+            <div class="p-4 p-md-5">
+                <!-- Brand Header -->
+                <div class="d-flex align-items-center justify-content-center gap-3 mb-3">
+                    <div class="brand-icon">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold fs-4 text-primary" style="font-family: var(--font-serif); line-height: 1.1;">UNETI EDU</div>
+                        <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 500;">Hệ thống Quản lý Đào tạo</div>
+                    </div>
+                </div>
+
+                <h3 class="text-center fw-bold text-dark mb-1" style="font-family: var(--font-serif); font-size: 1.4rem;">Đăng Ký Học Viên Mới</h3>
+                <p class="text-center text-muted small mb-4">Tạo tài khoản để đăng ký tham gia các khóa học chất lượng cao (Mục 5.1 & 5.2 - Vũ Đình Trường)</p>
+
+                <form asp-action="DangKy" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 py-2 small mb-3" role="alert"></div>
+
+                    <!-- Tên đăng nhập -->
+                    <div class="mb-3">
+                        <label asp-for="TenDangNhap" class="form-label fw-semibold small text-muted">
+                            <i class="bi bi-person me-1 text-primary"></i> TÊN ĐĂNG NHẬP <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="TenDangNhap" class="form-control rounded-3 py-2" placeholder="Ví dụ: nguyenvana..." />
+                        <span asp-validation-for="TenDangNhap" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Họ và tên -->
+                    <div class="mb-3">
+                        <label asp-for="HoTen" class="form-label fw-semibold small text-muted">
+                            <i class="bi bi-card-heading me-1 text-primary"></i> HỌ VÀ TÊN <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="HoTen" class="form-control rounded-3 py-2" placeholder="Ví dụ: Nguyễn Văn An..." />
+                        <span asp-validation-for="HoTen" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Email & Số điện thoại -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label fw-semibold small text-muted">
+                                <i class="bi bi-envelope me-1 text-primary"></i> EMAIL <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Email" class="form-control rounded-3 py-2" placeholder="email@example.com" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="SoDienThoai" class="form-label fw-semibold small text-muted">
+                                <i class="bi bi-telephone me-1 text-primary"></i> SỐ ĐIỆN THOẠI
+                            </label>
+                            <input asp-for="SoDienThoai" class="form-control rounded-3 py-2" placeholder="09xxxxxxxx" />
+                            <span asp-validation-for="SoDienThoai" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Mật khẩu & Xác nhận mật khẩu -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="MatKhau" class="form-label fw-semibold small text-muted">
+                                <i class="bi bi-key me-1 text-primary"></i> MẬT KHẨU <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="MatKhau" type="password" class="form-control rounded-3 py-2" placeholder="Tối thiểu 6 ký tự" />
+                            <span asp-validation-for="MatKhau" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="XacNhanMatKhau" class="form-label fw-semibold small text-muted">
+                                <i class="bi bi-shield-check me-1 text-primary"></i> XÁC NHẬN MẬT KHẨU <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="XacNhanMatKhau" type="password" class="form-control rounded-3 py-2" placeholder="Nhập lại mật khẩu" />
+                            <span asp-validation-for="XacNhanMatKhau" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold rounded-pill shadow-sm mb-3 text-uppercase" style="background: linear-gradient(135deg, var(--primary-rose), var(--primary-light)); border: none; letter-spacing: 0.5px;">
+                        <i class="bi bi-check-circle-fill me-2"></i> HOÀN TẤT ĐĂNG KÝ HỌC VIÊN
+                    </button>
+
+                    <div class="text-center small text-muted">
+                        Đã có tài khoản?
+                        <a asp-action="DangNhap" class="fw-bold text-decoration-none text-primary">Đăng nhập tại đây</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

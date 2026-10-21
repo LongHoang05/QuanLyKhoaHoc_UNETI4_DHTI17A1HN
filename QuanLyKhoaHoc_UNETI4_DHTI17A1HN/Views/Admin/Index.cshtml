@@ -1,0 +1,318 @@
+@using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    var recentAccounts = ViewBag.RecentAccounts as List<TaiKhoan> ?? new List<TaiKhoan>();
+    var recentChuongTrinhs = ViewBag.RecentChuongTrinhs as List<ChuongTrinhDaoTao> ?? new List<ChuongTrinhDaoTao>();
+}
+
+<!--
+// ========================================================
+// Họ và tên: Vũ Đình Trường - MSV: 23103100026
+// Phụ trách: Module 1 - Báo cáo Thống kê Quản trị (Admin Dashboard)
+// Tích hợp Chart.js theo đúng Mục 19 Đề tài BTL
+// ========================================================
+-->
+
+<!-- 1. Hero Banner Dashboard -->
+<div class="page-hero">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="hero-badge"><i class="bi bi-shield-lock-fill"></i> QUẢN TRỊ VIÊN HỆ THỐNG</span>
+                <span class="badge bg-white bg-opacity-25 text-white">Module 1 • Vũ Đình Trường</span>
+            </div>
+            <h1 class="hero-title">Bảng Điều Khiển Quản Trị Hệ Thống</h1>
+            <p class="hero-subtitle">Tổng quan tài nguyên đào tạo, cấu trúc tài khoản, phân quyền và thống kê số liệu trực quan</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-controller="TaiKhoan" asp-action="Create" class="btn btn-light rounded-pill px-3 py-2 fw-bold text-primary shadow-sm">
+                <i class="bi bi-person-plus-fill me-1"></i> Tạo tài khoản
+            </a>
+            <a asp-controller="ChuongTrinhDaoTao" asp-action="Create" class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold">
+                <i class="bi bi-plus-circle me-1"></i> Mở chương trình
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Thẻ số liệu thống kê (Mini Stat Cards) -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="mini-stat-card">
+            <div>
+                <div class="mini-stat-label">Tổng số tài khoản</div>
+                <div class="mini-stat-num text-primary">@ViewBag.TotalTaiKhoan</div>
+                <small class="text-muted">Gồm Admin, Giáo vụ, Học viên</small>
+            </div>
+            <div class="mini-stat-icon" style="background: var(--surface-container); color: var(--primary-rose);">
+                <i class="bi bi-people-fill"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="mini-stat-card">
+            <div>
+                <div class="mini-stat-label">Chương trình đào tạo</div>
+                <div class="mini-stat-num text-success">@ViewBag.TotalChuongTrinh</div>
+                <small class="text-muted">Các ngành và chuyên đề đào tạo</small>
+            </div>
+            <div class="mini-stat-icon" style="background: #e0f2fe; color: #0284c7;">
+                <i class="bi bi-collection-fill"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="mini-stat-card">
+            <div>
+                <div class="mini-stat-label">Giảng viên trung tâm</div>
+                <div class="mini-stat-num text-info">@ViewBag.TotalGiangVien</div>
+                <small class="text-muted">Đội ngũ giảng viên cơ hữu và mời</small>
+            </div>
+            <div class="mini-stat-icon" style="background: #f0fdf4; color: #16a34a;">
+                <i class="bi bi-person-badge-fill"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="mini-stat-card">
+            <div>
+                <div class="mini-stat-label">Tài khoản bị khóa</div>
+                <div class="mini-stat-num text-danger">@ViewBag.CountLocked</div>
+                <small class="text-muted">Đang tạm ngưng hoạt động</small>
+            </div>
+            <div class="mini-stat-icon" style="background: #fee2e2; color: #dc2626;">
+                <i class="bi bi-lock-fill"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Hàng biểu đồ trực quan Chart.js (Mục 19 Đề tài BTL) -->
+<div class="row g-4 mb-4">
+    <!-- Biểu đồ 1: Cơ cấu phân quyền tài khoản (Doughnut Chart) -->
+    <div class="col-lg-5">
+        <div class="content-card h-100">
+            <div class="toolbar">
+                <h6 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-pie-chart-fill me-2 text-primary"></i>Cơ cấu phân quyền tài khoản
+                </h6>
+                <span class="badge bg-light text-muted">Mục 5 & 19</span>
+            </div>
+            <div style="height: 260px; position: relative;">
+                <canvas id="roleChart"></canvas>
+            </div>
+            <div class="d-flex justify-content-around text-center mt-3 pt-3 border-top">
+                <div>
+                    <div class="fw-bold text-danger">@ViewBag.CountAdmin</div>
+                    <small class="text-muted">Quản trị viên</small>
+                </div>
+                <div>
+                    <div class="fw-bold text-primary">@ViewBag.CountGiaoVu</div>
+                    <small class="text-muted">Giáo vụ</small>
+                </div>
+                <div>
+                    <div class="fw-bold text-success">@ViewBag.CountHocVien</div>
+                    <small class="text-muted">Học viên</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Biểu đồ 2: Số lớp học theo Chương trình đào tạo (Bar Chart) -->
+    <div class="col-lg-7">
+        <div class="content-card h-100">
+            <div class="toolbar">
+                <h6 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-bar-chart-fill me-2 text-success"></i>Số lượng lớp học theo Chương trình
+                </h6>
+                <span class="badge bg-light text-muted">Chart.js</span>
+            </div>
+            <div style="height: 300px; position: relative;">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4. Danh sách gần đây -->
+<div class="row g-4">
+    <!-- Cột 1: Tài khoản mới tạo -->
+    <div class="col-lg-6">
+        <div class="content-card h-100">
+            <div class="toolbar">
+                <h6 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-person-lines-fill me-2 text-primary"></i>Tài khoản hệ thống
+                </h6>
+                <a asp-controller="TaiKhoan" asp-action="Index" class="small text-decoration-none">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+            </div>
+            <div class="table-responsive">
+                <table class="modern-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Người dùng</th>
+                            <th>Email</th>
+                            <th class="text-center">Vai trò</th>
+                            <th class="text-center">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var tk in recentAccounts)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark">@tk.HoTen</div>
+                                    <small class="text-muted font-monospace">@@@tk.TenDangNhap</small>
+                                </td>
+                                <td>@tk.Email</td>
+                                <td class="text-center">
+                                    @if (tk.VaiTro == "Admin")
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger border px-2 py-1 rounded-pill">Admin</span>
+                                    }
+                                    else if (tk.VaiTro == "GiaoVu")
+                                    {
+                                        <span class="badge bg-info-subtle text-info-emphasis border px-2 py-1 rounded-pill">Giáo Vụ</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success-subtle text-success border px-2 py-1 rounded-pill">Học Viên</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (tk.TrangThai)
+                                    {
+                                        <span class="status-pill active"><span class="status-dot"></span> Hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-pill paused"><span class="status-dot"></span> Đã khóa</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cột 2: Chương trình đào tạo -->
+    <div class="col-lg-6">
+        <div class="content-card h-100">
+            <div class="toolbar">
+                <h6 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-collection me-2 text-success"></i>Chương trình đào tạo của trung tâm
+                </h6>
+                <a asp-controller="ChuongTrinhDaoTao" asp-action="Index" class="small text-decoration-none">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+            </div>
+            <div class="table-responsive">
+                <table class="modern-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Tên chương trình</th>
+                            <th>Email liên hệ</th>
+                            <th class="text-center">Số lớp học</th>
+                            <th class="text-center">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in recentChuongTrinhs)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark">@c.TenChuongTrinh</div>
+                                    <small class="text-muted desc-text">@(c.MoTa ?? "Chưa có mô tả")</small>
+                                </td>
+                                <td>@(c.EmailLienHe ?? "Chưa có")</td>
+                                <td class="text-center">
+                                    <span class="class-pill">@(c.LopHocs?.Count ?? 0) lớp</span>
+                                </td>
+                                <td class="text-center">
+                                    @if (c.TrangThai)
+                                    {
+                                        <span class="status-pill active"><span class="status-dot"></span> Hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-pill paused"><span class="status-dot"></span> Tạm ngưng</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Chart 1: Role Chart (Doughnut)
+            const ctxRole = document.getElementById('roleChart');
+            if (ctxRole) {
+                new Chart(ctxRole, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Quản trị viên (Admin)', 'Giáo vụ (GiaoVu)', 'Học viên (HocVien)'],
+                        datasets: [{
+                            data: [@ViewBag.CountAdmin, @ViewBag.CountGiaoVu, @ViewBag.CountHocVien],
+                            backgroundColor: ['#dc2626', '#0284c7', '#16a34a'],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Chart 2: ChuongTrinh Chart (Bar)
+            const ctxCategory = document.getElementById('categoryChart');
+            if (ctxCategory) {
+                const categoryNames = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.ChuongTrinhNames ?? new List<string>()));
+                const categoryCounts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.LopHocCounts ?? new List<int>()));
+
+                new Chart(ctxCategory, {
+                    type: 'bar',
+                    data: {
+                        labels: categoryNames,
+                        datasets: [{
+                            label: 'Số lượng lớp học',
+                            data: categoryCounts,
+                            backgroundColor: '#0284c7',
+                            borderRadius: 6,
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}

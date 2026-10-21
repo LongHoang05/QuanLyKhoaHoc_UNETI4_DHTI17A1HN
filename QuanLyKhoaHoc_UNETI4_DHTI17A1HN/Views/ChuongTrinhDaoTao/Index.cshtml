@@ -1,0 +1,293 @@
+@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels.ChuongTrinhDaoTaoListViewModel
+@using Microsoft.AspNetCore.Http
+@{
+    ViewData["Title"] = "Chương Trình Đào Tạo";
+    var vaiTro = Context.Session.GetString("VaiTro");
+    var isAdmin = vaiTro == "Admin";
+    var isGiaoVu = vaiTro == "GiaoVu";
+
+    var countActive = Model.Items.Count(x => x.TrangThai);
+    var countPaused = Model.Items.Count(x => !x.TrangThai);
+    var totalLopHoc = Model.Items.Sum(x => x.LopHocs?.Count ?? 0);
+}
+
+<!--
+// ========================================================
+// Họ và tên: Vũ Đình Trường - MSV: 23103100026
+// Phụ trách: Module 1 - Quản lý Chương trình đào tạo (ChuongTrinhDaoTao)
+// Giao diện chuẩn Giao_DIen_Test (Tone Xanh Da Trời & Trắng)
+// ========================================================
+-->
+
+<!-- 1. Page Hero Banner -->
+<div class="page-hero">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                <span class="hero-badge"><i class="bi bi-mortarboard-fill"></i> Module 1 - Phụ trách: Vũ Đình Trường</span>
+                <span class="badge bg-white bg-opacity-25 text-white">MSV: 23103100026</span>
+                <span class="badge bg-info bg-opacity-50 text-white">EF Core 10 & LINQ</span>
+            </div>
+            <h1 class="hero-title">Quản Lý Chương Trình Đào Tạo</h1>
+            <p class="hero-subtitle">Quản lý danh mục các chương trình đào tạo chuẩn của trung tâm, kiểm soát an toàn khóa ngoại và liên kết lớp học</p>
+        </div>
+        @if (isAdmin || isGiaoVu)
+        {
+            <div class="d-flex gap-2">
+                <a asp-action="Create" class="btn btn-light rounded-pill px-3 py-2 fw-bold text-primary shadow-sm">
+                    <i class="bi bi-plus-circle-fill me-1"></i> Thêm Chương Trình Mới
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- 2. Row Thống kê Mini Stat Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="mini-stat-card">
+            <div>
+                <div class="mini-stat-label">Tổng Chương Trình</div>
+                <div class="mini-stat-num text-primary">@Model.TotalCount</div>
+                <small class="text-muted">Tổng số ngành/hướng đào tạo</small>
+            </div>
+            <div class="mini-stat-icon" style="background: var(--surface-container); color: var(--primary-rose);">
+                <i class="bi bi-collection-fill"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="mini-stat-card">
+            <div>
+                <div class="mini-stat-label">Đang Hoạt Động</div>
+                <div class="mini-stat-num text-success">@countActive</div>
+                <small class="text-muted">Đang mở tuyển sinh</small>
+            </div>
+            <div class="mini-stat-icon" style="background: #e0f2fe; color: #0284c7;">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="mini-stat-card">
+            <div>
+                <div class="mini-stat-label">Tạm Ngưng</div>
+                <div class="mini-stat-num text-secondary">@countPaused</div>
+                <small class="text-muted">Tạm dừng mở lớp mới</small>
+            </div>
+            <div class="mini-stat-icon" style="background: #f1f5f9; color: #64748b;">
+                <i class="bi bi-pause-circle-fill"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="mini-stat-card">
+            <div>
+                <div class="mini-stat-label">Tổng Số Lớp Mở</div>
+                <div class="mini-stat-num text-warning">@totalLopHoc</div>
+                <small class="text-muted">Lớp học thuộc các chương trình</small>
+            </div>
+            <div class="mini-stat-icon" style="background: #fef3c7; color: #d97706;">
+                <i class="bi bi-journal-code"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Bảng nội dung chính -->
+<div class="content-card">
+    <!-- Toolbar tìm kiếm & lọc -->
+    <div class="toolbar">
+        <form method="get" asp-action="Index" class="row g-2 align-items-center w-100">
+            <div class="col-md-5">
+                <div class="search-wrap">
+                    <i class="bi bi-search"></i>
+                    <input type="text" name="keyword" value="@Model.Keyword" class="form-control" placeholder="Tìm theo tên chương trình, mô tả, email..." />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="trangThai" class="form-select filter-select">
+                    <option value="">-- Tất cả trạng thái --</option>
+                    <option value="true" selected="@(Model.TrangThai == true)">Đang hoạt động</option>
+                    <option value="false" selected="@(Model.TrangThai == false)">Tạm ngưng</option>
+                </select>
+            </div>
+            <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary rounded-pill px-3">
+                    <i class="bi bi-funnel-fill me-1"></i> Lọc dữ liệu
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-3">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> Làm mới
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="modern-table align-middle">
+            <thead>
+                <tr>
+                    <th style="width: 80px;">MÃ</th>
+                    <th>TÊN CHƯƠNG TRÌNH ĐÀO TẠO</th>
+                    <th>EMAIL LIÊN HỆ</th>
+                    <th class="text-center">SỐ LỚP MỞ</th>
+                    <th class="text-center">TRẠNG THÁI</th>
+                    <th class="text-end">THAO TÁC</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Items != null && Model.Items.Any())
+                {
+                    foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td class="fw-bold text-muted">#@item.MaChuongTrinh</td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@item.MaChuongTrinh" class="fw-bold text-primary text-decoration-none">
+                                    @item.TenChuongTrinh
+                                </a>
+                                <div class="desc-text">@(item.MoTa ?? "Chưa có mô tả")</div>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.EmailLienHe))
+                                {
+                                    <span class="text-muted small"><i class="bi bi-envelope me-1"></i>@item.EmailLienHe</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted fst-italic small">Chưa cập nhật</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <span class="class-pill">@(item.LopHocs?.Count ?? 0) lớp</span>
+                            </td>
+                            <td class="text-center">
+                                @if (item.TrangThai)
+                                {
+                                    <span class="status-pill active"><span class="status-dot"></span> Hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="status-pill paused"><span class="status-dot"></span> Tạm ngưng</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end gap-1">
+                                    <a asp-action="Details" asp-route-id="@item.MaChuongTrinh" class="action-btn view" title="Xem chi tiết">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    @if (isAdmin)
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.MaChuongTrinh" class="action-btn edit" title="Chỉnh sửa">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form asp-action="ToggleStatus" asp-route-id="@item.MaChuongTrinh" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="action-btn text-warning" title="Đổi trạng thái hoạt động">
+                                                <i class="bi bi-arrow-repeat"></i>
+                                            </button>
+                                        </form>
+                                        <button type="button" class="action-btn delete" title="Xóa chương trình"
+                                                onclick="confirmDelete(@item.MaChuongTrinh, '@item.TenChuongTrinh')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                            Không tìm thấy chương trình đào tạo nào phù hợp với bộ lọc hiện tại.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Phân trang Server LINQ Skip/Take -->
+    @if (Model.TotalPages > 1)
+    {
+        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top flex-wrap gap-2">
+            <div class="text-muted small">
+                Hiển thị trang <strong>@Model.PageIndex</strong> / <strong>@Model.TotalPages</strong> (Tổng số: @Model.TotalCount bản ghi)
+            </div>
+            <nav>
+                <ul class="pagination pagination-sm mb-0 gap-1">
+                    <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                        <a class="page-link rounded" asp-action="Index"
+                           asp-route-page="@(Model.PageIndex - 1)"
+                           asp-route-keyword="@Model.Keyword"
+                           asp-route-trangThai="@Model.TrangThai">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                            <a class="page-link rounded" asp-action="Index"
+                               asp-route-page="@i"
+                               asp-route-keyword="@Model.Keyword"
+                               asp-route-trangThai="@Model.TrangThai">@i</a>
+                        </li>
+                    }
+
+                    <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                        <a class="page-link rounded" asp-action="Index"
+                           asp-route-page="@(Model.PageIndex + 1)"
+                           asp-route-keyword="@Model.Keyword"
+                           asp-route-trangThai="@Model.TrangThai">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+</div>
+
+<!-- Modal xác nhận xóa -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title text-danger fw-bold">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận xóa
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3">
+                <p>Bạn có chắc chắn muốn xóa chương trình đào tạo: <strong id="deleteItemName" class="text-dark"></strong>?</p>
+                <div class="alert alert-warning small mb-0">
+                    <i class="bi bi-shield-exclamation me-1"></i>
+                    <strong>Lưu ý:</strong> Hệ thống sẽ tự động chặn xóa nếu chương trình này đã có các lớp học liên kết.
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Hủy bỏ</button>
+                <form id="deleteForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger rounded-pill px-3">Đồng ý xóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id, name) {
+            document.getElementById('deleteItemName').innerText = name;
+            document.getElementById('deleteForm').action = '/ChuongTrinhDaoTao/Delete/' + id;
+            var myModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            myModal.show();
+        }
+    </script>
+}
