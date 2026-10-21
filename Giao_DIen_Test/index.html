@@ -1,0 +1,1106 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tổng quan Hệ thống Quản lý Đào tạo - UNETI EDU</title>
+    <!-- Google Fonts: Playfair Display + Montserrat (Phong cách Floral Haven) -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Montserrat:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Bootstrap 5 CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+        /* =========================================
+           DESIGN SYSTEM: SKY BLUE & PURE WHITE
+           Phong cách Xanh Da Trời & Trắng Tinh Khôi
+           ========================================= */
+        :root {
+            --sidebar-width: 275px;
+
+            /* Hệ màu Xanh Da Trời & Cyan (Sky Blue & White) */
+            --primary-rose: #0284c7;     /* Sky Blue 600 - Xanh da trời chủ đạo */
+            --primary-light: #38bdf8;    /* Sky Light 400 */
+            --primary-blush: #7dd3fc;    /* Sky Soft 300 */
+            --primary-dark: #0369a1;     /* Sky Dark 700 */
+
+            /* Nền & Bề mặt Trắng Sáng & Xanh Da Trời Nhạt */
+            --bg-color: #f0f7fd;
+            --surface-card: #ffffff;
+            --surface-container: #e0f2fe;
+            --surface-variant: #f8fafc;
+
+            /* Text chuẩn mực dễ nhìn */
+            --text-dark: #0f172a;
+            --text-gray: #334155;
+            --text-muted: #64748b;
+
+            /* Đường viền & Hiệu ứng */
+            --border-color: #bae6fd;
+            --border-light: #e2e8f0;
+            --glass-bg: rgba(255, 255, 255, 0.92);
+            --card-shadow: 0 4px 20px rgba(2, 132, 199, 0.06);
+            --card-hover-shadow: 0 12px 28px rgba(2, 132, 199, 0.12);
+
+            /* Typography */
+            --font-serif: "Playfair Display", Georgia, serif;
+            --font-sans: "Montserrat", -apple-system, BlinkMacSystemFont, sans-serif;
+
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: var(--font-sans);
+            color: var(--text-dark);
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(2, 132, 199, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.06) 0%, transparent 40%);
+        }
+
+        /* ================= SIDEBAR TRÁI ================= */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: linear-gradient(180deg, #07172c 0%, #0c2d48 55%, #051324 100%);
+            color: #e0f2fe;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            box-shadow: 4px 0 30px rgba(2, 132, 199, 0.15);
+        }
+
+        .sidebar-brand {
+            padding: 1.35rem 1.4rem;
+            font-family: var(--font-serif);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #38bdf8;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
+            font-size: 1.2rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1.1rem 0.85rem;
+            margin: 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.2);
+            border-radius: 99px;
+        }
+
+        .sidebar-category {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: #64748b;
+            padding: 0.85rem 1rem 0.35rem 1rem;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.68rem 0.95rem;
+            color: #d4a0b0;
+            text-decoration: none;
+            border-radius: 0.65rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .sidebar-link-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-link i {
+            font-size: 1.1rem;
+        }
+
+        .sidebar-link:hover {
+            background-color: rgba(2, 132, 199, 0.25);
+            color: #e0f2fe;
+            transform: translateX(3px);
+        }
+
+        .sidebar-link.active {
+            background: linear-gradient(90deg, var(--primary-rose), var(--primary-light));
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid rgba(56, 189, 248, 0.1);
+            background-color: rgba(15, 3, 8, 0.6);
+            font-size: 0.8rem;
+            color: #64748b;
+            backdrop-filter: blur(10px);
+        }
+
+        /* ================= MAIN WRAPPER ================= */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Topbar tối giản */
+        .topbar {
+            height: 66px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .topbar-title {
+            font-family: var(--font-serif);
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 1.15rem;
+        }
+
+        .content-area {
+            padding: 1.75rem 2rem 2.5rem 2rem;
+            flex-grow: 1;
+            max-width: 1440px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* ================= HERO GREETING (TỐI GIẢN) ================= */
+        .hero-banner {
+            background: linear-gradient(135deg, #071e3d 0%, #0c3d6d 50%, #051426 100%);
+            border-radius: 1.25rem;
+            padding: 1.75rem 2rem;
+            color: #ffffff;
+            box-shadow: 0 10px 30px rgba(2, 132, 199, 0.15);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1.75rem;
+        }
+
+        .hero-banner::after {
+            content: "";
+            position: absolute;
+            right: -60px;
+            bottom: -60px;
+            width: 240px;
+            height: 240px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero-title {
+            font-family: var(--font-serif);
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 0.35rem;
+            letter-spacing: -0.01em;
+        }
+
+        .hero-subtitle {
+            font-size: 0.88rem;
+            color: #f7d6df;
+            font-weight: 400;
+            margin-bottom: 0;
+        }
+
+        .hero-badge {
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: var(--primary-blush);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* ================= 4 THẺ CHỈ SỐ KPI TỐI GIẢN ================= */
+        .kpi-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.25rem 1.4rem;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--card-hover-shadow);
+            border-color: var(--primary-blush);
+            color: inherit;
+        }
+
+        .kpi-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .kpi-value {
+            font-family: var(--font-serif);
+            font-size: 1.85rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1.1;
+            margin-bottom: 0.25rem;
+        }
+
+        .kpi-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-gray);
+            margin-bottom: 0.2rem;
+        }
+
+        .kpi-sub {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ================= CARD KHỐI NỘI DUNG ================= */
+        .content-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1.15rem;
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            height: 100%;
+        }
+
+        .content-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.9rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .content-card-title {
+            font-family: var(--font-serif);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Danh sách Đơn đăng ký tối giản */
+        .reg-item {
+            padding: 0.9rem 1rem;
+            border-radius: 0.85rem;
+            border: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.6rem;
+            transition: var(--transition);
+            background: var(--surface-variant);
+        }
+
+        .reg-item:hover {
+            background: #fff;
+            border-color: var(--border-color);
+            box-shadow: 0 4px 14px rgba(2, 132, 199, 0.05);
+            transform: translateX(2px);
+        }
+
+        .reg-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--surface-container);
+            color: var(--primary-rose);
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .reg-name {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            line-height: 1.2;
+        }
+
+        .reg-meta {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .status-pill {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.28rem 0.65rem;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .status-pill.warning {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .status-pill.success {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-pill.info {
+            background: var(--surface-container);
+            color: var(--primary-rose);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        /* Danh sách Buổi học hôm nay tối giản */
+        .schedule-chip {
+            padding: 0.9rem 1rem;
+            border-radius: 0.85rem;
+            border: 1px solid var(--border-color);
+            background: #ffffff;
+            margin-bottom: 0.65rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: var(--transition);
+        }
+
+        .schedule-chip:hover {
+            border-color: var(--primary-blush);
+            box-shadow: 0 4px 14px rgba(2, 132, 199, 0.06);
+        }
+
+        .time-box {
+            background: var(--surface-container);
+            color: var(--primary-rose);
+            font-weight: 700;
+            font-size: 0.78rem;
+            padding: 0.45rem 0.65rem;
+            border-radius: 8px;
+            text-align: center;
+            line-height: 1.1;
+            flex-shrink: 0;
+        }
+
+        /* Lối tắt Module nhanh (Tối giản 5 Module) */
+        .quick-nav-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .quick-nav-btn {
+            background: var(--surface-variant);
+            border: 1px solid var(--border-color);
+            border-radius: 0.85rem;
+            padding: 0.85rem 1rem;
+            text-decoration: none;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .quick-nav-btn:hover {
+            background: #ffffff;
+            border-color: var(--primary-rose);
+            color: var(--primary-rose);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.08);
+        }
+
+        .quick-nav-btn i {
+            font-size: 1.15rem;
+            color: var(--primary-rose);
+        }
+
+        /* Toast Container */
+        .toast-container-custom {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 99999;
+        }
+
+        .custom-toast {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 0.85rem 1.15rem;
+            box-shadow: 0 10px 30px rgba(2, 132, 199, 0.15);
+            border-left: 4px solid var(--primary-rose);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            animation: slideIn 0.3s ease;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Container Toast thông báo -->
+    <div id="toastContainer" class="toast-container-custom"></div>
+
+    <!-- ==================== SIDEBAR TRÁI ==================== -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon">
+                <i class="bi bi-mortarboard-fill"></i>
+            </div>
+            <div>
+                <div style="line-height: 1.15;">UNETI EDU</div>
+                <div style="font-size: 0.65rem; color: #64748b; font-weight: 500; font-family: var(--font-sans);">Khoa
+                    CNTT - Nhóm 4</div>
+            </div>
+        </div>
+
+        <ul class="sidebar-menu">
+            <div class="sidebar-category">Bảng điều khiển</div>
+            <li>
+                <a href="index.html" class="sidebar-link active">
+                    <span class="sidebar-link-left"><i class="bi bi-speedometer2"></i> Tổng quan</span>
+                </a>
+            </li>
+
+            <div class="sidebar-category">Quản lý đào tạo (5 Module)</div>
+            <li>
+                <a href="admin-chuong-trinh.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-journal-bookmark-fill"></i> Chương trình ĐT
+                        (M1)</span>
+                    <span class="badge bg-secondary bg-opacity-50 rounded-pill">6</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-lop-hoc.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-easel2-fill"></i> Quản lý Lớp học (M2)</span>
+                    <span class="badge bg-success bg-opacity-75 rounded-pill">18</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-tai-khoan.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-person-lines-fill"></i> Học viên & Hồ sơ (M3)</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-dang-ky.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-clipboard2-check-fill"></i> Duyệt ĐK & Học phí
+                        (M4)</span>
+                    <span class="badge rounded-pill fw-bold" style="background: var(--primary-rose); color: #fff;">8
+                        mới</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-buoi-hoc.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-calendar-week-fill"></i> Lịch học & Buổi học
+                        (M5)</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-ket-qua.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-award-fill"></i> Kết quả học tập (M5)</span>
+                </a>
+            </li>
+
+            <div class="sidebar-category">Thống kê & Cổng ngoài</div>
+            <li>
+                <a href="admin-thong-ke.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-bar-chart-line-fill"></i> Báo cáo LINQ (M5)</span>
+                </a>
+            </li>
+            <li>
+                <a href="hoc-vien.html" class="sidebar-link text-warning">
+                    <span class="sidebar-link-left"><i class="bi bi-box-arrow-up-right"></i> Cổng Học viên (Mục 17.1)</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+                <span><i class="bi bi-shield-check me-1" style="color: var(--primary-blush);"></i> Phiên:</span>
+                <span class="badge text-white" id="currentRoleBadge"
+                    style="background: var(--primary-rose);">Admin</span>
+            </div>
+            <div class="small" style="font-size: 0.72rem; color: #64748b;">
+                Đề tài 16: Quản lý khóa học
+            </div>
+        </div>
+    </aside>
+
+    <!-- ==================== KHUNG NỘI DUNG CHÍNH ==================== -->
+    <div class="main-wrapper">
+
+        <!-- Topbar Tối giản -->
+        <header class="topbar">
+            <div class="d-flex align-items-center gap-2">
+                <span class="topbar-title">Tổng quan Hệ thống</span>
+                <span class="badge rounded-pill"
+                    style="background: var(--surface-container); color: var(--primary-rose); font-size: 0.72rem; font-weight: 600;">Học
+                    kỳ 1 • 2026</span>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <a href="hoc-vien.html" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1" style="font-size: 0.8rem;">
+                    <i class="bi bi-person-workspace me-1"></i> Cổng Học viên
+                </a>
+
+                <!-- Chuyển đổi vai trò nhanh để kiểm thử -->
+                <button type="button" class="btn btn-sm rounded-pill px-3 py-1" onclick="switchUserRole()"
+                    style="background: var(--surface-variant); border: 1px solid var(--border-color); color: var(--text-gray); font-weight: 600; font-size: 0.78rem;">
+                    <i class="bi bi-arrow-repeat me-1" style="color: var(--primary-rose);"></i> <span
+                        id="btnRoleText">Đổi sang Giáo vụ</span>
+                </button>
+
+                <div class="text-end d-none d-sm-block">
+                    <div class="fw-bold small" style="color: var(--text-dark);" id="userNameText">Quản trị viên Hệ thống
+                    </div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);" id="userEmailText">admin@uneti.edu.vn
+                    </div>
+                </div>
+
+                <a href="dang-nhap.html"
+                    class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center"
+                    style="width: 36px; height: 36px; background: var(--surface-container); color: var(--primary-rose); border: 1px solid var(--border-color);"
+                    title="Đăng xuất">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <main class="content-area">
+
+            <!-- 1. HERO GREETING (TỐI GIẢN & ẤM ÁP) -->
+            <div class="hero-banner">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="hero-badge"><i class="bi bi-stars"></i> UNETI Training Portal</span>
+                            <span class="small" style="color: #bae6fd;" id="currentDateStr">Thứ Tư, 21/10/2026</span>
+                        </div>
+                        <h1 class="hero-title">Xin chào, <span id="greetingName">Quản trị viên</span> 👋</h1>
+                        <p class="hero-subtitle">
+                            Hôm nay có <strong class="text-white">8 hồ sơ đăng ký mới</strong> cần xét duyệt và <strong
+                                class="text-white">3 ca học</strong> đang diễn ra tại các phòng Lab.
+                        </p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="admin-dang-ky.html" class="btn btn-sm px-3 py-2 rounded-pill fw-semibold text-white"
+                            style="background: var(--primary-rose); border: 1px solid rgba(56,189,248,0.4); font-size: 0.82rem;">
+                            <i class="bi bi-clipboard2-check me-1"></i> Xử lý Đăng ký (8)
+                        </a>
+                        <a href="admin-lop-hoc.html" class="btn btn-sm px-3 py-2 rounded-pill fw-semibold text-white"
+                            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25); font-size: 0.82rem;">
+                            <i class="bi bi-plus-circle me-1"></i> Mở Lớp Mới
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 4 THẺ CHỈ SỐ KPI TỐI GIẢN (CỐT LÕI HỆ THỐNG) -->
+            <div class="row g-3 mb-4">
+                <!-- KPI 1: Lớp đang mở -->
+                <div class="col-xl-3 col-md-6">
+                    <a href="admin-lop-hoc.html" class="kpi-card">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="kpi-label">Lớp đang mở tuyển sinh</div>
+                                <div class="kpi-value text-success">09</div>
+                                <div class="kpi-sub">
+                                    <i class="bi bi-arrow-up-short text-success fs-6"></i> Trên tổng số 18 lớp học
+                                </div>
+                            </div>
+                            <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                                <i class="bi bi-door-open-fill"></i>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- KPI 2: Chờ xét duyệt -->
+                <div class="col-xl-3 col-md-6">
+                    <a href="admin-dang-ky.html" class="kpi-card">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="kpi-label">Đăng ký chờ xét duyệt</div>
+                                <div class="kpi-value" style="color: #f59e0b;" id="kpiPendingCount">08</div>
+                                <div class="kpi-sub">
+                                    <i class="bi bi-clock-history text-warning fs-6"></i> Kiểm tra sĩ số & điều kiện
+                                </div>
+                            </div>
+                            <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                                <i class="bi bi-hourglass-split"></i>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- KPI 3: Tổng học viên -->
+                <div class="col-xl-3 col-md-6">
+                    <a href="admin-tai-khoan.html" class="kpi-card">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="kpi-label">Tổng số học viên</div>
+                                <div class="kpi-value" style="color: var(--primary-rose);">45</div>
+                                <div class="kpi-sub">
+                                    <i class="bi bi-person-check-fill text-muted fs-6"></i> 6 Chương trình đào tạo
+                                </div>
+                            </div>
+                            <div class="kpi-icon"
+                                style="background: var(--surface-container); color: var(--primary-rose);">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- KPI 4: Doanh thu / Thu phí -->
+                <div class="col-xl-3 col-md-6">
+                    <a href="admin-thong-ke.html" class="kpi-card">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="kpi-label">Học phí đã thu (Tháng)</div>
+                                <div class="kpi-value" style="color: var(--text-dark);">148.5M</div>
+                                <div class="kpi-sub">
+                                    <i class="bi bi-check2-circle text-success fs-6"></i> Ghi nhận trên DangKyHoc
+                                </div>
+                            </div>
+                            <div class="kpi-icon"
+                                style="background: rgba(2, 132, 199, 0.08); color: var(--primary-rose);">
+                                <i class="bi bi-cash-stack"></i>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 3. HAI KHỐI NỘI DUNG TỐI GIẢN (LAYOUT 7 - 5) -->
+            <div class="row g-4">
+
+                <!-- CỘT TRÁI (7 COLS): ĐƠN ĐĂNG KÝ GẦN ĐÂY CẦN XỬ LÝ -->
+                <div class="col-xl-7">
+                    <div class="content-card">
+                        <div class="content-card-header">
+                            <div>
+                                <h3 class="content-card-title">
+                                    <i class="bi bi-clipboard2-pulse text-warning"></i> Đơn đăng ký gần đây
+                                </h3>
+                                <div class="small" style="color: var(--text-muted); font-size: 0.74rem;">Module 4 • Kiểm
+                                    tra sĩ số và phê duyệt hồ sơ học viên</div>
+                            </div>
+                            <a href="admin-dang-ky.html" class="btn btn-sm rounded-pill fw-semibold"
+                                style="background: var(--surface-container); color: var(--primary-rose); border: 1px solid var(--border-color); font-size: 0.78rem;">
+                                Xem tất cả (64) <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+
+                        <!-- Danh sách đơn đăng ký gọn nhẹ -->
+                        <div class="registration-list">
+
+                            <!-- Item 1 -->
+                            <div class="reg-item">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="reg-avatar">MT</div>
+                                    <div>
+                                        <div class="reg-name">Trần Minh Tuấn</div>
+                                        <div class="reg-meta">Lớp: <strong
+                                                style="color: var(--text-dark);">NETCORE10-K01</strong> • Sĩ số: 18/25
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="status-pill warning">
+                                        <span class="status-dot"></span> Chờ duyệt
+                                    </span>
+                                    <a href="admin-dang-ky.html"
+                                        class="btn btn-sm btn-light border rounded-pill py-1 px-2"
+                                        style="font-size: 0.75rem;" title="Xem chi tiết">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Item 2 -->
+                            <div class="reg-item">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="reg-avatar" style="background: #e0f2fe; color: #0284c7;">VA</div>
+                                    <div>
+                                        <div class="reg-name">Nguyễn Văn An</div>
+                                        <div class="reg-meta">Lớp: <strong
+                                                style="color: var(--text-dark);">NETCORE10-K01</strong> • Học phí:
+                                            3.500.000đ</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="status-pill warning">
+                                        <span class="status-dot"></span> Chờ duyệt
+                                    </span>
+                                    <a href="admin-dang-ky.html"
+                                        class="btn btn-sm btn-light border rounded-pill py-1 px-2"
+                                        style="font-size: 0.75rem;">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Item 3 -->
+                            <div class="reg-item">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="reg-avatar"
+                                        style="background: var(--surface-container); color: var(--primary-rose);">QB
+                                    </div>
+                                    <div>
+                                        <div class="reg-name">Phạm Quốc Bảo</div>
+                                        <div class="reg-meta">Lớp: <strong
+                                                style="color: var(--text-dark);">PYTHON-K02</strong> • Sĩ số: 20/25
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="status-pill info">
+                                        <span class="status-dot"></span> Đã duyệt (Chờ thu)
+                                    </span>
+                                    <a href="admin-dang-ky.html"
+                                        class="btn btn-sm btn-light border rounded-pill py-1 px-2"
+                                        style="font-size: 0.75rem;">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Item 4 -->
+                            <div class="reg-item">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="reg-avatar" style="background: #dcfce7; color: #166534;">LH</div>
+                                    <div>
+                                        <div class="reg-name">Lê Hoàng Nam</div>
+                                        <div class="reg-meta">Lớp: <strong
+                                                style="color: var(--text-dark);">REACT-K05</strong> • Đã hoàn tất 100%
+                                            học phí</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="status-pill success">
+                                        <span class="status-dot"></span> Đã đóng học phí
+                                    </span>
+                                    <a href="admin-dang-ky.html"
+                                        class="btn btn-sm btn-light border rounded-pill py-1 px-2"
+                                        style="font-size: 0.75rem;">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CỘT PHẢI (5 COLS): LỊCH HỌC HÔM NAY & LỐI TẮT NHANH -->
+                <div class="col-xl-5">
+                    <div class="d-flex flex-column gap-3 h-100">
+
+                        <!-- Khối Lịch học hôm nay -->
+                        <div class="content-card flex-grow-1">
+                            <div class="content-card-header">
+                                <div>
+                                    <h3 class="content-card-title">
+                                        <i class="bi bi-calendar3-event text-danger"></i> Ca học hôm nay
+                                    </h3>
+                                    <div class="small" style="color: var(--text-muted); font-size: 0.74rem;">Module 5 •
+                                        Lịch học & Điểm danh</div>
+                                </div>
+                                <a href="admin-buoi-hoc.html"
+                                    class="btn btn-sm btn-light border rounded-pill fw-semibold"
+                                    style="font-size: 0.78rem; color: var(--text-gray);">
+                                    Xem lịch <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+
+                            <!-- 3 Ca học hôm nay -->
+                            <div class="schedule-chip">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="time-box">
+                                        <div>18:00</div>
+                                        <div style="font-size: 0.65rem; font-weight: normal;">Hôm nay</div>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold small" style="color: var(--text-dark);">NETCORE10-K01 (Buổi
+                                            5/16)</div>
+                                        <div class="small" style="font-size: 0.74rem; color: var(--text-muted);">
+                                            <i class="bi bi-geo-alt"></i> Lab 402 - Lĩnh Nam • ThS. Hùng
+                                        </div>
+                                    </div>
+                                </div>
+                                <a href="admin-buoi-hoc.html" class="btn btn-sm btn-success rounded-pill px-2 py-1"
+                                    style="font-size: 0.72rem;">
+                                    Điểm danh
+                                </a>
+                            </div>
+
+                            <div class="schedule-chip">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="time-box" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                                        <div>12/12</div>
+                                        <div style="font-size: 0.65rem; font-weight: normal;">Đủ buổi</div>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold small" style="color: var(--text-dark);">REACT-K05 Thực chiến
+                                        </div>
+                                        <div class="small" style="font-size: 0.74rem; color: var(--text-muted);">
+                                            <i class="bi bi-geo-alt"></i> Lab 202 - Minh Khai • Chờ nhập điểm
+                                        </div>
+                                    </div>
+                                </div>
+                                <a href="admin-ket-qua.html" class="btn btn-sm rounded-pill px-2 py-1 text-white"
+                                    style="background: var(--primary-rose); font-size: 0.72rem;">
+                                    Nhập điểm
+                                </a>
+                            </div>
+
+                            <div class="schedule-chip mb-0">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="time-box" style="background: #f3f4f6; color: #4b5563;">
+                                        <div>18:30</div>
+                                        <div style="font-size: 0.65rem; font-weight: normal;">Ngày mai</div>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold small" style="color: var(--text-dark);">PYTHON-K02 (Buổi
+                                            3/12)</div>
+                                        <div class="small" style="font-size: 0.74rem; color: var(--text-muted);">
+                                            <i class="bi bi-geo-alt"></i> Lab 301 - Minh Khai • TS. Mai
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="badge bg-secondary bg-opacity-25 text-secondary rounded-pill"
+                                    style="font-size: 0.7rem;">Sắp tới</span>
+                            </div>
+                        </div>
+
+                        <!-- Khối Lối tắt nhanh 5 Module -->
+                        <div class="content-card">
+                            <h3 class="content-card-title mb-3" style="font-size: 0.95rem;">
+                                <i class="bi bi-grid-fill" style="color: var(--primary-rose);"></i> Lối tắt nhanh các
+                                Module
+                            </h3>
+                            <div class="quick-nav-grid">
+                                <a href="admin-chuong-trinh.html" class="quick-nav-btn">
+                                    <i class="bi bi-journal-bookmark-fill"></i>
+                                    <span>CT Đào tạo (M1)</span>
+                                </a>
+                                <a href="admin-lop-hoc.html" class="quick-nav-btn">
+                                    <i class="bi bi-easel2-fill"></i>
+                                    <span>Lớp học (M2)</span>
+                                </a>
+                                <a href="admin-tai-khoan.html" class="quick-nav-btn">
+                                    <i class="bi bi-person-lines-fill"></i>
+                                    <span>Học viên (M3)</span>
+                                </a>
+                                <a href="admin-dang-ky.html" class="quick-nav-btn">
+                                    <i class="bi bi-clipboard2-check-fill"></i>
+                                    <span>Duyệt ĐK (M4)</span>
+                                </a>
+                                <a href="admin-buoi-hoc.html" class="quick-nav-btn">
+                                    <i class="bi bi-calendar-week-fill"></i>
+                                    <span>Lịch học (M5)</span>
+                                </a>
+                                <a href="admin-thong-ke.html" class="quick-nav-btn">
+                                    <i class="bi bi-bar-chart-line-fill"></i>
+                                    <span>Báo cáo LINQ</span>
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Hiển thị ngày tháng thực tế
+        const today = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' };
+        try {
+            document.getElementById('currentDateStr').innerText = today.toLocaleDateString('vi-VN', options);
+        } catch (e) {
+            document.getElementById('currentDateStr').innerText = 'Hôm nay';
+        }
+
+        // Hiển thị Toast thông báo hiện đại
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'custom-toast';
+
+            let icon = 'bi-check-circle-fill text-success';
+            let borderColor = '#10b981';
+            if (type === 'danger') {
+                icon = 'bi-exclamation-triangle-fill text-danger';
+                borderColor = '#ef4444';
+            } else if (type === 'warning') {
+                icon = 'bi-exclamation-circle-fill text-warning';
+                borderColor = '#f59e0b';
+            } else if (type === 'primary') {
+                icon = 'bi-info-circle-fill';
+                borderColor = '#0284c7';
+            }
+
+            toast.style.borderLeftColor = borderColor;
+            toast.innerHTML = `
+                <i class="bi ${icon} fs-5"></i>
+                <div class="flex-grow-1">
+                    <div class="fw-bold" style="color: var(--text-dark);">${message}</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted);">${new Date().toLocaleTimeString()}</div>
+                </div>
+                <button type="button" class="btn-close btn-sm" onclick="this.parentElement.remove()"></button>
+            `;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.transition = 'opacity 0.4s, transform 0.4s';
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-10px)';
+                setTimeout(() => toast.remove(), 400);
+            }, 3500);
+        }
+
+        // Chuyển đổi vai trò người dùng (Admin <-> Giáo vụ)
+        let currentRole = 'Admin';
+        function switchUserRole() {
+            if (currentRole === 'Admin') {
+                currentRole = 'GiaoVu';
+                document.getElementById('currentRoleBadge').innerText = 'Giáo vụ';
+                document.getElementById('currentRoleBadge').style.background = '#10b981';
+                document.getElementById('userNameText').innerText = 'Giáo vụ Trung tâm';
+                document.getElementById('greetingName').innerText = 'Giáo vụ';
+                document.getElementById('userEmailText').innerText = 'giaovu@uneti.edu.vn';
+                document.getElementById('btnRoleText').innerText = 'Đổi sang Admin';
+                showToast('Đã chuyển sang phiên làm việc: Giáo vụ Trung tâm', 'info');
+            } else {
+                currentRole = 'Admin';
+                document.getElementById('currentRoleBadge').innerText = 'Admin';
+                document.getElementById('currentRoleBadge').style.background = '#0284c7';
+                document.getElementById('userNameText').innerText = 'Quản trị viên Hệ thống';
+                document.getElementById('greetingName').innerText = 'Quản trị viên';
+                document.getElementById('userEmailText').innerText = 'admin@uneti.edu.vn';
+                document.getElementById('btnRoleText').innerText = 'Đổi sang Giáo vụ';
+                showToast('Đã chuyển sang phiên làm việc: Quản trị viên (Admin)', 'primary');
+            }
+        }
+    </script>
+
+</body>
+
+</html>
+

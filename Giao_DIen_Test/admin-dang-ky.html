@@ -1,0 +1,1880 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duyệt Đăng ký & Học phí (DangKyHoc) - UNETI EDU</title>
+    <!-- Google Fonts: Playfair Display + Montserrat (Phong cách Floral Haven) -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+        /* =========================================
+           DESIGN SYSTEM: FLORAL HAVEN - MODULE 4
+           Tối giản, Sang trọng & Hiện đại
+           ========================================= */
+        :root {
+            --sidebar-width: 275px;
+
+            /* Hệ màu Xanh Da Trời & Cyan (Sky Blue & White) */
+            --primary-rose: #0284c7;     /* Sky Blue 600 - Xanh da trời chủ đạo */
+            --primary-light: #38bdf8;    /* Sky Light 400 */
+            --primary-blush: #7dd3fc;    /* Sky Soft 300 */
+            --primary-dark: #0369a1;     /* Sky Dark 700 */
+
+            /* Nền & Bề mặt Trắng Sáng & Xanh Da Trời Nhạt */
+            --bg-color: #f0f7fd;
+            --surface-card: #ffffff;
+            --surface-container: #e0f2fe;
+            --surface-variant: #f8fafc;
+
+            /* Text chuẩn mực dễ nhìn */
+            --text-dark: #0f172a;
+            --text-gray: #334155;
+            --text-muted: #64748b;
+
+            /* Đường viền & Hiệu ứng */
+            --border-color: #bae6fd;
+            --border-light: #e2e8f0;
+            --glass-bg: rgba(255, 255, 255, 0.92);
+            --card-shadow: 0 4px 20px rgba(2, 132, 199, 0.06);
+            --card-hover-shadow: 0 12px 28px rgba(2, 132, 199, 0.12);
+
+            /* Typography */
+            --font-serif: "Playfair Display", Georgia, serif;
+            --font-sans: "Montserrat", -apple-system, BlinkMacSystemFont, sans-serif;
+
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: var(--font-sans);
+            color: var(--text-dark);
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(2, 132, 199, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.06) 0%, transparent 40%);
+        }
+
+        /* ================= SIDEBAR TRÁI ================= */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: linear-gradient(180deg, #07172c 0%, #0c2d48 55%, #051324 100%);
+            color: #e0f2fe;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            box-shadow: 4px 0 30px rgba(2, 132, 199, 0.15);
+        }
+
+        .sidebar-brand {
+            padding: 1.35rem 1.4rem;
+            font-family: var(--font-serif);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #38bdf8;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
+            font-size: 1.2rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1.1rem 0.85rem;
+            margin: 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar-menu::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.2);
+            border-radius: 99px;
+        }
+
+        .sidebar-category {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: #64748b;
+            padding: 0.85rem 1rem 0.35rem 1rem;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.68rem 0.95rem;
+            color: #d4a0b0;
+            text-decoration: none;
+            border-radius: 0.65rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .sidebar-link-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-link i {
+            font-size: 1.1rem;
+        }
+
+        .sidebar-link:hover {
+            background-color: rgba(2, 132, 199, 0.25);
+            color: #e0f2fe;
+            transform: translateX(3px);
+        }
+
+        .sidebar-link.active {
+            background: linear-gradient(90deg, var(--primary-rose), var(--primary-light));
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid rgba(56, 189, 248, 0.1);
+            background-color: rgba(15, 3, 8, 0.6);
+            font-size: 0.8rem;
+            color: #64748b;
+            backdrop-filter: blur(10px);
+        }
+
+        /* ================= MAIN WRAPPER ================= */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Topbar */
+        .topbar {
+            height: 66px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .breadcrumb {
+            margin-bottom: 0;
+            font-size: 0.85rem;
+        }
+
+        .breadcrumb a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary-rose);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .content-area {
+            padding: 1.75rem 2rem 2.5rem 2rem;
+            flex-grow: 1;
+            max-width: 1440px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* ================= HEADER HERO (TỐI GIẢN) ================= */
+        .page-hero {
+            background: linear-gradient(135deg, #071e3d 0%, #0c3d6d 50%, #051426 100%);
+            border-radius: 1.25rem;
+            padding: 1.5rem 1.85rem;
+            color: #ffffff;
+            box-shadow: 0 10px 30px rgba(45, 10, 26, 0.1);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-hero::after {
+            content: "";
+            position: absolute;
+            right: -50px;
+            bottom: -50px;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero-title {
+            font-family: var(--font-serif);
+            font-size: 1.45rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.01em;
+        }
+
+        .hero-subtitle {
+            font-size: 0.84rem;
+            color: #f7d6df;
+            margin-bottom: 0;
+        }
+
+        .hero-badge {
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: var(--primary-blush);
+            padding: 0.2rem 0.65rem;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* ================= STATS ROW TỐI GIẢN ================= */
+        .mini-stat-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.15rem 1.35rem;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mini-stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--card-hover-shadow);
+            border-color: var(--primary-blush);
+        }
+
+        .mini-stat-num {
+            font-family: var(--font-serif);
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1.1;
+        }
+
+        .mini-stat-label {
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: var(--text-gray);
+            margin-bottom: 0.2rem;
+        }
+
+        .mini-stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        /* ================= BẢNG & BỘ LỌC ĐĂNG KÝ TỐI GIẢN ================= */
+        .content-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1.15rem;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .toolbar {
+            padding: 1.15rem 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+            background: #ffffff;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 280px;
+            width: 100%;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .search-box input {
+            padding-left: 36px;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            background: var(--surface-variant);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .search-box input:focus {
+            background: #ffffff;
+            border-color: var(--primary-rose);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.08);
+        }
+
+        .filter-select {
+            border-radius: 50px;
+            font-size: 0.8rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--surface-variant);
+            padding: 0.38rem 0.85rem;
+            color: var(--text-gray);
+            font-weight: 500;
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary-rose);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.08);
+        }
+
+        /* Modern Table */
+        .modern-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .modern-table thead th {
+            background-color: var(--surface-variant);
+            color: var(--text-gray);
+            font-size: 0.74rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 0.95rem 1.15rem;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        .modern-table tbody tr {
+            border-bottom: 1px solid var(--border-light);
+            transition: var(--transition);
+        }
+
+        .modern-table tbody tr:hover {
+            background-color: #fff9fa;
+        }
+
+        .modern-table tbody td {
+            padding: 0.95rem 1.15rem;
+            vertical-align: middle;
+            font-size: 0.85rem;
+        }
+
+        .student-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--surface-container);
+            color: var(--primary-rose);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.82rem;
+            flex-shrink: 0;
+        }
+
+        /* Status Pills */
+        .status-pill {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.28rem 0.65rem;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .status-pill.pending { background: #fef3c7; color: #b45309; }
+        .status-pill.approved { background: #e0f2fe; color: #0369a1; }
+        .status-pill.paid { background: #dcfce7; color: #15803d; }
+        .status-pill.rejected { background: #fee2e2; color: #dc2626; }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        /* Action Buttons */
+        .btn-action-sm {
+            font-size: 0.76rem;
+            font-weight: 600;
+            padding: 0.32rem 0.75rem;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .btn-action-sm:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Modal styling */
+        .modal-content {
+            border-radius: 1.25rem;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            box-shadow: 0 15px 50px rgba(2, 132, 199, 0.15);
+        }
+
+        .modal-header {
+            background: var(--surface-container);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.2rem 1.5rem;
+        }
+
+        .modal-title {
+            font-family: var(--font-serif);
+            font-weight: 700;
+            color: var(--primary-rose);
+            font-size: 1.1rem;
+        }
+
+        /* Quick Status Filter Tabs */
+        .status-tab-bar {
+            padding: 0.85rem 1.5rem;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-tab-pill {
+            background: var(--surface-variant);
+            border: 1px solid var(--border-color);
+            padding: 0.38rem 0.95rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-gray);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .btn-tab-pill:hover {
+            background: #ffffff;
+            border-color: var(--primary-blush);
+            color: var(--primary-rose);
+        }
+
+        .btn-tab-pill.active {
+            background: #ffffff;
+            border-color: var(--primary-rose);
+            color: var(--primary-rose);
+            font-weight: 600;
+            box-shadow: 0 2px 10px rgba(2, 132, 199, 0.1);
+        }
+
+        /* Electronic Receipt Styling */
+        .receipt-card {
+            border: 2px dashed #e2c0cb;
+            border-radius: 1rem;
+            background: #ffffff;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .receipt-watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-25deg);
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: rgba(22, 163, 74, 0.08);
+            text-transform: uppercase;
+            pointer-events: none;
+            letter-spacing: 0.15em;
+            border: 4px solid rgba(22, 163, 74, 0.08);
+            padding: 8px 30px;
+            border-radius: 12px;
+            white-space: nowrap;
+        }
+
+        .receipt-header-logo {
+            font-family: var(--font-serif);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--primary-rose);
+            letter-spacing: -0.01em;
+        }
+
+        /* Toast Container */
+        .toast-container-custom {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 99999;
+        }
+
+        .custom-toast {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 0.85rem 1.15rem;
+            box-shadow: 0 10px 30px rgba(2, 132, 199, 0.15);
+            border-left: 4px solid var(--primary-rose);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 320px;
+            animation: slideIn 0.3s ease;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Toast container -->
+    <div id="toastContainer" class="toast-container-custom"></div>
+
+    <!-- ==================== SIDEBAR TRÁI ==================== -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon">
+                <i class="bi bi-mortarboard-fill"></i>
+            </div>
+            <div>
+                <div style="line-height: 1.15;">UNETI EDU</div>
+                <div style="font-size: 0.65rem; color: #64748b; font-weight: 500; font-family: var(--font-sans);">Khoa CNTT - Nhóm 4</div>
+            </div>
+        </div>
+
+        <ul class="sidebar-menu">
+            <div class="sidebar-category">Bảng điều khiển</div>
+            <li>
+                <a href="index.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-speedometer2"></i> Tổng quan</span>
+                </a>
+            </li>
+
+            <div class="sidebar-category">Quản lý đào tạo (5 Module)</div>
+            <li>
+                <a href="admin-chuong-trinh.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-journal-bookmark-fill"></i> Chương trình ĐT (M1)</span>
+                    <span class="badge bg-secondary bg-opacity-50 rounded-pill">6</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-lop-hoc.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-easel2-fill"></i> Quản lý Lớp học (M2)</span>
+                    <span class="badge bg-success bg-opacity-75 rounded-pill">18</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-tai-khoan.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-person-lines-fill"></i> Học viên & Hồ sơ (M3)</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-dang-ky.html" class="sidebar-link active">
+                    <span class="sidebar-link-left"><i class="bi bi-clipboard2-check-fill"></i> Duyệt ĐK & Học phí (M4)</span>
+                    <span class="badge rounded-pill fw-bold" style="background: var(--primary-rose); color: #fff;" id="sidebarPendingBadge">08 mới</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-buoi-hoc.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-calendar-week-fill"></i> Lịch học & Buổi học (M5)</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-ket-qua.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-award-fill"></i> Kết quả học tập (M5)</span>
+                </a>
+            </li>
+
+            <div class="sidebar-category">Thống kê & Cổng ngoài</div>
+            <li>
+                <a href="admin-thong-ke.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-bar-chart-line-fill"></i> Báo cáo LINQ (M5)</span>
+                </a>
+            </li>
+            <li>
+                <a href="hoc-vien.html" class="sidebar-link text-warning">
+                    <span class="sidebar-link-left"><i class="bi bi-box-arrow-up-right"></i> Cổng Học viên (Mục 17.1)</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+                <span><i class="bi bi-person-badge me-1" style="color: var(--primary-blush);"></i> Phụ trách M4:</span>
+                <span class="text-white fw-semibold">Nguyễn Hoàng Long</span>
+            </div>
+            <div class="small" style="font-size: 0.72rem; color: #64748b;">
+                Duyệt Đăng ký & Thu học phí • Mục 8
+            </div>
+        </div>
+    </aside>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <div class="main-wrapper">
+
+        <!-- Topbar -->
+        <header class="topbar">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html">Tổng quan</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Duyệt Đăng ký & Thu học phí (Module 4)</li>
+                </ol>
+            </nav>
+
+            <div class="d-flex align-items-center gap-3">
+                <a href="hoc-vien.html" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1" style="font-size: 0.8rem;">
+                    <i class="bi bi-person-workspace me-1"></i> Cổng Học viên
+                </a>
+                <div class="text-end d-none d-sm-block">
+                    <div class="fw-bold small" style="color: var(--text-dark);">Giáo vụ Trung tâm</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">giaovu@uneti.edu.vn</div>
+                </div>
+                <a href="dang-nhap.html" class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: var(--surface-container); color: var(--primary-rose); border: 1px solid var(--border-color);" title="Đăng xuất">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <main class="content-area">
+
+            <!-- 1. HERO BANNER TỐI GIẢN -->
+            <div class="page-hero">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="hero-badge"><i class="bi bi-clipboard2-check"></i> Entity DangKyHoc</span>
+                            <span class="small" style="color: #bae6fd;">Mục 8 Đề tài 16 UNETI</span>
+                        </div>
+                        <h1 class="hero-title">Duyệt Đăng ký, Thu Học phí & Sĩ số Lớp</h1>
+                        <p class="hero-subtitle">
+                            Luồng trạng thái chuẩn: <code>Chờ duyệt &rarr; Đã duyệt &rarr; Đã đóng học phí &rarr; Đang học</code>. Kiểm soát sĩ số tối đa bằng LINQ và ghi nhận phiếu thu.
+                        </p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm px-3 py-2 rounded-pill fw-semibold text-white" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); font-size: 0.82rem;" data-bs-toggle="modal" data-bs-target="#modalQuyDinhM4">
+                            <i class="bi bi-info-circle me-1"></i> Quy định Mục 8
+                        </button>
+                        <button type="button" class="btn btn-sm px-3 py-2 rounded-pill fw-semibold text-white" style="background: var(--primary-rose); border: 1px solid rgba(56,189,248,0.4); font-size: 0.82rem;" onclick="filterStatusQuick('Chờ duyệt')">
+                            <i class="bi bi-filter me-1"></i> Lọc Chờ duyệt (<span id="quickPendingBtnCount">08</span>)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. THẺ CHỈ SỐ NHANH TỐI GIẢN (4 CARDS) -->
+            <div class="row g-3 mb-4">
+                <div class="col-xl-3 col-sm-6">
+                    <div class="mini-stat-card">
+                        <div>
+                            <div class="mini-stat-label">Hồ sơ Chờ xét duyệt</div>
+                            <div class="mini-stat-num" style="color: #b45309;" id="statPendingCount">08</div>
+                            <div class="small text-muted" style="font-size: 0.72rem;">Kiểm tra điều kiện & sĩ số</div>
+                        </div>
+                        <div class="mini-stat-icon" style="background: #fef3c7; color: #b45309;">
+                            <i class="bi bi-hourglass-split"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-sm-6">
+                    <div class="mini-stat-card">
+                        <div>
+                            <div class="mini-stat-label">Đã duyệt (Chờ đóng tiền)</div>
+                            <div class="mini-stat-num" style="color: #0369a1;" id="statApprovedCount">12</div>
+                            <div class="small text-muted" style="font-size: 0.72rem;">Đã giữ chỗ trong lớp</div>
+                        </div>
+                        <div class="mini-stat-icon" style="background: #e0f2fe; color: #0369a1;">
+                            <i class="bi bi-check2-circle"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-sm-6">
+                    <div class="mini-stat-card">
+                        <div>
+                            <div class="mini-stat-label">Đã hoàn tất Học phí</div>
+                            <div class="mini-stat-num text-success" id="statPaidCount">44</div>
+                            <div class="small text-muted" style="font-size: 0.72rem;">Học viên chính thức</div>
+                        </div>
+                        <div class="mini-stat-icon" style="background: #dcfce7; color: #15803d;">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-sm-6">
+                    <div class="mini-stat-card">
+                        <div>
+                            <div class="mini-stat-label">Tổng thực thu học phí</div>
+                            <div class="mini-stat-num" style="color: var(--primary-rose);" id="statRevenueText">148.5Tr</div>
+                            <div class="small text-success" style="font-size: 0.72rem;"><i class="bi bi-arrow-up-right me-1"></i>Ghi nhận DangKyHoc</div>
+                        </div>
+                        <div class="mini-stat-icon" style="background: var(--surface-container); color: var(--primary-rose);">
+                            <i class="bi bi-wallet2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. BẢNG DỮ LIỆU ĐĂNG KÝ & BỘ LỌC TỐI GIẢN -->
+            <div class="content-card">
+                
+                <!-- Quick Status Filter Tabs (Pills) -->
+                <div class="status-tab-bar">
+                    <button type="button" class="btn-tab-pill active" onclick="setStatusTab('')" id="tabAll">
+                        <i class="bi bi-grid-fill"></i>
+                        <span>Tất cả đơn</span>
+                        <span class="badge rounded-pill bg-secondary" id="badgeTabAll">0</span>
+                    </button>
+                    <button type="button" class="btn-tab-pill" onclick="setStatusTab('Chờ duyệt')" id="tabPending">
+                        <i class="bi bi-hourglass-split text-warning"></i>
+                        <span>Chờ duyệt</span>
+                        <span class="badge rounded-pill bg-warning text-dark" id="badgeTabPending">0</span>
+                    </button>
+                    <button type="button" class="btn-tab-pill" onclick="setStatusTab('Đã duyệt')" id="tabApproved">
+                        <i class="bi bi-check2-circle text-info"></i>
+                        <span>Đã duyệt (Chờ thu)</span>
+                        <span class="badge rounded-pill bg-info text-dark" id="badgeTabApproved">0</span>
+                    </button>
+                    <button type="button" class="btn-tab-pill" onclick="setStatusTab('Đã đóng học phí')" id="tabPaid">
+                        <i class="bi bi-cash-stack text-success"></i>
+                        <span>Đã đóng học phí</span>
+                        <span class="badge rounded-pill bg-success" id="badgeTabPaid">0</span>
+                    </button>
+                    <button type="button" class="btn-tab-pill" onclick="setStatusTab('Từ chối')" id="tabRejected">
+                        <i class="bi bi-x-circle text-danger"></i>
+                        <span>Từ chối</span>
+                        <span class="badge rounded-pill bg-danger" id="badgeTabRejected">0</span>
+                    </button>
+                </div>
+
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <div class="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
+                        <!-- Search Box -->
+                        <div class="search-box">
+                            <i class="bi bi-search"></i>
+                            <input type="text" id="filterKeyword" onkeyup="applyFilters()" class="form-control form-control-sm" placeholder="Tìm tên học viên, lớp, mã đơn...">
+                        </div>
+
+                        <!-- Filter Trạng thái (Mục 8.1) -->
+                        <select id="filterStatus" onchange="applyFilters(); syncTabsWithSelect();" class="form-select form-select-sm filter-select">
+                            <option value="">-- Tất cả trạng thái --</option>
+                            <option value="Chờ duyệt">Chờ duyệt</option>
+                            <option value="Đã duyệt">Đã duyệt (Chờ thu)</option>
+                            <option value="Đã đóng học phí">Đã đóng học phí</option>
+                            <option value="Từ chối">Từ chối</option>
+                        </select>
+
+                        <!-- Filter CTĐT -->
+                        <select id="filterProgram" onchange="applyFilters()" class="form-select form-select-sm filter-select">
+                            <option value="">-- Tất cả CTĐT --</option>
+                            <option value=".NET Fullstack">.NET Fullstack</option>
+                            <option value="React & Next.js">React & Next.js</option>
+                            <option value="Tiếng Anh TOEIC">Tiếng Anh TOEIC</option>
+                            <option value="Python & AI Data">Python & AI Data</option>
+                            <option value="Mobile Flutter">Mobile Flutter</option>
+                            <option value="Java Enterprise">Java Enterprise</option>
+                        </select>
+
+                        <!-- Reset Filter -->
+                        <button type="button" class="btn btn-sm btn-light border rounded-pill px-3 py-1" onclick="resetFilters()" title="Đặt lại bộ lọc">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </button>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="small text-muted">
+                            Hiển thị <strong id="filterMatchCount">0</strong> đơn đăng ký
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1" onclick="exportToCSV()" title="Xuất danh sách ra file CSV / Excel">
+                            <i class="bi bi-file-earmark-excel me-1 text-success"></i> Xuất CSV
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Modern Table -->
+                <div class="table-responsive">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 70px;">Mã ĐK</th>
+                                <th>Học viên (HocVien)</th>
+                                <th>Lớp đăng ký (LopHoc)</th>
+                                <th>Ngày đăng ký</th>
+                                <th>Học phí / Thực thu</th>
+                                <th>Sĩ số lớp (LINQ)</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end" style="width: 140px;">Xử lý nghiệp vụ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="registrationTableBody">
+                            <!-- Render bằng JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Footer tóm tắt -->
+                <div class="p-3 bg-light border-top d-flex flex-wrap justify-content-between align-items-center gap-2 small text-muted">
+                    <div>
+                        <i class="bi bi-info-circle text-primary me-1"></i> Quy tắc Mục 8.4: Học phí ghi nhận trực tiếp trên <code>DangKyHoc</code> (<code>NgayDongHocPhi</code> & <code>SoTienDaDong</code>).
+                    </div>
+                    <div>
+                        <span class="badge rounded-pill" style="background: var(--surface-container); color: var(--primary-rose);">Mục 8: DangKyHoc</span>
+                        <span class="badge rounded-pill bg-light text-secondary border ms-1">Mục 8.6: Kiểm soát sĩ số</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ==================== MODAL 1: XÉT DUYỆT ĐĂNG KÝ (MỤC 8.2 & 8.3) ==================== -->
+    <div class="modal fade" id="modalDuyetDon" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">
+                        <i class="bi bi-clipboard2-check me-2"></i>Xét duyệt Đơn đăng ký học
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" style="background: var(--bg-color);">
+                    <div class="p-3 rounded-3 border mb-3 small" style="background: var(--surface-variant); border-color: var(--border-color) !important;">
+                        <div class="row g-2">
+                            <div class="col-6"><strong>Mã đơn ĐK:</strong> <span id="appModalMaDK" class="fw-bold" style="color: var(--primary-rose);">#DK-048</span></div>
+                            <div class="col-6"><strong>Học viên:</strong> <span id="appModalHV" class="fw-bold">Trần Minh Tuấn</span></div>
+                            <div class="col-6"><strong>Lớp đăng ký:</strong> <span id="appModalLop" class="fw-bold">NETCORE10-K01</span></div>
+                            <div class="col-6"><strong>Trình độ học vấn:</strong> <span id="appModalTD">Đại học Năm 3 CNTT</span></div>
+                            <div class="col-6"><strong>Sĩ số hiện tại:</strong> <span id="appModalSiSo" class="badge bg-success">18/25</span></div>
+                            <div class="col-6"><strong>Học phí:</strong> <strong id="appModalHocPhi" style="color: var(--primary-rose);">3.500.000 VNĐ</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- Cảnh báo nếu lớp đầy sĩ số (Mục 8.6) -->
+                    <div id="fullCapacityAlert" class="alert alert-danger py-2 px-3 small border-danger mb-3 d-none">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        <strong>Lớp đã đạt sĩ số tối đa!</strong> Thuật toán LINQ kiểm soát sĩ số đã chặn không cho duyệt thêm học viên vào lớp này.
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Nhận xét của Giáo vụ (NhanXetGiaoVu)</label>
+                        <textarea id="appGiaoVuNote" class="form-control form-control-sm" rows="3" placeholder="Đủ điều kiện đầu vào, đồng ý xét duyệt hồ sơ..." style="border-color: var(--border-color);"></textarea>
+                    </div>
+
+                    <div class="small text-muted">
+                        <i class="bi bi-info-circle me-1" style="color: var(--primary-rose);"></i> Duyệt đơn sẽ chuyển trạng thái sang <strong>"Đã duyệt"</strong> và tự động tăng sĩ số giữ chỗ của lớp lên +1.
+                    </div>
+                </div>
+                <div class="modal-footer p-3">
+                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="rejectRegistration()">
+                        <i class="bi bi-x-circle me-1"></i> Từ chối đơn
+                    </button>
+                    <button type="button" class="btn btn-sm px-4 fw-semibold rounded-pill text-white" id="btnConfirmApprove" style="background: var(--primary-rose);" onclick="approveRegistration()">
+                        <i class="bi bi-check2-circle me-1"></i> Phê duyệt đơn
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 2: GHI NHẬN THU HỌC PHÍ (MỤC 8.4) ==================== -->
+    <div class="modal fade" id="modalThuHocPhi" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">
+                        <i class="bi bi-wallet2 me-2"></i>Ghi nhận Thu học phí (Entity DangKyHoc)
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" style="background: var(--bg-color);">
+                    <div class="p-3 rounded-3 border mb-3 small" style="background: var(--surface-variant); border-color: var(--border-color) !important;">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Học viên nộp tiền:</span>
+                            <strong id="payStudentName" style="color: var(--text-dark);">Phạm Quốc Bảo</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Lớp học:</span>
+                            <strong id="payClassName">PYTHON-K02</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Học phí quy định:</span>
+                            <strong id="payFeeRequired" class="fs-6" style="color: var(--primary-rose);">2.800.000 VNĐ</strong>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Số tiền đã đóng (SoTienDaDong) <span class="text-danger">*</span></label>
+                        <div class="input-group input-group-sm">
+                            <input type="number" id="payAmountInput" class="form-control fw-bold text-success" value="2800000" min="1" max="5000000" style="border-color: var(--border-color);">
+                            <span class="input-group-text" style="background: var(--surface-variant); border-color: var(--border-color);">VNĐ</span>
+                        </div>
+                        <div class="form-text small" style="color: var(--text-muted);">Quy định Mục 8.4: <code>SoTienDaDong &gt; 0</code> và không vượt quá học phí lớp. Khi bằng học phí, chuyển sang <strong>"Đã đóng học phí"</strong>.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Hình thức nộp tiền</label>
+                        <select id="payMethodInput" class="form-select form-select-sm" style="border-color: var(--border-color);">
+                            <option value="Chuyển khoản VietQR">Chuyển khoản VietQR</option>
+                            <option value="Tiền mặt tại trung tâm">Tiền mặt tại trung tâm</option>
+                            <option value="Thẻ tín dụng / POS">Thẻ tín dụng / POS</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Ngày đóng học phí (NgayDongHocPhi)</label>
+                        <input type="text" id="payDateInput" class="form-control form-control-sm" value="Hôm nay (Tự động ghi nhận)" readonly style="background: var(--surface-variant); border-color: var(--border-color);">
+                    </div>
+                </div>
+                <div class="modal-footer p-3">
+                    <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-sm px-4 fw-semibold rounded-pill text-white" style="background: var(--primary-rose);" onclick="confirmPayment()">
+                        <i class="bi bi-check2-circle me-1"></i> Xác nhận & Ghi nhận CSDL
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 3: XEM CHI TIẾT ĐĂNG KÝ ==================== -->
+    <div class="modal fade" id="modalChiTietDK" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="detailModalTitle">
+                        <i class="bi bi-info-circle me-2"></i>Chi tiết Hồ sơ Đăng ký học
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" style="background: var(--bg-color);" id="detailModalBody">
+                    <!-- Render bằng JS -->
+                </div>
+                <div class="modal-footer p-3">
+                    <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 4: QUY ĐỊNH MỤC 8 ==================== -->
+    <div class="modal fade" id="modalQuyDinhM4" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">
+                        <i class="bi bi-book me-2"></i>Quy chuẩn Mục 8: Duyệt Đăng ký & Học phí (Nguyễn Hoàng Long)
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" style="background: var(--bg-color);">
+                    <div class="p-3 rounded-3 border mb-3 small" style="background: var(--surface-variant); border-color: var(--border-color) !important;">
+                        <h6 class="fw-bold" style="color: var(--primary-rose);">1. Luồng trạng thái chuẩn (Mục 8.5):</h6>
+                        <p class="mb-0">
+                            <code>Chờ duyệt &rarr; Đã duyệt &rarr; Đã đóng học phí &rarr; Đang học &rarr; Hoàn thành / Không hoàn thành</code><br>
+                            Nhánh từ chối: <code>Chờ duyệt &rarr; Từ chối</code> (bắt buộc nhập <code>NhanXetGiaoVu</code>).
+                        </p>
+                    </div>
+
+                    <div class="p-3 rounded-3 border small" style="background: var(--surface-container); border-color: var(--border-color) !important;">
+                        <h6 class="fw-bold" style="color: var(--primary-rose);">2. Ràng buộc học phí & Sĩ số (Mục 8.4 & 8.6):</h6>
+                        <ul class="ps-3 mb-0 text-muted">
+                            <li>Chỉ đăng ký <strong>Đã duyệt</strong> mới được ghi nhận học phí.</li>
+                            <li>Số tiền đã đóng phải lớn hơn 0 và không vượt quá học phí của lớp.</li>
+                            <li>Đếm tổng số học viên (Đã duyệt + Đã đóng học phí + Đang học). Khi đạt <code>SiSoToiDa</code>, hệ thống LINQ chặn không cho duyệt thêm.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer p-3">
+                    <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Đã hiểu quy tắc</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 5: BIÊN LAI THU HỌC PHÍ ĐIỆN TỬ (MỤC 8.4) ==================== -->
+    <div class="modal fade" id="modalBienLai" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header border-bottom">
+                    <h6 class="modal-title">
+                        <i class="bi bi-receipt-cutoff me-2"></i>Biên lai Thu học phí Điện tử (Entity DangKyHoc)
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" style="background: #f0f7fd;" id="receiptPrintArea">
+                    <!-- Rendered by JS -->
+                </div>
+                <div class="modal-footer p-3 bg-light">
+                    <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-sm px-4 fw-semibold rounded-pill text-white" style="background: var(--primary-rose);" onclick="window.print()">
+                        <i class="bi bi-printer me-1"></i> In phiếu thu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Dataset Đăng ký học chuẩn BTL 16 (Entity DangKyHoc)
+        let registrations = [
+            {
+                id: "DK-048",
+                studentId: "HV-02",
+                studentName: "Trần Minh Tuấn",
+                studentEmail: "tuan.tm@gmail.com",
+                studentEducation: "Đại học Năm 3 CNTT",
+                classCode: "NETCORE10-K01",
+                className: "Phát triển .NET Fullstack",
+                programName: ".NET Fullstack",
+                date: "2026-10-21",
+                fee: 3500000,
+                paidAmount: 0,
+                payMethod: "",
+                payDate: "",
+                capacity: "18/25",
+                isFull: false,
+                status: "Chờ duyệt",
+                note: "Mong muốn tham gia dự án thực chiến cuối khóa."
+            },
+            {
+                id: "DK-047",
+                studentId: "HV-03",
+                studentName: "Lê Thu Hà",
+                studentEmail: "ha.lt@gmail.com",
+                studentEducation: "Tốt nghiệp THPT",
+                classCode: "TOEIC-K12",
+                className: "Tiếng Anh TOEIC Chuẩn Quốc tế",
+                programName: "Tiếng Anh TOEIC",
+                date: "2026-10-19",
+                fee: 2200000,
+                paidAmount: 0,
+                payMethod: "",
+                payDate: "",
+                capacity: "30/30",
+                isFull: true,
+                status: "Chờ duyệt",
+                note: "Lớp học đã đầy 100% sĩ số (30/30). LINQ chặn duyệt."
+            },
+            {
+                id: "DK-046",
+                studentId: "HV-11",
+                studentName: "Nguyễn Trọng Hiếu",
+                studentEmail: "hieu.nt@gmail.com",
+                studentEducation: "Sinh viên UNETI K17",
+                classCode: "FLUTTER-K03",
+                className: "Lập trình Di động Flutter & Dart",
+                programName: "Mobile Flutter",
+                date: "2026-10-18",
+                fee: 3000000,
+                paidAmount: 0,
+                payMethod: "",
+                payDate: "",
+                capacity: "12/20",
+                isFull: false,
+                status: "Chờ duyệt",
+                note: "Đã có kiến thức nền tảng OOP và C++."
+            },
+            {
+                id: "DK-045",
+                studentId: "HV-04",
+                studentName: "Phạm Quốc Bảo",
+                studentEmail: "bao.pq@gmail.com",
+                studentEducation: "Đại học CNTT",
+                classCode: "PYTHON-K02",
+                className: "Khoa học Dữ liệu & AI",
+                programName: "Python & AI Data",
+                date: "2026-10-15",
+                fee: 2800000,
+                paidAmount: 0,
+                payMethod: "",
+                payDate: "",
+                capacity: "20/25",
+                isFull: false,
+                status: "Đã duyệt",
+                note: "Đủ điều kiện xếp lớp. Chờ đóng học phí."
+            },
+            {
+                id: "DK-044",
+                studentId: "HV-09",
+                studentName: "Bùi Quốc Huy",
+                studentEmail: "huy.bq@gmail.com",
+                studentEducation: "Đại học Sư phạm",
+                classCode: "JAVA-K08",
+                className: "Java Spring Boot Enterprise",
+                programName: "Java Enterprise",
+                date: "2026-10-14",
+                fee: 3600000,
+                paidAmount: 0,
+                payMethod: "",
+                payDate: "",
+                capacity: "16/25",
+                isFull: false,
+                status: "Đã duyệt",
+                note: "Đạt kiểm tra đầu vào Java Core 8.5/10."
+            },
+            {
+                id: "DK-043",
+                studentId: "HV-10",
+                studentName: "Đặng Phương Thảo",
+                studentEmail: "thao.dp@gmail.com",
+                studentEducation: "Kế toán Doanh nghiệp",
+                classCode: "REACT-K05",
+                className: "React & Next.js Thực chiến",
+                programName: "React & Next.js",
+                date: "2026-10-12",
+                fee: 3200000,
+                paidAmount: 0,
+                payMethod: "",
+                payDate: "",
+                capacity: "14/20",
+                isFull: false,
+                status: "Đã duyệt",
+                note: "Chờ xác nhận giao dịch chuyển khoản VietQR."
+            },
+            {
+                id: "DK-042",
+                studentId: "HV-05",
+                studentName: "Lê Hoàng Nam",
+                studentEmail: "nam.lh@gmail.com",
+                studentEducation: "Kỹ sư phần mềm",
+                classCode: "REACT-K05",
+                className: "React & Next.js Thực chiến",
+                programName: "React & Next.js",
+                date: "2026-10-10",
+                fee: 3200000,
+                paidAmount: 3200000,
+                payMethod: "Chuyển khoản VietQR",
+                payDate: "2026-10-11",
+                capacity: "14/20",
+                isFull: false,
+                status: "Đã đóng học phí",
+                note: "Đã hoàn tất 100% học phí đầu khóa."
+            },
+            {
+                id: "DK-041",
+                studentId: "HV-01",
+                studentName: "Nguyễn Văn An",
+                studentEmail: "an.nguyen@gmail.com",
+                studentEducation: "Sinh viên UNETI CNTT",
+                classCode: "NETCORE10-K01",
+                className: "Phát triển .NET Fullstack",
+                programName: ".NET Fullstack",
+                date: "2026-10-09",
+                fee: 3500000,
+                paidAmount: 3500000,
+                payMethod: "Chuyển khoản VietQR",
+                payDate: "2026-10-10",
+                capacity: "18/25",
+                isFull: false,
+                status: "Đã đóng học phí",
+                note: "Đã nộp học phí qua cổng VNPay/VietQR."
+            },
+            {
+                id: "DK-040",
+                studentId: "HV-06",
+                studentName: "Đỗ Thùy Linh",
+                studentEmail: "linh.dt@gmail.com",
+                studentEducation: "Cao đẳng",
+                classCode: "PYTHON-K02",
+                className: "Khoa học Dữ liệu & AI",
+                programName: "Python & AI Data",
+                date: "2026-10-08",
+                fee: 2800000,
+                paidAmount: 2800000,
+                payMethod: "Tiền mặt tại trung tâm",
+                payDate: "2026-10-09",
+                capacity: "20/25",
+                isFull: false,
+                status: "Đã đóng học phí",
+                note: "Đã đóng đủ học phí tại phòng Giáo vụ UNETI."
+            },
+            {
+                id: "DK-039",
+                studentId: "HV-08",
+                studentName: "Hoàng Mai Chi",
+                studentEmail: "chi.hm@gmail.com",
+                studentEducation: "Sinh viên Ngoại ngữ",
+                classCode: "TOEIC-K12",
+                className: "Tiếng Anh TOEIC Chuẩn Quốc tế",
+                programName: "Tiếng Anh TOEIC",
+                date: "2026-10-07",
+                fee: 2200000,
+                paidAmount: 2200000,
+                payMethod: "Chuyển khoản VietQR",
+                payDate: "2026-10-08",
+                capacity: "30/30",
+                isFull: true,
+                status: "Đã đóng học phí",
+                note: "Học viên thứ 30 giữ chỗ thành công."
+            },
+            {
+                id: "DK-038",
+                studentId: "HV-07",
+                studentName: "Vũ Hải Đăng",
+                studentEmail: "dang.vh@gmail.com",
+                studentEducation: "Đại học",
+                classCode: "NETCORE10-K01",
+                className: "Phát triển .NET Fullstack",
+                programName: ".NET Fullstack",
+                date: "2026-10-05",
+                fee: 3500000,
+                paidAmount: 0,
+                payMethod: "",
+                payDate: "",
+                capacity: "18/25",
+                isFull: false,
+                status: "Từ chối",
+                note: "Chưa đủ điều kiện tiên quyết kiến thức C# cơ bản."
+            },
+            {
+                id: "DK-037",
+                studentId: "HV-12",
+                studentName: "Trịnh Kim Ngân",
+                studentEmail: "ngan.tk@gmail.com",
+                studentEducation: "Nhân viên Văn phòng",
+                classCode: "JAVA-K08",
+                className: "Java Spring Boot Enterprise",
+                programName: "Java Enterprise",
+                date: "2026-10-04",
+                fee: 3600000,
+                paidAmount: 3600000,
+                payMethod: "Chuyển khoản VietQR",
+                payDate: "2026-10-05",
+                capacity: "16/25",
+                isFull: false,
+                status: "Đã đóng học phí",
+                note: "Đã xuất hóa đơn VAT điện tử."
+            },
+            {
+                id: "DK-036",
+                studentId: "HV-13",
+                studentName: "Trần Đình Trọng",
+                studentEmail: "trong.td@gmail.com",
+                studentEducation: "Sinh viên CNTT",
+                classCode: "FLUTTER-K03",
+                className: "Lập trình Di động Flutter & Dart",
+                programName: "Mobile Flutter",
+                date: "2026-10-03",
+                fee: 3000000,
+                paidAmount: 3000000,
+                payMethod: "Chuyển khoản VietQR",
+                payDate: "2026-10-04",
+                capacity: "12/20",
+                isFull: false,
+                status: "Đã đóng học phí",
+                note: "Học bổng khuyến học 0% - đã nộp đủ."
+            },
+            {
+                id: "DK-035",
+                studentId: "HV-14",
+                studentName: "Phạm Thị Mỹ Duyên",
+                studentEmail: "duyen.ptm@gmail.com",
+                studentEducation: "Đại học Thương Mại",
+                classCode: "REACT-K05",
+                className: "React & Next.js Thực chiến",
+                programName: "React & Next.js",
+                date: "2026-10-01",
+                fee: 3200000,
+                paidAmount: 0,
+                payMethod: "",
+                payDate: "",
+                capacity: "14/20",
+                isFull: false,
+                status: "Từ chối",
+                note: "Trùng lịch học chuyên ngành chính khóa tại UNETI Lĩnh Nam."
+            }
+        ];
+
+        let selectedRegId = null;
+
+        // Toast thông báo
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'custom-toast';
+            
+            let icon = 'bi-check-circle-fill text-success';
+            let borderColor = '#10b981';
+            if (type === 'danger') {
+                icon = 'bi-exclamation-triangle-fill text-danger';
+                borderColor = '#ef4444';
+            } else if (type === 'warning') {
+                icon = 'bi-exclamation-circle-fill text-warning';
+                borderColor = '#f59e0b';
+            }
+
+            toast.style.borderLeftColor = borderColor;
+            toast.innerHTML = `
+                <i class="bi ${icon} fs-5"></i>
+                <div class="flex-grow-1">
+                    <div class="fw-bold" style="color: var(--text-dark);">${message}</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted);">${new Date().toLocaleTimeString()}</div>
+                </div>
+                <button type="button" class="btn-close btn-sm" onclick="this.parentElement.remove()"></button>
+            `;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.transition = 'opacity 0.3s, transform 0.3s';
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-10px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Định dạng tiền
+        function formatMoney(amount) {
+            return new Intl.NumberFormat('vi-VN').format(amount) + ' đ';
+        }
+
+        // Đổi Tab trạng thái nhanh (Pill buttons)
+        function setStatusTab(st) {
+            document.getElementById('filterStatus').value = st;
+            
+            const tabs = [
+                { id: 'tabAll', value: '' },
+                { id: 'tabPending', value: 'Chờ duyệt' },
+                { id: 'tabApproved', value: 'Đã duyệt' },
+                { id: 'tabPaid', value: 'Đã đóng học phí' },
+                { id: 'tabRejected', value: 'Từ chối' }
+            ];
+
+            tabs.forEach(t => {
+                const el = document.getElementById(t.id);
+                if (el) {
+                    if (t.value === st) {
+                        el.classList.add('active');
+                    } else {
+                        el.classList.remove('active');
+                    }
+                }
+            });
+
+            applyFilters();
+        }
+
+        // Đồng bộ Dropdown sang Tab pills
+        function syncTabsWithSelect() {
+            const st = document.getElementById('filterStatus').value;
+            setStatusTab(st);
+        }
+
+        // Lọc và hiển thị
+        function applyFilters() {
+            const kw = document.getElementById('filterKeyword').value.toLowerCase().trim();
+            const statusFilter = document.getElementById('filterStatus').value;
+            const programFilter = document.getElementById('filterProgram').value;
+            const tbody = document.getElementById('registrationTableBody');
+
+            const filtered = registrations.filter(r => {
+                const matchKw = r.studentName.toLowerCase().includes(kw) || 
+                                r.classCode.toLowerCase().includes(kw) || 
+                                r.id.toLowerCase().includes(kw);
+                const matchStatus = !statusFilter || r.status === statusFilter;
+                const matchProgram = !programFilter || r.programName === programFilter;
+                return matchKw && matchStatus && matchProgram;
+            });
+
+            document.getElementById('filterMatchCount').innerText = filtered.length;
+
+            tbody.innerHTML = filtered.map(r => {
+                let statusBadge = '';
+                if (r.status === 'Chờ duyệt') {
+                    statusBadge = '<span class="status-pill pending"><span class="status-dot"></span> Chờ duyệt</span>';
+                } else if (r.status === 'Đã duyệt') {
+                    statusBadge = '<span class="status-pill approved"><span class="status-dot"></span> Đã duyệt (Chờ thu)</span>';
+                } else if (r.status === 'Đã đóng học phí') {
+                    statusBadge = '<span class="status-pill paid"><span class="status-dot"></span> Đã đóng học phí</span>';
+                } else {
+                    statusBadge = '<span class="status-pill rejected"><span class="status-dot"></span> Từ chối</span>';
+                }
+
+                let feeDisplay = `<div><strong>${formatMoney(r.fee)}</strong></div>`;
+                if (r.status === 'Đã đóng học phí') {
+                    feeDisplay += `<div class="small text-success fw-bold" style="font-size: 0.72rem;"><i class="bi bi-check-all"></i> Đã nộp: ${formatMoney(r.paidAmount)}</div>`;
+                } else {
+                    feeDisplay += `<div class="small text-muted" style="font-size: 0.72rem;">Chưa đóng</div>`;
+                }
+
+                let actionBtns = '';
+                if (r.status === 'Chờ duyệt') {
+                    actionBtns = `
+                        <button type="button" class="btn btn-action-sm text-white" style="background: var(--primary-rose);" onclick="openApprovalModal('${r.id}')">
+                            <i class="bi bi-check2-square"></i> Xét duyệt
+                        </button>
+                    `;
+                } else if (r.status === 'Đã duyệt') {
+                    actionBtns = `
+                        <div class="d-flex justify-content-end gap-1">
+                            <button type="button" class="btn btn-action-sm btn-outline-success" onclick="openPaymentModal('${r.id}')" title="Ghi nhận thu tiền">
+                                <i class="bi bi-wallet2"></i> Thu phí
+                            </button>
+                            <button type="button" class="btn btn-action-sm btn-light border" onclick="viewDetail('${r.id}')" title="Xem chi tiết">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    `;
+                } else if (r.status === 'Đã đóng học phí') {
+                    actionBtns = `
+                        <div class="d-flex justify-content-end gap-1">
+                            <button type="button" class="btn btn-action-sm text-white" style="background: #16a34a;" onclick="openReceiptModal('${r.id}')" title="Xem & In biên lai điện tử">
+                                <i class="bi bi-receipt-cutoff"></i> Biên lai
+                            </button>
+                            <button type="button" class="btn btn-action-sm btn-light border" onclick="viewDetail('${r.id}')" title="Xem chi tiết">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    actionBtns = `
+                        <button type="button" class="btn btn-action-sm btn-light border" onclick="viewDetail('${r.id}')">
+                            <i class="bi bi-eye"></i> Chi tiết
+                        </button>
+                    `;
+                }
+
+                return `
+                    <tr>
+                        <td class="fw-bold" style="color: var(--primary-rose);">${r.id}</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="student-avatar">${r.studentName.charAt(0)}</div>
+                                <div>
+                                    <div class="fw-semibold" style="color: var(--text-dark);">${r.studentName}</div>
+                                    <div class="small text-muted" style="font-size: 0.74rem;">${r.studentEducation}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fw-semibold">${r.classCode}</div>
+                            <div class="small text-muted" style="font-size: 0.74rem;">${r.className}</div>
+                        </td>
+                        <td><small class="text-muted">${r.date}</small></td>
+                        <td>${feeDisplay}</td>
+                        <td>
+                            <span class="badge ${r.isFull ? 'bg-danger' : 'bg-light text-dark border'} rounded-pill">
+                                ${r.capacity} ${r.isFull ? '(Đầy)' : ''}
+                            </span>
+                        </td>
+                        <td>${statusBadge}</td>
+                        <td class="text-end">${actionBtns}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            updateStats();
+        }
+
+        function resetFilters() {
+            document.getElementById('filterKeyword').value = '';
+            document.getElementById('filterProgram').value = '';
+            setStatusTab('');
+        }
+
+        // Mở Modal Xét duyệt đơn (Mục 8.2 & 8.3)
+        function openApprovalModal(id) {
+            selectedRegId = id;
+            const r = registrations.find(item => item.id === id);
+            if (!r) return;
+
+            document.getElementById('appModalMaDK').innerText = r.id;
+            document.getElementById('appModalHV').innerText = r.studentName;
+            document.getElementById('appModalLop').innerText = `${r.classCode} (${r.className})`;
+            document.getElementById('appModalTD').innerText = r.studentEducation;
+            document.getElementById('appModalSiSo').innerText = r.capacity;
+            document.getElementById('appModalHocPhi').innerText = formatMoney(r.fee);
+            document.getElementById('appGiaoVuNote').value = 'Đã đối chiếu trình độ đầu vào hợp lệ. Cho phép xếp vào lớp.';
+
+            const fullAlert = document.getElementById('fullCapacityAlert');
+            const btnApprove = document.getElementById('btnConfirmApprove');
+
+            if (r.isFull) {
+                fullAlert.classList.remove('d-none');
+                btnApprove.disabled = true;
+                btnApprove.classList.add('opacity-50');
+            } else {
+                fullAlert.classList.add('d-none');
+                btnApprove.disabled = false;
+                btnApprove.classList.remove('opacity-50');
+            }
+
+            new bootstrap.Modal(document.getElementById('modalDuyetDon')).show();
+        }
+
+        // Chấp thuận Duyệt đơn (Tăng sĩ số lớp bằng logic LINQ)
+        function approveRegistration() {
+            const r = registrations.find(item => item.id === selectedRegId);
+            if (!r) return;
+
+            if (r.isFull) {
+                alert('Lớp học đã đầy sĩ số tối đa! Không thể phê duyệt đơn này.');
+                return;
+            }
+
+            r.status = 'Đã duyệt';
+            
+            // Cập nhật tăng sĩ số giữ chỗ của lớp
+            const parts = r.capacity.split('/');
+            if (parts.length === 2) {
+                let cur = parseInt(parts[0]) || 0;
+                let max = parseInt(parts[1]) || 0;
+                cur = Math.min(cur + 1, max);
+                const newCap = `${cur}/${max}`;
+                // Áp dụng cập nhật cho các đơn cùng lớp
+                registrations.forEach(item => {
+                    if (item.classCode === r.classCode) {
+                        item.capacity = newCap;
+                        if (cur >= max) item.isFull = true;
+                    }
+                });
+            }
+
+            bootstrap.Modal.getInstance(document.getElementById('modalDuyetDon')).hide();
+            applyFilters();
+            showToast(`✅ Đã phê duyệt đơn ${r.id} cho học viên ${r.studentName}! Trạng thái chuyển thành "Đã duyệt" (Chờ thu). Sĩ số lớp tự động cập nhật.`, 'info');
+        }
+
+        // Từ chối đơn
+        function rejectRegistration() {
+            const r = registrations.find(item => item.id === selectedRegId);
+            if (!r) return;
+
+            const note = document.getElementById('appGiaoVuNote').value.trim();
+            if (!note) {
+                alert('Vui lòng nhập lý do từ chối vào mục Nhận xét của Giáo vụ!');
+                return;
+            }
+
+            r.status = 'Từ chối';
+            r.note = note;
+            bootstrap.Modal.getInstance(document.getElementById('modalDuyetDon')).hide();
+            applyFilters();
+            showToast(`⚠️ Đã từ chối đơn ${r.id}. Lý do: "${note}"`, 'danger');
+        }
+
+        // Mở Modal Thu học phí (Mục 8.4)
+        function openPaymentModal(id) {
+            selectedRegId = id;
+            const r = registrations.find(item => item.id === id);
+            if (!r) return;
+
+            document.getElementById('payStudentName').innerText = r.studentName;
+            document.getElementById('payClassName').innerText = `${r.classCode} (${r.className})`;
+            document.getElementById('payFeeRequired').innerText = formatMoney(r.fee);
+            document.getElementById('payAmountInput').value = r.fee;
+
+            new bootstrap.Modal(document.getElementById('modalThuHocPhi')).show();
+        }
+
+        // Xác nhận Thu học phí
+        function confirmPayment() {
+            const r = registrations.find(item => item.id === selectedRegId);
+            if (!r) return;
+
+            const amount = parseInt(document.getElementById('payAmountInput').value) || 0;
+            const method = document.getElementById('payMethodInput').value;
+
+            if (amount <= 0 || amount > r.fee) {
+                alert('Số tiền đã đóng phải lớn hơn 0 và không vượt quá học phí quy định!');
+                return;
+            }
+
+            r.paidAmount = amount;
+            r.payMethod = method;
+            r.payDate = new Date().toISOString().split('T')[0];
+            if (amount === r.fee) {
+                r.status = 'Đã đóng học phí';
+            }
+
+            bootstrap.Modal.getInstance(document.getElementById('modalThuHocPhi')).hide();
+            applyFilters();
+            showToast(`🎉 Đã thu học phí ${formatMoney(amount)} cho học viên ${r.studentName}! Ghi nhận thành công vào Entity DangKyHoc.`, 'info');
+
+            // Gợi ý mở biên lai ngay sau khi thu
+            setTimeout(() => {
+                if (confirm(`Bạn có muốn xem và in Biên lai Thu học phí cho học viên ${r.studentName} ngay bây giờ?`)) {
+                    openReceiptModal(r.id);
+                }
+            }, 500);
+        }
+
+        // Mở Modal Biên lai Thu học phí điện tử (Mục 8.4)
+        function openReceiptModal(id) {
+            const r = registrations.find(item => item.id === id);
+            if (!r) return;
+
+            const container = document.getElementById('receiptPrintArea');
+            container.innerHTML = `
+                <div class="receipt-card">
+                    <div class="receipt-watermark">ĐÃ THANH TOÁN</div>
+                    
+                    <!-- Header Biên lai -->
+                    <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="brand-icon" style="width: 36px; height: 36px; font-size: 1rem;">
+                                <i class="bi bi-mortarboard-fill"></i>
+                            </div>
+                            <div>
+                                <div class="receipt-header-logo">TRƯỜNG ĐẠI HỌC KINH TẾ - KỸ THUẬT CÔNG NGHIỆP</div>
+                                <div class="small text-muted" style="font-size: 0.72rem;">TRUNG TÂM TIN HỌC & ĐÀO TẠO KỸ NĂNG NGHỀ (UNETI EDU)</div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold" style="color: var(--primary-rose);">MÃ BIÊN LAI: PT-${r.id}</div>
+                            <div class="small text-muted" style="font-size: 0.72rem;">Ngày lập: ${r.payDate || r.date}</div>
+                        </div>
+                    </div>
+
+                    <!-- Tiêu đề phiếu -->
+                    <div class="text-center my-3">
+                        <h4 class="fw-bold" style="font-family: var(--font-serif); color: var(--text-dark); margin-bottom: 2px;">
+                            PHIẾU THU HỌC PHÍ ĐIỆN TỬ
+                        </h4>
+                        <div class="small text-muted fst-italic">Căn cứ theo Đơn đăng ký học số ${r.id}</div>
+                    </div>
+
+                    <!-- Thông tin chi tiết -->
+                    <div class="table-responsive my-3">
+                        <table class="table table-bordered small mb-0">
+                            <tbody>
+                                <tr>
+                                    <td class="bg-light fw-semibold" style="width: 25%;">Họ tên học viên:</td>
+                                    <td class="fw-bold" style="color: var(--primary-rose);">${r.studentName}</td>
+                                    <td class="bg-light fw-semibold" style="width: 20%;">Mã học viên:</td>
+                                    <td>${r.studentId}</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light fw-semibold">Lớp học đăng ký:</td>
+                                    <td colspan="3">${r.classCode} - ${r.className} (${r.programName})</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light fw-semibold">Hình thức thanh toán:</td>
+                                    <td>${r.payMethod || 'Chuyển khoản VietQR'}</td>
+                                    <td class="bg-light fw-semibold">Trạng thái:</td>
+                                    <td><span class="badge bg-success bg-opacity-75">Đã thu đủ 100%</span></td>
+                                </tr>
+                                <tr style="background: var(--surface-container);">
+                                    <td class="fw-bold fs-6">Tổng số tiền thực thu:</td>
+                                    <td colspan="3" class="fw-bold fs-5 text-success">
+                                        ${formatMoney(r.paidAmount || r.fee)}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Ký tên -->
+                    <div class="row text-center mt-4 pt-2">
+                        <div class="col-6">
+                            <div class="fw-semibold small">Người nộp tiền</div>
+                            <div class="small text-muted fst-italic">(Ký và ghi rõ họ tên)</div>
+                            <div style="height: 55px;"></div>
+                            <div class="fw-bold small text-dark">${r.studentName}</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="fw-semibold small">Người lập phiếu (Giáo vụ UNETI)</div>
+                            <div class="small text-muted fst-italic">(Ký số điện tử)</div>
+                            <div style="height: 55px;" class="d-flex align-items-center justify-content-center">
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success p-2 small">
+                                    <i class="bi bi-shield-check me-1"></i> VERIFIED BY UNETI EDU
+                                </span>
+                            </div>
+                            <div class="fw-bold small text-dark">Nguyễn Hoàng Long (Phụ trách M4)</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            new bootstrap.Modal(document.getElementById('modalBienLai')).show();
+        }
+
+        // Xem Chi tiết Đăng ký
+        function viewDetail(id) {
+            const r = registrations.find(item => item.id === id);
+            if (!r) return;
+
+            document.getElementById('detailModalTitle').innerHTML = `<i class="bi bi-info-circle me-2"></i>Chi tiết Đơn đăng ký: ${r.id}`;
+
+            document.getElementById('detailModalBody').innerHTML = `
+                <div class="p-3 rounded-3 border mb-3 small" style="background: var(--surface-variant); border-color: var(--border-color) !important;">
+                    <div class="row g-2">
+                        <div class="col-6"><strong>Mã đơn đăng ký:</strong> ${r.id}</div>
+                        <div class="col-6"><strong>Ngày đăng ký:</strong> ${r.date}</div>
+                        <div class="col-6"><strong>Học viên:</strong> <strong style="color: var(--primary-rose);">${r.studentName}</strong></div>
+                        <div class="col-6"><strong>Email học viên:</strong> ${r.studentEmail}</div>
+                        <div class="col-6"><strong>Lớp đăng ký:</strong> ${r.classCode}</div>
+                        <div class="col-6"><strong>Chương trình đào tạo:</strong> ${r.programName}</div>
+                        <div class="col-6"><strong>Học phí quy định:</strong> ${formatMoney(r.fee)}</div>
+                        <div class="col-6"><strong>Trạng thái:</strong> <span class="badge bg-light text-dark border">${r.status}</span></div>
+                        <div class="col-6"><strong>Số tiền đã đóng:</strong> <strong class="text-success">${formatMoney(r.paidAmount)}</strong></div>
+                        <div class="col-6"><strong>Hình thức thanh toán:</strong> ${r.payMethod || 'Chưa nộp'}</div>
+                        <div class="col-6"><strong>Sĩ số lớp hiện tại:</strong> <span class="badge bg-secondary">${r.capacity}</span></div>
+                        <div class="col-6"><strong>Ngày thu tiền:</strong> ${r.payDate || 'Chưa phát sinh'}</div>
+                        <div class="col-12 mt-2"><strong>Ghi chú / Nhận xét giáo vụ (NhanXetGiaoVu):</strong> ${r.note}</div>
+                    </div>
+                </div>
+            `;
+
+            new bootstrap.Modal(document.getElementById('modalChiTietDK')).show();
+        }
+
+        // Xuất file CSV / Excel
+        function exportToCSV() {
+            const headers = ["Mã ĐK", "Mã HV", "Họ tên", "Email", "Lớp học", "Chương trình", "Học phí", "Đã đóng", "Hình thức", "Ngày đóng", "Trạng thái", "Sĩ số lớp"];
+            
+            const rows = registrations.map(r => [
+                `"${r.id}"`,
+                `"${r.studentId}"`,
+                `"${r.studentName}"`,
+                `"${r.studentEmail}"`,
+                `"${r.classCode}"`,
+                `"${r.programName}"`,
+                r.fee,
+                r.paidAmount,
+                `"${r.payMethod || ''}"`,
+                `"${r.payDate || ''}"`,
+                `"${r.status}"`,
+                `"${r.capacity}"`
+            ]);
+
+            const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\r\n");
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.setAttribute("href", url);
+            a.setAttribute("download", `DangKyHoc_UNETI_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            showToast("📁 Đã xuất thành công danh sách Đăng ký học & Học phí ra tệp CSV!", "info");
+        }
+
+        // Cập nhật số đếm thống kê & Doanh thu thực thu
+        function updateStats() {
+            const total = registrations.length;
+            const pending = registrations.filter(r => r.status === 'Chờ duyệt').length;
+            const approved = registrations.filter(r => r.status === 'Đã duyệt').length;
+            const paid = registrations.filter(r => r.status === 'Đã đóng học phí').length;
+            const rejected = registrations.filter(r => r.status === 'Từ chối').length;
+
+            // Thống kê nhanh trên top cards
+            document.getElementById('statPendingCount').innerText = String(pending).padStart(2, '0');
+            document.getElementById('quickPendingBtnCount').innerText = String(pending).padStart(2, '0');
+            document.getElementById('sidebarPendingBadge').innerText = `${pending} mới`;
+            document.getElementById('statApprovedCount').innerText = String(approved).padStart(2, '0');
+            document.getElementById('statPaidCount').innerText = String(paid).padStart(2, '0');
+
+            // Cập nhật Tab Pills
+            const bAll = document.getElementById('badgeTabAll');
+            const bPending = document.getElementById('badgeTabPending');
+            const bApproved = document.getElementById('badgeTabApproved');
+            const bPaid = document.getElementById('badgeTabPaid');
+            const bRejected = document.getElementById('badgeTabRejected');
+
+            if (bAll) bAll.innerText = total;
+            if (bPending) bPending.innerText = String(pending).padStart(2, '0');
+            if (bApproved) bApproved.innerText = String(approved).padStart(2, '0');
+            if (bPaid) bPaid.innerText = String(paid).padStart(2, '0');
+            if (bRejected) bRejected.innerText = String(rejected).padStart(2, '0');
+
+            // Tính tổng tiền thực thu (Trực quan trên Entity DangKyHoc)
+            const totalRevenue = registrations.reduce((sum, r) => sum + (r.paidAmount || 0), 0);
+            const revInMillions = (totalRevenue / 1000000).toFixed(1);
+            document.getElementById('statRevenueText').innerText = `${revInMillions}Tr`;
+        }
+
+        // Khởi tạo
+        applyFilters();
+    </script>
+
+</body>
+
+</html>
+
+

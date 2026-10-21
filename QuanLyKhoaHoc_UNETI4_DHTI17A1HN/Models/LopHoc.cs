@@ -7,6 +7,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
     // Họ và tên: Nguyễn Đình Kiên
     // Mã sinh viên: 23103100020
     // Phụ trách: Module 2 - Quản lý lớp học, Tìm kiếm, Lọc, Sắp xếp, Phân trang
+    // Entity LopHoc - Chuẩn Mục 6.1 Đề tài BTL UNETI
     // ========================================================
     [Table("LopHoc")]
     public class LopHoc
@@ -20,9 +21,10 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
         [Display(Name = "Tên lớp học")]
         public string TenLop { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Vui lòng chọn khóa học/chương trình đào tạo")]
-        [Display(Name = "Khóa học")]
-        public int MaKhoaHoc { get; set; }
+        // Khóa ngoại trỏ trực tiếp đến ChuongTrinhDaoTao (Chuẩn Mục 6.1 & Mục 10)
+        [Required(ErrorMessage = "Vui lòng chọn chương trình đào tạo")]
+        [Display(Name = "Chương trình đào tạo")]
+        public int MaChuongTrinh { get; set; }
 
         [Display(Name = "Giảng viên phụ trách")]
         public int? MaGiangVien { get; set; }
@@ -75,7 +77,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
         public string? YeuCauHocVien { get; set; }
 
         [StringLength(50)]
-        [Display(Name = "Trạng thái")]
+        [Display(Name = "Trạng thái lớp")]
         public string TrangThai { get; set; } = "Đang mở đăng ký"; // Chưa mở, Đang mở đăng ký, Tạm dừng, Đã đóng đăng ký
 
         [StringLength(100)]
@@ -86,8 +88,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
         public DateTime NgayTao { get; set; } = DateTime.Now;
 
         // Navigation properties
-        [ForeignKey("MaKhoaHoc")]
-        public virtual KhoaHoc? KhoaHoc { get; set; }
+        [ForeignKey("MaChuongTrinh")]
+        public virtual ChuongTrinhDaoTao? ChuongTrinhDaoTao { get; set; }
 
         [ForeignKey("MaGiangVien")]
         public virtual GiangVien? GiangVien { get; set; }

@@ -25,5 +25,7 @@ $RECYCLE.BIN/
 doc_text.txt
 extracted_doc.txt
 extracted_repo_doc.txt
+doc_extracted_text.txt
 extract.ps1
 extract_repo.ps1
+read_docx.ps1

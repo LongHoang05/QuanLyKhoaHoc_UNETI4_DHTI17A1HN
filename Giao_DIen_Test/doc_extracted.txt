@@ -1,0 +1,624 @@
+﻿BÀI TẬP LỚN MÔN THỰC HÀNH LẬP TRÌNH .NET
+ĐỀ TÀI 16: XÂY DỰNG HỆ THỐNG QUẢN LÝ ĐĂNG KÝ KHÓA HỌCVÀ HỌC VIÊN TRUNG TÂM ĐÀO TẠO
+1. MỤC TIÊU
+Xây dựng ứng dụng Web Hệ thống quản lý đăng ký khóa học và học viên trung tâm đào tạo bằng ASP.NET Core 10 MVC. Hệ thống hỗ trợ quản lý xuyên suốt quá trình từ công bố lớp học, tiếp nhận đăng ký, xét duyệt, thu học phí, xếp lịch học đến ghi nhận kết quả học tập.
+Hệ thống phục vụ ba nhóm người dùng chính:
+Admin: quản lý tài khoản, chương trình đào tạo, dữ liệu dùng chung và toàn bộ hệ thống.
+Giáo vụ: quản lý lớp học, tiếp nhận và duyệt đăng ký, ghi nhận học phí, xếp lịch học, cập nhật kết quả, Dashboard và thống kê.
+Học viên: đăng nhập, quản lý thông tin cá nhân, xem lớp đang mở đăng ký, đăng ký học, theo dõi trạng thái, lịch học và kết quả học tập của chính mình.
+Thông qua bài tập lớn, sinh viên vận dụng tổng hợp:
+C# và lập trình hướng đối tượng.
+ASP.NET Core 10 MVC và kiến trúc Model - View - Controller.
+Entity Framework Core 10, Code First và Migration.
+CRUD, Model Binding, Data Annotation và Validation.
+Razor View, Tag Helper/HTML Helper.
+LINQ cho tìm kiếm, lọc, sắp xếp, kiểm tra nghiệp vụ và thống kê.
+Phân trang trên truy vấn dữ liệu.
+Session, đăng nhập và phân quyền đơn giản.
+Xử lý luồng trạng thái đăng ký học, kiểm soát sĩ số lớp và lịch học.
+Làm việc nhóm bằng Git/GitHub.
+2. CÔNG NGHỆ SỬ DỤNG
+2.1. Công nghệ bắt buộc
+.NET 10 SDK.
+ASP.NET Core 10 MVC.
+C#.
+Entity Framework Core 10.
+SQL Server.
+LINQ.
+Razor View.
+HTML/CSS và JavaScript ở mức cần thiết.
+Visual Studio hoặc Visual Studio Code.
+Git/GitHub.
+2.2. Quy định về phiên bản
+Project bắt buộc được tạo và phát triển trên .NET 10. Các package Entity Framework Core phải sử dụng phiên bản 10 và tương thích với .NET 10.
+Không chấp nhận:
+ASP.NET MVC trên .NET Framework.
+ASP.NET Core phiên bản thấp hơn yêu cầu.
+Project cũ chỉ đổi tên Entity, giao diện hoặc dữ liệu để chuyển thành đề tài quản lý đăng ký khóa học và học viên trung tâm đào tạo.
+Project chỉ có CRUD nhưng không thực hiện các nghiệp vụ đăng ký khóa học và tổ chức lớp học bắt buộc trong đề.
+Sinh viên phải hiểu, giải thích và có khả năng chỉnh sửa mã nguồn thuộc phần mình thực hiện khi bảo vệ.
+3. QUY MÔ VÀ TỔ CHỨC NHÓM
+Mỗi nhóm gồm 04 sinh viên.
+Mỗi nhóm sử dụng:
+01 Project ASP.NET Core 10 MVC.
+01 cơ sở dữ liệu SQL Server dùng chung.
+01 Repository GitHub chung.
+Mỗi sinh viên chịu trách nhiệm chính về 01 Module. Các thành viên phải phối hợp thống nhất Entity, quan hệ dữ liệu, trạng thái nghiệp vụ, giao diện điều hướng và quy tắc phân quyền.
+3.1. Quy định đặt tên Project
+Tên Project được đặt theo cấu trúc:
+[TênĐềTài]_UNETI[STTNhóm]_[MãLớp]
+Ví dụ đối với Nhóm 16, lớp TI17A1HN:
+QuanLyKhoaHoc_UNETI16_TI17A1HN
+Trong đó UNETI16 là số thứ tự Nhóm 16, không phải số lượng sinh viên. Tên Project, Solution và Namespace phải thống nhất trong toàn nhóm.
+4. PHÂN CHIA CHỨC NĂNG CHO 04 SINH VIÊN
+4.1. Sinh viên 1 - Module 1
+Tài khoản - Đăng nhập - Phân quyền - Quản lý chương trình đào tạo
+4.2. Sinh viên 2 - Module 2
+Quản lý lớp học - Tìm kiếm - Lọc - Sắp xếp - Phân trang
+4.3. Sinh viên 3 - Module 3
+Quản lý học viên - Hồ sơ cá nhân - Đăng ký lớp học - Theo dõi đăng ký
+4.4. Sinh viên 4 - Module 4
+Tiếp nhận đăng ký - Duyệt/Từ chối - Ghi nhận học phí - Quản lý trạng thái và sĩ số
+4.5. Sinh viên 5 - Module 5
+Lịch học - Kết quả học tập - Dashboard - Thống kê
+Việc phân chia trên xác định trách nhiệm chính. Mỗi thành viên vẫn phải hiểu cấu trúc chung, cơ sở dữ liệu và luồng nghiệp vụ liên quan đến Module của mình.
+5. MODULE 1 - TÀI KHOẢN, ĐĂNG NHẬP, PHÂN QUYỀN VÀ CHƯƠNG TRÌNH ĐÀO TẠO
+5.1. Quản lý tài khoản
+Entity TaiKhoan gồm tối thiểu:
+MaTaiKhoan.
+TenDangNhap.
+MatKhau.
+HoTen.
+Email.
+VaiTro.
+TrangThai.
+Hệ thống có ba vai trò: Admin, Giáo vụ và Học viên. Tên đăng nhập bắt buộc và không được trùng; mật khẩu bắt buộc; Email đúng định dạng; tài khoản bị khóa không được đăng nhập.
+5.2. Đăng nhập
+Người dùng nhập tên đăng nhập và mật khẩu. Hệ thống sử dụng Entity Framework Core và LINQ để kiểm tra tài khoản trong cơ sở dữ liệu.
+Khi đăng nhập thành công, lưu tối thiểu vào Session:
+Mã tài khoản.
+Họ tên.
+Vai trò.
+Nếu tài khoản không tồn tại, sai mật khẩu hoặc bị khóa phải hiển thị thông báo phù hợp.
+5.3. Đăng xuất
+Xóa thông tin đăng nhập khỏi Session.
+Chuyển về trang chủ hoặc trang đăng nhập.
+Không cho phép tiếp tục truy cập chức năng yêu cầu đăng nhập bằng Session cũ.
+5.4. Phân quyền
+Admin được phép quản lý tài khoản, chương trình đào tạo và truy cập các chức năng quản trị. Giáo vụ được quản lý lớp học, đăng ký học, học phí, lịch học, kết quả và thống kê. Học viên chỉ được thao tác với hồ sơ và dữ liệu thuộc chính mình.
+Các chức năng quản trị phải kiểm tra quyền tại Controller trước khi xử lý; không được chỉ ẩn menu hoặc nút trên View.
+5.5. Quản lý chương trình đào tạo
+Entity ChuongTrinhDaoTao gồm tối thiểu:
+MaChuongTrinh.
+TenChuongTrinh.
+MoTa.
+EmailLienHe.
+TrangThai.
+Admin thực hiện xem danh sách, chi tiết, thêm, sửa, xóa và cập nhật trạng thái.
+Tên chương trình bắt buộc và không được trùng.
+Email liên hệ đúng định dạng nếu có.
+Mô tả dùng textarea.
+Không được xóa chương trình nếu việc xóa làm các lớp học liên quan không còn hợp lệ.
+6. MODULE 2 - QUẢN LÝ LỚP HỌC
+6.1. Entity LopHoc
+Entity LopHoc gồm tối thiểu:
+MaLop.
+TenLop.
+MaChuongTrinh.
+GiangVien.
+TrinhDoDauVao.
+SiSoToiDa.
+SoBuoiHoc.
+HocPhi.
+NgayBatDauDangKy.
+HanDangKy.
+NgayKhaiGiang.
+MoTa.
+YeuCauHocVien.
+TrangThai.
+Trạng thái có thể gồm: Chưa mở, Đang mở đăng ký, Tạm dừng, Đã đóng đăng ký.
+6.2. CRUD và Validation
+Giáo vụ/Admin thực hiện danh sách, chi tiết, thêm, sửa và cập nhật trạng thái.
+Chương trình đào tạo sử dụng select lấy dữ liệu từ Database.
+Tên lớp bắt buộc.
+Sĩ số tối đa > 0.
+Số buổi học > 0.
+Học phí >= 0.
+Hạn đăng ký phải sau hoặc bằng ngày bắt đầu đăng ký.
+Ngày khai giảng phải sau hoặc bằng hạn đăng ký.
+Mô tả và yêu cầu học viên sử dụng textarea.
+Không cho chuyển lớp sang Đang mở đăng ký nếu dữ liệu bắt buộc chưa hợp lệ. Không cho giảm sĩ số tối đa xuống thấp hơn số học viên đã được duyệt. Khi lớp đã có đăng ký, việc xóa phải được kiểm soát để không làm mất dữ liệu lịch sử.
+6.3. Tìm kiếm
+Cho phép tìm kiếm bằng LINQ theo:
+Tên lớp học.
+Tên chương trình đào tạo.
+Tên giảng viên.
+6.4. Lọc
+Chương trình đào tạo.
+Trình độ đầu vào.
+Trạng thái lớp.
+Khoảng học phí.
+Còn hạn đăng ký/Hết hạn đăng ký.
+Còn chỗ/Hết chỗ.
+Các điều kiện phải có khả năng kết hợp với nhau.
+6.5. Sắp xếp
+Tên lớp A -> Z.
+Tên lớp Z -> A.
+Hạn đăng ký tăng dần.
+Hạn đăng ký giảm dần.
+Học phí tăng/giảm.
+Ngày khai giảng gần nhất/xa nhất.
+6.6. Phân trang
+Danh sách lớp học bắt buộc phải phân trang. Có trang trước, trang sau, số trang và hiển thị trang hiện tại. Phải xử lý đúng trang đầu và trang cuối.
+Tìm kiếm + Lọc + Sắp xếp + Phân trang phải hoạt động kết hợp.
+Khi chuyển trang phải giữ lại từ khóa, bộ lọc và kiểu sắp xếp đang sử dụng.
+Truy vấn dữ liệu -> Tìm kiếm -> Lọc -> Sắp xếp -> Phân trang -> Hiển thị
+Phân trang thực hiện trên truy vấn EF Core/LINQ bằng Skip(), Take() hoặc cách tương đương; không tải toàn bộ dữ liệu về trình duyệt rồi chỉ ẩn/hiện.
+6.7. Hiển thị cho học viên
+Học viên chỉ được đăng ký lớp thỏa mãn đồng thời: trạng thái Đang mở đăng ký, đã đến ngày bắt đầu đăng ký, chưa quá hạn đăng ký và còn chỗ. Hệ thống phải hiển thị rõ trạng thái còn/hết hạn và còn/hết chỗ để tránh đăng ký nhầm.
+7. MODULE 3 - QUẢN LÝ HỌC VIÊN VÀ ĐĂNG KÝ LỚP HỌC
+7.1. Quản lý học viên
+Entity HocVien gồm tối thiểu:
+MaHocVien.
+MaTaiKhoan.
+HoTen.
+NgaySinh.
+GioiTinh.
+SoDienThoai.
+Email.
+DiaChi.
+TrinhDoHocVan.
+NgheNghiep.
+TrangThai.
+Validation: họ tên bắt buộc; ngày sinh hợp lệ; Email đúng định dạng; số điện thoại hợp lệ. Học viên chỉ được cập nhật hồ sơ cá nhân của chính mình.
+7.2. Entity DangKyHoc
+Entity DangKyHoc gồm tối thiểu:
+MaDangKy.
+MaHocVien.
+MaLop.
+NgayDangKy.
+GhiChu.
+TrangThai.
+NgayXuLy.
+NhanXetGiaoVu.
+NgayDongHocPhi.
+SoTienDaDong.
+Trạng thái đăng ký:
+Chờ duyệt.
+Đã duyệt.
+Đã đóng học phí.
+Đang học.
+Hoàn thành.
+Không hoàn thành.
+Từ chối.
+Đã hủy.
+7.3. Đăng ký lớp học
+Học viên phải đăng nhập trước khi đăng ký. Người dùng chọn một lớp đang mở đăng ký hợp lệ và nhập thông tin bổ sung cần thiết.
+Trước khi tạo đăng ký, hệ thống phải kiểm tra bằng EF Core/LINQ:
+Học viên tồn tại và đang hoạt động.
+Lớp học tồn tại và ở trạng thái Đang mở đăng ký.
+Ngày hiện tại nằm trong thời gian đăng ký của lớp.
+Lớp còn chỗ theo sĩ số tối đa.
+Học viên không được có hai đăng ký đang xử lý cho cùng một lớp.
+Thông tin bắt buộc của hồ sơ học viên đã được khai báo.
+NgayDangKy phải do hệ thống xác định, không cho học viên tự nhập; các trường NgayDongHocPhi, SoTienDaDong chỉ do Giáo vụ ghi nhận. Đăng ký mới tạo có trạng thái Chờ duyệt.
+7.4. Hủy đăng ký
+Học viên chỉ được hủy đăng ký của chính mình và chỉ trong các trạng thái cho phép, ví dụ Chờ duyệt hoặc Đã duyệt nhưng chưa đóng học phí. Đăng ký Đã đóng học phí, Đang học hoặc đã có kết quả cuối cùng không được hủy tùy ý.
+7.5. Theo dõi đăng ký
+Học viên được xem:
+Danh sách đăng ký đã thực hiện.
+Lớp học và chương trình đào tạo đã đăng ký.
+Ngày đăng ký.
+Trạng thái hiện tại và tình trạng học phí.
+Lịch học nếu có.
+Kết quả học tập khi đã được công bố.
+Học viên chỉ được xem dữ liệu của chính mình. Việc thay đổi mã trên URL không được làm lộ đăng ký của học viên khác.
+8. MODULE 4 - TIẾP NHẬN, XÉT DUYỆT, HỌC PHÍ VÀ QUẢN LÝ TRẠNG THÁI ĐĂNG KÝ
+8.1. Danh sách đăng ký cần xử lý
+Giáo vụ xem danh sách đăng ký với các chức năng:
+Tìm theo họ tên học viên.
+Tìm theo tên lớp.
+Lọc theo chương trình đào tạo.
+Lọc theo trạng thái đăng ký.
+Lọc theo ngày đăng ký.
+Sắp xếp theo ngày đăng ký hoặc tên học viên.
+Xem chi tiết đăng ký.
+8.2. Duyệt đăng ký
+Giáo vụ xem thông tin học viên, lớp học và yêu cầu đầu vào của lớp để cập nhật kết quả xét duyệt.
+Chỉ đăng ký Chờ duyệt mới được chuyển sang một trong hai trạng thái:
+Đã duyệt.
+Từ chối.
+Khi xử lý phải ghi NgayXuLy và NhanXetGiaoVu. Không cho học viên tự thay đổi các trường này.
+8.3. Kiểm tra điều kiện trước khi duyệt
+Trước khi chuyển đăng ký sang Đã duyệt, hệ thống phải kiểm tra:
+Đăng ký tồn tại và chưa bị hủy.
+Lớp học liên quan tồn tại.
+Học viên còn hoạt động.
+Đăng ký chưa có kết quả xét duyệt trước đó.
+Sĩ số các đăng ký Đã duyệt, Đã đóng học phí và Đang học của lớp chưa đạt SiSoToiDa.
+Có thể hiển thị thông tin so sánh trình độ học vấn của học viên với trình độ đầu vào của lớp. Việc duyệt hay từ chối do Giáo vụ quyết định; hệ thống không tự suy diễn kết quả chỉ dựa trên một thuộc tính.
+8.4. Ghi nhận học phí
+Chỉ đăng ký Đã duyệt mới được ghi nhận học phí. Khi ghi nhận, hệ thống xác định NgayDongHocPhi, Giáo vụ nhập SoTienDaDong; số tiền phải lớn hơn 0 và không vượt quá học phí của lớp. Khi số tiền đã đóng bằng học phí, đăng ký chuyển sang Đã đóng học phí.
+8.5. Quản lý luồng trạng thái
+Các trạng thái phải chuyển theo luồng hợp lệ, không cho phép cập nhật tùy ý. Luồng cơ bản:
+Chờ duyệt -> Đã duyệt -> Đã đóng học phí -> Đang học -> Hoàn thành/Không hoàn thành
+Các nhánh khác: Chờ duyệt -> Từ chối; hoặc trạng thái phù hợp -> Đã hủy.
+Chỉ chuyển sang Đang học khi lớp đã có ít nhất một buổi học được lên lịch và đã đến ngày khai giảng. Không cho chuyển trực tiếp từ Chờ duyệt sang Hoàn thành; không cho đăng ký Từ chối được xếp lịch học; không cho sửa kết quả cuối cùng mà không có kiểm tra trạng thái.
+8.6. Kiểm soát sĩ số lớp
+Hệ thống phải sử dụng LINQ để đếm số học viên Đã duyệt, Đã đóng học phí và Đang học của từng lớp. Khi số học viên đạt SiSoToiDa, hệ thống phải cảnh báo Giáo vụ, không cho duyệt thêm và có thể chuyển lớp sang Đã đóng đăng ký. Không được tự động xóa hoặc làm mất các đăng ký còn lại.
+9. MODULE 5 - LỊCH HỌC, KẾT QUẢ HỌC TẬP, DASHBOARD VÀ THỐNG KÊ
+9.1. Entity BuoiHoc
+Entity BuoiHoc gồm tối thiểu:
+MaBuoiHoc.
+MaLop.
+ThoiGianBatDau.
+ThoiGianKetThuc.
+PhongHoc.
+GiangVien.
+NoiDung.
+GhiChu.
+TrangThai.
+Trạng thái có thể gồm: Đã lên lịch, Đã hoàn thành, Đã hủy.
+9.2. Xếp lịch học
+Chỉ lớp có ít nhất một đăng ký Đã đóng học phí mới được xếp lịch học. Khi tạo buổi học, hệ thống phải kiểm tra:
+Thời gian kết thúc phải sau thời gian bắt đầu.
+Thời gian học không được nằm trong quá khứ tại thời điểm xếp lịch.
+Tổng số buổi học chưa hủy của lớp không vượt quá SoBuoiHoc.
+Lớp học không có buổi học khác bị trùng khoảng thời gian.
+Phòng học không có buổi học khác bị trùng khoảng thời gian.
+Giảng viên không có buổi học khác bị trùng khoảng thời gian.
+Kiểm tra trùng lịch phải thực hiện bằng EF Core/LINQ trên các buổi học chưa hủy.
+Ví dụ: một buổi học từ 18:00 đến 20:00 thì không được tạo buổi học khác cho cùng phòng học hoặc cùng giảng viên từ 19:00 đến 21:00.
+9.3. Cập nhật sau buổi học
+Khi buổi học kết thúc, cập nhật trạng thái buổi học thành Đã hoàn thành. Không cho đánh dấu Đã hoàn thành nếu buổi học chưa diễn ra hoặc đã bị hủy.
+9.4. Entity KetQuaHocTap
+Entity KetQuaHocTap gồm tối thiểu:
+MaKetQua.
+MaDangKy.
+DiemChuyenCan.
+DiemCuoiKhoa.
+DiemTongKet.
+KetQua.
+NhanXet.
+NgayCapNhat.
+KetQua gồm Hoàn thành hoặc Không hoàn thành. Chỉ đăng ký Đang học và thuộc lớp đã hoàn thành toàn bộ buổi học đã lên lịch mới được ghi nhận kết quả cuối cùng. Điểm chuyên cần và điểm cuối khóa nằm trong khoảng 0-10; điểm tổng kết do hệ thống tính (ví dụ 20% điểm chuyên cần và 80% điểm cuối khóa) và kết quả cuối cùng vẫn phải được Giáo vụ xác nhận. Ngày cập nhật do hệ thống xác định.
+9.5. Dashboard
+Tổng số chương trình đào tạo.
+Tổng số lớp học.
+Số lớp đang mở đăng ký.
+Tổng số học viên.
+Tổng số đăng ký.
+Số đăng ký Chờ duyệt.
+Số đăng ký Đã duyệt.
+Số buổi học sắp tới.
+Số học viên Hoàn thành.
+Không bắt buộc sử dụng biểu đồ.
+9.6. Thống kê bằng LINQ
+Số lớp học theo chương trình đào tạo.
+Số đăng ký theo từng lớp.
+Số đăng ký theo trạng thái.
+Lớp có nhiều đăng ký nhất.
+Doanh thu học phí theo tháng.
+Doanh thu học phí theo chương trình đào tạo.
+Số đăng ký theo tháng.
+Số buổi học theo tháng.
+Điểm tổng kết trung bình theo lớp.
+Tỷ lệ lấp đầy sĩ số theo từng lớp.
+Tỷ lệ Hoàn thành trên số học viên đã có kết quả.
+Sử dụng các phương thức LINQ phù hợp như Count(), Sum(), Average(), GroupBy(), OrderBy(), OrderByDescending(), Any(). Sinh viên phải giải thích được truy vấn và ý nghĩa kết quả.
+10. THIẾT KẾ CƠ SỞ DỮ LIỆU
+Các Entity chính tối thiểu gồm:
+TaiKhoan.
+ChuongTrinhDaoTao.
+LopHoc.
+HocVien.
+DangKyHoc.
+BuoiHoc.
+KetQuaHocTap.
+Quan hệ chính:
+TaiKhoan (1) - (0..1) HocVien.
+ChuongTrinhDaoTao (1) - (n) LopHoc.
+HocVien (1) - (n) DangKyHoc.
+LopHoc (1) - (n) DangKyHoc.
+LopHoc (1) - (0..n) BuoiHoc.
+DangKyHoc (1) - (0..1) KetQuaHocTap.
+Sinh viên phải xác định Primary Key, Foreign Key, Navigation Property, kiểu dữ liệu, Required/Nullable, độ dài chuỗi, quan hệ giữa các Entity và các ràng buộc nghiệp vụ.
+Nhóm có thể bổ sung Entity GiangVien hoặc PhongHoc nếu muốn quản lý chi tiết hơn, nhưng không được làm giảm các chức năng bắt buộc.
+11. ENTITY FRAMEWORK CORE VÀ MIGRATION
+Cơ sở dữ liệu phải được xây dựng bằng Entity Framework Core 10 theo phương pháp Code First.
+Entity -> DbContext -> Migration -> SQL Server
+Xây dựng các Entity.
+Xây dựng DbContext.
+Khai báo DbSet.
+Cấu hình Connection String SQL Server.
+Tạo Migration.
+Cập nhật Database.
+Truy xuất dữ liệu bằng Entity Framework Core và LINQ.
+11.1. Quy định Migration khi làm nhóm
+Các thành viên phải thống nhất thay đổi Entity trước khi tạo Migration. Migration phải có tên rõ nghĩa và được Commit lên Repository. Không để mỗi thành viên tự ý thay đổi cùng một Entity gây xung đột cấu trúc Database.
+Không sử dụng câu lệnh SQL viết trực tiếp để thay thế các chức năng CRUD bắt buộc.
+12. YÊU CẦU VỀ ASP.NET CORE MVC
+Ứng dụng phải tuân thủ kiến trúc MVC. Các Controller có thể gồm:
+TaiKhoanController.
+ChuongTrinhDaoTaoController.
+LopHocController.
+HocVienController.
+DangKyHocController.
+BuoiHocController.
+KetQuaHocTapController.
+ThongKeController.
+Không xây dựng toàn bộ hệ thống trong một Controller. Mỗi Controller phải có phạm vi chức năng hợp lý.
+Phải sử dụng phù hợp:
+Model/Entity.
+Controller và Action.
+View.
+ViewModel khi một màn hình cần kết hợp nhiều nguồn dữ liệu.
+Model Binding.
+Data Annotation và Validation.
+Razor Syntax.
+Tag Helper/HTML Helper.
+Entity Framework Core.
+LINQ.
+13. VALIDATION VÀ XỬ LÝ NGHIỆP VỤ
+Sử dụng Data Annotation phù hợp như:
+[Required], [StringLength], [Range], [EmailAddress], [Phone], [Display]
+Kiểm tra tối thiểu:
+Tên đăng nhập không trùng.
+Tên chương trình đào tạo không trùng.
+Sĩ số tối đa > 0.
+Số buổi học > 0.
+Học phí >= 0.
+Hạn đăng ký không trước ngày bắt đầu đăng ký; ngày khai giảng không trước hạn đăng ký.
+Email và số điện thoại hợp lệ.
+Học viên không đăng ký hai lần đang xử lý cho cùng một lớp.
+Không đăng ký lớp chưa mở, tạm dừng, đã đóng, hết hạn hoặc hết chỗ.
+Chỉ đăng ký Chờ duyệt mới được duyệt.
+Không duyệt vượt sĩ số tối đa của lớp.
+Số tiền học phí đã đóng > 0 và không vượt quá học phí của lớp.
+Chỉ lớp có học viên Đã đóng học phí mới được xếp lịch học.
+Không để lớp, phòng học hoặc giảng viên có hai buổi học trùng thời gian.
+Không xếp quá số buổi học quy định của lớp.
+Chỉ đăng ký Đang học của lớp đã học xong mới được cập nhật kết quả cuối cùng.
+Điểm nằm trong khoảng 0-10.
+Học viên chỉ được thao tác với dữ liệu của chính mình.
+Các lỗi Validation phải hiển thị rõ trên View. Quy tắc nghiệp vụ không phù hợp với Data Annotation phải được kiểm tra tại Controller hoặc lớp xử lý nghiệp vụ.
+14. YÊU CẦU VỀ RAZOR VIEW
+Không giữ nguyên hoàn toàn View do Scaffolding sinh ra. Giao diện phải được chỉnh sửa phù hợp với nghiệp vụ.
+Ngày bắt đầu đăng ký, hạn đăng ký và ngày khai giảng sử dụng type="date" khi phù hợp.
+Thời gian buổi học sử dụng type="datetime-local".
+Mô tả lớp, yêu cầu học viên, nội dung buổi học và nhận xét sử dụng textarea.
+Chương trình đào tạo và lớp học sử dụng select lấy dữ liệu từ Database.
+Giới tính sử dụng radio hoặc select.
+Trạng thái sử dụng kiểu nhập liệu phù hợp và không cho người dùng tự chọn trạng thái trái nghiệp vụ.
+Có Validation Message.
+Hiển thị tên đối tượng liên quan thay cho chỉ mã khóa ngoại.
+Định dạng ngày/giờ và học phí rõ ràng.
+Các nút thao tác phải phù hợp với trạng thái. Ví dụ đăng ký Từ chối không hiển thị chức năng ghi nhận học phí; đăng ký chưa học xong không hiển thị chức năng nhập kết quả cuối cùng.
+15. TÌM KIẾM, LỌC, SẮP XẾP, PHÂN TRANG VÀ LINQ
+Đây là yêu cầu bắt buộc.
+Danh sách lớp học phải thực hiện đầy đủ:
+Tìm kiếm + Lọc + Sắp xếp + Phân trang
+Khi chuyển trang phải giữ:
+Từ khóa tìm kiếm.
+Chương trình đào tạo.
+Trình độ đầu vào.
+Trạng thái.
+Điều kiện còn hạn/hết hạn đăng ký.
+Điều kiện còn chỗ/hết chỗ.
+Kiểu sắp xếp.
+Ngoài ra LINQ bắt buộc được sử dụng cho:
+Kiểm tra đăng ký trùng của cùng học viên và lớp học.
+Kiểm tra lớp còn nhận đăng ký và còn chỗ.
+Tìm kiếm/lọc đăng ký học.
+Đếm sĩ số của từng lớp.
+Kiểm tra trùng lịch của lớp học.
+Kiểm tra trùng phòng học và trùng lịch giảng viên.
+Tính doanh thu học phí và điểm tổng kết.
+Dashboard và thống kê.
+Không tải toàn bộ dữ liệu rồi dùng JavaScript để giả lập phân trang hoặc thay thế các truy vấn LINQ bắt buộc.
+16. DỮ LIỆU MẪU
+Tối thiểu:
+05 chương trình đào tạo.
+15 lớp học, trong đó có lớp Đang mở đăng ký, Đã đóng đăng ký và hết hạn đăng ký.
+30 học viên.
+01-02 tài khoản Admin.
+02-03 tài khoản Giáo vụ.
+Tài khoản học viên tương ứng.
+40-50 đăng ký học với nhiều trạng thái khác nhau.
+20-30 buổi học.
+Dữ liệu kết quả học tập gồm cả Hoàn thành và Không hoàn thành.
+Dữ liệu phải đủ đa dạng để kiểm tra CRUD, Validation, Search, Filter, Sort, Pagination, đăng nhập, phân quyền, đăng ký lớp, duyệt đăng ký, đầy sĩ số, học phí, trùng lịch học, cập nhật kết quả, Dashboard và thống kê.
+Danh sách lớp học phải đủ dữ liệu để tạo nhiều trang khi kiểm tra Pagination.
+17. YÊU CẦU GIAO DIỆN
+17.1. Phía học viên
+Trang chủ.
+Đăng nhập/Đăng xuất.
+Thông tin cá nhân.
+Danh sách lớp học.
+Tìm kiếm/Lọc/Sắp xếp/Phân trang.
+Chi tiết lớp học.
+Đăng ký lớp học.
+Danh sách đăng ký đã thực hiện.
+Theo dõi trạng thái và học phí.
+Xem lịch học và kết quả học tập.
+17.2. Phía Giáo vụ/Admin
+Trang quản trị.
+Quản lý chương trình đào tạo.
+Quản lý lớp học.
+Quản lý học viên.
+Quản lý đăng ký học.
+Duyệt đăng ký.
+Ghi nhận học phí.
+Xếp và quản lý lịch học.
+Cập nhật kết quả học tập.
+Dashboard.
+Thống kê.
+Không đặt nặng thiết kế đồ họa; trọng tâm là chức năng, tính đúng đắn của nghiệp vụ và kỹ thuật ASP.NET Core MVC.
+18. QUY ĐỊNH GHI THÔNG TIN NGƯỜI THỰC HIỆN TRONG MÃ NGUỒN
+Mỗi sinh viên bắt buộc phải ghi Họ và tên, Mã sinh viên và Nội dung thực hiện tại đầu các file mã nguồn do mình phụ trách chính.
+// Họ và tên: Nguyễn Văn A// Mã sinh viên: 22103100001// Nội dung thực hiện: Quản lý lớp học,// tìm kiếm, lọc, sắp xếp và phân trang.
+Quy định áp dụng đối với:
+Model/Entity.
+Controller.
+ViewModel.
+View.
+Các lớp xử lý khác nếu có.
+Nếu file có nhiều sinh viên cùng thực hiện, phải ghi rõ họ tên, mã sinh viên và nội dung cụ thể của từng người.
+Thông tin trong mã nguồn phải phù hợp với Module được phân công, bảng phân công công việc, lịch sử Commit/Push trên GitHub và nội dung sinh viên trực tiếp bảo vệ.
+Không được ghi tên sinh viên vào file nếu sinh viên đó không trực tiếp tham gia thực hiện phần mã nguồn tương ứng.
+19. CHỨC NĂNG NÂNG CAO - KHÔNG BẮT BUỘC
+Upload tài liệu học tập.
+Gửi email thông báo kết quả duyệt hoặc lịch học.
+Điểm danh từng buổi học.
+Biểu đồ Chart.js.
+AJAX.
+Xuất Excel/PDF danh sách lớp và bảng điểm.
+Tìm kiếm không tải lại trang.
+Mã hóa mật khẩu.
+ASP.NET Core Identity.
+Các chức năng nâng cao không được thay thế chức năng bắt buộc còn thiếu. Không cộng ưu tiên cho giao diện đẹp nếu nghiệp vụ bắt buộc chưa hoàn thành.
+20. QUY ĐỊNH SỬ DỤNG AI
+Sinh viên được phép sử dụng công cụ AI để hỗ trợ:
+Tìm hiểu kiến thức.
+Tham khảo thiết kế và mã nguồn.
+Tìm và sửa lỗi.
+Tham khảo truy vấn LINQ.
+Hỗ trợ xây dựng giao diện.
+Sinh viên phải hiểu mã nguồn, giải thích được mã nguồn, chỉnh sửa được mã nguồn và chịu trách nhiệm đối với phần đã sử dụng. Việc sử dụng AI không thay thế yêu cầu báo cáo, bảo vệ và đánh giá trực tiếp.
+21. LÀM VIỆC NHÓM VỚI GITHUB
+Mỗi nhóm sử dụng 01 Repository GitHub chung. Mỗi thành viên sử dụng tài khoản GitHub cá nhân và phải có lịch sử Commit thể hiện phần việc thực tế.
+Mẫu Commit:
+[Mã SV] [Module] Nội dung công việc
+Ví dụ:
+[22103100001] [LopHoc] Them chuc nang phan trang
+Mỗi thành viên phải có các Commit phù hợp với tiến độ, không dồn toàn bộ công việc vào một Commit duy nhất ở cuối.
+Thiết kế CSDL -> Thống nhất Entity -> Tạo Project -> DbContext/Migration -> Phân chia 05 Module -> Code -> Commit/Push -> Pull/Tích hợp -> Kiểm thử -> Hoàn thiện
+Thông tin Họ tên + Mã sinh viên + Nội dung thực hiện trong mã nguồn phải có khả năng đối chiếu với lịch sử GitHub. Không chấp nhận một thành viên thực hiện toàn bộ Project rồi chia mã nguồn cho các thành viên còn lại.
+22. KIỂM THỬ VÀ HOÀN THIỆN
+22.1. Tài khoản và phân quyền
+Đăng nhập đúng.
+Sai mật khẩu.
+Tài khoản không tồn tại.
+Tài khoản bị khóa.
+Đăng xuất.
+Học viên truy cập URL quản trị.
+Phân quyền tại Controller.
+22.2. CRUD và Validation
+Create/Edit/Details/Delete theo quyền.
+Dữ liệu hợp lệ và không hợp lệ.
+Tên đăng nhập/chương trình đào tạo trùng.
+Sĩ số hoặc học phí không hợp lệ.
+Khoảng ngày đăng ký/khai giảng không hợp lệ.
+Validation Message.
+22.3. Tìm kiếm, lọc, sắp xếp và phân trang
+Tìm kiếm có/không có kết quả.
+Lọc từng điều kiện.
+Lọc kết hợp nhiều điều kiện.
+Sắp xếp tăng/giảm.
+Trang đầu, trang giữa, trang cuối.
+Giữ điều kiện khi chuyển trang.
+22.4. Đăng ký và xử lý đăng ký
+Đăng ký hợp lệ.
+Đăng ký lớp hết hạn.
+Đăng ký lớp đã đóng/tạm dừng.
+Đăng ký lớp hết chỗ.
+Đăng ký trùng cùng lớp.
+Hủy đăng ký hợp lệ/không hợp lệ.
+Duyệt đăng ký.
+Từ chối đăng ký.
+Không cho đăng ký Từ chối được xếp lịch học.
+22.5. Học phí và sĩ số
+Ghi nhận học phí hợp lệ.
+Số tiền học phí không hợp lệ.
+Đếm sĩ số theo lớp.
+Cảnh báo khi đạt sĩ số tối đa.
+Không duyệt thêm khi lớp đã đầy.
+22.6. Lịch học
+Xếp lịch hợp lệ.
+Thời gian kết thúc trước thời gian bắt đầu.
+Trùng lịch lớp.
+Trùng phòng học.
+Trùng lịch giảng viên.
+Vượt quá số buổi học quy định.
+Hủy buổi học.
+Hoàn thành buổi học.
+Không cho lớp chưa có học viên đóng học phí xếp lịch.
+22.7. Kết quả học tập
+Nhập kết quả khi lớp đã học xong.
+Không cho nhập kết quả khi chưa học xong.
+Điểm ngoài khoảng 0-10.
+Tính đúng điểm tổng kết.
+22.8. Kiểm thử quyền dữ liệu
+Học viên chỉ xem/sửa hồ sơ cá nhân của mình.
+Học viên chỉ xem đăng ký, lịch học và kết quả của mình.
+Thay đổi mã trên URL không truy cập được dữ liệu người khác.
+22.9. Dashboard và thống kê
+Đối chiếu kết quả LINQ với dữ liệu thực tế trong Database. Các số liệu tổng hợp phải thay đổi đúng khi thêm, cập nhật trạng thái hoặc hủy đăng ký/buổi học.
+23. SẢN PHẨM CẦN NỘP
+Mỗi nhóm nộp:
+Source Code hoàn chỉnh.
+Repository GitHub.
+Migration.
+Database hoặc hướng dẫn tạo Database từ Migration.
+Dữ liệu mẫu.
+Tài khoản kiểm thử theo từng vai trò.
+Báo cáo bài tập lớn theo mẫu quy định.
+Thiết kế cơ sở dữ liệu.
+Bảng phân công công việc cho 05 thành viên.
+Hướng dẫn cài đặt và chạy chương trình.
+Video minh chứng quá trình thực hiện và sản phẩm theo yêu cầu của giảng viên.
+Báo cáo phải thể hiện rõ:
+Danh sách thành viên và mã sinh viên.
+Phân công 05 Module.
+Phân tích bài toán và luồng đăng ký, tổ chức lớp học.
+Thiết kế CSDL, Entity và quan hệ.
+Các chức năng chính.
+Mã nguồn quan trọng.
+Truy vấn LINQ.
+Search/Filter/Sort/Pagination.
+Nghiệp vụ kiểm tra đăng ký, duyệt, sĩ số, trùng lịch học và kết quả.
+Giao diện/kết quả.
+Quá trình GitHub.
+Bảng tổng hợp file/chức năng do từng sinh viên phụ trách.
+24. BẢO VỆ VÀ ĐÁNH GIÁ CÁ NHÂN
+Mỗi sinh viên phải trực tiếp trình bày và giải thích phần chức năng mình phụ trách.
+Sinh viên phải giải thích được các kiến thức chung liên quan:
+MVC.
+Entity.
+Primary Key và Foreign Key.
+Navigation Property.
+DbContext.
+Code First và Migration.
+CRUD.
+Model Binding.
+Data Annotation và Validation.
+Razor View.
+LINQ.
+Search/Filter/Sort/Pagination.
+Session.
+Đăng nhập và phân quyền.
+GitHub.
+Ngoài phần chung, từng sinh viên phải giải thích được nghiệp vụ Module của mình:
+SV1: kiểm tra đăng nhập, Session, phân quyền và quản lý chương trình đào tạo.
+SV2: truy vấn kết hợp tìm kiếm - lọc - sắp xếp - phân trang lớp học.
+SV3: kiểm tra điều kiện đăng ký lớp và quyền dữ liệu của học viên.
+SV4: luồng trạng thái đăng ký, điều kiện duyệt, ghi nhận học phí và kiểm soát sĩ số lớp.
+SV5: thuật toán kiểm tra trùng khoảng thời gian học (lớp, phòng, giảng viên), cập nhật kết quả và thống kê LINQ.
+Giảng viên có thể yêu cầu sinh viên giải thích mã nguồn hoặc thực hiện một thay đổi nhỏ trực tiếp trên Project khi bảo vệ.
+Module được phân công -> Họ tên/Mã sinh viên/Nội dung thực hiện trong mã nguồn -> Lịch sử Commit trên GitHub -> Nội dung sinh viên trực tiếp bảo vệ
+Không chấp nhận sinh viên chỉ biết chạy chương trình nhưng không giải thích được mã nguồn thuộc phạm vi mình thực hiện.
+25. QUY TRÌNH NGHIỆP VỤ VÀ KẾT QUẢ CẦN ĐẠT
+25.1. Quy trình đối với học viên
+Đăng nhập -> Cập nhật hồ sơ cá nhân -> Xem danh sách lớp học -> Tìm kiếm/Lọc/Sắp xếp/Phân trang -> Đăng ký lớp -> Theo dõi xét duyệt -> Đóng học phí -> Xem lịch học -> Tham gia học -> Xem kết quả học tập
+25.2. Quy trình đối với Giáo vụ/Admin
+Đăng nhập -> Quản lý chương trình đào tạo -> Quản lý lớp học -> Tiếp nhận đăng ký -> Duyệt đăng ký -> Ghi nhận học phí -> Xếp lịch học -> Hoàn thành buổi học -> Cập nhật kết quả -> Dashboard -> Thống kê
+25.3. Quy trình xử lý đăng ký học
+Chờ duyệt -> Đã duyệt -> Đã đóng học phí -> Đang học -> Hoàn thành/Không hoàn thành
+Nhánh loại/hủy: Chờ duyệt -> Từ chối; hoặc trạng thái phù hợp -> Đã hủy.
+25.4. Quy trình xử lý dữ liệu
+Entity -> DbContext -> Entity Framework Core 10 -> Migration -> SQL Server -> LINQ -> Controller -> Razor View
+25.5. Kết quả cần đạt
+Sau khi hoàn thành bài tập lớn, nhóm phải xây dựng được ứng dụng Web quản lý đăng ký khóa học và học viên trung tâm đào tạo bằng ASP.NET Core 10 MVC, Entity Framework Core 10 và SQL Server, đáp ứng đầy đủ chức năng của 05 Module.
+Sinh viên phải vận dụng được:
+C# -> ASP.NET Core 10 MVC -> Entity/Data Annotation -> DbContext -> EF Core 10 -> Code First/Migration -> CRUD -> Validation -> Razor View -> LINQ -> Search/Filter/Sort/Pagination -> Session -> Đăng nhập/Phân quyền -> Đăng ký lớp -> Duyệt đăng ký -> Kiểm soát sĩ số -> Lịch học -> Kiểm tra trùng lịch -> Kết quả học tập -> Dashboard/Thống kê -> GitHub
+Mỗi thành viên phải chứng minh được phần việc cá nhân thông qua mã nguồn có ghi Họ tên - Mã sinh viên - Nội dung thực hiện, lịch sử Commit trên GitHub và phần bảo vệ trực tiếp.

@@ -6,22 +6,23 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
     // ========================================================
     // Họ và tên: Vũ Đình Trường
     // Mã sinh viên: 23103100026
-    // Phụ trách: Module 1 - Quản lý Chương trình đào tạo / Danh mục khóa học
+    // Phụ trách: Module 1 - Tài khoản, Đăng nhập, Phân quyền & Quản lý Chương trình đào tạo
+    // Entity ChuongTrinhDaoTao - Chuẩn Mục 5.5 Đề tài BTL UNETI
     // ========================================================
-    [Table("DanhMucKhoaHoc")]
-    public class DanhMucKhoaHoc
+    [Table("ChuongTrinhDaoTao")]
+    public class ChuongTrinhDaoTao
     {
         [Key]
         [Display(Name = "Mã chương trình")]
-        public int MaDanhMuc { get; set; }
+        public int MaChuongTrinh { get; set; }
 
-        [Required(ErrorMessage = "Tên chương trình/danh mục không được để trống")]
-        [StringLength(200, ErrorMessage = "Tên không vượt quá 200 ký tự")]
+        [Required(ErrorMessage = "Tên chương trình đào tạo không được để trống")]
+        [StringLength(200, ErrorMessage = "Tên chương trình không vượt quá 200 ký tự")]
         [Display(Name = "Tên chương trình đào tạo")]
-        public string TenDanhMuc { get; set; } = string.Empty;
+        public string TenChuongTrinh { get; set; } = string.Empty;
 
         [StringLength(1000)]
-        [Display(Name = "Mô tả")]
+        [Display(Name = "Mô tả chương trình")]
         public string? MoTa { get; set; }
 
         [EmailAddress(ErrorMessage = "Email liên hệ không đúng định dạng")]
@@ -29,13 +30,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
         [Display(Name = "Email liên hệ")]
         public string? EmailLienHe { get; set; }
 
-        [Display(Name = "Trạng thái")]
+        [Display(Name = "Trạng thái hoạt động")]
         public bool TrangThai { get; set; } = true;
 
         [Display(Name = "Ngày tạo")]
         public DateTime NgayTao { get; set; } = DateTime.Now;
 
-        // Navigation property
-        public virtual ICollection<KhoaHoc> KhoaHocs { get; set; } = new List<KhoaHoc>();
+        // Navigation property: ChuongTrinhDaoTao (1) - (n) LopHoc (Chuẩn Mục 10)
+        public virtual ICollection<LopHoc> LopHocs { get; set; } = new List<LopHoc>();
     }
 }
