@@ -181,59 +181,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
                         });
                 });
 
-            modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien", b =>
-                {
-                    b.Property<int>("MaGiangVien")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaGiangVien"));
-
-                    b.Property<string>("ChuyenNganh")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("HinhAnh")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("HoTen")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<DateTime>("NgayTao")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("SoDienThoai")
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
-
-                    b.Property<bool>("TrangThai")
-                        .HasColumnType("bit");
-
-                    b.HasKey("MaGiangVien");
-
-                    b.ToTable("GiangVien");
-
-                    b.HasData(
-                        new
-                        {
-                            MaGiangVien = 1,
-                            ChuyenNganh = "Công nghệ phần mềm & Web",
-                            Email = "tvhung@uneti.edu.vn",
-                            HoTen = "ThS. Trần Văn Hùng",
-                            NgayTao = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            SoDienThoai = "0912345678",
-                            TrangThai = true
-                        });
-                });
-
             modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.HocVien", b =>
                 {
                     b.Property<int>("MaHocVien")
@@ -371,9 +318,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
                     b.Property<int>("MaChuongTrinh")
                         .HasColumnType("int");
 
-                    b.Property<int?>("MaGiangVien")
-                        .HasColumnType("int");
-
                     b.Property<string>("MoTa")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
@@ -423,8 +367,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
 
                     b.HasIndex("MaChuongTrinh");
 
-                    b.HasIndex("MaGiangVien");
-
                     b.ToTable("LopHoc");
 
                     b.HasData(
@@ -434,7 +376,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
                             HanDangKy = new DateTime(2026, 12, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             HocPhi = 3500000m,
                             MaChuongTrinh = 1,
-                            MaGiangVien = 1,
                             MoTa = "Lớp học buổi tối thứ 2-4-6 từ 18:00 - 21:00",
                             NgayBatDauDangKy = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NgayKhaiGiang = new DateTime(2027, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -588,14 +529,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien", "GiangVien")
-                        .WithMany("LopHocs")
-                        .HasForeignKey("MaGiangVien")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.Navigation("ChuongTrinhDaoTao");
-
-                    b.Navigation("GiangVien");
                 });
 
             modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.ChuongTrinhDaoTao", b =>
@@ -606,11 +540,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
             modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc", b =>
                 {
                     b.Navigation("KetQuaHocTap");
-                });
-
-            modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien", b =>
-                {
-                    b.Navigation("LopHocs");
                 });
 
             modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.HocVien", b =>

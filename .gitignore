@@ -29,3 +29,4 @@ doc_extracted_text.txt
 extract.ps1
 extract_repo.ps1
 read_docx.ps1
+DocxEditor/

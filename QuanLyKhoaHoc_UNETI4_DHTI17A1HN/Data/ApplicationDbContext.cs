@@ -24,7 +24,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
         // ====== Module 2 - Nguyễn Đình Kiên (23103100020) ======
         // ========================================================
         public DbSet<LopHoc> LopHocs { get; set; }
-        public DbSet<GiangVien> GiangViens { get; set; } // Thực thể bổ sung theo Mục 10
 
         // ========================================================
         // ====== Module 3 - Nguyễn Đức Linh (23103100042) ======
@@ -61,13 +60,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                 .WithMany(c => c.LopHocs)
                 .HasForeignKey(l => l.MaChuongTrinh)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            // 3. GiangVien -> LopHoc (1 - n) (Tùy chọn)
-            modelBuilder.Entity<LopHoc>()
-                .HasOne(l => l.GiangVien)
-                .WithMany(g => g.LopHocs)
-                .HasForeignKey(l => l.MaGiangVien)
-                .OnDelete(DeleteBehavior.SetNull);
 
             // 4. HocVien -> DangKyHoc (1 - n)
             modelBuilder.Entity<DangKyHoc>()
@@ -155,26 +147,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                 }
             );
 
-            modelBuilder.Entity<GiangVien>().HasData(
-                new GiangVien
-                {
-                    MaGiangVien = 1,
-                    HoTen = "ThS. Trần Văn Hùng",
-                    Email = "tvhung@uneti.edu.vn",
-                    SoDienThoai = "0912345678",
-                    ChuyenNganh = "Công nghệ phần mềm & Web",
-                    TrangThai = true,
-                    NgayTao = new DateTime(2026, 1, 1)
-                }
-            );
-
             modelBuilder.Entity<LopHoc>().HasData(
                 new LopHoc
                 {
                     MaLopHoc = 1,
                     TenLop = "NETCORE10-K01",
                     MaChuongTrinh = 1, // Trực thuộc ChuongTrinhDaoTao #1
-                    MaGiangVien = 1,
                     TenGiangVien = "ThS. Trần Văn Hùng",
                     TrinhDoDauVao = "Cơ bản",
                     SiSoToiDa = 25,

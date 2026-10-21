@@ -15,13 +15,13 @@ Khung dự án này là **nền tảng chung duy nhất** đã được cấu h�
 
 ### Những thành phần ĐÃ ĐƯỢC LÀM SẴN trong khung:
 1. **Toàn bộ Entity Models (`Models/*.cs`):**
-   - Đầy đủ 10 model chuẩn theo nghiệp vụ: `TaiKhoan`, `DanhMucKhoaHoc`, `KhoaHoc`, `LopHoc`, `GiangVien`, `HocVien`, `DangKyHoc`, `BuoiHoc`, `KetQuaHocTap`, `ThanhToan`.
+   - Đầy đủ 7 model chuẩn theo đặc tả Đề tài BTL: `TaiKhoan`, `ChuongTrinhDaoTao`, `LopHoc`, `HocVien`, `DangKyHoc`, `BuoiHoc`, `KetQuaHocTap`.
    - Đã khai báo đầy đủ khóa chính, khóa ngoại, DataAnnotations (Validation, MaxLength, DisplayName).
 2. **Cơ sở dữ liệu & Cấu hình quan hệ (`Data/ApplicationDbContext.cs`):**
-   - Đã cấu hình quan hệ 1-N, N-N, các chỉ mục (Indexes).
-   - Đã cấu hình sẵn **Seed Data** (tạo sẵn dữ liệu mẫu cho tài khoản test, danh mục, khóa học, giảng viên, lớp học).
-3. **Migration nền tảng gốc (`Migrations/20261014070040_InitialCreate.cs`):**
-   - Đã tạo sẵn 1 migration duy nhất cho toàn bộ bảng.
+   - Đã cấu hình quan hệ 1-N (ChuongTrinhDaoTao -> LopHoc -> DangKyHoc...), 1-1 (DangKyHoc -> KetQuaHocTap).
+   - Đã cấu hình sẵn **Seed Data** (tạo sẵn dữ liệu mẫu cho tài khoản test, chương trình đào tạo, lớp học, học viên).
+3. **Migration nền tảng gốc (`Migrations/*_InitialCreate.cs`):**
+   - Đã tạo sẵn 1 migration duy nhất cho toàn bộ 7 bảng cốt lõi.
 4. **Cấu hình ứng dụng (`Program.cs`, `appsettings.json`):**
    - Đã bật sẵn kết nối SQL Server, Session 60 phút, Routing MVC.
 5. **Giao diện dùng chung (`Views/Shared/_Layout.cshtml`, `Views/Home/Index.cshtml`):**
@@ -373,11 +373,11 @@ Mỗi bạn căn cứ vào bảng này để tạo đúng file và viết các h
 
 | Thành viên | Module | File Repository cần tạo | File Service cần tạo | Các phương thức nghiệp vụ trọng tâm |
 | :--- | :---: | :--- | :--- | :--- |
-| **Vũ Đình Trường**<br>`23103100026` | **Module 1** | - `ITaiKhoanRepository.cs`<br>- `TaiKhoanRepository.cs`<br>- `IKhoaHocRepository.cs`<br>- `KhoaHocRepository.cs` | - `ITaiKhoanService.cs`<br>- `TaiKhoanService.cs`<br>- `IKhoaHocService.cs`<br>- `KhoaHocService.cs` | - `KiemTraDangNhap(tenDangNhap, matKhau)`<br>- `TaoTaiKhoanHocVien(taiKhoan)`<br>- `LuuSession(MaTaiKhoan, HoTen, VaiTro)`<br>- CRUD Danh mục & Khóa học đào tạo |
-| **Nguyễn Đình Kiên**<br>`23103100020` | **Module 2** | - `ILopHocRepository.cs`<br>- `LopHocRepository.cs`<br>- `IGiangVienRepository.cs`<br>- `GiangVienRepository.cs` | - `ILopHocService.cs`<br>- `LopHocService.cs` | - `GetPagedAsync(keyword, trangThai, maGV, sapXep, page, size)`<br>- **LINQ Skip() & Take() phân trang server**<br>- Validation logic ngày mở, hạn nộp, ngày khai giảng |
-| **Nguyễn Đức Linh**<br>`23103100042` | **Module 3** | - `IHocVienRepository.cs`<br>- `HocVienRepository.cs`<br>- `IDangKyHocRepository.cs`<br>- `DangKyHocRepository.cs` | - `IHocVienService.cs`<br>- `HocVienService.cs` | - `LayHoSoTheoTaiKhoan(maTaiKhoan)`<br>- `CapNhatHoSo(hocVien)`<br>- `LayDanhSachLopDangMo()`<br>- `DangKyLop(maHocVien, maLop)`: Kiểm tra bằng LINQ: lớp còn mở, còn chỗ, không đăng ký trùng |
-| **Nguyễn Hoàng Long**<br>`23103100046` | **Module 4** | - `IQuanLyDangKyRepository.cs`<br>- `QuanLyDangKyRepository.cs`<br>- `IThanhToanRepository.cs`<br>- `ThanhToanRepository.cs` | - `IQuanLyDangKyService.cs`<br>- `QuanLyDangKyService.cs` | - `LayDanhSachDonDangKy(maLop, trangThai)`<br>- **LINQ đếm sĩ số lớp đã duyệt < SiSoToiDa**<br>- `DuyetDon(maDangKy, ghiChu)`<br>- `TuChoiDon(maDangKy, lyDo)`<br>- `GhiNhanDongHocPhi(thanhToan)` & cập nhật trạng thái đơn |
-| **Nguyễn Tùng Dương**<br>`23103100003` | **Module 5** | - `IBuoiHocRepository.cs`<br>- `BuoiHocRepository.cs`<br>- `IKetQuaHocTapRepository.cs`<br>- `KetQuaHocTapRepository.cs` | - `ILichHocService.cs`<br>- `LichHocService.cs`<br>- `IThongKeService.cs`<br>- `ThongKeService.cs` | - **Thuật toán LINQ kiểm tra trùng lịch:** Không trùng phòng, không trùng GV, không trùng lớp trong cùng khung giờ<br>- Nhập điểm & tính điểm tổng kết: `0.2 * CC + 0.8 * CK`, xếp loại học lực<br>- **Dashboard thống kê LINQ**: Doanh thu, Top khóa học, Tỷ lệ đỗ/trượt |
+| **Vũ Đình Trường**<br>`23103100026` | **Module 1** | - `ITaiKhoanRepository.cs`<br>- `TaiKhoanRepository.cs`<br>- `IChuongTrinhDaoTaoRepository.cs`<br>- `ChuongTrinhDaoTaoRepository.cs` | - `ITaiKhoanService.cs`<br>- `TaiKhoanService.cs`<br>- `IChuongTrinhDaoTaoService.cs`<br>- `ChuongTrinhDaoTaoService.cs` | - `KiemTraDangNhap(tenDangNhap, matKhau)`<br>- `TaoTaiKhoanHocVien(taiKhoan)`<br>- `LuuSession(MaTaiKhoan, HoTen, VaiTro)`<br>- Phân quyền (Admin, GiaoVu, HocVien)<br>- CRUD Chương trình đào tạo |
+| **Nguyễn Đình Kiên**<br>`23103100020` | **Module 2** | - `ILopHocRepository.cs`<br>- `LopHocRepository.cs` | - `ILopHocService.cs`<br>- `LopHocService.cs` | - `GetPagedAsync(keyword, trangThai, sapXep, page, size)`<br>- **LINQ Skip() & Take() phân trang server**<br>- Validation ngày mở, hạn nộp, ngày khai giảng<br>- Quản lý lớp học (CRUD) |
+| **Nguyễn Đức Linh**<br>`23103100042` | **Module 3** | - `IHocVienRepository.cs`<br>- `HocVienRepository.cs`<br>- `IDangKyHocRepository.cs`<br>- `DangKyHocRepository.cs` | - `IHocVienService.cs`<br>- `HocVienService.cs` | - `LayHoSoTheoTaiKhoan(maTaiKhoan)`<br>- `CapNhatHoSo(hocVien)`<br>- `LayDanhSachLopDangMo()`<br>- `DangKyLop(maHocVien, maLop)`: Kiểm tra bằng LINQ: lớp còn mở, còn chỗ, không trùng đơn |
+| **Nguyễn Hoàng Long**<br>`23103100046` | **Module 4** | - `IQuanLyDangKyRepository.cs`<br>- `QuanLyDangKyRepository.cs` | - `IQuanLyDangKyService.cs`<br>- `QuanLyDangKyService.cs` | - `LayDanhSachDonDangKy(maLop, trangThai)`<br>- **LINQ đếm sĩ số lớp đã duyệt < SiSoToiDa**<br>- `DuyetDon(maDangKy, ghiChu)`<br>- `TuChoiDon(maDangKy, lyDo)`<br>- `XacNhanDongHocPhi(maDangKy, soTien, ngayDong)` |
+| **Nguyễn Tùng Dương**<br>`23103100003` | **Module 5** | - `IBuoiHocRepository.cs`<br>- `BuoiHocRepository.cs`<br>- `IKetQuaHocTapRepository.cs`<br>- `KetQuaHocTapRepository.cs` | - `ILichHocService.cs`<br>- `LichHocService.cs`<br>- `IThongKeService.cs`<br>- `ThongKeService.cs` | - **Thuật toán LINQ kiểm tra trùng lịch:** Không trùng phòng, không trùng GV, không trùng lớp trong cùng khung giờ<br>- Quản lý điểm & xếp loại học tập<br>- **Dashboard thống kê LINQ**: Doanh thu, Tỷ lệ đăng ký, Sĩ số các lớp |
 
 ---
 
