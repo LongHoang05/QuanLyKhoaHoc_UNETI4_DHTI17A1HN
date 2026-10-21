@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +24,14 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+// ========================================================
+// 3. Đăng ký Repository & Service Layer (Kiến trúc BTL UNETI)
+// ========================================================
+// Module 2 - Nguyễn Đình Kiên (23103100020)
+builder.Services.AddScoped<ILopHocRepository, LopHocRepository>();
+builder.Services.AddScoped<IGiangVienRepository, GiangVienRepository>();
+builder.Services.AddScoped<ILopHocService, LopHocService>();
 
 // Đăng ký dịch vụ Controllers with Views
 builder.Services.AddControllersWithViews();
