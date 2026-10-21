@@ -130,6 +130,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels
         public int MaDangKy { get; set; }
         public string TenLop { get; set; } = string.Empty;
         public string TenKhoaHoc { get; set; } = string.Empty;
+        public string TenChuongTrinh { get; set; } = string.Empty;
         public DateTime NgayDangKy { get; set; }
         public string TrangThai { get; set; } = string.Empty;
         public decimal HocPhi { get; set; }

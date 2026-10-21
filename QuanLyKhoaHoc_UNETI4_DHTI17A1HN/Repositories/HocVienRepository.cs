@@ -49,7 +49,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 .Include(h => h.TaiKhoan)
                 .Include(h => h.DangKyHocs)
                     .ThenInclude(d => d.LopHoc)
-                        .ThenInclude(l => l!.KhoaHoc)
+                        .ThenInclude(l => l!.ChuongTrinhDaoTao)
                 .FirstOrDefaultAsync(h => h.MaHocVien == id.Value);
         }
 

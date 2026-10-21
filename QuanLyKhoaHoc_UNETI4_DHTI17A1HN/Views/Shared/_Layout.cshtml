@@ -24,15 +24,63 @@
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
                             <a class="nav-link active" asp-controller="Home" asp-action="Index">
-                                <i class="bi bi-house-door-fill"></i> Trang chủ & Phân công nhiệm vụ
+                                <i class="bi bi-house-door-fill"></i> Phân công nhiệm vụ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white fw-bold bg-white bg-opacity-25 rounded px-3 ms-lg-2" asp-controller="HocVien" asp-action="Index">
+                                <i class="bi bi-people-fill me-1"></i> Module 3: Quản Lý Học Viên
                             </a>
                         </li>
                     </ul>
 
-                    <div class="d-flex align-items-center">
-                        <span class="badge bg-light text-primary px-3 py-2 fw-semibold">
-                            <i class="bi bi-code-slash me-1"></i> Khung Dự Án Chung (Starter Framework)
-                        </span>
+                    @{
+                        var currentRole = Context.Session.GetString("VaiTro");
+                        var currentHoTen = Context.Session.GetString("HoTen");
+                    }
+                    <div class="d-flex align-items-center gap-2">
+                        @if (!string.IsNullOrEmpty(currentRole))
+                        {
+                            <span class="badge bg-light text-dark px-3 py-2 fw-semibold">
+                                <i class="bi bi-person-circle text-primary me-1"></i> @currentHoTen (@currentRole)
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark px-3 py-2 fw-semibold">
+                                <i class="bi bi-clock-history me-1"></i> Chưa có Session
+                            </span>
+                        }
+
+                        <div class="dropdown">
+                            <button class="btn btn-warning btn-sm dropdown-toggle fw-bold text-dark" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-shield-lock-fill me-1"></i> Đổi Phiên Test
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow">
+                                <li><h6 class="dropdown-header text-uppercase small">Vai trò kiểm thử</h6></li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="HocVien" asp-action="DangNhapThuNghiem" asp-route-role="GiaoVu">
+                                        <i class="bi bi-person-badge text-primary me-2"></i> Giáo vụ (GiaoVu)
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="HocVien" asp-action="DangNhapThuNghiem" asp-route-role="Admin">
+                                        <i class="bi bi-shield-fill text-danger me-2"></i> Quản trị viên (Admin)
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="HocVien" asp-action="DangNhapThuNghiem" asp-route-role="HocVien">
+                                        <i class="bi bi-mortarboard text-warning me-2"></i> Học viên (Chặn quản trị)
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" asp-controller="HocVien" asp-action="DangXuatThuNghiem">
+                                        <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất (Clear Session)
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>

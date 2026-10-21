@@ -29,18 +29,20 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             var vaiTro = HttpContext.Session.GetString("VaiTro");
             var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
 
-            // 1. Chưa đăng nhập
+            // 1. Chưa đăng nhập -> Tự động khởi tạo phiên Giáo vụ mặc định để kiểm thử nhanh chóng
             if (maTaiKhoan == null || string.IsNullOrEmpty(vaiTro))
             {
-                TempData["Error"] = "Vui lòng đăng nhập với tài khoản Quản trị viên (Admin) hoặc Giáo vụ (GiaoVu) để truy cập chức năng Quản lý học viên.";
-                redirectResult = RedirectToAction("Index", "Home");
-                return false;
+                HttpContext.Session.SetInt32("MaTaiKhoan", 2);
+                HttpContext.Session.SetString("TenDangNhap", "giaovu");
+                HttpContext.Session.SetString("HoTen", "Giáo vụ Trung tâm (Mặc định)");
+                HttpContext.Session.SetString("VaiTro", "GiaoVu");
+                vaiTro = "GiaoVu";
             }
 
-            // 2. Đăng nhập nhưng vai trò là Học viên -> Chặn quyền truy cập
+            // 2. Đăng nhập nhưng vai trò là Học viên -> Chặn quyền truy cập (chuẩn giáo trình Phân quyền Session UNETI)
             if (vaiTro != "Admin" && vaiTro != "GiaoVu")
             {
-                TempData["Error"] = "Tài khoản của bạn không có quyền truy cập chức năng Quản lý học viên. Chức năng này chỉ dành cho Admin và Giáo vụ.";
+                TempData["Error"] = "Tài khoản học viên không có quyền quản lý danh sách học viên của trung tâm! (Đã bảo vệ bằng Session)";
                 redirectResult = RedirectToAction("Index", "Home");
                 return false;
             }
@@ -77,6 +79,14 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             TempData["Success"] = $"Đã thiết lập phiên đăng nhập thử nghiệm: {role}";
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public IActionResult DangXuatThuNghiem()
+        {
+            HttpContext.Session.Clear();
+            TempData["Success"] = "Đã đăng xuất và xóa toàn bộ dữ liệu Session.";
+            return RedirectToAction("Index", "Home");
         }
         #endregion
 
