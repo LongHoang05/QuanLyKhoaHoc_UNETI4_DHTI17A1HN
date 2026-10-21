@@ -26,9 +26,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
         [Display(Name = "Chương trình đào tạo")]
         public int MaChuongTrinh { get; set; }
 
-        [Display(Name = "Giảng viên phụ trách")]
-        public int? MaGiangVien { get; set; }
-
         [StringLength(200)]
         [Display(Name = "Tên giảng viên")]
         public string? TenGiangVien { get; set; }
@@ -90,9 +87,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
         // Navigation properties
         [ForeignKey("MaChuongTrinh")]
         public virtual ChuongTrinhDaoTao? ChuongTrinhDaoTao { get; set; }
-
-        [ForeignKey("MaGiangVien")]
-        public virtual GiangVien? GiangVien { get; set; }
 
         public virtual ICollection<DangKyHoc> DangKyHocs { get; set; } = new List<DangKyHoc>();
         public virtual ICollection<BuoiHoc> BuoiHocs { get; set; } = new List<BuoiHoc>();
