@@ -1,0 +1,435 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập Hệ thống - UNETI EDU</title>
+    <!-- Google Fonts: Playfair Display + Montserrat (Phong cách Floral Haven) -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-rose: #0284c7;     /* Sky Blue 600 */
+            --primary-light: #38bdf8;    /* Sky Light 400 */
+            --primary-blush: #7dd3fc;    /* Sky Soft 300 */
+            --primary-dark: #0369a1;     /* Sky Dark 700 */
+            --bg-color: #f0f7fd;
+            --surface-container: #e0f2fe;
+            --surface-variant: #f8fafc;
+            --text-dark: #0f172a;
+            --text-gray: #334155;
+            --text-muted: #64748b;
+            --sage-green: #38bdf8;
+            --soft-gold: #0ea5e9;
+            --border-color: #bae6fd;
+            --glass-bg: rgba(255, 255, 255, 0.92);
+            --font-serif: "Playfair Display", Georgia, serif;
+            --font-sans: "Montserrat", sans-serif;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: var(--font-sans);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(2, 132, 199, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(224, 242, 254, 0.4) 0%, transparent 60%);
+            padding: 20px;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 480px;
+            margin: auto;
+        }
+
+        .auth-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 28px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 60px rgba(2, 132, 199, 0.12);
+            padding: 40px 36px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #0284c7, #38bdf8, #06b6d4);
+        }
+
+        .auth-brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.4rem;
+            box-shadow: 0 6px 18px rgba(2, 132, 199, 0.3);
+        }
+
+        .auth-logo {
+            font-family: var(--font-serif);
+            font-size: 26px;
+            font-weight: 700;
+            color: #0284c7;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .auth-title {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            color: var(--text-dark);
+            text-align: center;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .auth-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .role-selector {
+            display: flex;
+            background: var(--surface-container);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 4px;
+            margin-bottom: 24px;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 50px;
+            border: none;
+            background: transparent;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-gray);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .role-btn.active {
+            background: var(--primary-rose);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+        }
+
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            color: var(--primary-rose);
+        }
+
+        .form-control {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            background: #fff;
+            color: var(--text-dark);
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-blush);
+            box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.08);
+            background: #fff;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, var(--primary-rose), var(--primary-light));
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            padding: 13px 28px;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+            transition: var(--transition);
+            box-shadow: 0 8px 20px rgba(2, 132, 199, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(2, 132, 199, 0.35);
+            background: linear-gradient(135deg, var(--primary-light), var(--primary-rose));
+            color: #fff;
+        }
+
+        .quick-accounts {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .quick-acc-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .quick-chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .quick-chip {
+            background: var(--surface-container);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .quick-chip:hover {
+            background: var(--primary-rose);
+            color: #fff;
+            border-color: var(--primary-rose);
+            transform: translateY(-1px);
+        }
+
+        .alert-custom {
+            border-radius: 12px;
+            font-size: 13px;
+            padding: 10px 14px;
+            display: none;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-brand">
+                <div class="brand-icon">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+                <div>
+                    <a href="index.html" class="auth-logo">UNETI EDU</a>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">Hệ thống Quản lý Đào tạo</div>
+                </div>
+            </div>
+
+            <h2 class="auth-title">Chào mừng trở lại</h2>
+            <p class="auth-subtitle">Đăng nhập tài khoản hệ thống (Mục 5.1 & 5.2 Đề tài 16)</p>
+
+            <!-- Chọn vai trò nhanh -->
+            <div class="role-selector">
+                <button type="button" class="role-btn active" onclick="selectRole('Admin')">
+                    <i class="bi bi-shield-lock-fill"></i> Admin
+                </button>
+                <button type="button" class="role-btn" onclick="selectRole('GiaoVu')">
+                    <i class="bi bi-briefcase-fill"></i> Giáo vụ
+                </button>
+                <button type="button" class="role-btn" onclick="selectRole('HocVien')">
+                    <i class="bi bi-person-fill"></i> Học viên
+                </button>
+            </div>
+
+            <!-- Thông báo lỗi đăng nhập -->
+            <div id="loginAlert" class="alert alert-danger alert-custom" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> <span id="alertMsg">Sai tên đăng nhập hoặc mật khẩu!</span>
+            </div>
+
+            <!-- Form đăng nhập -->
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold" for="username">Tên đăng nhập (TenDangNhap)</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0" style="border-color: var(--border-color);">
+                            <i class="bi bi-person text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0" id="username" placeholder="Nhập tên đăng nhập" required value="admin">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-semibold mb-0" for="password">Mật khẩu (MatKhau)</label>
+                        <a href="javascript:void(0)" onclick="alert('Demo: Vui lòng dùng một trong các tài khoản mẫu bên dưới!')" class="small text-decoration-none" style="color: var(--primary-rose);">Quên mật khẩu?</a>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0" style="border-color: var(--border-color);">
+                            <i class="bi bi-key text-muted"></i>
+                        </span>
+                        <input type="password" class="form-control border-start-0 border-end-0" id="password" placeholder="Nhập mật khẩu" required value="admin123">
+                        <button class="btn btn-outline-secondary border-start-0 bg-white" type="button" onclick="togglePass()" style="border-color: var(--border-color);">
+                            <i class="bi bi-eye text-muted" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="rememberMe" checked>
+                        <label class="form-check-label small text-muted" for="rememberMe">Lưu đăng nhập Session</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-login">
+                    <i class="bi bi-box-arrow-in-right"></i> Đăng nhập hệ thống
+                </button>
+            </form>
+
+            <!-- Tài khoản mẫu để kiểm thử theo Đề tài -->
+            <div class="quick-accounts">
+                <div class="quick-acc-title">Tài khoản mẫu kiểm thử (Mục 16)</div>
+                <div class="quick-chips">
+                    <div class="quick-chip" onclick="fillAccount('admin', 'admin123', 'Admin')">
+                        <i class="bi bi-person-badge"></i> Admin: admin
+                    </div>
+                    <div class="quick-chip" onclick="fillAccount('giaovu', 'gv123', 'GiaoVu')">
+                        <i class="bi bi-person-workspace"></i> Giáo vụ: giaovu
+                    </div>
+                    <div class="quick-chip" onclick="fillAccount('hocvien01', 'hv123', 'HocVien')">
+                        <i class="bi bi-mortarboard"></i> Học viên: hocvien01
+                    </div>
+                    <div class="quick-chip" style="border-color: #fee2e2; color: #dc2626; background: #fff5f5;" onclick="fillAccount('locked', '123456', 'Locked')">
+                        <i class="bi bi-lock-fill"></i> Khóa (Mục 5.1): locked
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentRole = 'Admin';
+
+        function selectRole(role) {
+            currentRole = role;
+            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            if (role === 'Admin') fillAccount('admin', 'admin123', 'Admin');
+            else if (role === 'GiaoVu') fillAccount('giaovu', 'gv123', 'GiaoVu');
+            else if (role === 'HocVien') fillAccount('hocvien01', 'hv123', 'HocVien');
+        }
+
+        function fillAccount(u, p, r) {
+            document.getElementById('username').value = u;
+            document.getElementById('password').value = p;
+            document.querySelectorAll('.role-btn').forEach(b => {
+                if (b.innerText.includes(r === 'GiaoVu' ? 'Giáo vụ' : r === 'HocVien' ? 'Học viên' : 'Admin')) {
+                    document.querySelectorAll('.role-btn').forEach(x => x.classList.remove('active'));
+                    b.classList.add('active');
+                }
+            });
+        }
+
+        function togglePass() {
+            const passInput = document.getElementById('password');
+            const icon = document.getElementById('eyeIcon');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                icon.className = 'bi bi-eye-slash text-muted';
+            } else {
+                passInput.type = 'password';
+                icon.className = 'bi bi-eye text-muted';
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('username').value.trim();
+            const p = document.getElementById('password').value.trim();
+            const alertBox = document.getElementById('loginAlert');
+            const alertMsg = document.getElementById('alertMsg');
+
+            if (u === 'locked' || u === 'khoa') {
+                alertBox.style.display = 'block';
+                alertMsg.innerHTML = '<i class="bi bi-lock-fill me-1"></i> <strong>Tài khoản đã bị tạm khóa (Mục 5.1):</strong> TrangThai = False. Không được phép đăng nhập vào hệ thống!';
+                return;
+            }
+
+            // Kiểm tra phân quyền chuẩn Đề tài 16
+            if (u === 'admin' && p === 'admin123') {
+                sessionStorage.setItem('MaTaiKhoan', '1');
+                sessionStorage.setItem('HoTen', 'Quản trị viên Hệ thống');
+                sessionStorage.setItem('VaiTro', 'Admin');
+                window.location.href = 'index.html';
+            } else if (u === 'giaovu' && p === 'gv123') {
+                sessionStorage.setItem('MaTaiKhoan', '2');
+                sessionStorage.setItem('HoTen', 'Giáo vụ Trung tâm');
+                sessionStorage.setItem('VaiTro', 'Giáo vụ');
+                window.location.href = 'index.html';
+            } else if ((u === 'hocvien01' || u === 'hocvien') && (p === 'hv123' || p === '123456')) {
+                sessionStorage.setItem('MaTaiKhoan', '3');
+                sessionStorage.setItem('HoTen', 'Trần Minh Tuấn (HV-02)');
+                sessionStorage.setItem('VaiTro', 'Học viên');
+                window.location.href = 'hoc-vien.html';
+            } else {
+                alertBox.style.display = 'block';
+                alertMsg.innerText = 'Tài khoản không tồn tại hoặc sai mật khẩu (Mục 5.2)!';
+            }
+        }
+    </script>
+</body>
+
+</html>
+
+

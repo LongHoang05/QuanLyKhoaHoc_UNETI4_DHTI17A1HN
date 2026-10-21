@@ -12,7 +12,7 @@ using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20261014070040_InitialCreate")]
+    [Migration("20261017113312_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -72,6 +72,58 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
                     b.ToTable("BuoiHoc");
                 });
 
+            modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.ChuongTrinhDaoTao", b =>
+                {
+                    b.Property<int>("MaChuongTrinh")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaChuongTrinh"));
+
+                    b.Property<string>("EmailLienHe")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("MoTa")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("NgayTao")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TenChuongTrinh")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("TrangThai")
+                        .HasColumnType("bit");
+
+                    b.HasKey("MaChuongTrinh");
+
+                    b.ToTable("ChuongTrinhDaoTao");
+
+                    b.HasData(
+                        new
+                        {
+                            MaChuongTrinh = 1,
+                            EmailLienHe = "cntt@uneti.edu.vn",
+                            MoTa = "Đào tạo kỹ sư phần mềm thực chiến với ASP.NET Core 10, React, SQL Server",
+                            NgayTao = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TenChuongTrinh = "Lập trình Web & Phần mềm Doanh nghiệp",
+                            TrangThai = true
+                        },
+                        new
+                        {
+                            MaChuongTrinh = 2,
+                            EmailLienHe = "ai@uneti.edu.vn",
+                            MoTa = "Chương trình chuyên sâu Python, Machine Learning, Deep Learning và Power BI",
+                            NgayTao = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TenChuongTrinh = "Khoa học Dữ liệu & Trí tuệ Nhân tạo",
+                            TrangThai = true
+                        });
+                });
+
             modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc", b =>
                 {
                     b.Property<int>("MaDangKy")
@@ -123,64 +175,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
                         new
                         {
                             MaDangKy = 1,
-                            GhiChu = "Đăng ký khóa học ASP.NET Core",
+                            GhiChu = "Đăng ký lớp học NETCORE10-K01",
                             MaHocVien = 1,
                             MaLopHoc = 1,
                             NgayDangKy = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             SoTienDaDong = 0m,
                             TrangThai = "Chờ duyệt"
-                        });
-                });
-
-            modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DanhMucKhoaHoc", b =>
-                {
-                    b.Property<int>("MaDanhMuc")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaDanhMuc"));
-
-                    b.Property<string>("EmailLienHe")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("MoTa")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<DateTime>("NgayTao")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("TenDanhMuc")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<bool>("TrangThai")
-                        .HasColumnType("bit");
-
-                    b.HasKey("MaDanhMuc");
-
-                    b.ToTable("DanhMucKhoaHoc");
-
-                    b.HasData(
-                        new
-                        {
-                            MaDanhMuc = 1,
-                            EmailLienHe = "cntt@uneti.edu.vn",
-                            MoTa = "Các khóa học lập trình .NET Core, React, Node.js, Python",
-                            NgayTao = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TenDanhMuc = "Lập trình Web & Phần mềm",
-                            TrangThai = true
-                        },
-                        new
-                        {
-                            MaDanhMuc = 2,
-                            EmailLienHe = "ai@uneti.edu.vn",
-                            MoTa = "Khóa học Machine Learning, Data Analytics, Deep Learning",
-                            NgayTao = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TenDanhMuc = "Khoa học Dữ liệu & AI",
-                            TrangThai = true
                         });
                 });
 
@@ -357,73 +357,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
                     b.ToTable("KetQuaHocTap");
                 });
 
-            modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.KhoaHoc", b =>
-                {
-                    b.Property<int>("MaKhoaHoc")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaKhoaHoc"));
-
-                    b.Property<string>("HinhAnh")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<decimal>("HocPhi")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("MaDanhMuc")
-                        .HasColumnType("int");
-
-                    b.Property<string>("MoTa")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<DateTime>("NgayTao")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("TenKhoaHoc")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.Property<int>("ThoiLuong")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("TrangThai")
-                        .HasColumnType("bit");
-
-                    b.HasKey("MaKhoaHoc");
-
-                    b.HasIndex("MaDanhMuc");
-
-                    b.ToTable("KhoaHoc");
-
-                    b.HasData(
-                        new
-                        {
-                            MaKhoaHoc = 1,
-                            HocPhi = 3500000m,
-                            MaDanhMuc = 1,
-                            MoTa = "Khóa học xây dựng web doanh nghiệp với ASP.NET Core 10 và EF Core",
-                            NgayTao = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TenKhoaHoc = "Lập trình ASP.NET Core 10 MVC",
-                            ThoiLuong = 48,
-                            TrangThai = true
-                        },
-                        new
-                        {
-                            MaKhoaHoc = 2,
-                            HocPhi = 2800000m,
-                            MaDanhMuc = 2,
-                            MoTa = "Khóa học trực quan hóa và phân tích số liệu cho doanh nghiệp",
-                            NgayTao = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TenKhoaHoc = "Phân tích dữ liệu với Python & Power BI",
-                            ThoiLuong = 36,
-                            TrangThai = true
-                        });
-                });
-
             modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc", b =>
                 {
                     b.Property<int>("MaLopHoc")
@@ -438,10 +371,10 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
                     b.Property<decimal>("HocPhi")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int?>("MaGiangVien")
+                    b.Property<int>("MaChuongTrinh")
                         .HasColumnType("int");
 
-                    b.Property<int>("MaKhoaHoc")
+                    b.Property<int?>("MaGiangVien")
                         .HasColumnType("int");
 
                     b.Property<string>("MoTa")
@@ -491,9 +424,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
 
                     b.HasKey("MaLopHoc");
 
-                    b.HasIndex("MaGiangVien");
+                    b.HasIndex("MaChuongTrinh");
 
-                    b.HasIndex("MaKhoaHoc");
+                    b.HasIndex("MaGiangVien");
 
                     b.ToTable("LopHoc");
 
@@ -503,8 +436,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
                             MaLopHoc = 1,
                             HanDangKy = new DateTime(2026, 12, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             HocPhi = 3500000m,
+                            MaChuongTrinh = 1,
                             MaGiangVien = 1,
-                            MaKhoaHoc = 1,
                             MoTa = "Lớp học buổi tối thứ 2-4-6 từ 18:00 - 21:00",
                             NgayBatDauDangKy = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NgayKhaiGiang = new DateTime(2027, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -599,45 +532,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
                         });
                 });
 
-            modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.ThanhToan", b =>
-                {
-                    b.Property<int>("MaThanhToan")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaThanhToan"));
-
-                    b.Property<string>("GhiChu")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int>("MaDangKy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("NgayThanhToan")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PhuongThucThanhToan")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<decimal>("SoTien")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("TrangThaiThanhToan")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("MaThanhToan");
-
-                    b.HasIndex("MaDangKy")
-                        .IsUnique();
-
-                    b.ToTable("ThanhToan");
-                });
-
             modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.BuoiHoc", b =>
                 {
                     b.HasOne("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc", "LopHoc")
@@ -689,56 +583,32 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
                     b.Navigation("DangKyHoc");
                 });
 
-            modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.KhoaHoc", b =>
+            modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc", b =>
                 {
-                    b.HasOne("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DanhMucKhoaHoc", "DanhMucKhoaHoc")
-                        .WithMany("KhoaHocs")
-                        .HasForeignKey("MaDanhMuc")
+                    b.HasOne("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.ChuongTrinhDaoTao", "ChuongTrinhDaoTao")
+                        .WithMany("LopHocs")
+                        .HasForeignKey("MaChuongTrinh")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("DanhMucKhoaHoc");
-                });
-
-            modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc", b =>
-                {
                     b.HasOne("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien", "GiangVien")
                         .WithMany("LopHocs")
                         .HasForeignKey("MaGiangVien")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.KhoaHoc", "KhoaHoc")
-                        .WithMany("LopHocs")
-                        .HasForeignKey("MaKhoaHoc")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Navigation("ChuongTrinhDaoTao");
 
                     b.Navigation("GiangVien");
-
-                    b.Navigation("KhoaHoc");
                 });
 
-            modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.ThanhToan", b =>
+            modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.ChuongTrinhDaoTao", b =>
                 {
-                    b.HasOne("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc", "DangKyHoc")
-                        .WithOne("ThanhToan")
-                        .HasForeignKey("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.ThanhToan", "MaDangKy")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DangKyHoc");
+                    b.Navigation("LopHocs");
                 });
 
             modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc", b =>
                 {
                     b.Navigation("KetQuaHocTap");
-
-                    b.Navigation("ThanhToan");
-                });
-
-            modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DanhMucKhoaHoc", b =>
-                {
-                    b.Navigation("KhoaHocs");
                 });
 
             modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien", b =>
@@ -749,11 +619,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
             modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.HocVien", b =>
                 {
                     b.Navigation("DangKyHocs");
-                });
-
-            modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.KhoaHoc", b =>
-                {
-                    b.Navigation("LopHocs");
                 });
 
             modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc", b =>

@@ -15,11 +15,11 @@ Khung dự án này là **nền tảng chung duy nhất** đã được cấu h�
 
 ### Những thành phần ĐÃ ĐƯỢC LÀM SẴN trong khung:
 1. **Toàn bộ Entity Models (`Models/*.cs`):**
-   - Đầy đủ 10 model chuẩn theo nghiệp vụ: `TaiKhoan`, `DanhMucKhoaHoc`, `KhoaHoc`, `LopHoc`, `GiangVien`, `HocVien`, `DangKyHoc`, `BuoiHoc`, `KetQuaHocTap`, `ThanhToan`.
+   - Đầy đủ các model chuẩn theo Mục 10 Đề tài 16: `TaiKhoan`, `ChuongTrinhDaoTao`, `LopHoc`, `GiangVien`, `HocVien`, `DangKyHoc`, `BuoiHoc`, `KetQuaHocTap`.
    - Đã khai báo đầy đủ khóa chính, khóa ngoại, DataAnnotations (Validation, MaxLength, DisplayName).
 2. **Cơ sở dữ liệu & Cấu hình quan hệ (`Data/ApplicationDbContext.cs`):**
-   - Đã cấu hình quan hệ 1-N, N-N, các chỉ mục (Indexes).
-   - Đã cấu hình sẵn **Seed Data** (tạo sẵn dữ liệu mẫu cho tài khoản test, danh mục, khóa học, giảng viên, lớp học).
+   - Đã cấu hình quan hệ 1-N (ChuongTrinhDaoTao -> LopHoc -> DangKyHoc...), 1-1 (DangKyHoc -> KetQuaHocTap).
+   - Đã cấu hình sẵn **Seed Data** (tạo sẵn dữ liệu mẫu cho tài khoản test, chương trình đào tạo, giảng viên, lớp học).
 3. **Migration nền tảng gốc (`Migrations/20261014070040_InitialCreate.cs`):**
    - Đã tạo sẵn 1 migration duy nhất cho toàn bộ bảng.
 4. **Cấu hình ứng dụng (`Program.cs`, `appsettings.json`):**

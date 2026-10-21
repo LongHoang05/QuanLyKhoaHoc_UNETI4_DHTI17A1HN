@@ -4,8 +4,8 @@ using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
 {
     /// <summary>
-    /// DbContext chính của ứng dụng - Khung CSDL dùng chung cho toàn bộ 5 Module
-    /// Quản lý kết nối SQL Server và các bảng (DbSet)
+    /// DbContext chính của ứng dụng - Kiến trúc CSDL 7 thực thể cốt lõi chuẩn Đề tài 16 BTL UNETI
+    /// ChuongTrinhDaoTao (1) -> (n) LopHoc (1) -> (n) DangKyHoc -> KetQuaHocTap
     /// </summary>
     public class ApplicationDbContext : DbContext
     {
@@ -18,14 +18,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
         // ====== Module 1 - Vũ Đình Trường (23103100026) ======
         // ========================================================
         public DbSet<TaiKhoan> TaiKhoans { get; set; }
-        public DbSet<DanhMucKhoaHoc> DanhMucKhoaHocs { get; set; }
-        public DbSet<KhoaHoc> KhoaHocs { get; set; }
+        public DbSet<ChuongTrinhDaoTao> ChuongTrinhDaoTaos { get; set; }
 
         // ========================================================
         // ====== Module 2 - Nguyễn Đình Kiên (23103100020) ======
         // ========================================================
         public DbSet<LopHoc> LopHocs { get; set; }
-        public DbSet<GiangVien> GiangViens { get; set; }
+        public DbSet<GiangVien> GiangViens { get; set; } // Thực thể bổ sung theo Mục 10
 
         // ========================================================
         // ====== Module 3 - Nguyễn Đức Linh (23103100042) ======
@@ -36,7 +35,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
         // ====== Module 4 - Nguyễn Hoàng Long (23103100046) ======
         // ========================================================
         public DbSet<DangKyHoc> DangKyHocs { get; set; }
-        public DbSet<ThanhToan> ThanhToans { get; set; }
 
         // ========================================================
         // ====== Module 5 - Nguyễn Tùng Dương (23103100003) ======
@@ -48,72 +46,58 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // ===== Cấu hình quan hệ giữa các Entity =====
+            // ===== Cấu hình quan hệ giữa các Entity theo Mục 10 =====
 
-            // TaiKhoan -> HocVien (1-1)
+            // 1. TaiKhoan -> HocVien (1 - 0..1)
             modelBuilder.Entity<HocVien>()
                 .HasOne(h => h.TaiKhoan)
                 .WithOne(t => t.HocVien)
                 .HasForeignKey<HocVien>(h => h.MaTaiKhoan)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // DanhMucKhoaHoc -> KhoaHoc (1-N)
-            modelBuilder.Entity<KhoaHoc>()
-                .HasOne(k => k.DanhMucKhoaHoc)
-                .WithMany(d => d.KhoaHocs)
-                .HasForeignKey(k => k.MaDanhMuc)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // KhoaHoc -> LopHoc (1-N)
+            // 2. ChuongTrinhDaoTao -> LopHoc (1 - n) - KHÔNG QUA BẢNG KHÓA HỌC TRUNG GIAN
             modelBuilder.Entity<LopHoc>()
-                .HasOne(l => l.KhoaHoc)
-                .WithMany(k => k.LopHocs)
-                .HasForeignKey(l => l.MaKhoaHoc)
+                .HasOne(l => l.ChuongTrinhDaoTao)
+                .WithMany(c => c.LopHocs)
+                .HasForeignKey(l => l.MaChuongTrinh)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // GiangVien -> LopHoc (1-N)
+            // 3. GiangVien -> LopHoc (1 - n) (Tùy chọn)
             modelBuilder.Entity<LopHoc>()
                 .HasOne(l => l.GiangVien)
                 .WithMany(g => g.LopHocs)
                 .HasForeignKey(l => l.MaGiangVien)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // HocVien -> DangKyHoc (1-N)
+            // 4. HocVien -> DangKyHoc (1 - n)
             modelBuilder.Entity<DangKyHoc>()
                 .HasOne(d => d.HocVien)
                 .WithMany(h => h.DangKyHocs)
                 .HasForeignKey(d => d.MaHocVien)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // LopHoc -> DangKyHoc (1-N)
+            // 5. LopHoc -> DangKyHoc (1 - n)
             modelBuilder.Entity<DangKyHoc>()
                 .HasOne(d => d.LopHoc)
                 .WithMany(l => l.DangKyHocs)
                 .HasForeignKey(d => d.MaLopHoc)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // LopHoc -> BuoiHoc (1-N)
+            // 6. LopHoc -> BuoiHoc (1 - 0..n)
             modelBuilder.Entity<BuoiHoc>()
                 .HasOne(b => b.LopHoc)
                 .WithMany(l => l.BuoiHocs)
                 .HasForeignKey(b => b.MaLopHoc)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // DangKyHoc -> KetQuaHocTap (1-1)
+            // 7. DangKyHoc -> KetQuaHocTap (1 - 0..1)
             modelBuilder.Entity<KetQuaHocTap>()
                 .HasOne(k => k.DangKyHoc)
                 .WithOne(d => d.KetQuaHocTap)
                 .HasForeignKey<KetQuaHocTap>(k => k.MaDangKy)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // DangKyHoc -> ThanhToan (1-1)
-            modelBuilder.Entity<ThanhToan>()
-                .HasOne(t => t.DangKyHoc)
-                .WithOne(d => d.ThanhToan)
-                .HasForeignKey<ThanhToan>(t => t.MaDangKy)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // ===== Dữ liệu mẫu khởi tạo (Seed Data) =====
+            // ===== Dữ liệu mẫu khởi tạo (Seed Data chuẩn Đề tài 16) =====
             modelBuilder.Entity<TaiKhoan>().HasData(
                 new TaiKhoan
                 {
@@ -150,47 +134,22 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                 }
             );
 
-            modelBuilder.Entity<DanhMucKhoaHoc>().HasData(
-                new DanhMucKhoaHoc
+            modelBuilder.Entity<ChuongTrinhDaoTao>().HasData(
+                new ChuongTrinhDaoTao
                 {
-                    MaDanhMuc = 1,
-                    TenDanhMuc = "Lập trình Web & Phần mềm",
-                    MoTa = "Các khóa học lập trình .NET Core, React, Node.js, Python",
+                    MaChuongTrinh = 1,
+                    TenChuongTrinh = "Lập trình Web & Phần mềm Doanh nghiệp",
+                    MoTa = "Đào tạo kỹ sư phần mềm thực chiến với ASP.NET Core 10, React, SQL Server",
                     EmailLienHe = "cntt@uneti.edu.vn",
                     TrangThai = true,
                     NgayTao = new DateTime(2026, 1, 1)
                 },
-                new DanhMucKhoaHoc
+                new ChuongTrinhDaoTao
                 {
-                    MaDanhMuc = 2,
-                    TenDanhMuc = "Khoa học Dữ liệu & AI",
-                    MoTa = "Khóa học Machine Learning, Data Analytics, Deep Learning",
+                    MaChuongTrinh = 2,
+                    TenChuongTrinh = "Khoa học Dữ liệu & Trí tuệ Nhân tạo",
+                    MoTa = "Chương trình chuyên sâu Python, Machine Learning, Deep Learning và Power BI",
                     EmailLienHe = "ai@uneti.edu.vn",
-                    TrangThai = true,
-                    NgayTao = new DateTime(2026, 1, 1)
-                }
-            );
-
-            modelBuilder.Entity<KhoaHoc>().HasData(
-                new KhoaHoc
-                {
-                    MaKhoaHoc = 1,
-                    TenKhoaHoc = "Lập trình ASP.NET Core 10 MVC",
-                    MoTa = "Khóa học xây dựng web doanh nghiệp với ASP.NET Core 10 và EF Core",
-                    MaDanhMuc = 1,
-                    HocPhi = 3500000,
-                    ThoiLuong = 48,
-                    TrangThai = true,
-                    NgayTao = new DateTime(2026, 1, 1)
-                },
-                new KhoaHoc
-                {
-                    MaKhoaHoc = 2,
-                    TenKhoaHoc = "Phân tích dữ liệu với Python & Power BI",
-                    MoTa = "Khóa học trực quan hóa và phân tích số liệu cho doanh nghiệp",
-                    MaDanhMuc = 2,
-                    HocPhi = 2800000,
-                    ThoiLuong = 36,
                     TrangThai = true,
                     NgayTao = new DateTime(2026, 1, 1)
                 }
@@ -214,7 +173,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                 {
                     MaLopHoc = 1,
                     TenLop = "NETCORE10-K01",
-                    MaKhoaHoc = 1,
+                    MaChuongTrinh = 1, // Trực thuộc ChuongTrinhDaoTao #1
                     MaGiangVien = 1,
                     TenGiangVien = "ThS. Trần Văn Hùng",
                     TrinhDoDauVao = "Cơ bản",
@@ -257,7 +216,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                     MaHocVien = 1,
                     MaLopHoc = 1,
                     NgayDangKy = new DateTime(2026, 2, 1),
-                    GhiChu = "Đăng ký khóa học ASP.NET Core",
+                    GhiChu = "Đăng ký lớp học NETCORE10-K01",
                     TrangThai = "Chờ duyệt",
                     SoTienDaDong = 0
                 }

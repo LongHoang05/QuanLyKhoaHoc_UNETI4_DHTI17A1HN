@@ -1,0 +1,632 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết quả học tập & Nhập điểm (KetQuaHocTap) - UNETI EDU</title>
+    <!-- Google Fonts: Playfair Display + Montserrat (Floral Haven) -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --sidebar-width: 275px;
+            --primary-rose: #0284c7;     /* Sky Blue 600 */
+            --primary-light: #38bdf8;    /* Sky Light 400 */
+            --primary-blush: #7dd3fc;    /* Sky Soft 300 */
+            --primary-dark: #0369a1;     /* Sky Dark 700 */
+            --bg-color: #f0f7fd;
+            --surface-card: #ffffff;
+            --surface-container: #e0f2fe;
+            --surface-variant: #f8fafc;
+            --text-dark: #0f172a;
+            --text-gray: #334155;
+            --text-muted: #64748b;
+            --border-color: #bae6fd;
+            --border-light: #e2e8f0;
+            --glass-bg: rgba(255, 255, 255, 0.92);
+            --card-shadow: 0 4px 20px rgba(2, 132, 199, 0.06);
+            --card-hover: 0 10px 28px rgba(2, 132, 199, 0.12);
+            --font-serif: "Playfair Display", Georgia, serif;
+            --font-sans: "Montserrat", -apple-system, BlinkMacSystemFont, sans-serif;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg-color);
+            font-family: var(--font-sans);
+            color: var(--text-dark);
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(2, 132, 199, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.06) 0%, transparent 40%);
+        }
+
+        /* Sidebar Trái */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: linear-gradient(180deg, #07172c 0%, #0c2d48 55%, #051324 100%);
+            color: #e0f2fe;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            box-shadow: 4px 0 30px rgba(2, 132, 199, 0.15);
+        }
+
+        .sidebar-brand {
+            padding: 1.35rem 1.4rem;
+            font-family: var(--font-serif);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #38bdf8;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
+            font-size: 1.2rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1.1rem 0.85rem;
+            margin: 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .sidebar-category {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: #64748b;
+            padding: 0.85rem 1rem 0.35rem 1rem;
+        }
+
+        .sidebar-menu li { margin-bottom: 0.25rem; }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.68rem 0.95rem;
+            color: #d4a0b0;
+            text-decoration: none;
+            border-radius: 0.65rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .sidebar-link-left { display: flex; align-items: center; gap: 12px; }
+        .sidebar-link i { font-size: 1.1rem; }
+
+        .sidebar-link:hover {
+            background-color: rgba(2, 132, 199, 0.25);
+            color: #e0f2fe;
+            transform: translateX(3px);
+        }
+
+        .sidebar-link.active {
+            background: linear-gradient(90deg, var(--primary-rose), var(--primary-light));
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid rgba(56, 189, 248, 0.1);
+            background-color: rgba(15, 3, 8, 0.6);
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        /* Main Content */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar {
+            height: 66px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .content-area {
+            padding: 1.75rem 2rem 2.5rem 2rem;
+            flex-grow: 1;
+            max-width: 1440px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Hero Banner */
+        .page-hero {
+            background: linear-gradient(135deg, #071e3d 0%, #0c3d6d 50%, #051426 100%);
+            border-radius: 1.25rem;
+            padding: 1.5rem 1.85rem;
+            color: #ffffff;
+            box-shadow: 0 10px 30px rgba(45, 10, 26, 0.1);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-title {
+            font-family: var(--font-serif);
+            font-size: 1.45rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Content Card & Table */
+        .content-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1.15rem;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .toolbar {
+            padding: 1.15rem 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .modern-table { width: 100%; border-collapse: collapse; }
+        .modern-table thead th {
+            background-color: var(--surface-variant);
+            color: var(--text-gray);
+            font-size: 0.74rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 0.95rem 1.15rem;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+        .modern-table tbody td {
+            padding: 0.95rem 1.15rem;
+            vertical-align: middle;
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .modern-table tbody tr:hover { background-color: #fff9fa; }
+
+        /* Grade inputs */
+        .grade-input {
+            width: 75px;
+            text-align: center;
+            font-weight: 700;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 0.5rem;
+            font-size: 0.88rem;
+            transition: var(--transition);
+        }
+        .grade-input:focus {
+            border-color: var(--primary-rose);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+            outline: none;
+        }
+
+        /* Toast Container */
+        .toast-container-custom {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 99999;
+        }
+        .custom-toast {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 0.85rem 1.15rem;
+            box-shadow: 0 10px 30px rgba(2, 132, 199, 0.15);
+            border-left: 4px solid var(--primary-rose);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 320px;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="toastContainer" class="toast-container-custom"></div>
+
+    <!-- ==================== SIDEBAR TRÁI ==================== -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon">
+                <i class="bi bi-mortarboard-fill"></i>
+            </div>
+            <div>
+                <div style="line-height: 1.15;">UNETI EDU</div>
+                <div style="font-size: 0.65rem; color: #64748b; font-weight: 500; font-family: var(--font-sans);">Khoa CNTT - Nhóm 4</div>
+            </div>
+        </div>
+
+        <ul class="sidebar-menu">
+            <div class="sidebar-category">Bảng điều khiển</div>
+            <li>
+                <a href="index.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-speedometer2"></i> Tổng quan</span>
+                </a>
+            </li>
+
+            <div class="sidebar-category">Quản lý đào tạo (5 Module)</div>
+            <li>
+                <a href="admin-chuong-trinh.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-journal-bookmark-fill"></i> Chương trình ĐT (M1)</span>
+                    <span class="badge bg-secondary bg-opacity-50 rounded-pill">6</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-lop-hoc.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-easel2-fill"></i> Quản lý Lớp học (M2)</span>
+                    <span class="badge bg-success bg-opacity-75 rounded-pill">18</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-tai-khoan.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-person-lines-fill"></i> Học viên & Hồ sơ (M3)</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-dang-ky.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-clipboard2-check-fill"></i> Duyệt ĐK & Học phí (M4)</span>
+                    <span class="badge rounded-pill fw-bold" style="background: var(--primary-rose); color: #fff;">03 mới</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-buoi-hoc.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-calendar-week-fill"></i> Lịch học & Buổi học (M5)</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-ket-qua.html" class="sidebar-link active">
+                    <span class="sidebar-link-left"><i class="bi bi-award-fill"></i> Kết quả học tập (M5)</span>
+                    <span class="badge rounded-pill bg-success fw-bold">Tính điểm</span>
+                </a>
+            </li>
+
+            <div class="sidebar-category">Thống kê & Cổng ngoài</div>
+            <li>
+                <a href="admin-thong-ke.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-bar-chart-line-fill"></i> Báo cáo LINQ (M5)</span>
+                </a>
+            </li>
+            <li>
+                <a href="hoc-vien.html" class="sidebar-link text-warning">
+                    <span class="sidebar-link-left"><i class="bi bi-box-arrow-up-right"></i> Cổng Học viên (Mục 17.1)</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+                <span><i class="bi bi-person-badge me-1" style="color: var(--primary-blush);"></i> Phụ trách M5:</span>
+                <span class="text-white fw-semibold">Vũ Đình Trường</span>
+            </div>
+            <div class="small" style="font-size: 0.72rem; color: #64748b;">
+                Kết quả học tập & Đánh giá • Mục 9.4
+            </div>
+        </div>
+    </aside>
+
+    <!-- ==================== MAIN WRAPPER ==================== -->
+    <div class="main-wrapper">
+        <header class="topbar">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 small">
+                    <li class="breadcrumb-item"><a href="index.html" class="text-decoration-none text-muted">Tổng quan</a></li>
+                    <li class="breadcrumb-item active fw-semibold" style="color: var(--text-dark);">Kết quả học tập & Nhập điểm (Module 5)</li>
+                </ol>
+            </nav>
+
+            <div class="d-flex align-items-center gap-3">
+                <a href="hoc-vien.html" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1" style="font-size: 0.8rem;">
+                    <i class="bi bi-person-workspace me-1"></i> Cổng Học viên
+                </a>
+                <div class="vr"></div>
+                <div class="text-end d-none d-sm-block">
+                    <div class="fw-bold small" style="color: var(--text-dark);">Giáo vụ Khảo thí</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">khaothi@uneti.edu.vn</div>
+                </div>
+                <a href="dang-nhap.html" class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: var(--surface-container); color: var(--primary-rose); border: 1px solid var(--border-color);" title="Đăng xuất">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
+        </header>
+
+        <main class="content-area">
+
+            <!-- 1. HERO BANNER TỐI GIẢN -->
+            <div class="page-hero">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge rounded-pill px-3 py-1" style="background: rgba(56, 189, 248, 0.2); color: var(--primary-blush); border: 1px solid rgba(56, 189, 248, 0.35);">
+                                <i class="bi bi-award me-1"></i> Entity KetQuaHocTap
+                            </span>
+                            <span class="small" style="color: #bae6fd;">Mục 9.4 Đề tài 16 UNETI</span>
+                        </div>
+                        <h1 class="hero-title">Nhập Điểm, Đánh Giá Hoàn Thành & Công Thức Tự Động</h1>
+                        <p class="mb-0 small" style="color: #f7d6df;">
+                            Công thức tính điểm chuẩn: <code>DiemTongKet = 0.2 * DiemChuyenCan + 0.8 * DiemCuoiKhoa</code>. Chỉ lớp đã hoàn thành toàn bộ buổi học mới được công bố bảng điểm.
+                        </p>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm px-3 py-2 rounded-pill fw-semibold text-white" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); font-size: 0.82rem;" onclick="window.print()">
+                            <i class="bi bi-printer me-1"></i> In bảng điểm
+                        </button>
+                        <button type="button" class="btn btn-sm px-3 py-2 rounded-pill fw-semibold text-white" style="background: var(--primary-rose); border: 1px solid rgba(56,189,248,0.4); font-size: 0.82rem;" onclick="saveAllGrades()">
+                            <i class="bi bi-cloud-arrow-up-fill me-1"></i> Lưu toàn bộ bảng điểm
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cảnh báo nếu lớp chưa hoàn thành toàn bộ buổi học (Mục 9.4) -->
+            <div id="incompleteClassAlert" class="alert alert-warning py-2 px-3 small border-warning mb-3 d-none">
+                <i class="bi bi-exclamation-circle-fill me-1"></i>
+                <strong>Lưu ý Mục 9.4:</strong> Lớp học này đang diễn ra và chưa hoàn thành toàn bộ số buổi học. Hệ thống chỉ cho phép xem trước, việc xác nhận bảng điểm tốt nghiệp cuối cùng bị khóa cho đến khi toàn bộ buổi học kết thúc.
+            </div>
+
+            <!-- 2. BẢNG KẾT QUẢ HỌC TẬP & NHẬP ĐIỂM -->
+            <div class="content-card">
+                <div class="toolbar">
+                    <div class="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
+                        <!-- Chọn Lớp học -->
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="small fw-bold text-muted text-nowrap"><i class="bi bi-easel me-1"></i>Lớp học:</span>
+                            <select id="selectedClass" onchange="onClassChange()" class="form-select form-select-sm" style="min-width: 280px;">
+                                <option value="NETCORE10-K01" data-completed="true">NETCORE10-K01 (.NET Fullstack - Đã học xong)</option>
+                                <option value="PYTHON-K02" data-completed="true">PYTHON-K02 (Python AI Data - Đã học xong)</option>
+                                <option value="REACT-K05" data-completed="false">REACT-K05 (React & Next.js - Đang học, chưa kết thúc)</option>
+                                <option value="TOEIC-K12" data-completed="false">TOEIC-K12 (Tiếng Anh TOEIC - Đang học)</option>
+                            </select>
+                        </div>
+
+                        <!-- Lọc Đánh giá -->
+                        <select id="filterPassFail" onchange="renderGradesTable()" class="form-select form-select-sm" style="max-width: 200px;">
+                            <option value="">-- Tất cả kết quả --</option>
+                            <option value="Hoàn thành">Hoàn thành (>= 5.0)</option>
+                            <option value="Không hoàn thành">Không hoàn thành (< 5.0)</option>
+                        </select>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="small text-muted">
+                            Sĩ số lớp: <strong id="classStudentCount">0</strong> học viên
+                        </div>
+                        <div class="small text-success">
+                            Tỷ lệ đạt: <strong id="passRateText">100%</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 70px;">Mã HV</th>
+                                <th>Học viên</th>
+                                <th>Email liên hệ</th>
+                                <th style="width: 130px;" class="text-center">Chuyên cần (20%)</th>
+                                <th style="width: 130px;" class="text-center">Cuối khóa (80%)</th>
+                                <th style="width: 130px;" class="text-center">Điểm tổng kết</th>
+                                <th style="width: 140px;" class="text-center">Đánh giá</th>
+                                <th style="width: 130px;" class="text-center">Xếp loại</th>
+                                <th>Nhận xét của Giáo vụ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gradesTableBody">
+                            <!-- Render by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-3 bg-light border-top d-flex justify-content-between align-items-center small text-muted">
+                    <div><i class="bi bi-info-circle text-primary me-1"></i> Điểm tổng kết tự động tính theo thời gian thực: <code>TK = 0.2 * CC + 0.8 * CK</code>. Đạt >= 5.0 được ghi nhận "Hoàn thành" và cấp chứng nhận.</div>
+                    <span class="badge rounded-pill" style="background: var(--surface-container); color: var(--primary-rose);">Mục 9.4: KetQuaHocTap</span>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Dataset Kết quả học tập chuẩn BTL 16 (Entity KetQuaHocTap)
+        let gradeRecords = [
+            // Lớp NETCORE10-K01 (Đã học xong toàn bộ buổi học)
+            { id: "HV-01", name: "Nguyễn Văn An", email: "an.nguyen@gmail.com", classCode: "NETCORE10-K01", cc: 9.0, ck: 8.5, note: "Chuyên cần xuất sắc, đồ án cuối khóa hoàn thiện tốt." },
+            { id: "HV-02", name: "Trần Minh Tuấn", email: "tuan.tm@gmail.com", classCode: "NETCORE10-K01", cc: 9.0, ck: 8.5, note: "Nắm vững Clean Architecture & Blazor." },
+            { id: "HV-05", name: "Lê Hoàng Nam", email: "nam.lh@gmail.com", classCode: "NETCORE10-K01", cc: 8.0, ck: 7.5, note: "Kỹ năng lập trình tốt, tiếp thu nhanh." },
+            { id: "HV-07", name: "Vũ Hải Đăng", email: "dang.vh@gmail.com", classCode: "NETCORE10-K01", cc: 6.0, ck: 4.0, note: "Chưa hoàn thành bài tập lớn cuối khóa." },
+            { id: "HV-11", name: "Nguyễn Trọng Hiếu", email: "hieu.nt@gmail.com", classCode: "NETCORE10-K01", cc: 8.5, ck: 9.0, note: "Đồ án xuất sắc đạt điểm tối đa." },
+
+            // Lớp PYTHON-K02 (Đã học xong)
+            { id: "HV-04", name: "Phạm Quốc Bảo", email: "bao.pq@gmail.com", classCode: "PYTHON-K02", cc: 9.0, ck: 8.0, note: "Phân tích dữ liệu tốt." },
+            { id: "HV-06", name: "Đỗ Thùy Linh", email: "linh.dt@gmail.com", classCode: "PYTHON-K02", cc: 8.5, ck: 7.0, note: "Hiểu rõ các thuật toán máy học cơ bản." },
+            { id: "HV-09", name: "Bùi Quốc Huy", email: "huy.bq@gmail.com", classCode: "PYTHON-K02", cc: 7.0, ck: 6.5, note: "Chăm chỉ hoàn thành bài tập." },
+
+            // Lớp REACT-K05 (Đang học, chưa kết thúc)
+            { id: "HV-10", name: "Đặng Phương Thảo", email: "thao.dp@gmail.com", classCode: "REACT-K05", cc: 9.0, ck: 0, note: "Đang tham gia các buổi học theo lịch." },
+            { id: "HV-12", name: "Trịnh Kim Ngân", email: "ngan.tk@gmail.com", classCode: "REACT-K05", cc: 8.5, ck: 0, note: "Đang học phần Next.js Server Components." }
+        ];
+
+        // Toast Helper
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'custom-toast';
+            toast.innerHTML = `
+                <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                <div class="flex-grow-1">
+                    <div class="fw-bold" style="color: var(--text-dark);">${message}</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted);">${new Date().toLocaleTimeString()}</div>
+                </div>
+                <button type="button" class="btn-close btn-sm" onclick="this.parentElement.remove()"></button>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        // Đổi Lớp học
+        function onClassChange() {
+            const sel = document.getElementById('selectedClass');
+            const opt = sel.options[sel.selectedIndex];
+            const isCompleted = opt.getAttribute('data-completed') === 'true';
+            const alertEl = document.getElementById('incompleteClassAlert');
+
+            if (!isCompleted) {
+                alertEl.classList.remove('d-none');
+            } else {
+                alertEl.classList.add('d-none');
+            }
+
+            renderGradesTable();
+        }
+
+        // Render Bảng Điểm
+        function renderGradesTable() {
+            const selClass = document.getElementById('selectedClass').value;
+            const filterPF = document.getElementById('filterPassFail').value;
+            const tbody = document.getElementById('gradesTableBody');
+
+            const classRecords = gradeRecords.filter(r => r.classCode === selClass);
+            document.getElementById('classStudentCount').innerText = classRecords.length;
+
+            let passCount = 0;
+
+            const filtered = classRecords.filter(r => {
+                const total = (0.2 * r.cc + 0.8 * r.ck).toFixed(1);
+                const isPass = total >= 5.0;
+                if (isPass) passCount++;
+
+                const evalStr = isPass ? 'Hoàn thành' : 'Không hoàn thành';
+                return !filterPF || evalStr === filterPF;
+            });
+
+            const rate = classRecords.length > 0 ? Math.round((passCount / classRecords.length) * 100) : 0;
+            document.getElementById('passRateText').innerText = `${rate}% (${passCount}/${classRecords.length})`;
+
+            tbody.innerHTML = filtered.map(r => {
+                const total = (0.2 * r.cc + 0.8 * r.ck).toFixed(1);
+                const isPass = total >= 5.0;
+                
+                let evalBadge = isPass 
+                    ? '<span class="badge bg-success bg-opacity-75">Hoàn thành</span>' 
+                    : '<span class="badge bg-danger">Không hoàn thành</span>';
+                
+                let rank = '';
+                if (total >= 9.0) rank = '<span class="badge bg-primary bg-opacity-10 text-primary border border-primary">Xuất sắc</span>';
+                else if (total >= 8.0) rank = '<span class="badge bg-success bg-opacity-10 text-success border border-success">Giỏi</span>';
+                else if (total >= 6.5) rank = '<span class="badge bg-info bg-opacity-10 text-dark border">Khá</span>';
+                else if (total >= 5.0) rank = '<span class="badge bg-warning bg-opacity-10 text-dark border">Trung bình</span>';
+                else rank = '<span class="badge bg-danger bg-opacity-10 text-danger border border-danger">Yếu</span>';
+
+                return `
+                    <tr>
+                        <td class="fw-bold" style="color: var(--primary-rose);">${r.id}</td>
+                        <td><strong>${r.name}</strong></td>
+                        <td class="text-muted small">${r.email}</td>
+                        <td class="text-center">
+                            <input type="number" step="0.5" min="0" max="10" class="grade-input" value="${r.cc}" onchange="updateScore('${r.id}', 'cc', this.value)">
+                        </td>
+                        <td class="text-center">
+                            <input type="number" step="0.5" min="0" max="10" class="grade-input" value="${r.ck}" onchange="updateScore('${r.id}', 'ck', this.value)">
+                        </td>
+                        <td class="text-center">
+                            <strong class="fs-6 ${isPass ? 'text-success' : 'text-danger'}">${total}</strong>
+                        </td>
+                        <td class="text-center">${evalBadge}</td>
+                        <td class="text-center">${rank}</td>
+                        <td>
+                            <input type="text" class="form-control form-control-sm" value="${r.note}" onchange="updateNote('${r.id}', this.value)" style="border-color: var(--border-color);">
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Cập nhật điểm thời gian thực
+        function updateScore(id, field, val) {
+            const num = parseFloat(val);
+            if (isNaN(num) || num < 0 || num > 10) {
+                alert('Quy định Mục 9.4: Điểm chuyên cần và điểm cuối khóa phải nằm trong khoảng từ 0.0 đến 10.0!');
+                renderGradesTable();
+                return;
+            }
+
+            const item = gradeRecords.find(x => x.id === id);
+            if (item) {
+                item[field] = num;
+                renderGradesTable();
+            }
+        }
+
+        function updateNote(id, noteVal) {
+            const item = gradeRecords.find(x => x.id === id);
+            if (item) {
+                item.note = noteVal;
+            }
+        }
+
+        // Lưu toàn bộ bảng điểm
+        function saveAllGrades() {
+            showToast('✅ Đã lưu toàn bộ bảng điểm vào cơ sở dữ liệu Entity KetQuaHocTap thành công!');
+        }
+
+        // Khởi tạo
+        document.addEventListener('DOMContentLoaded', onClassChange);
+    </script>
+</body>
+
+</html>
+
+
