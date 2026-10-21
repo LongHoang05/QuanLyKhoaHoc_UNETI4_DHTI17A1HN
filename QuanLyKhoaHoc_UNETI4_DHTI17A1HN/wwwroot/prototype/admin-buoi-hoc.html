@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch học & Buổi học (BuoiHoc) - UNETI EDU</title>
+    <!-- Google Fonts: Playfair Display + Montserrat (Floral Haven) -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --sidebar-width: 275px;
+            --primary-rose: #0284c7;     /* Sky Blue 600 */
+            --primary-light: #38bdf8;    /* Sky Light 400 */
+            --primary-blush: #7dd3fc;    /* Sky Soft 300 */
+            --primary-dark: #0369a1;     /* Sky Dark 700 */
+            --bg-color: #f0f7fd;
+            --surface-card: #ffffff;
+            --surface-container: #e0f2fe;
+            --surface-variant: #f8fafc;
+            --text-dark: #0f172a;
+            --text-gray: #334155;
+            --text-muted: #64748b;
+            --border-color: #bae6fd;
+            --border-light: #e2e8f0;
+            --glass-bg: rgba(255, 255, 255, 0.92);
+            --card-shadow: 0 4px 20px rgba(2, 132, 199, 0.06);
+            --card-hover: 0 10px 28px rgba(2, 132, 199, 0.12);
+            --font-serif: "Playfair Display", Georgia, serif;
+            --font-sans: "Montserrat", -apple-system, BlinkMacSystemFont, sans-serif;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg-color);
+            font-family: var(--font-sans);
+            color: var(--text-dark);
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(2, 132, 199, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.06) 0%, transparent 40%);
+        }
+
+        /* Sidebar Trái */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: linear-gradient(180deg, #07172c 0%, #0c2d48 55%, #051324 100%);
+            color: #e0f2fe;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            box-shadow: 4px 0 30px rgba(2, 132, 199, 0.15);
+        }
+
+        .sidebar-brand {
+            padding: 1.35rem 1.4rem;
+            font-family: var(--font-serif);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #38bdf8;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
+            font-size: 1.2rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1.1rem 0.85rem;
+            margin: 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .sidebar-category {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: #64748b;
+            padding: 0.85rem 1rem 0.35rem 1rem;
+        }
+
+        .sidebar-menu li { margin-bottom: 0.25rem; }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.68rem 0.95rem;
+            color: #d4a0b0;
+            text-decoration: none;
+            border-radius: 0.65rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .sidebar-link-left { display: flex; align-items: center; gap: 12px; }
+        .sidebar-link i { font-size: 1.1rem; }
+
+        .sidebar-link:hover {
+            background-color: rgba(2, 132, 199, 0.25);
+            color: #e0f2fe;
+            transform: translateX(3px);
+        }
+
+        .sidebar-link.active {
+            background: linear-gradient(90deg, var(--primary-rose), var(--primary-light));
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid rgba(56, 189, 248, 0.1);
+            background-color: rgba(15, 3, 8, 0.6);
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        /* Main Content */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar {
+            height: 66px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .content-area {
+            padding: 1.75rem 2rem 2.5rem 2rem;
+            flex-grow: 1;
+            max-width: 1440px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Hero Banner */
+        .page-hero {
+            background: linear-gradient(135deg, #071e3d 0%, #0c3d6d 50%, #051426 100%);
+            border-radius: 1.25rem;
+            padding: 1.5rem 1.85rem;
+            color: #ffffff;
+            box-shadow: 0 10px 30px rgba(45, 10, 26, 0.1);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-title {
+            font-family: var(--font-serif);
+            font-size: 1.45rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Stats */
+        .mini-stat-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.15rem 1.35rem;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mini-stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--card-hover);
+            border-color: var(--primary-blush);
+        }
+
+        .mini-stat-num {
+            font-family: var(--font-serif);
+            font-size: 1.65rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .mini-stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        /* Content Card & Table */
+        .content-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1.15rem;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .toolbar {
+            padding: 1.15rem 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .modern-table { width: 100%; border-collapse: collapse; }
+        .modern-table thead th {
+            background-color: var(--surface-variant);
+            color: var(--text-gray);
+            font-size: 0.74rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 0.95rem 1.15rem;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+        .modern-table tbody td {
+            padding: 0.95rem 1.15rem;
+            vertical-align: middle;
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .modern-table tbody tr:hover { background-color: #fff9fa; }
+
+        /* Status Pills */
+        .status-pill {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.28rem 0.65rem;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+        .status-pill.scheduled { background: #e0f2fe; color: #0369a1; }
+        .status-pill.completed { background: #dcfce7; color: #15803d; }
+        .status-pill.cancelled { background: #fee2e2; color: #dc2626; }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+        /* Action Buttons */
+        .btn-action-sm {
+            font-size: 0.76rem;
+            font-weight: 600;
+            padding: 0.32rem 0.75rem;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        /* Toast Container */
+        .toast-container-custom {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 99999;
+        }
+        .custom-toast {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 0.85rem 1.15rem;
+            box-shadow: 0 10px 30px rgba(2, 132, 199, 0.15);
+            border-left: 4px solid var(--primary-rose);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 320px;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="toastContainer" class="toast-container-custom"></div>
+
+    <!-- ==================== SIDEBAR TRÁI ==================== -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon">
+                <i class="bi bi-mortarboard-fill"></i>
+            </div>
+            <div>
+                <div style="line-height: 1.15;">UNETI EDU</div>
+                <div style="font-size: 0.65rem; color: #64748b; font-weight: 500; font-family: var(--font-sans);">Khoa CNTT - Nhóm 4</div>
+            </div>
+        </div>
+
+        <ul class="sidebar-menu">
+            <div class="sidebar-category">Bảng điều khiển</div>
+            <li>
+                <a href="/" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-speedometer2"></i> Tổng quan</span>
+                </a>
+            </li>
+
+            <div class="sidebar-category">Quản lý đào tạo (5 Module)</div>
+            <li>
+                <a href="admin-chuong-trinh.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-journal-bookmark-fill"></i> Chương trình ĐT (M1)</span>
+                    <span class="badge bg-secondary bg-opacity-50 rounded-pill">6</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-lop-hoc.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-easel2-fill"></i> Quản lý Lớp học (M2)</span>
+                    <span class="badge bg-success bg-opacity-75 rounded-pill">18</span>
+                </a>
+            </li>
+            <li>
+                <a href="/HocVien" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-person-lines-fill"></i> Học viên & Hồ sơ (M3)</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-dang-ky.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-clipboard2-check-fill"></i> Duyệt ĐK & Học phí (M4)</span>
+                    <span class="badge rounded-pill fw-bold" style="background: var(--primary-rose); color: #fff;">03 mới</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-buoi-hoc.html" class="sidebar-link active">
+                    <span class="sidebar-link-left"><i class="bi bi-calendar-week-fill"></i> Lịch học & Buổi học (M5)</span>
+                    <span class="badge rounded-pill fw-bold bg-info text-dark" id="sidebarSessionBadge">14</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-ket-qua.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-award-fill"></i> Kết quả học tập (M5)</span>
+                </a>
+            </li>
+
+            <div class="sidebar-category">Thống kê & Cổng ngoài</div>
+            <li>
+                <a href="admin-thong-ke.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-bar-chart-line-fill"></i> Báo cáo LINQ (M5)</span>
+                </a>
+            </li>
+            <li>
+                <a href="hoc-vien.html" class="sidebar-link text-warning">
+                    <span class="sidebar-link-left"><i class="bi bi-box-arrow-up-right"></i> Cổng Học viên (Mục 17.1)</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+                <span><i class="bi bi-person-badge me-1" style="color: var(--primary-blush);"></i> Phụ trách M5:</span>
+                <span class="text-white fw-semibold">Vũ Đình Trường</span>
+            </div>
+            <div class="small" style="font-size: 0.72rem; color: #64748b;">
+                Xếp lịch học & Kiểm tra xung đột • Mục 9
+            </div>
+        </div>
+    </aside>
+
+    <!-- ==================== MAIN WRAPPER ==================== -->
+    <div class="main-wrapper">
+        <header class="topbar">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 small">
+                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted">Tổng quan</a></li>
+                    <li class="breadcrumb-item active fw-semibold" style="color: var(--text-dark);">Quản lý Lịch học & Buổi học (Module 5)</li>
+                </ol>
+            </nav>
+
+            <div class="d-flex align-items-center gap-3">
+                <a href="hoc-vien.html" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1" style="font-size: 0.8rem;">
+                    <i class="bi bi-person-workspace me-1"></i> Cổng Học viên
+                </a>
+                <div class="vr"></div>
+                <div class="text-end d-none d-sm-block">
+                    <div class="fw-bold small" style="color: var(--text-dark);">Giáo vụ Đào tạo</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">giaovu@uneti.edu.vn</div>
+                </div>
+                <a href="dang-nhap.html" class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: var(--surface-container); color: var(--primary-rose); border: 1px solid var(--border-color);" title="Đăng xuất">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
+        </header>
+
+        <main class="content-area">
+
+            <!-- 1. HERO BANNER TỐI GIẢN -->
+            <div class="page-hero">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge rounded-pill px-3 py-1" style="background: rgba(56, 189, 248, 0.2); color: var(--primary-blush); border: 1px solid rgba(56, 189, 248, 0.35);">
+                                <i class="bi bi-calendar-event me-1"></i> Entity BuoiHoc
+                            </span>
+                            <span class="small" style="color: #bae6fd;">Mục 9.1 & 9.2 Đề tài 16 UNETI</span>
+                        </div>
+                        <h1 class="hero-title">Quản lý Lịch học, Buổi học & Thuật toán Xung đột LINQ</h1>
+                        <p class="mb-0 small" style="color: #f7d6df;">
+                            Kiểm soát phòng học, giảng viên và ca học không bị trùng lặp khoảng thời gian bằng LINQ. Chỉ xếp lịch cho lớp có học viên đã đóng học phí.
+                        </p>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm px-3 py-2 rounded-pill fw-semibold text-white" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); font-size: 0.82rem;" data-bs-toggle="modal" data-bs-target="#modalQuyDinhM5">
+                            <i class="bi bi-info-circle me-1"></i> Ràng buộc Mục 9.2
+                        </button>
+                        <button type="button" class="btn btn-sm px-3 py-2 rounded-pill fw-semibold text-white" style="background: var(--primary-rose); border: 1px solid rgba(56,189,248,0.4); font-size: 0.82rem;" onclick="openAddSessionModal()">
+                            <i class="bi bi-calendar-plus me-1"></i> + Xếp buổi học mới
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. THẺ CHỈ SỐ NHANH (4 CARDS) -->
+            <div class="row g-3 mb-4">
+                <div class="col-xl-3 col-sm-6">
+                    <div class="mini-stat-card">
+                        <div>
+                            <div class="small fw-semibold text-muted" style="font-size: 0.74rem;">Buổi học hôm nay</div>
+                            <div class="mini-stat-num" style="color: var(--primary-rose);" id="statTodayCount">03</div>
+                            <div class="small text-success" style="font-size: 0.72rem;"><i class="bi bi-broadcast me-1"></i>Đang theo dõi ca học</div>
+                        </div>
+                        <div class="mini-stat-icon" style="background: var(--surface-container); color: var(--primary-rose);">
+                            <i class="bi bi-calendar-day"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-sm-6">
+                    <div class="mini-stat-card">
+                        <div>
+                            <div class="small fw-semibold text-muted" style="font-size: 0.74rem;">Đã lên lịch (Chưa học)</div>
+                            <div class="mini-stat-num" style="color: #0369a1;" id="statScheduledCount">07</div>
+                            <div class="small text-muted" style="font-size: 0.72rem;">Đã kiểm tra không trùng lịch</div>
+                        </div>
+                        <div class="mini-stat-icon" style="background: #e0f2fe; color: #0369a1;">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-sm-6">
+                    <div class="mini-stat-card">
+                        <div>
+                            <div class="small fw-semibold text-muted" style="font-size: 0.74rem;">Đã hoàn thành</div>
+                            <div class="mini-stat-num text-success" id="statCompletedCount">18</div>
+                            <div class="small text-muted" style="font-size: 0.72rem;">Đã điểm danh chuyên cần</div>
+                        </div>
+                        <div class="mini-stat-icon" style="background: #dcfce7; color: #15803d;">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-sm-6">
+                    <div class="mini-stat-card">
+                        <div>
+                            <div class="small fw-semibold text-muted" style="font-size: 0.74rem;">Phòng Lab & Giảng đường</div>
+                            <div class="mini-stat-num text-dark">06</div>
+                            <div class="small text-muted" style="font-size: 0.72rem;">Minh Khai & Lĩnh Nam</div>
+                        </div>
+                        <div class="mini-stat-icon" style="background: #fef3c7; color: #b45309;">
+                            <i class="bi bi-building"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. BẢNG DỮ LIỆU BUỔI HỌC & BỘ LỌC TỐI GIẢN -->
+            <div class="content-card">
+                <div class="toolbar">
+                    <div class="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
+                        <!-- Search Box -->
+                        <div class="input-group input-group-sm" style="max-width: 280px;">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" id="sessionKeyword" onkeyup="applySessionFilters()" class="form-control border-start-0" placeholder="Tìm lớp, phòng, giảng viên...">
+                        </div>
+
+                        <!-- Filter Lớp -->
+                        <select id="sessionClassFilter" onchange="applySessionFilters()" class="form-select form-select-sm" style="max-width: 220px;">
+                            <option value="">-- Tất cả lớp học --</option>
+                            <option value="NETCORE10-K01">NETCORE10-K01 (.NET Fullstack)</option>
+                            <option value="REACT-K05">REACT-K05 (React & Next.js)</option>
+                            <option value="PYTHON-K02">PYTHON-K02 (Python AI Data)</option>
+                            <option value="TOEIC-K12">TOEIC-K12 (Tiếng Anh TOEIC)</option>
+                            <option value="JAVA-K08">JAVA-K08 (Java Spring Boot)</option>
+                        </select>
+
+                        <!-- Filter Trạng thái -->
+                        <select id="sessionStatusFilter" onchange="applySessionFilters()" class="form-select form-select-sm" style="max-width: 170px;">
+                            <option value="">-- Trạng thái --</option>
+                            <option value="Đã lên lịch">Đã lên lịch</option>
+                            <option value="Đã hoàn thành">Đã hoàn thành</option>
+                            <option value="Đã hủy">Đã hủy</option>
+                        </select>
+
+                        <!-- Filter Phòng học -->
+                        <select id="sessionRoomFilter" onchange="applySessionFilters()" class="form-select form-select-sm" style="max-width: 170px;">
+                            <option value="">-- Phòng học --</option>
+                            <option value="Lab 402 - Minh Khai">Lab 402 - Minh Khai</option>
+                            <option value="Lab 501 - Minh Khai">Lab 501 - Minh Khai</option>
+                            <option value="Hội trường A2">Hội trường A2</option>
+                            <option value="Lab 203 - Lĩnh Nam">Lab 203 - Lĩnh Nam</option>
+                        </select>
+
+                        <button type="button" class="btn btn-sm btn-light border rounded-pill px-3 py-1" onclick="resetSessionFilters()" title="Đặt lại bộ lọc">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </button>
+                    </div>
+
+                    <div class="small text-muted">
+                        Hiển thị <strong id="sessionMatchCount">0</strong> buổi học
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-responsive">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 75px;">Mã Buổi</th>
+                                <th>Lớp học (LopHoc)</th>
+                                <th>Thời gian học (Start - End)</th>
+                                <th>Phòng học (PhongHoc)</th>
+                                <th>Giảng viên</th>
+                                <th>Nội dung bài học</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end" style="width: 150px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sessionsTableBody">
+                            <!-- Render by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-3 bg-light border-top d-flex justify-content-between align-items-center small text-muted">
+                    <div><i class="bi bi-info-circle text-primary me-1"></i> Quy định Mục 9.2: Thuật toán LINQ kiểm tra trùng lịch phòng học, giảng viên và lớp học trong thời gian thực.</div>
+                    <span class="badge rounded-pill" style="background: var(--surface-container); color: var(--primary-rose);">Mục 9: Entity BuoiHoc</span>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ==================== MODAL 1: XẾP BUỔI HỌC MỚI (MỤC 9.2) ==================== -->
+    <div class="modal fade" id="modalAddSession" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header border-bottom" style="background: var(--surface-container);">
+                    <h6 class="modal-title fw-bold" style="color: var(--primary-rose);">
+                        <i class="bi bi-calendar-plus me-2"></i>Xếp Buổi Học Mới & Kiểm Tra Xung Đột LINQ
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" style="background: var(--bg-color);">
+                    <!-- Conflict Alert -->
+                    <div id="collisionAlert" class="alert alert-danger py-2 px-3 small border-danger mb-3 d-none">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        <strong>Phát hiện xung đột lịch học (Mục 9.2):</strong>
+                        <span id="collisionMessage">Phòng hoặc Giảng viên đã có lịch học trong khoảng thời gian này!</span>
+                    </div>
+
+                    <form id="formAddSession" onsubmit="event.preventDefault(); saveNewSession();">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Lớp học (MaLop) <span class="text-danger">*</span></label>
+                                <select id="inputClass" class="form-select form-select-sm" onchange="checkClassEligibility()" required>
+                                    <option value="NETCORE10-K01">NETCORE10-K01 (.NET Fullstack - Đã có học phí)</option>
+                                    <option value="REACT-K05">REACT-K05 (React 19 & Next.js - Đã có học phí)</option>
+                                    <option value="PYTHON-K02">PYTHON-K02 (Python AI Data - Đã có học phí)</option>
+                                    <option value="JAVA-K08">JAVA-K08 (Java Spring Boot - Đã có học phí)</option>
+                                    <option value="FLUTTER-K03" data-nopaid="true">FLUTTER-K03 (Chưa có học viên đóng phí - Khóa xếp lịch)</option>
+                                </select>
+                                <div id="noPaidAlert" class="form-text small text-danger d-none">
+                                    <i class="bi bi-x-circle"></i> Quy định Mục 9.2: Chỉ lớp có ít nhất 1 học viên <strong>Đã đóng học phí</strong> mới được xếp lịch.
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Giảng viên giảng dạy (GiangVien) <span class="text-danger">*</span></label>
+                                <select id="inputTeacher" class="form-select form-select-sm" required>
+                                    <option value="TS. Vũ Đình Trường">TS. Vũ Đình Trường</option>
+                                    <option value="ThS. Nguyễn Hoàng Long">ThS. Nguyễn Hoàng Long</option>
+                                    <option value="TS. Lê Hoàng Phúc">TS. Lê Hoàng Phúc</option>
+                                    <option value="ThS. Hoàng Thị Mai">ThS. Hoàng Thị Mai</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Ngày học <span class="text-danger">*</span></label>
+                                <input type="date" id="inputDate" class="form-control form-control-sm" value="2026-10-25" required>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Giờ bắt đầu <span class="text-danger">*</span></label>
+                                <input type="time" id="inputStartTime" class="form-control form-control-sm" value="18:00" required>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Giờ kết thúc <span class="text-danger">*</span></label>
+                                <input type="time" id="inputEndTime" class="form-control form-control-sm" value="21:00" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Phòng học (PhongHoc) <span class="text-danger">*</span></label>
+                                <select id="inputRoom" class="form-select form-select-sm" required>
+                                    <option value="Lab 402 - Minh Khai">Lab 402 - Cơ sở Minh Khai</option>
+                                    <option value="Lab 501 - Minh Khai">Lab 501 - Cơ sở Minh Khai</option>
+                                    <option value="Hội trường A2">Hội trường A2 - Minh Khai</option>
+                                    <option value="Lab 203 - Lĩnh Nam">Lab 203 - Cơ sở Lĩnh Nam</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Nội dung bài giảng</label>
+                                <input type="text" id="inputTopic" class="form-control form-control-sm" placeholder="Ví dụ: Thiết kế Database & EF Core Migration..." required>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Ghi chú phòng máy / thiết bị</label>
+                                <input type="text" id="inputNote" class="form-control form-control-sm" placeholder="Máy chiếu, máy tính cấu hình cao Visual Studio 2026...">
+                            </div>
+                        </div>
+
+                        <div class="modal-footer px-0 pb-0 mt-4 border-top pt-3">
+                            <button type="button" class="btn btn-sm btn-secondary rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" id="btnSaveSession" class="btn btn-sm px-4 text-white rounded-pill fw-semibold" style="background: var(--primary-rose);">
+                                <i class="bi bi-check2-circle me-1"></i> Lưu buổi học vào CSDL
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 2: ĐIỂM DANH HỌC VIÊN (MỤC 9.3) ==================== -->
+    <div class="modal fade" id="modalAttendance" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header border-bottom" style="background: var(--surface-container);">
+                    <h6 class="modal-title fw-bold" style="color: var(--primary-rose);">
+                        <i class="bi bi-person-check-fill me-2"></i>Điểm Danh Chuyên Cần & Hoàn Thành Buổi Học
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" style="background: var(--bg-color);">
+                    <div class="p-3 border rounded-3 bg-white mb-3 small">
+                        <div class="row g-2">
+                            <div class="col-6"><strong>Mã buổi học:</strong> <span id="attSessionId" class="text-danger fw-bold">BH-01</span></div>
+                            <div class="col-6"><strong>Lớp học:</strong> <span id="attClassCode" class="fw-bold">NETCORE10-K01</span></div>
+                            <div class="col-6"><strong>Giảng viên:</strong> <span id="attTeacher">TS. Vũ Đình Trường</span></div>
+                            <div class="col-6"><strong>Phòng học:</strong> <span id="attRoom">Lab 402 - Minh Khai</span></div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered bg-white align-middle small mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 50px;" class="text-center">STT</th>
+                                    <th>Mã HV</th>
+                                    <th>Họ và tên học viên</th>
+                                    <th class="text-center" style="width: 140px;">Điểm danh</th>
+                                    <th>Ghi chú</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-center">1</td>
+                                    <td><strong>HV-01</strong></td>
+                                    <td>Nguyễn Văn An</td>
+                                    <td class="text-center">
+                                        <div class="form-check form-check-inline m-0">
+                                            <input class="form-check-input" type="checkbox" checked id="att1">
+                                            <label class="form-check-label text-success fw-bold" for="att1">Có mặt</label>
+                                        </div>
+                                    </td>
+                                    <td><input type="text" class="form-control form-control-sm" placeholder="Đi học đúng giờ"></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">2</td>
+                                    <td><strong>HV-02</strong></td>
+                                    <td>Trần Minh Tuấn</td>
+                                    <td class="text-center">
+                                        <div class="form-check form-check-inline m-0">
+                                            <input class="form-check-input" type="checkbox" checked id="att2">
+                                            <label class="form-check-label text-success fw-bold" for="att2">Có mặt</label>
+                                        </div>
+                                    </td>
+                                    <td><input type="text" class="form-control form-control-sm" placeholder="Tích cực phát biểu"></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">3</td>
+                                    <td><strong>HV-05</strong></td>
+                                    <td>Lê Hoàng Nam</td>
+                                    <td class="text-center">
+                                        <div class="form-check form-check-inline m-0">
+                                            <input class="form-check-input" type="checkbox" checked id="att3">
+                                            <label class="form-check-label text-success fw-bold" for="att3">Có mặt</label>
+                                        </div>
+                                    </td>
+                                    <td><input type="text" class="form-control form-control-sm"></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">4</td>
+                                    <td><strong>HV-06</strong></td>
+                                    <td>Đỗ Thùy Linh</td>
+                                    <td class="text-center">
+                                        <div class="form-check form-check-inline m-0">
+                                            <input class="form-check-input" type="checkbox" id="att4">
+                                            <label class="form-check-label text-danger fw-bold" for="att4">Vắng</label>
+                                        </div>
+                                    </td>
+                                    <td><input type="text" class="form-control form-control-sm" value="Nghỉ có phép"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer p-3 bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-sm px-4 text-white rounded-pill fw-semibold" style="background: #16a34a;" onclick="confirmCompleteSession()">
+                        <i class="bi bi-check2-all me-1"></i> Lưu điểm danh & Đánh dấu "Đã hoàn thành"
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 3: QUY ĐỊNH MỤC 9.2 ==================== -->
+    <div class="modal fade" id="modalQuyDinhM5" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header border-bottom" style="background: var(--surface-container);">
+                    <h6 class="modal-title fw-bold" style="color: var(--primary-rose);">
+                        <i class="bi bi-book me-2"></i>Quy định Xếp Lịch & Trùng Lịch (Mục 9.2 Đề tài 16)
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" style="background: var(--bg-color);">
+                    <div class="p-3 border rounded-3 bg-white mb-3 small">
+                        <h6 class="fw-bold" style="color: var(--primary-rose);">1. Điều kiện tiên quyết:</h6>
+                        <ul class="mb-0 ps-3 text-muted">
+                            <li>Chỉ lớp có ít nhất 1 học viên <strong>Đã đóng học phí</strong> mới được xếp lịch học.</li>
+                            <li>Tổng số buổi học chưa hủy của lớp không được vượt quá <code>SoBuoiHoc</code> quy định.</li>
+                            <li>Thời gian kết thúc phải sau thời gian bắt đầu; thời gian học không nằm trong quá khứ.</li>
+                        </ul>
+                    </div>
+                    <div class="p-3 border rounded-3 bg-white small">
+                        <h6 class="fw-bold" style="color: var(--primary-rose);">2. Thuật toán kiểm tra xung đột LINQ:</h6>
+                        <p class="mb-1 text-muted">Hệ thống quét toàn bộ các buổi học chưa hủy trong CSDL để đảm bảo không tồn tại giao nhau về khoảng thời gian:</p>
+                        <code class="d-block p-2 bg-light rounded border mb-2 text-dark">
+                            !sessions.Any(b => b.TrangThai != "Đã hủy" && b.NgayHoc == newDate && (newStart < b.GioKetThuc && newEnd > b.GioBatDau) && (b.PhongHoc == newRoom || b.GiangVien == newTeacher || b.MaLop == newClass))
+                        </code>
+                        <div class="text-muted">Ngăn chặn triệt để tình trạng 1 phòng hoặc 1 giảng viên bị xếp 2 lớp cùng một lúc.</div>
+                    </div>
+                </div>
+                <div class="modal-footer p-3 bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary rounded-pill px-3" data-bs-dismiss="modal">Đã hiểu quy tắc</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Dataset Buổi học chuẩn Entity BuoiHoc (Mục 9.1)
+        let sessions = [
+            {
+                id: "BH-01",
+                classCode: "NETCORE10-K01",
+                date: "2026-10-21",
+                startTime: "18:00",
+                endTime: "21:00",
+                room: "Lab 402 - Minh Khai",
+                teacher: "TS. Vũ Đình Trường",
+                topic: "Kiến trúc ASP.NET Core 10 & Entity Framework Core",
+                status: "Đã lên lịch",
+                note: "Máy chiếu A2"
+            },
+            {
+                id: "BH-02",
+                classCode: "REACT-K05",
+                date: "2026-10-21",
+                startTime: "18:00",
+                endTime: "21:00",
+                room: "Lab 501 - Minh Khai",
+                teacher: "ThS. Nguyễn Hoàng Long",
+                topic: "React 19 Server Components & Hooks",
+                status: "Đã lên lịch",
+                note: "Phòng máy cấu hình cao"
+            },
+            {
+                id: "BH-03",
+                classCode: "PYTHON-K02",
+                date: "2026-10-21",
+                startTime: "13:30",
+                endTime: "17:00",
+                room: "Lab 203 - Lĩnh Nam",
+                teacher: "TS. Lê Hoàng Phúc",
+                topic: "Thư viện Pandas & Tiền xử lý dữ liệu AI",
+                status: "Đã hoàn thành",
+                note: "Chuyên cần 95%"
+            },
+            {
+                id: "BH-04",
+                classCode: "TOEIC-K12",
+                date: "2026-10-22",
+                startTime: "19:30",
+                endTime: "21:30",
+                room: "Hội trường A2",
+                teacher: "ThS. Hoàng Thị Mai",
+                topic: "Kỹ năng Listening Part 3 & 4 Cấp tốc",
+                status: "Đã lên lịch",
+                note: "Chuẩn bị loa âm thanh"
+            },
+            {
+                id: "BH-05",
+                classCode: "NETCORE10-K01",
+                date: "2026-10-19",
+                startTime: "18:00",
+                endTime: "21:00",
+                room: "Lab 402 - Minh Khai",
+                teacher: "TS. Vũ Đình Trường",
+                topic: "C# 14 & Lập trình Hướng đối tượng nâng cao",
+                status: "Đã hoàn thành",
+                note: "Đã điểm danh đủ"
+            },
+            {
+                id: "BH-06",
+                classCode: "JAVA-K08",
+                date: "2026-10-23",
+                startTime: "18:00",
+                endTime: "21:00",
+                room: "Lab 402 - Minh Khai",
+                teacher: "TS. Vũ Đình Trường",
+                topic: "Spring Boot 3.4 & Spring Security JWT",
+                status: "Đã lên lịch",
+                note: "Đã giữ chỗ phòng máy"
+            },
+            {
+                id: "BH-07",
+                classCode: "PYTHON-K02",
+                date: "2026-10-18",
+                startTime: "13:30",
+                endTime: "17:00",
+                room: "Lab 203 - Lĩnh Nam",
+                teacher: "TS. Lê Hoàng Phúc",
+                topic: "Giới thiệu Python & Cú pháp cơ bản",
+                status: "Đã hoàn thành",
+                note: "Khởi động khóa học"
+            },
+            {
+                id: "BH-08",
+                classCode: "REACT-K05",
+                date: "2026-10-17",
+                startTime: "18:00",
+                endTime: "21:00",
+                room: "Lab 501 - Minh Khai",
+                teacher: "ThS. Nguyễn Hoàng Long",
+                topic: "TypeScript 5 & Cấu trúc dự án Next.js",
+                status: "Đã hoàn thành",
+                note: "Đạt yêu cầu đầu ra"
+            },
+            {
+                id: "BH-09",
+                classCode: "TOEIC-K12",
+                date: "2026-10-15",
+                startTime: "19:30",
+                endTime: "21:30",
+                room: "Hội trường A2",
+                teacher: "ThS. Hoàng Thị Mai",
+                topic: "Kiểm tra đầu khóa TOEIC Placement Test",
+                status: "Đã hoàn thành",
+                note: "30/30 học viên tham dự"
+            },
+            {
+                id: "BH-10",
+                classCode: "NETCORE10-K01",
+                date: "2026-10-16",
+                startTime: "18:00",
+                endTime: "21:00",
+                room: "Lab 402 - Minh Khai",
+                teacher: "TS. Vũ Đình Trường",
+                topic: "Buổi học dời lịch do bảo trì phòng máy",
+                status: "Đã hủy",
+                note: "Đã xếp lịch bù ngày 21/10"
+            }
+        ];
+
+        let selectedSessionForAtt = null;
+
+        // Toast Helper
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'custom-toast';
+            let icon = 'bi-check-circle-fill text-success';
+            let border = '#10b981';
+            if (type === 'danger') { icon = 'bi-exclamation-triangle-fill text-danger'; border = '#ef4444'; }
+
+            toast.style.borderLeftColor = border;
+            toast.innerHTML = `
+                <i class="bi ${icon} fs-5"></i>
+                <div class="flex-grow-1">
+                    <div class="fw-bold" style="color: var(--text-dark);">${message}</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted);">${new Date().toLocaleTimeString()}</div>
+                </div>
+                <button type="button" class="btn-close btn-sm" onclick="this.parentElement.remove()"></button>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        // Lọc và render danh sách buổi học
+        function applySessionFilters() {
+            const kw = document.getElementById('sessionKeyword').value.toLowerCase().trim();
+            const cls = document.getElementById('sessionClassFilter').value;
+            const st = document.getElementById('sessionStatusFilter').value;
+            const rm = document.getElementById('sessionRoomFilter').value;
+            const tbody = document.getElementById('sessionsTableBody');
+
+            const filtered = sessions.filter(s => {
+                const matchKw = s.classCode.toLowerCase().includes(kw) || s.room.toLowerCase().includes(kw) || s.teacher.toLowerCase().includes(kw) || s.topic.toLowerCase().includes(kw);
+                const matchCls = !cls || s.classCode === cls;
+                const matchSt = !st || s.status === st;
+                const matchRm = !rm || s.room === rm;
+                return matchKw && matchCls && matchSt && matchRm;
+            });
+
+            document.getElementById('sessionMatchCount').innerText = filtered.length;
+
+            tbody.innerHTML = filtered.map(s => {
+                let badge = '';
+                let actionBtn = '';
+
+                if (s.status === 'Đã lên lịch') {
+                    badge = '<span class="status-pill scheduled"><span class="status-dot"></span> Đã lên lịch</span>';
+                    actionBtn = `
+                        <div class="d-flex justify-content-end gap-1">
+                            <button class="btn btn-action-sm text-white" style="background: #16a34a;" onclick="openAttendanceModal('${s.id}')" title="Điểm danh chuyên cần">
+                                <i class="bi bi-person-check-fill"></i> Điểm danh
+                            </button>
+                            <button class="btn btn-action-sm btn-outline-danger" onclick="cancelSession('${s.id}')" title="Hủy buổi học">
+                                <i class="bi bi-x-circle"></i>
+                            </button>
+                        </div>
+                    `;
+                } else if (s.status === 'Đã hoàn thành') {
+                    badge = '<span class="status-pill completed"><span class="status-dot"></span> Đã hoàn thành</span>';
+                    actionBtn = `
+                        <button class="btn btn-action-sm btn-light border text-muted" onclick="openAttendanceModal('${s.id}')">
+                            <i class="bi bi-eye"></i> Xem điểm danh
+                        </button>
+                    `;
+                } else {
+                    badge = '<span class="status-pill cancelled"><span class="status-dot"></span> Đã hủy</span>';
+                    actionBtn = `<span class="small text-muted fst-italic">Không khả dụng</span>`;
+                }
+
+                return `
+                    <tr>
+                        <td class="fw-bold" style="color: var(--primary-rose);">${s.id}</td>
+                        <td>
+                            <div class="fw-semibold">${s.classCode}</div>
+                            <div class="small text-muted">${s.note}</div>
+                        </td>
+                        <td>
+                            <div class="fw-semibold">${s.startTime} - ${s.endTime}</div>
+                            <div class="small text-muted">${s.date}</div>
+                        </td>
+                        <td><span class="badge bg-light text-dark border">${s.room}</span></td>
+                        <td><div class="small fw-semibold">${s.teacher}</div></td>
+                        <td><div class="small text-dark" style="max-width: 260px;">${s.topic}</div></td>
+                        <td>${badge}</td>
+                        <td class="text-end">${actionBtn}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            updateStats();
+        }
+
+        function resetSessionFilters() {
+            document.getElementById('sessionKeyword').value = '';
+            document.getElementById('sessionClassFilter').value = '';
+            document.getElementById('sessionStatusFilter').value = '';
+            document.getElementById('sessionRoomFilter').value = '';
+            applySessionFilters();
+        }
+
+        // Mở Modal Xếp buổi học mới
+        function openAddSessionModal() {
+            document.getElementById('collisionAlert').classList.add('d-none');
+            checkClassEligibility();
+            new bootstrap.Modal(document.getElementById('modalAddSession')).show();
+        }
+
+        // Kiểm tra điều kiện lớp có học viên đóng tiền (Mục 9.2)
+        function checkClassEligibility() {
+            const sel = document.getElementById('inputClass');
+            const opt = sel.options[sel.selectedIndex];
+            const isNoPaid = opt.getAttribute('data-nopaid') === 'true';
+            const alertEl = document.getElementById('noPaidAlert');
+            const btnSave = document.getElementById('btnSaveSession');
+
+            if (isNoPaid) {
+                alertEl.classList.remove('d-none');
+                btnSave.disabled = true;
+                btnSave.classList.add('opacity-50');
+            } else {
+                alertEl.classList.add('d-none');
+                btnSave.disabled = false;
+                btnSave.classList.remove('opacity-50');
+            }
+        }
+
+        // Lưu buổi học mới với thuật toán kiểm tra xung đột LINQ (Mục 9.2)
+        function saveNewSession() {
+            const classCode = document.getElementById('inputClass').value;
+            const teacher = document.getElementById('inputTeacher').value;
+            const date = document.getElementById('inputDate').value;
+            const startTime = document.getElementById('inputStartTime').value;
+            const endTime = document.getElementById('inputEndTime').value;
+            const room = document.getElementById('inputRoom').value;
+            const topic = document.getElementById('inputTopic').value.trim();
+            const note = document.getElementById('inputNote').value.trim();
+
+            if (endTime <= startTime) {
+                alert('Thời gian kết thúc phải sau thời gian bắt đầu!');
+                return;
+            }
+
+            // Thuật toán LINQ kiểm tra xung đột thời gian (Collision Check)
+            const conflict = sessions.find(s => {
+                if (s.status === 'Đã hủy' || s.date !== date) return false;
+                // Kiểm tra trùng khoảng thời gian (Overlap)
+                const isTimeOverlap = (startTime < s.endTime && endTime > s.startTime);
+                if (!isTimeOverlap) return false;
+
+                if (s.room === room) return { type: 'phòng học', conflictWith: s };
+                if (s.teacher === teacher) return { type: 'giảng viên', conflictWith: s };
+                if (s.classCode === classCode) return { type: 'lớp học', conflictWith: s };
+                return false;
+            });
+
+            if (conflict) {
+                const alertEl = document.getElementById('collisionAlert');
+                const msgEl = document.getElementById('collisionMessage');
+                let reason = '';
+                if (conflict.room === room) reason = `Phòng "${room}" đã có lớp "${conflict.classCode}" học từ ${conflict.startTime} đến ${conflict.endTime}!`;
+                else if (conflict.teacher === teacher) reason = `Giảng viên "${teacher}" đã có lịch dạy lớp "${conflict.classCode}" từ ${conflict.startTime} đến ${conflict.endTime}!`;
+                else reason = `Lớp "${classCode}" đã có lịch học trong khung giờ này!`;
+
+                msgEl.innerText = reason;
+                alertEl.classList.remove('d-none');
+                return;
+            }
+
+            // Nếu hợp lệ, tạo mới BuoiHoc
+            const newId = `BH-0${sessions.length + 1}`;
+            sessions.unshift({
+                id: newId,
+                classCode: classCode,
+                date: date,
+                startTime: startTime,
+                endTime: endTime,
+                room: room,
+                teacher: teacher,
+                topic: topic,
+                status: "Đã lên lịch",
+                note: note || "Buổi học được xếp mới"
+            });
+
+            bootstrap.Modal.getInstance(document.getElementById('modalAddSession')).hide();
+            applySessionFilters();
+            showToast(`✅ Đã xếp thành công buổi học ${newId} cho lớp ${classCode}. Đã kiểm tra không xung đột lịch.`);
+        }
+
+        // Mở Modal Điểm danh (Mục 9.3)
+        function openAttendanceModal(id) {
+            const s = sessions.find(x => x.id === id);
+            if (!s) return;
+            selectedSessionForAtt = s;
+
+            document.getElementById('attSessionId').innerText = s.id;
+            document.getElementById('attClassCode').innerText = s.classCode;
+            document.getElementById('attTeacher').innerText = s.teacher;
+            document.getElementById('attRoom').innerText = s.room;
+
+            new bootstrap.Modal(document.getElementById('modalAttendance')).show();
+        }
+
+        // Xác nhận hoàn thành buổi học
+        function confirmCompleteSession() {
+            if (!selectedSessionForAtt) return;
+
+            selectedSessionForAtt.status = 'Đã hoàn thành';
+            bootstrap.Modal.getInstance(document.getElementById('modalAttendance')).hide();
+            applySessionFilters();
+            showToast(`🎉 Đã ghi nhận điểm danh chuyên cần và đánh dấu buổi học ${selectedSessionForAtt.id} thành "Đã hoàn thành"!`);
+        }
+
+        // Hủy buổi học
+        function cancelSession(id) {
+            const s = sessions.find(x => x.id === id);
+            if (!s) return;
+
+            if (confirm(`Bạn có chắc chắn muốn hủy buổi học ${s.id} của lớp ${s.classCode}?`)) {
+                s.status = 'Đã hủy';
+                applySessionFilters();
+                showToast(`⚠️ Đã hủy buổi học ${s.id}. Lịch phòng máy và giảng viên đã được giải phóng.`, 'danger');
+            }
+        }
+
+        // Thống kê
+        function updateStats() {
+            const today = sessions.filter(s => s.date === '2026-10-21' && s.status !== 'Đã hủy').length;
+            const scheduled = sessions.filter(s => s.status === 'Đã lên lịch').length;
+            const completed = sessions.filter(s => s.status === 'Đã hoàn thành').length;
+
+            document.getElementById('statTodayCount').innerText = String(today).padStart(2, '0');
+            document.getElementById('statScheduledCount').innerText = String(scheduled).padStart(2, '0');
+            document.getElementById('statCompletedCount').innerText = String(completed).padStart(2, '0');
+            document.getElementById('sidebarSessionBadge').innerText = `${sessions.length}`;
+        }
+
+        // Khởi tạo
+        document.addEventListener('DOMContentLoaded', applySessionFilters);
+    </script>
+</body>
+
+</html>
+
+
+

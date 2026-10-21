@@ -46,37 +46,47 @@
 
             <div class="sidebar-category">Quản lý đào tạo (5 Module)</div>
             <li>
-                <a href="javascript:void(0)" class="sidebar-link opacity-75" title="Module 1 - Phụ trách: Vũ Đình Trường">
+                <a href="/prototype/admin-chuong-trinh.html" class="sidebar-link" title="Module 1 - Phụ trách: Vũ Đình Trường (Dữ liệu mẫu)">
                     <span class="sidebar-link-left"><i class="bi bi-journal-bookmark-fill"></i> Chương trình ĐT (M1)</span>
-                    <span class="badge bg-secondary bg-opacity-50 rounded-pill">M1</span>
+                    <span class="badge bg-secondary bg-opacity-75 rounded-pill">M1</span>
                 </a>
             </li>
             <li>
-                <a href="javascript:void(0)" class="sidebar-link opacity-75" title="Module 2 - Phụ trách: Nguyễn Đình Kiên">
+                <a href="/prototype/admin-lop-hoc.html" class="sidebar-link" title="Module 2 - Phụ trách: Nguyễn Đình Kiên (Dữ liệu mẫu)">
                     <span class="sidebar-link-left"><i class="bi bi-easel2-fill"></i> Quản lý Lớp học (M2)</span>
-                    <span class="badge bg-success bg-opacity-75 rounded-pill">M2</span>
+                    <span class="badge bg-success bg-opacity-75 rounded-pill">18 lớp</span>
                 </a>
             </li>
             <li>
                 <a asp-controller="HocVien" asp-action="Index" class="sidebar-link @(currentController == "HocVien" && currentAction != "Portal" ? "active" : "")">
                     <span class="sidebar-link-left"><i class="bi bi-person-lines-fill"></i> Học viên & Hồ sơ (M3)</span>
-                    <span class="badge rounded-pill fw-bold" style="background: var(--primary-blush); color: #07172c;">Online</span>
+                    <span class="badge rounded-pill fw-bold" style="background: var(--primary-rose); color: #fff;">CSDL Thật</span>
                 </a>
             </li>
             <li>
-                <a href="javascript:void(0)" class="sidebar-link opacity-75" title="Module 4 - Phụ trách: Nguyễn Hoàng Long">
+                <a href="/prototype/admin-dang-ky.html" class="sidebar-link" title="Module 4 - Phụ trách: Nguyễn Hoàng Long (Dữ liệu mẫu)">
                     <span class="sidebar-link-left"><i class="bi bi-clipboard2-check-fill"></i> Duyệt ĐK & Học phí (M4)</span>
-                    <span class="badge rounded-pill fw-bold" style="background: var(--primary-rose); color: #fff;">M4</span>
+                    <span class="badge rounded-pill fw-bold" style="background: var(--primary-rose); color: #fff;">8 mới</span>
                 </a>
             </li>
             <li>
-                <a href="javascript:void(0)" class="sidebar-link opacity-75" title="Module 5 - Phụ trách: Lê Tiến Dương">
+                <a href="/prototype/admin-buoi-hoc.html" class="sidebar-link" title="Module 5 - Phụ trách: Lê Tiến Dương (Dữ liệu mẫu)">
                     <span class="sidebar-link-left"><i class="bi bi-calendar-week-fill"></i> Lịch học & Buổi học (M5)</span>
                     <span class="badge bg-secondary bg-opacity-50 rounded-pill">M5</span>
                 </a>
             </li>
+            <li>
+                <a href="/prototype/admin-ket-qua.html" class="sidebar-link" title="Module 5: Kết quả học tập & Bảng điểm (Dữ liệu mẫu)">
+                    <span class="sidebar-link-left"><i class="bi bi-award-fill"></i> Kết quả học tập (M5)</span>
+                </a>
+            </li>
 
-            <div class="sidebar-category">Cổng sinh viên / Học viên</div>
+            <div class="sidebar-category">Thống kê & Cổng sinh viên</div>
+            <li>
+                <a href="/prototype/admin-thong-ke.html" class="sidebar-link" title="Module 5: Báo cáo Thống kê LINQ (Dữ liệu mẫu)">
+                    <span class="sidebar-link-left"><i class="bi bi-bar-chart-line-fill"></i> Báo cáo LINQ (M5)</span>
+                </a>
+            </li>
             <li>
                 <a asp-controller="HocVien" asp-action="Portal" class="sidebar-link @(currentAction == "Portal" ? "active" : "") text-warning fw-semibold">
                     <span class="sidebar-link-left"><i class="bi bi-box-arrow-up-right"></i> Cổng Học Viên (Mục 17.1)</span>

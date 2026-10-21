@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chương trình Đào tạo (ChuongTrinhDaoTao) - UNETI EDU</title>
+    <!-- Google Fonts: Playfair Display + Montserrat (Phong cách Floral Haven) -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+        /* =========================================
+           DESIGN SYSTEM: FLORAL HAVEN - MODULE 1
+           Tối giản, Sang trọng & Hiện đại
+           ========================================= */
+        :root {
+            --sidebar-width: 275px;
+
+            /* Hệ màu Xanh Da Trời & Cyan (Sky Blue & White) */
+            --primary-rose: #0284c7;     /* Sky Blue 600 - Xanh da trời chủ đạo */
+            --primary-light: #38bdf8;    /* Sky Light 400 */
+            --primary-blush: #7dd3fc;    /* Sky Soft 300 */
+            --primary-dark: #0369a1;     /* Sky Dark 700 */
+
+            /* Nền & Bề mặt Trắng Sáng & Xanh Da Trời Nhạt */
+            --bg-color: #f0f7fd;
+            --surface-card: #ffffff;
+            --surface-container: #e0f2fe;
+            --surface-variant: #f8fafc;
+
+            /* Text chuẩn mực dễ nhìn */
+            --text-dark: #0f172a;
+            --text-gray: #334155;
+            --text-muted: #64748b;
+
+            /* Đường viền & Hiệu ứng */
+            --border-color: #bae6fd;
+            --border-light: #e2e8f0;
+            --glass-bg: rgba(255, 255, 255, 0.92);
+            --card-shadow: 0 4px 20px rgba(2, 132, 199, 0.06);
+            --card-hover-shadow: 0 12px 28px rgba(2, 132, 199, 0.12);
+
+            /* Typography */
+            --font-serif: "Playfair Display", Georgia, serif;
+            --font-sans: "Montserrat", -apple-system, BlinkMacSystemFont, sans-serif;
+
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: var(--font-sans);
+            color: var(--text-dark);
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(2, 132, 199, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.06) 0%, transparent 40%);
+        }
+
+        /* ================= SIDEBAR TRÁI ================= */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: linear-gradient(180deg, #07172c 0%, #0c2d48 55%, #051324 100%);
+            color: #e0f2fe;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            box-shadow: 4px 0 30px rgba(2, 132, 199, 0.15);
+        }
+
+        .sidebar-brand {
+            padding: 1.35rem 1.4rem;
+            font-family: var(--font-serif);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #38bdf8;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
+            font-size: 1.2rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1.1rem 0.85rem;
+            margin: 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar-menu::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.2);
+            border-radius: 99px;
+        }
+
+        .sidebar-category {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: #64748b;
+            padding: 0.85rem 1rem 0.35rem 1rem;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.68rem 0.95rem;
+            color: #d4a0b0;
+            text-decoration: none;
+            border-radius: 0.65rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .sidebar-link-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-link i {
+            font-size: 1.1rem;
+        }
+
+        .sidebar-link:hover {
+            background-color: rgba(2, 132, 199, 0.25);
+            color: #e0f2fe;
+            transform: translateX(3px);
+        }
+
+        .sidebar-link.active {
+            background: linear-gradient(90deg, var(--primary-rose), var(--primary-light));
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid rgba(56, 189, 248, 0.1);
+            background-color: rgba(15, 3, 8, 0.6);
+            font-size: 0.8rem;
+            color: #64748b;
+            backdrop-filter: blur(10px);
+        }
+
+        /* ================= MAIN WRAPPER ================= */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Topbar tối giản */
+        .topbar {
+            height: 66px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .breadcrumb {
+            margin-bottom: 0;
+            font-size: 0.85rem;
+        }
+
+        .breadcrumb a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary-rose);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .content-area {
+            padding: 1.75rem 2rem 2.5rem 2rem;
+            flex-grow: 1;
+            max-width: 1440px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* ================= HEADER HERO (TỐI GIẢN) ================= */
+        .page-hero {
+            background: linear-gradient(135deg, #071e3d 0%, #0c3d6d 50%, #051426 100%);
+            border-radius: 1.25rem;
+            padding: 1.5rem 1.85rem;
+            color: #ffffff;
+            box-shadow: 0 10px 30px rgba(45, 10, 26, 0.1);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-hero::after {
+            content: "";
+            position: absolute;
+            right: -50px;
+            bottom: -50px;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero-title {
+            font-family: var(--font-serif);
+            font-size: 1.45rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.01em;
+        }
+
+        .hero-subtitle {
+            font-size: 0.84rem;
+            color: #f7d6df;
+            margin-bottom: 0;
+        }
+
+        .hero-badge {
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: var(--primary-blush);
+            padding: 0.2rem 0.65rem;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* ================= STATS ROW TỐI GIẢN ================= */
+        .mini-stat-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.15rem 1.35rem;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mini-stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--card-hover-shadow);
+            border-color: var(--primary-blush);
+        }
+
+        .mini-stat-num {
+            font-family: var(--font-serif);
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1.1;
+        }
+
+        .mini-stat-label {
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: var(--text-gray);
+            margin-bottom: 0.2rem;
+        }
+
+        .mini-stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        /* ================= BẢNG & KHUNG DỮ LIỆU TỐI GIẢN ================= */
+        .content-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1.15rem;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .toolbar {
+            padding: 1.15rem 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+            background: #ffffff;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 320px;
+            width: 100%;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .search-box input {
+            padding-left: 36px;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            background: var(--surface-variant);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .search-box input:focus {
+            background: #ffffff;
+            border-color: var(--primary-rose);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.08);
+        }
+
+        .filter-select {
+            border-radius: 50px;
+            font-size: 0.82rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--surface-variant);
+            padding: 0.4rem 1rem;
+            color: var(--text-gray);
+            font-weight: 500;
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary-rose);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.08);
+        }
+
+        /* Modern Table */
+        .modern-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .modern-table thead th {
+            background-color: var(--surface-variant);
+            color: var(--text-gray);
+            font-size: 0.74rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 0.95rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        .modern-table tbody tr {
+            border-bottom: 1px solid var(--border-light);
+            transition: var(--transition);
+        }
+
+        .modern-table tbody tr:hover {
+            background-color: #fff9fa;
+        }
+
+        .modern-table tbody td {
+            padding: 1rem 1.25rem;
+            vertical-align: middle;
+            font-size: 0.85rem;
+        }
+
+        .program-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            background: var(--surface-container);
+            color: var(--primary-rose);
+            flex-shrink: 0;
+        }
+
+        .program-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 2px;
+            line-height: 1.25;
+        }
+
+        .program-code {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .desc-text {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            font-size: 0.8rem;
+            color: var(--text-gray);
+            max-width: 320px;
+            line-height: 1.4;
+        }
+
+        /* Status pill */
+        .status-pill {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.28rem 0.65rem;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .status-pill.active {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-pill.paused {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        /* Class link pill */
+        .class-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 0.32rem 0.75rem;
+            border-radius: 50px;
+            background: var(--surface-container);
+            color: var(--primary-rose);
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-decoration: none;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .class-pill:hover {
+            background: var(--primary-rose);
+            color: #ffffff;
+            border-color: var(--primary-rose);
+            transform: translateY(-1px);
+        }
+
+        .class-pill.empty {
+            background: #f9fafb;
+            color: #9ca3af;
+            border-color: #e5e7eb;
+            pointer-events: none;
+        }
+
+        /* Action Buttons */
+        .btn-action-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            background: #ffffff;
+            color: var(--text-gray);
+            transition: var(--transition);
+            font-size: 0.85rem;
+        }
+
+        .btn-action-icon:hover {
+            background: var(--surface-container);
+            color: var(--primary-rose);
+            border-color: var(--primary-blush);
+        }
+
+        .btn-action-icon.delete:hover {
+            background: #fee2e2;
+            color: #dc2626;
+            border-color: #fca5a5;
+        }
+
+        /* View mode toggle */
+        .view-btn {
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            background: #ffffff;
+            color: var(--text-muted);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+
+        .view-btn.active {
+            background: var(--primary-rose);
+            color: #ffffff;
+            border-color: var(--primary-rose);
+        }
+
+        /* Grid Card View */
+        .prog-grid-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .prog-grid-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--card-hover-shadow);
+            border-color: var(--primary-blush);
+        }
+
+        /* Modal styling */
+        .modal-content {
+            border-radius: 1.25rem;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            box-shadow: 0 15px 50px rgba(2, 132, 199, 0.15);
+        }
+
+        .modal-header {
+            background: var(--surface-container);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.2rem 1.5rem;
+        }
+
+        .modal-title {
+            font-family: var(--font-serif);
+            font-weight: 700;
+            color: var(--primary-rose);
+            font-size: 1.1rem;
+        }
+
+        /* Toast Container */
+        .toast-container-custom {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 99999;
+        }
+
+        .custom-toast {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 0.85rem 1.15rem;
+            box-shadow: 0 10px 30px rgba(2, 132, 199, 0.15);
+            border-left: 4px solid var(--primary-rose);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 320px;
+            animation: slideIn 0.3s ease;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Toast container -->
+    <div id="toastContainer" class="toast-container-custom"></div>
+
+    <!-- ==================== SIDEBAR TRÁI ==================== -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon">
+                <i class="bi bi-mortarboard-fill"></i>
+            </div>
+            <div>
+                <div style="line-height: 1.15;">UNETI EDU</div>
+                <div style="font-size: 0.65rem; color: #64748b; font-weight: 500; font-family: var(--font-sans);">Khoa CNTT - Nhóm 4</div>
+            </div>
+        </div>
+
+        <ul class="sidebar-menu">
+            <div class="sidebar-category">Bảng điều khiển</div>
+            <li>
+                <a href="/" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-speedometer2"></i> Tổng quan</span>
+                </a>
+            </li>
+
+            <div class="sidebar-category">Quản lý đào tạo (5 Module)</div>
+            <li>
+                <a href="admin-chuong-trinh.html" class="sidebar-link active">
+                    <span class="sidebar-link-left"><i class="bi bi-journal-bookmark-fill"></i> Chương trình ĐT (M1)</span>
+                    <span class="badge rounded-pill fw-bold" style="background: var(--primary-blush); color: #fff;" id="sidebarBadgeCount">6</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-lop-hoc.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-easel2-fill"></i> Quản lý Lớp học (M2)</span>
+                    <span class="badge bg-success bg-opacity-75 rounded-pill">18</span>
+                </a>
+            </li>
+            <li>
+                <a href="/HocVien" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-person-lines-fill"></i> Học viên & Hồ sơ (M3)</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-dang-ky.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-clipboard2-check-fill"></i> Duyệt ĐK & Học phí (M4)</span>
+                    <span class="badge rounded-pill fw-bold" style="background: var(--primary-rose); color: #fff;">8 mới</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-buoi-hoc.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-calendar-week-fill"></i> Lịch học & Buổi học (M5)</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-ket-qua.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-award-fill"></i> Kết quả học tập (M5)</span>
+                </a>
+            </li>
+
+            <div class="sidebar-category">Thống kê & Cổng ngoài</div>
+            <li>
+                <a href="admin-thong-ke.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-bar-chart-line-fill"></i> Báo cáo LINQ (M5)</span>
+                </a>
+            </li>
+            <li>
+                <a href="hoc-vien.html" class="sidebar-link text-warning">
+                    <span class="sidebar-link-left"><i class="bi bi-box-arrow-up-right"></i> Cổng Học viên (Mục 17.1)</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+                <span><i class="bi bi-person-badge me-1" style="color: var(--primary-blush);"></i> Phụ trách M1:</span>
+                <span class="text-white fw-semibold">Vũ Đình Trường</span>
+            </div>
+            <div class="small" style="font-size: 0.72rem; color: #64748b;">
+                MSV: 23103100026 • DHTI17A1HN
+            </div>
+        </div>
+    </aside>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <div class="main-wrapper">
+
+        <!-- Topbar -->
+        <header class="topbar">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Tổng quan</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Chương trình Đào tạo (Module 1)</li>
+                </ol>
+            </nav>
+
+            <div class="d-flex align-items-center gap-3">
+                <a href="hoc-vien.html" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1" style="font-size: 0.8rem;">
+                    <i class="bi bi-person-workspace me-1"></i> Cổng Học viên
+                </a>
+                <div class="text-end d-none d-sm-block">
+                    <div class="fw-bold small" style="color: var(--text-dark);">Quản trị viên Hệ thống</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">admin@uneti.edu.vn</div>
+                </div>
+                <a href="dang-nhap.html" class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: var(--surface-container); color: var(--primary-rose); border: 1px solid var(--border-color);" title="Đăng xuất">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <main class="content-area">
+
+            <!-- 1. HERO BANNER TỐI GIẢN -->
+            <div class="page-hero">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="hero-badge"><i class="bi bi-journal-code"></i> Entity ChuongTrinhDaoTao</span>
+                            <span class="small" style="color: #bae6fd;">Mục 5.5 Đề tài 16 UNETI</span>
+                        </div>
+                        <h1 class="hero-title">Quản lý Chương trình Đào tạo</h1>
+                        <p class="hero-subtitle">
+                            Thiết lập danh mục đào tạo và quản lý quan hệ trực tiếp <strong>1 - n với Lớp học</strong> (Ràng buộc: Không thể xóa khi có lớp học liên kết).
+                        </p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm px-3 py-2 rounded-pill fw-semibold text-white" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); font-size: 0.82rem;" data-bs-toggle="modal" data-bs-target="#modalQuyTac">
+                            <i class="bi bi-info-circle me-1"></i> Quy định Mục 5.5
+                        </button>
+                        <button type="button" class="btn btn-sm px-3 py-2 rounded-pill fw-semibold text-white" style="background: var(--primary-rose); border: 1px solid rgba(56,189,248,0.4); font-size: 0.82rem;" onclick="openCreateModal()">
+                            <i class="bi bi-plus-lg me-1"></i> Thêm Chương Trình
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. THẺ CHỈ SỐ NHANH TỐI GIẢN (4 CARDS) -->
+            <div class="row g-3 mb-4">
+                <div class="col-xl-3 col-sm-6">
+                    <div class="mini-stat-card">
+                        <div>
+                            <div class="mini-stat-label">Tổng Chương trình</div>
+                            <div class="mini-stat-num" id="statTotalCount">06</div>
+                            <div class="small" style="font-size: 0.72rem; color: #15803d;"><i class="bi bi-check-circle me-1"></i>Đạt chuẩn &ge; 5 mẫu</div>
+                        </div>
+                        <div class="mini-stat-icon" style="background: var(--surface-container); color: var(--primary-rose);">
+                            <i class="bi bi-journal-bookmark-fill"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-sm-6">
+                    <div class="mini-stat-card">
+                        <div>
+                            <div class="mini-stat-label">Đang hoạt động</div>
+                            <div class="mini-stat-num text-success" id="statActiveCount">05</div>
+                            <div class="small text-muted" style="font-size: 0.72rem;">Đang tuyển sinh</div>
+                        </div>
+                        <div class="mini-stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                            <i class="bi bi-check2-circle"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-sm-6">
+                    <div class="mini-stat-card">
+                        <div>
+                            <div class="mini-stat-label">Tạm ngưng</div>
+                            <div class="mini-stat-num text-secondary" id="statPausedCount">01</div>
+                            <div class="small text-muted" style="font-size: 0.72rem;">Dừng mở lớp mới</div>
+                        </div>
+                        <div class="mini-stat-icon" style="background: #f3f4f6; color: #6b7280;">
+                            <i class="bi bi-pause-circle"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-sm-6">
+                    <div class="mini-stat-card">
+                        <div>
+                            <div class="mini-stat-label">Lớp học trực thuộc</div>
+                            <div class="mini-stat-num" style="color: var(--primary-light);">18</div>
+                            <div class="small text-muted" style="font-size: 0.72rem;">Quan hệ 1 - n với LopHoc</div>
+                        </div>
+                        <div class="mini-stat-icon" style="background: rgba(190, 24, 93, 0.1); color: var(--primary-light);">
+                            <i class="bi bi-easel2-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. KHỐI BẢNG DỮ LIỆU & TOOLBAR TỐI GIẢN -->
+            <div class="content-card">
+                
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <div class="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
+                        <!-- Search Box -->
+                        <div class="search-box">
+                            <i class="bi bi-search"></i>
+                            <input type="text" id="searchInput" onkeyup="filterPrograms()" class="form-control form-control-sm" placeholder="Tìm tên, mã, email...">
+                        </div>
+
+                        <!-- Status Filter -->
+                        <select id="statusFilter" onchange="filterPrograms()" class="form-select form-select-sm filter-select" style="width: auto;">
+                            <option value="">-- Tất cả trạng thái --</option>
+                            <option value="Đang hoạt động">Đang hoạt động</option>
+                            <option value="Tạm ngưng">Tạm ngưng</option>
+                        </select>
+
+                        <!-- View Switcher -->
+                        <div class="d-flex gap-1 ms-auto ms-sm-0">
+                            <button type="button" class="view-btn active" id="btnTableView" onclick="setViewMode('table')" title="Chế độ bảng">
+                                <i class="bi bi-list-ul"></i>
+                            </button>
+                            <button type="button" class="view-btn" id="btnGridView" onclick="setViewMode('grid')" title="Chế độ thẻ lưới">
+                                <i class="bi bi-grid-fill"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="admin-lop-hoc.html" class="btn btn-sm btn-light border rounded-pill px-3 py-1 fw-semibold" style="font-size: 0.78rem; color: var(--text-gray);">
+                            <i class="bi bi-easel2 me-1"></i> Quản lý Lớp học
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 1. Chế độ Bảng (Table View) -->
+                <div class="table-responsive" id="tableViewContainer">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 70px;">Mã</th>
+                                <th>Chương trình Đào tạo</th>
+                                <th>Mô tả tóm tắt</th>
+                                <th>Email liên hệ</th>
+                                <th>Lớp trực thuộc (1 - n)</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end" style="width: 120px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="programTableBody">
+                            <!-- Render bằng JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 2. Chế độ Thẻ (Grid Card View) -->
+                <div class="p-3 d-none" id="gridViewContainer">
+                    <div class="row g-3" id="gridCardsRow">
+                        <!-- Render bằng JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Footer tóm tắt -->
+                <div class="p-3 bg-light border-top d-flex flex-wrap justify-content-between align-items-center gap-2 small text-muted">
+                    <div>
+                        Hiển thị <strong id="visibleCount">6</strong> / <strong id="totalCountFooter">6</strong> Chương trình đào tạo. Dữ liệu chuẩn Entity <code>ChuongTrinhDaoTao</code>.
+                    </div>
+                    <div>
+                        <span class="badge rounded-pill" style="background: var(--surface-container); color: var(--primary-rose);">Mục 5.5: Quản lý CTĐT</span>
+                        <span class="badge rounded-pill bg-light text-secondary border ms-1">Mục 10: Quan hệ 1 - n</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ==================== MODAL 1: THÊM / SỬA CHƯƠNG TRÌNH ==================== -->
+    <div class="modal fade" id="modalThemSua" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="modalFormTitle">
+                        <i class="bi bi-journal-plus me-2"></i>Thêm Chương trình Đào tạo mới
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formChuongTrinh" onsubmit="saveProgram(event)">
+                    <input type="hidden" id="editProgramId" value="">
+                    <div class="modal-body p-4" style="background: var(--bg-color);">
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label fw-bold small">Tên chương trình đào tạo <span class="text-danger">*</span></label>
+                                <input type="text" id="inputTenCT" class="form-control form-control-sm" required placeholder="VD: Lập trình Di động Flutter" style="border-color: var(--border-color);">
+                                <div class="form-text small" style="color: var(--text-muted);">Bắt buộc, không được trùng tên theo Mục 5.5.</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">Trạng thái <span class="text-danger">*</span></label>
+                                <select id="inputTrangThai" class="form-select form-select-sm" style="border-color: var(--border-color);">
+                                    <option value="Đang hoạt động">Đang hoạt động (true)</option>
+                                    <option value="Tạm ngưng">Tạm ngưng (false)</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold small">Email bộ phận liên hệ</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text" style="background: var(--surface-variant); border-color: var(--border-color);"><i class="bi bi-envelope"></i></span>
+                                    <input type="email" id="inputEmail" class="form-control" placeholder="daotao@uneti.edu.vn" style="border-color: var(--border-color);">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold small">Mô tả tóm tắt chương trình <span class="text-danger">*</span></label>
+                                <textarea id="inputMoTa" class="form-control form-control-sm" rows="3" required placeholder="Nội dung, mục tiêu chuẩn đầu ra..." style="border-color: var(--border-color);"></textarea>
+                                <div class="form-text small" style="color: var(--text-muted);">Thuộc tính <code>MoTa</code> (bắt buộc dùng textarea theo đề tài).</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer p-3">
+                        <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Hủy bỏ</button>
+                        <button type="submit" class="btn btn-sm px-4 fw-semibold rounded-pill text-white" style="background: var(--primary-rose);">
+                            <i class="bi bi-check2-circle me-1"></i> Lưu thông tin
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 2: CHI TIẾT & DANH SÁCH LỚP HỌC (1 - N) ==================== -->
+    <div class="modal fade" id="modalChiTiet" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="detailModalTitle">
+                        <i class="bi bi-info-circle me-2"></i>Chi tiết Chương trình đào tạo
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" style="background: var(--bg-color);" id="detailModalBody">
+                    <!-- Render động -->
+                </div>
+                <div class="modal-footer p-3">
+                    <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
+                    <a href="admin-lop-hoc.html" class="btn btn-sm px-3 rounded-pill text-white" style="background: var(--primary-rose);">
+                        <i class="bi bi-easel2 me-1"></i> Sang Quản lý Lớp học
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 3: XÓA & RÀNG BUỘC (MỤC 5.5) ==================== -->
+    <div class="modal fade" id="modalXoa" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title text-danger" id="deleteModalTitle">
+                        <i class="bi bi-shield-exclamation me-2"></i>Xác nhận thao tác
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" id="deleteModalBody" style="background: var(--bg-color);">
+                    <!-- Render động -->
+                </div>
+                <div class="modal-footer p-3" id="deleteModalFooter">
+                    <!-- Render động -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 4: QUY ĐỊNH MỤC 5.5 ==================== -->
+    <div class="modal fade" id="modalQuyTac" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">
+                        <i class="bi bi-book me-2"></i>Quy định Đề tài 16: Mục 5.5 - Quản lý Chương trình Đào tạo
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" style="background: var(--bg-color);">
+                    <div class="p-3 rounded-3 border mb-3 small" style="background: var(--surface-variant); border-color: var(--border-color) !important;">
+                        <h6 class="fw-bold" style="color: var(--primary-rose);">1. Entity ChuongTrinhDaoTao gồm:</h6>
+                        <ul class="ps-3 mb-2">
+                            <li><code>MaChuongTrinh</code> (Khóa chính PK)</li>
+                            <li><code>TenChuongTrinh</code> (Bắt buộc, không được trùng)</li>
+                            <li><code>MoTa</code> (Textarea theo quy định)</li>
+                            <li><code>EmailLienHe</code> (Định dạng EmailAddress)</li>
+                            <li><code>TrangThai</code> (Admin: xem, thêm, sửa, xóa, cập nhật trạng thái)</li>
+                        </ul>
+                        <div class="p-2 rounded-2 bg-danger bg-opacity-10 text-danger fw-semibold">
+                            ⚠️ Ràng buộc cốt lõi: "Không được xóa chương trình nếu việc xóa làm các lớp học liên quan không còn hợp lệ."
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold small" style="color: var(--text-dark);">2. Quan hệ trực tiếp với Lớp học (Mục 10):</h6>
+                    <p class="small text-muted mb-0">
+                        Mô hình dữ liệu: <code>ChuongTrinhDaoTao (1) &rarr; (n) LopHoc</code>. Bảng <code>LopHoc</code> có khóa ngoại <code>MaChuongTrinh</code> liên kết trực tiếp.
+                    </p>
+                </div>
+                <div class="modal-footer p-3">
+                    <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Đã hiểu quy tắc</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Danh sách 6 chương trình chuẩn BTL 16
+        let programs = [
+            {
+                id: 1,
+                code: "CT01",
+                name: "Phát triển Phần mềm .NET Fullstack",
+                email: "dotnet@uneti.edu.vn",
+                status: "Đang hoạt động",
+                description: "Đào tạo lập trình viên C#, ASP.NET Core 10 MVC, Entity Framework Core 10, LINQ và SQL Server từ cơ bản đến xây dựng dự án doanh nghiệp thực tế.",
+                classes: [
+                    { id: 1, name: "NETCORE10-K01", teacher: "ThS. Trần Văn Hùng", capacity: "18/25", fee: "3.500.000 VNĐ", status: "Đang mở đăng ký" },
+                    { id: 2, name: "NETCORE10-K02", teacher: "TS. Lê Hoàng Nam", capacity: "25/25", fee: "3.500.000 VNĐ", status: "Đã đóng đăng ký" },
+                    { id: 9, name: "NETCORE10-K03", teacher: "ThS. Trần Văn Hùng", capacity: "8/25", fee: "3.500.000 VNĐ", status: "Đang mở đăng ký" },
+                    { id: 10, name: "WEBAPI-K01", teacher: "ThS. Trần Văn Hùng", capacity: "12/20", fee: "3.800.000 VNĐ", status: "Đang mở đăng ký" },
+                    { id: 16, name: "NETCORE10-K04", teacher: "TS. Lê Hoàng Nam", capacity: "10/25", fee: "3.500.000 VNĐ", status: "Đang mở đăng ký" }
+                ]
+            },
+            {
+                id: 2,
+                code: "CT02",
+                name: "Lập trình Web Frontend Hiện đại (React & Next.js)",
+                email: "frontend@uneti.edu.vn",
+                status: "Đang hoạt động",
+                description: "Làm chủ HTML5, CSS3, JavaScript ES6+, ReactJS và Next.js để xây dựng giao diện ứng dụng web Single Page Application chuẩn Responsive.",
+                classes: [
+                    { id: 3, name: "REACT-K05", teacher: "ThS. Nguyễn Đức Tuấn", capacity: "14/20", fee: "3.200.000 VNĐ", status: "Đang mở đăng ký" },
+                    { id: 13, name: "REACT-K06", teacher: "ThS. Nguyễn Đức Tuấn", capacity: "0/20", fee: "3.200.000 VNĐ", status: "Chưa mở" }
+                ]
+            },
+            {
+                id: 3,
+                code: "CT03",
+                name: "Tiếng Anh TOEIC 4 Kỹ năng Chuẩn Quốc tế",
+                email: "toeic@uneti.edu.vn",
+                status: "Đang hoạt động",
+                description: "Lộ trình luyện thi TOEIC từ mất gốc lên 450+, 650+ và 750+ dành cho sinh viên chuẩn bị xét chuẩn đầu ra tốt nghiệp và đi làm doanh nghiệp.",
+                classes: [
+                    { id: 6, name: "TOEIC-K12", teacher: "Cô Mai Thị Lan", capacity: "30/30", fee: "2.200.000 VNĐ", status: "Đã đóng đăng ký" },
+                    { id: 12, name: "TOEIC-K13", teacher: "Cô Mai Thị Lan", capacity: "19/30", fee: "2.200.000 VNĐ", status: "Đang mở đăng ký" },
+                    { id: 18, name: "TOEIC-K14", teacher: "Cô Mai Thị Lan", capacity: "25/30", fee: "2.200.000 VNĐ", status: "Đã đóng đăng ký" }
+                ]
+            },
+            {
+                id: 4,
+                code: "CT04",
+                name: "Khoa học Dữ liệu & AI (Python & Power BI)",
+                email: "data@uneti.edu.vn",
+                status: "Đang hoạt động",
+                description: "Phân tích dữ liệu kinh doanh với Python Pandas, trực quan hóa Dashboard Power BI, học máy Machine Learning và ứng dụng AI thực tế.",
+                classes: [
+                    { id: 4, name: "PYTHON-K02", teacher: "TS. Lê Thị Mai", capacity: "20/25", fee: "2.800.000 VNĐ", status: "Đang mở đăng ký" },
+                    { id: 7, name: "AI-PRO-K01", teacher: "TS. Lê Thị Mai", capacity: "15/20", fee: "3.600.000 VNĐ", status: "Đang mở đăng ký" },
+                    { id: 11, name: "PYTHON-K03", teacher: "TS. Lê Thị Mai", capacity: "5/25", fee: "2.800.000 VNĐ", status: "Đang mở đăng ký" },
+                    { id: 17, name: "PYTHON-K04", teacher: "TS. Lê Thị Mai", capacity: "18/25", fee: "2.800.000 VNĐ", status: "Đã đóng đăng ký" }
+                ]
+            },
+            {
+                id: 5,
+                code: "CT05",
+                name: "Kiểm thử Phần mềm & Đảm bảo Chất lượng (QA/Tester)",
+                email: "qa.tester@uneti.edu.vn",
+                status: "Tạm ngưng",
+                description: "Kiểm thử thủ công (Manual Test), viết Testcase, kiểm thử API với Postman và tự động hóa kiểm thử với Selenium WebDriver.",
+                classes: [
+                    { id: 8, name: "TESTER-K01", teacher: "ThS. Chu Đình Thắng", capacity: "16/20", fee: "2.600.000 VNĐ", status: "Tạm dừng" }
+                ]
+            },
+            {
+                id: 6,
+                code: "CT06",
+                name: "Triển khai Hệ thống với Docker & Kubernetes (DevOps)",
+                email: "devops@uneti.edu.vn",
+                status: "Đang hoạt động",
+                description: "Đóng gói ứng dụng với Docker Container, quản lý cụm máy chủ Kubernetes, giám sát hệ thống CI/CD và tối ưu hóa hạ tầng Cloud.",
+                classes: []
+            }
+        ];
+
+        // Toast thông báo
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'custom-toast';
+            
+            let icon = 'bi-check-circle-fill text-success';
+            let borderColor = '#10b981';
+            if (type === 'danger') {
+                icon = 'bi-exclamation-triangle-fill text-danger';
+                borderColor = '#ef4444';
+            } else if (type === 'warning') {
+                icon = 'bi-exclamation-circle-fill text-warning';
+                borderColor = '#f59e0b';
+            }
+
+            toast.style.borderLeftColor = borderColor;
+            toast.innerHTML = `
+                <i class="bi ${icon} fs-5"></i>
+                <div class="flex-grow-1">
+                    <div class="fw-bold" style="color: var(--text-dark);">${message}</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted);">${new Date().toLocaleTimeString()}</div>
+                </div>
+                <button type="button" class="btn-close btn-sm" onclick="this.parentElement.remove()"></button>
+            `;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.transition = 'opacity 0.3s, transform 0.3s';
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-10px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Render Table & Cards
+        function renderPrograms(list = programs) {
+            const tbody = document.getElementById('programTableBody');
+            tbody.innerHTML = list.map(p => `
+                <tr data-id="${p.id}">
+                    <td class="fw-bold text-center" style="color: var(--primary-rose);">#${p.code}</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="program-avatar">
+                                <i class="bi bi-journal-code"></i>
+                            </div>
+                            <div>
+                                <div class="program-name">${p.name}</div>
+                                <div class="program-code">Mã CSDL: <code>MaChuongTrinh = ${p.id}</code></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><div class="desc-text">${p.description}</div></td>
+                    <td>
+                        <span class="small" style="color: var(--text-gray);">
+                            <i class="bi bi-envelope me-1" style="color: var(--primary-rose);"></i>${p.email}
+                        </span>
+                    </td>
+                    <td>
+                        ${p.classes.length > 0 
+                            ? `<a href="admin-lop-hoc.html?maChuongTrinh=${p.id}" class="class-pill">
+                                 <i class="bi bi-easel2-fill"></i> ${p.classes.length} Lớp học
+                               </a>`
+                            : `<span class="class-pill empty"><i class="bi bi-inbox"></i> Chưa có lớp</span>`
+                        }
+                    </td>
+                    <td>
+                        <span class="status-pill ${p.status === 'Đang hoạt động' ? 'active' : 'paused'}">
+                            <span class="status-dot"></span> ${p.status}
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        <div class="d-inline-flex gap-1">
+                            <button type="button" class="btn-action-icon" title="Chi tiết" onclick="viewDetail(${p.id})">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button type="button" class="btn-action-icon" title="Sửa" onclick="openEditModal(${p.id})">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn-action-icon delete" title="Xóa" onclick="handleDelete(${p.id})">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Render Card Grid
+            const gridRow = document.getElementById('gridCardsRow');
+            gridRow.innerHTML = list.map(p => `
+                <div class="col-lg-4 col-md-6">
+                    <div class="prog-grid-card">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge rounded-pill" style="background: var(--surface-container); color: var(--primary-rose);">#${p.code}</span>
+                                <span class="status-pill ${p.status === 'Đang hoạt động' ? 'active' : 'paused'}">
+                                    <span class="status-dot"></span> ${p.status}
+                                </span>
+                            </div>
+                            <h6 class="fw-bold mb-1" style="color: var(--text-dark);">${p.name}</h6>
+                            <div class="small mb-2" style="color: var(--text-muted);"><i class="bi bi-envelope me-1"></i>${p.email}</div>
+                            <p class="desc-text mb-3">${p.description}</p>
+                        </div>
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                <span class="small fw-semibold" style="color: var(--primary-rose);">
+                                    <i class="bi bi-easel2 me-1"></i>${p.classes.length} Lớp học
+                                </span>
+                                <div class="d-flex gap-1">
+                                    <button class="btn btn-sm btn-light border py-1 px-2" onclick="viewDetail(${p.id})"><i class="bi bi-eye"></i></button>
+                                    <button class="btn btn-sm btn-light border py-1 px-2 text-primary" onclick="openEditModal(${p.id})"><i class="bi bi-pencil"></i></button>
+                                    <button class="btn btn-sm btn-light border py-1 px-2 text-danger" onclick="handleDelete(${p.id})"><i class="bi bi-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Cập nhật số đếm
+            document.getElementById('visibleCount').innerText = list.length;
+            document.getElementById('totalCountFooter').innerText = programs.length;
+            document.getElementById('sidebarBadgeCount').innerText = programs.length;
+            document.getElementById('statTotalCount').innerText = `0${programs.length}`;
+            document.getElementById('statActiveCount').innerText = `0${programs.filter(p => p.status === 'Đang hoạt động').length}`;
+            document.getElementById('statPausedCount').innerText = `0${programs.filter(p => p.status === 'Tạm ngưng').length}`;
+        }
+
+        // Lọc tìm kiếm thời gian thực
+        function filterPrograms() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+            const status = document.getElementById('statusFilter').value;
+
+            const filtered = programs.filter(p => {
+                const matchKeyword = keyword === '' || 
+                                     p.name.toLowerCase().includes(keyword) || 
+                                     p.code.toLowerCase().includes(keyword) || 
+                                     p.email.toLowerCase().includes(keyword);
+                const matchStatus = status === '' || p.status === status;
+                return matchKeyword && matchStatus;
+            });
+
+            renderPrograms(filtered);
+        }
+
+        // Chuyển đổi View Mode
+        function setViewMode(mode) {
+            const tableView = document.getElementById('tableViewContainer');
+            const gridView = document.getElementById('gridViewContainer');
+            const btnTable = document.getElementById('btnTableView');
+            const btnGrid = document.getElementById('btnGridView');
+
+            if (mode === 'grid') {
+                tableView.classList.add('d-none');
+                gridView.classList.remove('d-none');
+                btnTable.classList.remove('active');
+                btnGrid.classList.add('active');
+            } else {
+                gridView.classList.add('d-none');
+                tableView.classList.remove('d-none');
+                btnGrid.classList.remove('active');
+                btnTable.classList.add('active');
+            }
+        }
+
+        // Modal Thêm mới
+        function openCreateModal() {
+            document.getElementById('modalFormTitle').innerHTML = '<i class="bi bi-journal-plus me-2"></i>Thêm Chương trình Đào tạo mới';
+            document.getElementById('editProgramId').value = '';
+            document.getElementById('inputTenCT').value = '';
+            document.getElementById('inputEmail').value = '';
+            document.getElementById('inputMoTa').value = '';
+            document.getElementById('inputTrangThai').value = 'Đang hoạt động';
+            new bootstrap.Modal(document.getElementById('modalThemSua')).show();
+        }
+
+        // Modal Sửa
+        function openEditModal(id) {
+            const p = programs.find(item => item.id === id);
+            if (!p) return;
+
+            document.getElementById('modalFormTitle').innerHTML = `<i class="bi bi-pencil-square me-2"></i>Cập nhật Chương trình: #${p.code}`;
+            document.getElementById('editProgramId').value = p.id;
+            document.getElementById('inputTenCT').value = p.name;
+            document.getElementById('inputEmail').value = p.email;
+            document.getElementById('inputMoTa').value = p.description;
+            document.getElementById('inputTrangThai').value = p.status;
+            new bootstrap.Modal(document.getElementById('modalThemSua')).show();
+        }
+
+        // Lưu dữ liệu Form
+        function saveProgram(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editProgramId').value;
+            const name = document.getElementById('inputTenCT').value.trim();
+            const email = document.getElementById('inputEmail').value.trim();
+            const desc = document.getElementById('inputMoTa').value.trim();
+            const status = document.getElementById('inputTrangThai').value;
+
+            if (editId) {
+                const item = programs.find(p => p.id === parseInt(editId));
+                if (item) {
+                    item.name = name;
+                    item.email = email;
+                    item.description = desc;
+                    item.status = status;
+                }
+                showToast(`✅ Đã cập nhật chương trình "${name}"!`, 'info');
+            } else {
+                const newId = programs.length + 1;
+                const newCode = `CT0${newId}`;
+                programs.push({
+                    id: newId,
+                    code: newCode,
+                    name: name,
+                    email: email,
+                    description: desc,
+                    status: status,
+                    classes: []
+                });
+                showToast(`✅ Đã thêm mới chương trình "${name}" (#${newCode})!`, 'info');
+            }
+
+            bootstrap.Modal.getInstance(document.getElementById('modalThemSua')).hide();
+            filterPrograms();
+        }
+
+        // Xem chi tiết
+        function viewDetail(id) {
+            const p = programs.find(item => item.id === id);
+            if (!p) return;
+
+            document.getElementById('detailModalTitle').innerHTML = `<i class="bi bi-info-circle me-2"></i>Chi tiết #${p.code} - ${p.name}`;
+            
+            let classesHtml = '';
+            if (p.classes.length > 0) {
+                classesHtml = `
+                    <div class="table-responsive mt-3">
+                        <table class="table table-sm table-bordered align-middle small mb-0">
+                            <thead style="background: var(--surface-variant);">
+                                <tr>
+                                    <th>Mã lớp</th>
+                                    <th>Tên Lớp (LopHoc)</th>
+                                    <th>Giảng viên</th>
+                                    <th>Sĩ số</th>
+                                    <th>Học phí</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${p.classes.map(c => `
+                                    <tr>
+                                        <td class="fw-bold">#${c.id}</td>
+                                        <td class="fw-semibold">${c.name}</td>
+                                        <td>${c.teacher}</td>
+                                        <td><span class="badge bg-light text-dark border">${c.capacity}</span></td>
+                                        <td class="text-danger fw-bold">${c.fee}</td>
+                                        <td><span class="badge ${c.status === 'Đã đóng đăng ký' ? 'bg-secondary' : 'bg-success'}">${c.status}</span></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                classesHtml = `<div class="alert alert-light border py-2 px-3 small mt-3 mb-0 text-muted">Chương trình này hiện chưa có lớp học nào liên kết (0 lớp).</div>`;
+            }
+
+            document.getElementById('detailModalBody').innerHTML = `
+                <div class="p-3 rounded-3 border mb-3 small" style="background: var(--surface-variant); border-color: var(--border-color) !important;">
+                    <div class="row g-2">
+                        <div class="col-6"><strong>Mã CT (PK):</strong> <code>MaChuongTrinh = ${p.id}</code> (#${p.code})</div>
+                        <div class="col-6"><strong>Trạng thái:</strong> <span class="badge ${p.status === 'Đang hoạt động' ? 'bg-success' : 'bg-secondary'}">${p.status}</span></div>
+                        <div class="col-6"><strong>Email liên hệ:</strong> ${p.email}</div>
+                        <div class="col-6"><strong>Số lớp trực thuộc:</strong> <strong>${p.classes.length} Lớp học</strong></div>
+                        <div class="col-12 mt-2"><strong>Mô tả chi tiết:</strong> ${p.description}</div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold small" style="color: var(--text-dark);"><i class="bi bi-easel2 me-1" style="color: var(--primary-rose);"></i> Danh sách Lớp học (${p.classes.length}):</span>
+                    <a href="admin-lop-hoc.html?maChuongTrinh=${p.id}" class="small text-decoration-none fw-semibold" style="color: var(--primary-rose);">Mở trang Lớp học &rarr;</a>
+                </div>
+                ${classesHtml}
+            `;
+
+            new bootstrap.Modal(document.getElementById('modalChiTiet')).show();
+        }
+
+        // Xóa & Kiểm tra ràng buộc Mục 5.5
+        function handleDelete(id) {
+            const p = programs.find(item => item.id === id);
+            if (!p) return;
+
+            const modal = new bootstrap.Modal(document.getElementById('modalXoa'));
+            const title = document.getElementById('deleteModalTitle');
+            const body = document.getElementById('deleteModalBody');
+            const footer = document.getElementById('deleteModalFooter');
+
+            if (p.classes.length > 0) {
+                // CHẶN XÓA THEO MỤC 5.5
+                title.innerHTML = '<i class="bi bi-shield-x text-danger me-2"></i>Không thể xóa Chương trình!';
+                body.innerHTML = `
+                    <div class="alert alert-danger py-2 px-3 small border-danger mb-3">
+                        Chương trình <strong>"${p.name}" (#${p.code})</strong> đang có <strong>${p.classes.length} lớp học</strong> trực thuộc.
+                    </div>
+                    <p class="small text-muted mb-2">
+                        <strong>Quy định Mục 5.5 Đề tài:</strong><br>
+                        <em>"Không được xóa chương trình nếu việc xóa làm các lớp học liên quan không còn hợp lệ."</em>
+                    </p>
+                    <p class="small text-secondary mb-0">
+                        👉 <em>Gợi ý:</em> Chuyển trạng thái sang <strong>"Tạm ngưng"</strong> để dừng mở lớp mới.
+                    </p>
+                `;
+                footer.innerHTML = `
+                    <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Đã hiểu quy tắc</button>
+                    <button type="button" class="btn btn-warning btn-sm rounded-pill px-3" data-bs-dismiss="modal" onclick="openEditModal(${p.id})">
+                        <i class="bi bi-pause-circle me-1"></i> Đổi sang Tạm ngưng
+                    </button>
+                `;
+            } else {
+                // CHO PHÉP XÓA THẬT VÌ 0 LỚP HỌC
+                title.innerHTML = '<i class="bi bi-trash3 text-danger me-2"></i>Xác nhận Xóa Chương trình';
+                body.innerHTML = `
+                    <p class="small mb-2">Chương trình <strong>"${p.name}" (#${p.code})</strong> chưa có lớp học nào liên kết.</p>
+                    <p class="small text-danger mb-0">Thao tác này sẽ xóa vĩnh viễn khỏi CSDL SQL Server. Bạn có chắc chắn muốn xóa?</p>
+                `;
+                footer.innerHTML = `
+                    <button type="button" class="btn btn-light border btn-sm rounded-pill px-3" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="button" class="btn btn-danger btn-sm rounded-pill px-3" data-bs-dismiss="modal" onclick="confirmDelete(${p.id})">
+                        <i class="bi bi-trash3 me-1"></i> Xác nhận Xóa
+                    </button>
+                `;
+            }
+
+            modal.show();
+        }
+
+        // Xác nhận xóa
+        function confirmDelete(id) {
+            const index = programs.findIndex(p => p.id === id);
+            if (index !== -1) {
+                const name = programs[index].name;
+                programs.splice(index, 1);
+                filterPrograms();
+                showToast(`🗑️ Đã xóa chương trình "${name}" thành công!`, 'danger');
+            }
+        }
+
+        // Khởi tạo hiển thị
+        renderPrograms();
+    </script>
+
+</body>
+
+</html>
+
+

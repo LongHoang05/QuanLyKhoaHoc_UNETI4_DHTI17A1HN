@@ -37,6 +37,13 @@ builder.Services.AddScoped<IHocVienService, HocVienService>();
 
 var app = builder.Build();
 
+// Tự động nạp dữ liệu mẫu phong phú (Seed Mock Data) để test toàn bộ giao diện
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    DbSeeder.SeedMockData(context);
+}
+
 // ========================================================
 // 4. Cấu hình Middleware HTTP pipeline
 // ========================================================
