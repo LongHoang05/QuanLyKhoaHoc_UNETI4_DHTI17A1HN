@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thống kê & Báo cáo LINQ (Module 5) - UNETI EDU</title>
+    <!-- Google Fonts: Playfair Display + Montserrat (Floral Haven) -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --sidebar-width: 275px;
+            --primary-rose: #0284c7;     /* Sky Blue 600 */
+            --primary-light: #38bdf8;    /* Sky Light 400 */
+            --primary-blush: #7dd3fc;    /* Sky Soft 300 */
+            --primary-dark: #0369a1;     /* Sky Dark 700 */
+            --bg-color: #f0f7fd;
+            --surface-card: #ffffff;
+            --surface-container: #e0f2fe;
+            --surface-variant: #f8fafc;
+            --text-dark: #0f172a;
+            --text-gray: #334155;
+            --text-muted: #64748b;
+            --border-color: #bae6fd;
+            --border-light: #e2e8f0;
+            --glass-bg: rgba(255, 255, 255, 0.92);
+            --card-shadow: 0 4px 20px rgba(2, 132, 199, 0.06);
+            --card-hover: 0 10px 28px rgba(2, 132, 199, 0.12);
+            --font-serif: "Playfair Display", Georgia, serif;
+            --font-sans: "Montserrat", -apple-system, BlinkMacSystemFont, sans-serif;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg-color);
+            font-family: var(--font-sans);
+            color: var(--text-dark);
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(2, 132, 199, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.06) 0%, transparent 40%);
+        }
+
+        /* Sidebar Trái */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: linear-gradient(180deg, #07172c 0%, #0c2d48 55%, #051324 100%);
+            color: #e0f2fe;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            box-shadow: 4px 0 30px rgba(2, 132, 199, 0.15);
+        }
+
+        .sidebar-brand {
+            padding: 1.35rem 1.4rem;
+            font-family: var(--font-serif);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #38bdf8;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
+            font-size: 1.2rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1.1rem 0.85rem;
+            margin: 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .sidebar-category {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: #64748b;
+            padding: 0.85rem 1rem 0.35rem 1rem;
+        }
+
+        .sidebar-menu li { margin-bottom: 0.25rem; }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.68rem 0.95rem;
+            color: #d4a0b0;
+            text-decoration: none;
+            border-radius: 0.65rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .sidebar-link-left { display: flex; align-items: center; gap: 12px; }
+        .sidebar-link i { font-size: 1.1rem; }
+
+        .sidebar-link:hover {
+            background-color: rgba(2, 132, 199, 0.25);
+            color: #e0f2fe;
+            transform: translateX(3px);
+        }
+
+        .sidebar-link.active {
+            background: linear-gradient(90deg, var(--primary-rose), var(--primary-light));
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid rgba(56, 189, 248, 0.1);
+            background-color: rgba(15, 3, 8, 0.6);
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        /* Main Content */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar {
+            height: 66px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .content-area {
+            padding: 1.75rem 2rem 2.5rem 2rem;
+            flex-grow: 1;
+            max-width: 1440px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Hero Banner */
+        .page-hero {
+            background: linear-gradient(135deg, #071e3d 0%, #0c3d6d 50%, #051426 100%);
+            border-radius: 1.25rem;
+            padding: 1.5rem 1.85rem;
+            color: #ffffff;
+            box-shadow: 0 10px 30px rgba(45, 10, 26, 0.1);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-title {
+            font-family: var(--font-serif);
+            font-size: 1.45rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Stats */
+        .mini-stat-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.15rem 1.35rem;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mini-stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--card-hover);
+            border-color: var(--primary-blush);
+        }
+
+        .mini-stat-num {
+            font-family: var(--font-serif);
+            font-size: 1.65rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .mini-stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        /* Chart card */
+        .chart-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1.15rem;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            height: 100%;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .chart-title {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0;
+        }
+
+        /* Code block for LINQ explanation */
+        .linq-code {
+            background: #1f0b14;
+            color: #e0f2fe;
+            font-family: "Consolas", monospace;
+            font-size: 0.78rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-top: 0.75rem;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ==================== SIDEBAR TRÁI ==================== -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon">
+                <i class="bi bi-mortarboard-fill"></i>
+            </div>
+            <div>
+                <div style="line-height: 1.15;">UNETI EDU</div>
+                <div style="font-size: 0.65rem; color: #64748b; font-weight: 500; font-family: var(--font-sans);">Khoa CNTT - Nhóm 4</div>
+            </div>
+        </div>
+
+        <ul class="sidebar-menu">
+            <div class="sidebar-category">Bảng điều khiển</div>
+            <li>
+                <a href="/" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-speedometer2"></i> Tổng quan</span>
+                </a>
+            </li>
+
+            <div class="sidebar-category">Quản lý đào tạo (5 Module)</div>
+            <li>
+                <a href="admin-chuong-trinh.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-journal-bookmark-fill"></i> Chương trình ĐT (M1)</span>
+                    <span class="badge bg-secondary bg-opacity-50 rounded-pill">6</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-lop-hoc.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-easel2-fill"></i> Quản lý Lớp học (M2)</span>
+                    <span class="badge bg-success bg-opacity-75 rounded-pill">18</span>
+                </a>
+            </li>
+            <li>
+                <a href="/HocVien" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-person-lines-fill"></i> Học viên & Hồ sơ (M3)</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-dang-ky.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-clipboard2-check-fill"></i> Duyệt ĐK & Học phí (M4)</span>
+                    <span class="badge rounded-pill fw-bold" style="background: var(--primary-rose); color: #fff;">03 mới</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-buoi-hoc.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-calendar-week-fill"></i> Lịch học & Buổi học (M5)</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-ket-qua.html" class="sidebar-link">
+                    <span class="sidebar-link-left"><i class="bi bi-award-fill"></i> Kết quả học tập (M5)</span>
+                </a>
+            </li>
+
+            <div class="sidebar-category">Thống kê & Cổng ngoài</div>
+            <li>
+                <a href="admin-thong-ke.html" class="sidebar-link active">
+                    <span class="sidebar-link-left"><i class="bi bi-bar-chart-line-fill"></i> Báo cáo LINQ (M5)</span>
+                    <span class="badge rounded-pill bg-light text-dark fw-bold">11 báo cáo</span>
+                </a>
+            </li>
+            <li>
+                <a href="hoc-vien.html" class="sidebar-link text-warning">
+                    <span class="sidebar-link-left"><i class="bi bi-box-arrow-up-right"></i> Cổng Học viên (Mục 17.1)</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+                <span><i class="bi bi-person-badge me-1" style="color: var(--primary-blush);"></i> Phụ trách M5:</span>
+                <span class="text-white fw-semibold">Vũ Đình Trường</span>
+            </div>
+            <div class="small" style="font-size: 0.72rem; color: #64748b;">
+                Thống kê & Báo cáo LINQ • Mục 9.6
+            </div>
+        </div>
+    </aside>
+
+    <!-- ==================== MAIN WRAPPER ==================== -->
+    <div class="main-wrapper">
+        <header class="topbar">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 small">
+                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted">Tổng quan</a></li>
+                    <li class="breadcrumb-item active fw-semibold" style="color: var(--text-dark);">Báo cáo & Thống kê LINQ (Module 5)</li>
+                </ol>
+            </nav>
+
+            <div class="d-flex align-items-center gap-3">
+                <a href="hoc-vien.html" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1" style="font-size: 0.8rem;">
+                    <i class="bi bi-person-workspace me-1"></i> Cổng Học viên
+                </a>
+                <div class="vr"></div>
+                <div class="text-end d-none d-sm-block">
+                    <div class="fw-bold small" style="color: var(--text-dark);">Giáo vụ Thống kê</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">thongke@uneti.edu.vn</div>
+                </div>
+                <a href="dang-nhap.html" class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: var(--surface-container); color: var(--primary-rose); border: 1px solid var(--border-color);" title="Đăng xuất">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
+        </header>
+
+        <main class="content-area">
+
+            <!-- 1. HERO BANNER TỐI GIẢN -->
+            <div class="page-hero">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge rounded-pill px-3 py-1" style="background: rgba(56, 189, 248, 0.2); color: var(--primary-blush); border: 1px solid rgba(56, 189, 248, 0.35);">
+                                <i class="bi bi-pie-chart-fill me-1"></i> 11 Chỉ Tiêu LINQ Chuẩn Mục 9.6
+                            </span>
+                            <span class="small" style="color: #bae6fd;">Count, Sum, Average, GroupBy, OrderByDescending</span>
+                        </div>
+                        <h1 class="hero-title">Báo Cáo Phân Tích Đào Tạo & Truy Vấn LINQ Nâng Cao</h1>
+                        <p class="mb-0 small" style="color: #f7d6df;">
+                            Tổng hợp trực quan doanh thu theo tháng, tỷ lệ lấp đầy sĩ số, điểm tổng kết trung bình và phân bố trạng thái đăng ký của toàn bộ hệ thống.
+                        </p>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm px-3 py-2 rounded-pill fw-semibold text-white" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); font-size: 0.82rem;" onclick="window.print()">
+                            <i class="bi bi-printer me-1"></i> In báo cáo thống kê
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. THẺ TỔNG HỢP 4 CHỈ SỐ LỚN -->
+            <div class="row g-3 mb-4">
+                <div class="col-xl-3 col-sm-6">
+                    <div class="mini-stat-card">
+                        <div>
+                            <div class="small fw-semibold text-muted" style="font-size: 0.74rem;">Tổng thực thu học phí (Sum)</div>
+                            <div class="mini-stat-num" style="color: var(--primary-rose);">18.3 Tr</div>
+                            <div class="small text-success" style="font-size: 0.72rem;"><i class="bi bi-arrow-up-right me-1"></i>Đạt 100% chỉ tiêu kỳ I</div>
+                        </div>
+                        <div class="mini-stat-icon" style="background: var(--surface-container); color: var(--primary-rose);">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-sm-6">
+                    <div class="mini-stat-card">
+                        <div>
+                            <div class="small fw-semibold text-muted" style="font-size: 0.74rem;">Lớp đông nhất (Max LINQ)</div>
+                            <div class="mini-stat-num" style="color: #0369a1;">TOEIC-K12</div>
+                            <div class="small text-muted" style="font-size: 0.72rem;">30/30 học viên (100% lấp đầy)</div>
+                        </div>
+                        <div class="mini-stat-icon" style="background: #e0f2fe; color: #0369a1;">
+                            <i class="bi bi-fire"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-sm-6">
+                    <div class="mini-stat-card">
+                        <div>
+                            <div class="small fw-semibold text-muted" style="font-size: 0.74rem;">Điểm TB tốt nghiệp (Average)</div>
+                            <div class="mini-stat-num text-success">8.1 / 10</div>
+                            <div class="small text-muted" style="font-size: 0.72rem;">Xếp loại: Giỏi</div>
+                        </div>
+                        <div class="mini-stat-icon" style="background: #dcfce7; color: #15803d;">
+                            <i class="bi bi-award"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-sm-6">
+                    <div class="mini-stat-card">
+                        <div>
+                            <div class="small fw-semibold text-muted" style="font-size: 0.74rem;">Tỷ lệ hoàn thành (Pass Rate)</div>
+                            <div class="mini-stat-num text-dark">92.8%</div>
+                            <div class="small text-success" style="font-size: 0.72rem;"><i class="bi bi-check-all me-1"></i>Chuẩn đầu ra UNETI</div>
+                        </div>
+                        <div class="mini-stat-icon" style="background: #fef3c7; color: #b45309;">
+                            <i class="bi bi-patch-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. BIỂU ĐỒ TRỰC QUAN & TRUY VẤN LINQ (MỤC 9.6) -->
+            <div class="row g-4 mb-4">
+                
+                <!-- Biểu đồ 1: Doanh thu theo tháng -->
+                <div class="col-lg-8">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <h5 class="chart-title">1. Doanh Thu Học Phí Theo Tháng (DoanhThuTheoThang)</h5>
+                                <div class="small text-muted">Truy vấn: <code>GroupBy(d => d.NgayDongHocPhi.Value.Month).Select(g => g.Sum(x => x.SoTienDaDong))</code></div>
+                            </div>
+                            <span class="badge bg-light text-dark border">Đơn vị: Triệu VNĐ</span>
+                        </div>
+                        <div style="height: 280px;">
+                            <canvas id="chartRevenue"></canvas>
+                        </div>
+                        <div class="linq-code">
+                            var doanhThu = db.DangKyHocs.Where(d => d.SoTienDaDong > 0)<br>
+                            &nbsp;&nbsp;.GroupBy(d => d.NgayDongHocPhi.Value.Month)<br>
+                            &nbsp;&nbsp;.Select(g => new { Thang = "Tháng " + g.Key, TongThu = g.Sum(x => x.SoTienDaDong) })<br>
+                            &nbsp;&nbsp;.OrderBy(x => x.Thang).ToList();
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Biểu đồ 2: Cơ cấu trạng thái đăng ký -->
+                <div class="col-lg-4">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <h5 class="chart-title">2. Đơn Theo Trạng Thái</h5>
+                                <div class="small text-muted">Mục 9.6: GroupBy(d => d.TrangThai)</div>
+                            </div>
+                        </div>
+                        <div style="height: 280px; position: relative;">
+                            <canvas id="chartStatus"></canvas>
+                        </div>
+                        <div class="linq-code">
+                            var tyLeDon = db.DangKyHocs<br>
+                            &nbsp;&nbsp;.GroupBy(d => d.TrangThai)<br>
+                            &nbsp;&nbsp;.Select(g => new { Status = g.Key, SoLuong = g.Count() });
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Biểu đồ 3: Tỷ lệ lấp đầy sĩ số theo từng lớp -->
+                <div class="col-lg-6">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <h5 class="chart-title">3. Tỷ Lệ Lấp Đầy Sĩ Số Từng Lớp (TyLeLapDay)</h5>
+                                <div class="small text-muted">Mục 9.6: SoHocVien / SiSoToiDa * 100%</div>
+                            </div>
+                        </div>
+                        <div style="height: 260px;">
+                            <canvas id="chartCapacity"></canvas>
+                        </div>
+                        <div class="linq-code">
+                            var lapDay = db.LopHocs.Select(l => new {<br>
+                            &nbsp;&nbsp;l.TenLop, TyLe = (double)l.DangKyHocs.Count(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí") / l.SiSoToiDa * 100<br>
+                            }).ToList();
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Biểu đồ 4: Điểm tổng kết trung bình theo lớp -->
+                <div class="col-lg-6">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <h5 class="chart-title">4. Điểm Tổng Kết Trung Bình Theo Lớp (DiemTB)</h5>
+                                <div class="small text-muted">Mục 9.6: Average(k => k.DiemTongKet)</div>
+                            </div>
+                        </div>
+                        <div style="height: 260px;">
+                            <canvas id="chartAvgScore"></canvas>
+                        </div>
+                        <div class="linq-code">
+                            var diemTB = db.KetQuaHocTaps<br>
+                            &nbsp;&nbsp;.GroupBy(k => k.DangKyHoc.LopHoc.TenLop)<br>
+                            &nbsp;&nbsp;.Select(g => new { Lop = g.Key, DiemTB = g.Average(x => x.DiemTongKet) })<br>
+                            &nbsp;&nbsp;.OrderByDescending(x => x.DiemTB).ToList();
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Chart 1: Doanh thu theo tháng
+            const ctxRev = document.getElementById('chartRevenue').getContext('2d');
+            new Chart(ctxRev, {
+                type: 'bar',
+                data: {
+                    labels: ['Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10 (Hiện tại)', 'Tháng 11 (Dự kiến)'],
+                    datasets: [{
+                        label: 'Doanh thu học phí (Triệu VNĐ)',
+                        data: [28.5, 42.0, 39.5, 18.3, 35.0],
+                        backgroundColor: 'rgba(2, 132, 199, 0.75)',
+                        borderColor: '#0284c7',
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#e2e8f0' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Chart 2: Trạng thái đơn đăng ký
+            const ctxStatus = document.getElementById('chartStatus').getContext('2d');
+            new Chart(ctxStatus, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Đã đóng học phí (6)', 'Chờ duyệt (3)', 'Đã duyệt (3)', 'Từ chối (2)'],
+                    datasets: [{
+                        data: [6, 3, 3, 2],
+                        backgroundColor: ['#16a34a', '#f59e0b', '#0284c7', '#dc2626'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                    }
+                }
+            });
+
+            // Chart 3: Tỷ lệ lấp đầy sĩ số
+            const ctxCap = document.getElementById('chartCapacity').getContext('2d');
+            new Chart(ctxCap, {
+                type: 'bar',
+                data: {
+                    labels: ['TOEIC-K12', 'PYTHON-K02', 'NETCORE10-K01', 'REACT-K05', 'JAVA-K08', 'FLUTTER-K03'],
+                    datasets: [{
+                        label: 'Tỷ lệ lấp đầy (%)',
+                        data: [100, 80, 72, 70, 64, 60],
+                        backgroundColor: [
+                            'rgba(220, 38, 38, 0.8)',
+                            'rgba(2, 132, 199, 0.8)',
+                            'rgba(2, 132, 199, 0.8)',
+                            'rgba(2, 132, 199, 0.8)',
+                            'rgba(2, 132, 199, 0.8)',
+                            'rgba(100, 116, 139, 0.8)'
+                        ],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { max: 100, beginAtZero: true, grid: { color: '#e2e8f0' } },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Chart 4: Điểm trung bình theo lớp
+            const ctxAvg = document.getElementById('chartAvgScore').getContext('2d');
+            new Chart(ctxAvg, {
+                type: 'line',
+                data: {
+                    labels: ['NETCORE10-K01', 'PYTHON-K02', 'REACT-K05', 'JAVA-K08', 'TOEIC-K12'],
+                    datasets: [{
+                        label: 'Điểm TB Tốt nghiệp',
+                        data: [8.6, 8.2, 7.8, 8.0, 7.9],
+                        borderColor: '#0284c7',
+                        backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: '#0284c7',
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { min: 5, max: 10, grid: { color: '#e2e8f0' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
+
+
+

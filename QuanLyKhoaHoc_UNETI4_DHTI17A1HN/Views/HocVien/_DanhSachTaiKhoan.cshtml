@@ -1,0 +1,111 @@
+@model List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.TaiKhoan>
+
+<!-- Bảng Danh Sách Tài Khoản Hệ Thống (Entity TaiKhoan - Chuẩn Mục 5.1 & admin-tai-khoan.html) -->
+<table class="modern-table">
+    <thead>
+        <tr>
+            <th style="width: 70px;" class="text-center">Mã</th>
+            <th>Người dùng & Tên đăng nhập</th>
+            <th>Email liên hệ</th>
+            <th>Vai trò (VaiTro)</th>
+            <th>Trạng thái (TrangThai)</th>
+            <th>Ngày tạo</th>
+            <th class="text-end" style="width: 140px;">Hành động</th>
+        </tr>
+    </thead>
+    <tbody id="accountsTableBody">
+        @if (Model == null || !Model.Any())
+        {
+            <tr>
+                <td colspan="7" class="text-center py-5 text-muted">
+                    <i class="bi bi-people fs-1 d-block mb-2" style="color: var(--primary-light);"></i>
+                    <span class="fw-semibold">Không tìm thấy tài khoản nào phù hợp với bộ lọc.</span>
+                </td>
+            </tr>
+        }
+        else
+        {
+            <input type="hidden" id="soLuongTaiKhoanMoi" value="@Model.Count" />
+            foreach (var a in Model)
+            {
+                var roleClass = "role-student";
+                var roleIcon = "bi-mortarboard-fill";
+                var roleText = a.VaiTro;
+
+                if (a.VaiTro == "Admin")
+                {
+                    roleClass = "role-admin";
+                    roleIcon = "bi-shield-lock-fill";
+                    roleText = "Admin";
+                }
+                else if (a.VaiTro == "GiaoVu" || a.VaiTro == "Giáo vụ")
+                {
+                    roleClass = "role-staff";
+                    roleIcon = "bi-briefcase-fill";
+                    roleText = "Giáo vụ";
+                }
+                else
+                {
+                    roleClass = "role-student";
+                    roleIcon = "bi-mortarboard-fill";
+                    roleText = "Học viên";
+                }
+
+                var initialLetter = string.IsNullOrEmpty(a.HoTen) ? "U" : a.HoTen.Trim().Substring(a.HoTen.Trim().LastIndexOf(' ') + 1).Substring(0, 1).ToUpper();
+
+                <tr id="row-account-@a.MaTaiKhoan">
+                    <td class="fw-bold text-center" style="color: var(--primary-rose);">#@a.MaTaiKhoan</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="avatar-circle">@initialLetter</div>
+                            <div>
+                                <div class="fw-semibold" style="color: var(--text-dark);">@a.HoTen</div>
+                                <div class="small" style="font-size: 0.74rem; color: var(--text-muted);">@@@a.TenDangNhap</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><small class="text-secondary"><i class="bi bi-envelope me-1"></i>@a.Email</small></td>
+                    <td>
+                        <span class="role-badge @roleClass">
+                            <i class="bi @roleIcon"></i> @roleText
+                        </span>
+                    </td>
+                    <td id="status-account-badge-@a.MaTaiKhoan">
+                        @if (a.TrangThai)
+                        {
+                            <span class="badge rounded-pill bg-success bg-opacity-10 text-success" style="font-size: 0.72rem;">
+                                <i class="bi bi-check-circle-fill me-1"></i> Hoạt động
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger" style="font-size: 0.72rem;">
+                                <i class="bi bi-lock-fill me-1"></i> Đang bị khóa
+                            </span>
+                        }
+                    </td>
+                    <td><small class="text-muted">@a.NgayTao.ToString("yyyy-MM-dd")</small></td>
+                    <td class="text-end">
+                        <div class="d-inline-flex gap-1">
+                            <button type="button" 
+                                    class="btn-action-icon @(a.TrangThai ? "danger" : "") btn-toggle-lock-acc" 
+                                    id="btn-lock-acc-@a.MaTaiKhoan"
+                                    data-id="@a.MaTaiKhoan" 
+                                    data-username="@a.TenDangNhap"
+                                    title="@(a.TrangThai ? "Khóa tài khoản" : "Mở khóa")">
+                                <i class="bi @(a.TrangThai ? "bi-lock" : "bi-unlock text-success")"></i>
+                            </button>
+                            <button type="button" 
+                                    class="btn-action-icon btn-reset-pass" 
+                                    data-id="@a.MaTaiKhoan" 
+                                    data-username="@a.TenDangNhap"
+                                    title="Cấp lại mật khẩu">
+                                <i class="bi bi-key"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

@@ -59,7 +59,7 @@
                 </li>
             }
 
-            <div class="sidebar-category">Module 1 - Quản lý Đào tạo (Trường)</div>
+            <div class="sidebar-category">Quản lý đào tạo (5 Module)</div>
             <li>
                 <a asp-controller="ChuongTrinhDaoTao" asp-action="Index" class="sidebar-link @(currentController == "ChuongTrinhDaoTao" ? "active" : "")">
                     <span class="sidebar-link-left"><i class="bi bi-journal-bookmark-fill"></i> Chương trình ĐT (M1)</span>
@@ -67,7 +67,21 @@
                 </a>
             </li>
 
-            @if (isAdmin)
+            <li>
+                <a href="/prototype/admin-lop-hoc.html" class="sidebar-link" title="Module 2 - Phụ trách: Nguyễn Đình Kiên">
+                    <span class="sidebar-link-left"><i class="bi bi-easel2-fill"></i> Quản lý Lớp học (M2)</span>
+                    <span class="badge bg-success bg-opacity-75 rounded-pill">M2</span>
+                </a>
+            </li>
+
+            <li>
+                <a asp-controller="HocVien" asp-action="Index" class="sidebar-link @(currentController == "HocVien" && currentAction != "Portal" ? "active" : "")">
+                    <span class="sidebar-link-left"><i class="bi bi-person-lines-fill"></i> Học viên & Hồ sơ (M3)</span>
+                    <span class="badge rounded-pill fw-bold" style="background: var(--primary-rose); color: #fff;">M3</span>
+                </a>
+            </li>
+
+            @if (isAdmin || isGiaoVu)
             {
                 <li>
                     <a asp-controller="TaiKhoan" asp-action="Index" class="sidebar-link @(currentController == "TaiKhoan" && currentAction == "Index" ? "active" : "")">
@@ -77,28 +91,49 @@
                 </li>
             }
 
-            <div class="sidebar-category">Các Phân Hệ Nhóm 4</div>
             <li>
-                <a href="#" class="sidebar-link text-muted">
-                    <span class="sidebar-link-left"><i class="bi bi-calendar-check"></i> Lớp học (M2 Kiên)</span>
+                <a href="/prototype/admin-dang-ky.html" class="sidebar-link" title="Module 4 - Phụ trách: Nguyễn Hoàng Long">
+                    <span class="sidebar-link-left"><i class="bi bi-clipboard2-check-fill"></i> Duyệt ĐK & Học phí (M4)</span>
+                    <span class="badge bg-secondary bg-opacity-75 rounded-pill">M4</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="/prototype/admin-buoi-hoc.html" class="sidebar-link" title="Module 5 - Phụ trách: Nguyễn Tùng Dương">
+                    <span class="sidebar-link-left"><i class="bi bi-calendar-week-fill"></i> Lịch học & Buổi học (M5)</span>
+                    <span class="badge bg-secondary bg-opacity-50 rounded-pill">M5</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="/prototype/admin-ket-qua.html" class="sidebar-link" title="Module 5: Kết quả học tập & Bảng điểm">
+                    <span class="sidebar-link-left"><i class="bi bi-award-fill"></i> Kết quả học tập (M5)</span>
+                </a>
+            </li>
+
+            <div class="sidebar-category">Cổng Sinh Viên & Thống kê</div>
+            <li>
+                <a asp-controller="HocVien" asp-action="Portal" class="sidebar-link @(currentAction == "Portal" ? "active" : "") text-warning fw-semibold">
+                    <span class="sidebar-link-left"><i class="bi bi-box-arrow-up-right"></i> Cổng Học Viên</span>
+                    <span class="badge bg-warning text-dark rounded-pill">Portal</span>
                 </a>
             </li>
             <li>
-                <a href="#" class="sidebar-link text-muted">
-                    <span class="sidebar-link-left"><i class="bi bi-person-badge"></i> Học viên (M3 Linh)</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" class="sidebar-link text-muted">
-                    <span class="sidebar-link-left"><i class="bi bi-clipboard-check"></i> Duyệt đơn (M4 Long)</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" class="sidebar-link text-muted">
-                    <span class="sidebar-link-left"><i class="bi bi-graph-up-arrow"></i> Lịch & Thống kê (M5 Dương)</span>
+                <a href="/prototype/admin-thong-ke.html" class="sidebar-link" title="Module 5: Báo cáo Thống kê LINQ">
+                    <span class="sidebar-link-left"><i class="bi bi-bar-chart-line-fill"></i> Báo cáo LINQ (M5)</span>
                 </a>
             </li>
         </ul>
+
+        <div class="sidebar-footer">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+                <span><i class="bi bi-people-fill me-1" style="color: var(--primary-blush);"></i> Nhóm 4:</span>
+                <span class="text-white fw-semibold">ĐHTI17A1HN</span>
+            </div>
+            <div class="small" style="font-size: 0.72rem; color: #64748b;">
+                Đề tài 36 • ASP.NET Core 10 MVC
+            </div>
+        </div>
     </aside>
 
     <!-- ==================== 2. MAIN WRAPPER (TOPBAR + CONTENT + FOOTER) ==================== -->
@@ -118,11 +153,22 @@
                         <li class="breadcrumb-item"><a asp-controller="ChuongTrinhDaoTao" asp-action="Index">Chương trình đào tạo (M1)</a></li>
                         @if (currentAction != "Index") { <li class="breadcrumb-item active">@currentAction</li> }
                     }
-
                     else if (currentController == "TaiKhoan")
                     {
                         <li class="breadcrumb-item"><a asp-controller="TaiKhoan" asp-action="Index">Quản lý Tài khoản (M1)</a></li>
                         @if (currentAction != "Index") { <li class="breadcrumb-item active">@currentAction</li> }
+                    }
+                    else if (currentController == "HocVien")
+                    {
+                        <li class="breadcrumb-item"><a asp-controller="HocVien" asp-action="Index">Học viên & Hồ sơ (M3)</a></li>
+                        @if (currentAction == "Portal")
+                        {
+                            <li class="breadcrumb-item active">Cổng học viên</li>
+                        }
+                        else if (currentAction != "Index")
+                        {
+                            <li class="breadcrumb-item active">@currentAction</li>
+                        }
                     }
                     else
                     {
@@ -131,21 +177,26 @@
                 </ol>
             </nav>
 
-            <!-- Khối người dùng & Session Test Drawer (Mục 22.1) -->
-            <div class="d-flex align-items-center gap-3 ms-auto">
-                <!-- Dropdown thông tin tài khoản -->
+            <!-- Khối người dùng & Session Drawer -->
+            <div class="d-flex align-items-center gap-2 gap-sm-3 ms-auto">
+                <!-- Nút Cổng học viên -->
+                <a asp-controller="HocVien" asp-action="Portal" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-semibold" style="font-size: 0.8rem;">
+                    <i class="bi bi-mortarboard me-1"></i> Cổng Học Viên
+                </a>
+
+                <!-- Dropdown thông tin tài khoản & Đổi phiên Test -->
                 <div class="dropdown">
                     <button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2 px-3 py-1 rounded-pill border" type="button" data-bs-toggle="dropdown">
                         <i class="bi bi-person-circle fs-5 text-primary"></i>
                         <div class="text-start d-none d-sm-block" style="line-height: 1.15;">
                             <div class="fw-bold small text-dark">@(hoTen ?? "Khách vãng lai")</div>
-                            <small class="text-muted" style="font-size: 0.7rem;">@(vaiTro ?? "Chưa đăng nhập")</small>
+                            <small class="text-muted" style="font-size: 0.7rem;">Vai trò: <span class="badge bg-primary bg-opacity-10 text-primary">@(vaiTro ?? "Chưa đăng nhập")</span></small>
                         </div>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 mt-2" style="min-width: 250px;">
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 mt-2" style="min-width: 260px; font-size: 0.85rem;">
                         <li class="px-3 py-2 border-bottom fw-bold text-dark d-flex justify-content-between align-items-center">
-                            <span>Phiên Kiểm Thử Phân Quyền</span>
-                            <span class="badge bg-primary-subtle text-primary">Mục 22.1</span>
+                            <span>Phiên Đăng Nhập Nhanh</span>
+                            <span class="badge bg-primary-subtle text-primary">Test Phân Quyền</span>
                         </li>
                         <li>
                             <form asp-controller="TaiKhoan" asp-action="DangNhap" method="post" class="d-inline">
@@ -170,7 +221,7 @@
                                 <input type="hidden" name="TenDangNhap" value="hocvien" />
                                 <input type="hidden" name="MatKhau" value="123456" />
                                 <button type="submit" class="dropdown-item py-2">
-                                    <i class="bi bi-mortarboard text-success me-2"></i> Học viên - Bị chặn Quản trị
+                                    <i class="bi bi-mortarboard text-success me-2"></i> Học viên (HocVien) - Xem & Đăng ký
                                 </button>
                             </form>
                         </li>
@@ -205,7 +256,7 @@
                     </ul>
                 </div>
 
-                <!-- Nút tài khoản nhanh -->
+                <!-- Nút đăng xuất/đăng nhập nhanh -->
                 @if (isLogged)
                 {
                     <a asp-controller="TaiKhoan" asp-action="DangXuat" class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: var(--surface-container); color: var(--primary-rose); border: 1px solid var(--border-color);" title="Đăng xuất">
@@ -253,7 +304,7 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
-    <!-- Toast notification helper -->
+    <!-- Hàm helper hiển thị Toast dùng chung chuẩn Giao_DIen_Test -->
     <script>
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
@@ -266,7 +317,13 @@
             if (type === 'danger' || type === 'error') icon = 'bi-exclamation-triangle-fill text-danger';
             if (type === 'warning') icon = 'bi-exclamation-circle-fill text-warning';
 
-            toast.innerHTML = '<i class="bi ' + icon + ' fs-5"></i><div class="flex-grow-1"><div class="fw-semibold small">' + message + '</div></div><button type="button" class="btn-close btn-close-sm ms-2" onclick="this.parentElement.remove()"></button>';
+            toast.innerHTML = `
+                <i class="bi ${icon} fs-5"></i>
+                <div class="flex-grow-1">
+                    <div class="fw-semibold small">${message}</div>
+                </div>
+                <button type="button" class="btn-close btn-close-sm ms-2" onclick="this.parentElement.remove()"></button>
+            `;
             container.appendChild(toast);
             setTimeout(() => {
                 toast.style.opacity = '0';

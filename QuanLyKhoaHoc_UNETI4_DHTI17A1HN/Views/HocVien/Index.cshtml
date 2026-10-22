@@ -1,0 +1,573 @@
+@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels.HocVienIndexViewModel
+@{
+    ViewData["Title"] = "Quản lý Tài khoản & Hồ sơ Học viên (Mục 5 & Mục 7)";
+}
+
+<!-- ==================== 1. HERO BANNER TỐI GIẢN (Chuẩn admin-tai-khoan.html) ==================== -->
+<div class="page-hero">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="hero-badge"><i class="bi bi-person-badge"></i> Entity TaiKhoan & HocVien</span>
+                <span class="small" style="color: #bae6fd;">Mục 5 & Mục 7 Đề tài 16 UNETI • Phụ trách: Nguyễn Đức Linh</span>
+            </div>
+            <h1 class="hero-title">Quản lý Tài khoản & Hồ sơ Học viên</h1>
+            <p class="hero-subtitle">
+                Phân quyền 3 vai trò (Admin, Giáo vụ, Học viên). Quản lý hồ sơ cá nhân Entity <code>HocVien</code>, khóa/mở khóa đăng nhập và cấp lại mật khẩu.
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm px-3 py-2 rounded-pill fw-semibold text-white" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); font-size: 0.82rem;" data-bs-toggle="modal" data-bs-target="#modalQuyDinhM3">
+                <i class="bi bi-info-circle me-1"></i> Quy định Mục 5 & 7
+            </button>
+            <button type="button" class="btn btn-sm px-3 py-2 rounded-pill fw-semibold text-white" style="background: var(--primary-rose); border: 1px solid rgba(56,189,248,0.4); font-size: 0.82rem;" onclick="openAddAccountModal()">
+                <i class="bi bi-person-plus-fill me-1"></i> Thêm Người Dùng
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 2. THẺ CHỈ SỐ NHANH TỐI GIẢN (4 CARDS) ==================== -->
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-sm-6">
+        <div class="mini-stat-card">
+            <div>
+                <div class="mini-stat-label">Tổng số Học viên</div>
+                <div class="mini-stat-num" style="color: var(--primary-rose);" id="statStudentCount">@Model.TongSoHocVien</div>
+                <div class="small" style="font-size: 0.72rem; color: #15803d;"><i class="bi bi-check-circle me-1"></i>Đạt chuẩn &ge; 20 mẫu BTL</div>
+            </div>
+            <div class="mini-stat-icon" style="background: var(--surface-container); color: var(--primary-rose);">
+                <i class="bi bi-mortarboard-fill"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-sm-6">
+        <div class="mini-stat-card">
+            <div>
+                <div class="mini-stat-label">Giáo vụ Đào tạo</div>
+                <div class="mini-stat-num" style="color: #b45309;" id="statStaffCount">@Model.SoGiaoVu.ToString("D2")</div>
+                <div class="small text-muted" style="font-size: 0.72rem;">Quản lý lớp & duyệt phí</div>
+            </div>
+            <div class="mini-stat-icon" style="background: #fffbeb; color: #b45309;">
+                <i class="bi bi-briefcase-fill"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-sm-6">
+        <div class="mini-stat-card">
+            <div>
+                <div class="mini-stat-label">Quản trị viên (Admin)</div>
+                <div class="mini-stat-num" style="color: #0369a1;" id="statAdminCount">@Model.SoAdmin.ToString("D2")</div>
+                <div class="small text-muted" style="font-size: 0.72rem;">Toàn quyền hệ thống</div>
+            </div>
+            <div class="mini-stat-icon" style="background: #e0f2fe; color: #0369a1;">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-sm-6">
+        <div class="mini-stat-card">
+            <div>
+                <div class="mini-stat-label">Tài khoản bị khóa</div>
+                <div class="mini-stat-num text-danger" id="statLockedCount">@Model.SoBiKhoa.ToString("D2")</div>
+                <div class="small text-muted" style="font-size: 0.72rem;">Không được đăng nhập</div>
+            </div>
+            <div class="mini-stat-icon" style="background: #fee2e2; color: #dc2626;">
+                <i class="bi bi-lock-fill"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 3. KHỐI BẢNG DỮ LIỆU & TAB ĐIỀU HƯỚNG TỐI GIẢN ==================== -->
+<div class="content-card">
+    
+    <!-- Tab Switching: Tài khoản <-> Hồ sơ Học viên -->
+    <div class="nav-tabs-custom">
+        <button type="button" class="nav-link active" id="tabBtnAccounts" onclick="switchTab('accounts')">
+            <i class="bi bi-people-fill me-1"></i> Danh sách Tài khoản (Entity TaiKhoan)
+        </button>
+        <button type="button" class="nav-link" id="tabBtnProfiles" onclick="switchTab('profiles')">
+            <i class="bi bi-person-vcard-fill me-1"></i> Hồ sơ Chi tiết Học viên (Entity HocVien)
+        </button>
+    </div>
+
+    <!-- Toolbar Tìm kiếm & Lọc -->
+    <div class="toolbar">
+        <div class="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
+            <!-- Search Box -->
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="searchKeyword" class="form-control form-control-sm" placeholder="Tìm tên, username, email, SĐT..." autocomplete="off">
+            </div>
+
+            <!-- Filter Vai trò (chỉ hiện khi xem Tab Accounts) -->
+            <select id="filterRole" class="form-select form-select-sm filter-select">
+                <option value="">-- Tất cả vai trò --</option>
+                <option value="Học viên">Học viên</option>
+                <option value="Giáo vụ">Giáo vụ</option>
+                <option value="Admin">Admin</option>
+            </select>
+
+            <!-- Filter Trạng thái (dùng chung cho cả 2 tab) -->
+            <select id="filterStatus" class="form-select form-select-sm filter-select">
+                <option value="">-- Trạng thái --</option>
+                <option value="active">Đang hoạt động</option>
+                <option value="locked">Đang bị khóa</option>
+            </select>
+
+            <!-- Filter Lớp học: YÊU CẦU ĐẶC BIỆT (chỉ hiện khi xem Tab Profiles Học viên) -->
+            <select id="filterClass" class="form-select form-select-sm filter-select" style="display: none; max-width: 230px;">
+                <option value="">-- Tất cả lớp học --</option>
+                @if (Model.DanhSachLopHoc != null)
+                {
+                    foreach (var lop in Model.DanhSachLopHoc)
+                    {
+                        <option value="@lop.MaLopHoc">@lop.TenLop</option>
+                    }
+                }
+            </select>
+
+            <!-- Nút Reset bộ lọc -->
+            <button type="button" id="btnResetFilter" class="btn btn-sm btn-outline-secondary rounded-pill px-3" style="font-size: 0.8rem;">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Đặt lại
+            </button>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <div class="small text-muted">
+                Hiển thị <strong id="filterCount">@(Model.DanhSachTaiKhoan?.Count ?? 0)</strong> kết quả phù hợp
+            </div>
+        </div>
+    </div>
+
+    <!-- Spinner Loading AJAX -->
+    <div id="tableLoading" class="text-center py-4 d-none">
+        <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+        <span class="ms-2 text-muted small">Đang tải dữ liệu...</span>
+    </div>
+
+    <!-- 1. Bảng Tài khoản (Tab 1) -->
+    <div class="table-responsive" id="accountsTableContainer">
+        @await Html.PartialAsync("_DanhSachTaiKhoan", Model.DanhSachTaiKhoan)
+    </div>
+
+    <!-- 2. Bảng Hồ sơ Học viên (Tab 2) -->
+    <div class="table-responsive d-none" id="profilesTableContainer">
+        @await Html.PartialAsync("_DanhSachHocVien", Model.DanhSachHocVien)
+    </div>
+
+    <!-- Footer tóm tắt -->
+    <div class="p-3 bg-light border-top d-flex flex-wrap justify-content-between align-items-center gap-2 small text-muted">
+        <div>
+            <i class="bi bi-shield-check text-success me-1"></i> Ràng buộc Mục 5: Tài khoản bị khóa (<code>TrangThai: false</code>) sẽ không thể đăng nhập vào hệ thống.
+        </div>
+        <div>
+            <span class="badge rounded-pill" style="background: var(--surface-container); color: var(--primary-rose);">Mục 5: TaiKhoan</span>
+            <span class="badge rounded-pill bg-light text-secondary border ms-1">Mục 7: HocVien</span>
+        </div>
+    </div>
+
+</div>
+
+<!-- ==================== MODAL 1: THÊM TÀI KHOẢN MỚI ==================== -->
+<div class="modal fade" id="modalThemTaiKhoan" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">
+                    <i class="bi bi-person-plus-fill me-2"></i>Thêm Tài khoản mới (Entity TaiKhoan)
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formThemTaiKhoan" onsubmit="saveNewAccount(event)">
+                <div class="modal-body p-4" style="background: var(--bg-color);">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-bold small">Tên đăng nhập (TenDangNhap) <span class="text-danger">*</span></label>
+                            <input type="text" id="newUsername" class="form-control form-control-sm" required placeholder="VD: hocvien06 (không được trùng)" style="border-color: var(--border-color);">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small">Mật khẩu khởi tạo (MatKhau) <span class="text-danger">*</span></label>
+                            <input type="password" id="newPassword" class="form-control form-control-sm" required value="123456" style="border-color: var(--border-color);">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small">Họ và tên (HoTen) <span class="text-danger">*</span></label>
+                            <input type="text" id="newFullName" class="form-control form-control-sm" required placeholder="VD: Hoàng Minh Châu" style="border-color: var(--border-color);">
+                        </div>
+                        <div class="col-md-7">
+                            <label class="form-label fw-bold small">Email liên hệ <span class="text-danger">*</span></label>
+                            <input type="email" id="newEmail" class="form-control form-control-sm" required placeholder="chau.hm@gmail.com" style="border-color: var(--border-color);">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold small">Vai trò (VaiTro)</label>
+                            <select id="newRole" class="form-select form-select-sm" style="border-color: var(--border-color);">
+                                <option value="Học viên">Học viên</option>
+                                <option value="Giáo vụ">Giáo vụ</option>
+                                <option value="Admin">Admin</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer p-3">
+                    <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-sm px-4 fw-semibold rounded-pill text-white" style="background: var(--primary-rose);" id="btnSubmitAddAccount">
+                        <i class="bi bi-check2-circle me-1"></i> Lưu Tài khoản
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODAL 2: HỒ SƠ CHI TIẾT HỌC VIÊN (MỤC 7.1) ==================== -->
+<div class="modal fade" id="modalChiTietHocVien" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title" id="profileModalTitle">
+                    <i class="bi bi-person-vcard me-2"></i>Hồ sơ Chi tiết Học viên (Entity HocVien)
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" style="background: var(--bg-color);" id="profileModalBody">
+                <!-- Render bằng AJAX JSON -->
+            </div>
+            <div class="modal-footer p-3">
+                <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
+                <a href="/prototype/admin-dang-ky.html" class="btn btn-sm px-3 rounded-pill text-white" style="background: var(--primary-rose);">
+                    <i class="bi bi-clipboard2-check me-1"></i> Quản lý Đăng ký học (M4)
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODAL 3: QUY ĐỊNH MỤC 5 & 7 ==================== -->
+<div class="modal fade" id="modalQuyDinhM3" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">
+                    <i class="bi bi-book me-2"></i>Quy định Đề tài 16: Mục 5 & Mục 7 (Nguyễn Đức Linh)
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" style="background: var(--bg-color);">
+                <div class="p-3 rounded-3 border mb-3 small" style="background: var(--surface-variant); border-color: var(--border-color) !important;">
+                    <h6 class="fw-bold" style="color: var(--primary-rose);">1. Entity TaiKhoan (Mục 5.1):</h6>
+                    <p class="mb-1">Gồm: <code>MaTaiKhoan</code>, <code>TenDangNhap</code>, <code>MatKhau</code>, <code>HoTen</code>, <code>Email</code>, <code>VaiTro</code> (Admin, Giáo vụ, Học viên), <code>TrangThai</code> (true: hoạt động, false: bị khóa).</p>
+                    <div class="p-2 rounded-2 bg-danger bg-opacity-10 text-danger fw-semibold mt-1">
+                        ⚠️ "Tài khoản bị khóa (TrangThai = false) không được phép đăng nhập."
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-3 border small" style="background: var(--surface-container); border-color: var(--border-color) !important;">
+                    <h6 class="fw-bold" style="color: var(--primary-rose);">2. Entity HocVien (Mục 7.1):</h6>
+                    <p class="mb-0">Gồm: <code>MaHocVien</code>, <code>MaTaiKhoan</code> (FK), <code>HoTen</code>, <code>NgaySinh</code>, <code>GioiTinh</code>, <code>SoDienThoai</code>, <code>Email</code>, <code>DiaChi</code>, <code>TrinhDoHocVan</code>, <code>NgheNghiep</code>, <code>TrangThai</code>. "Học viên chỉ được xem và cập nhật hồ sơ cá nhân của chính mình."</p>
+                </div>
+            </div>
+            <div class="modal-footer p-3">
+                <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Đã hiểu quy tắc</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentTab = 'accounts';
+        let debounceTimer = null;
+
+        // 1. Chuyển Tab (Tài khoản <-> Hồ sơ Học viên)
+        function switchTab(tab) {
+            currentTab = tab;
+            const btnAcc = $('#tabBtnAccounts');
+            const btnProf = $('#tabBtnProfiles');
+            const accTable = $('#accountsTableContainer');
+            const profTable = $('#profilesTableContainer');
+            const roleFilter = $('#filterRole');
+            const classFilter = $('#filterClass');
+
+            if (tab === 'accounts') {
+                btnAcc.addClass('active');
+                btnProf.removeClass('active');
+                accTable.removeClass('d-none');
+                profTable.addClass('d-none');
+                roleFilter.show();
+                classFilter.hide();
+            } else {
+                btnProf.addClass('active');
+                btnAcc.removeClass('active');
+                profTable.removeClass('d-none');
+                accTable.addClass('d-none');
+                roleFilter.hide();
+                classFilter.show(); // Hiển thị bộ lọc lớp học ở Tab Hồ sơ Học viên
+            }
+
+            applyFilter();
+        }
+
+        // 2. Thực hiện Lọc AJAX theo tiêu chí
+        function applyFilter() {
+            const kw = $('#searchKeyword').val().trim();
+            const status = $('#filterStatus').val();
+
+            $('#tableLoading').removeClass('d-none');
+
+            if (currentTab === 'accounts') {
+                const role = $('#filterRole').val();
+                $('#accountsTableContainer').css('opacity', '0.5');
+
+                $.ajax({
+                    url: '@Url.Action("FilterTaiKhoanAjax", "HocVien")',
+                    type: 'GET',
+                    data: { keyword: kw, role: role, status: status },
+                    success: function (html) {
+                        $('#accountsTableContainer').html(html).css('opacity', '1');
+                        $('#tableLoading').addClass('d-none');
+                        const newCount = $('#soLuongTaiKhoanMoi').val() || 0;
+                        $('#filterCount').text(newCount);
+                    },
+                    error: function () {
+                        $('#accountsTableContainer').css('opacity', '1');
+                        $('#tableLoading').addClass('d-none');
+                        showToast("Lỗi khi tìm kiếm tài khoản!", "danger");
+                    }
+                });
+            } else {
+                // Tab Hồ sơ Học viên: có thêm tham số maLopHoc (Lọc theo lớp học)
+                const maLop = $('#filterClass').val();
+                $('#profilesTableContainer').css('opacity', '0.5');
+
+                $.ajax({
+                    url: '@Url.Action("FilterHocVienAjax", "HocVien")',
+                    type: 'GET',
+                    data: { keyword: kw, status: status, maLopHoc: maLop },
+                    success: function (html) {
+                        $('#profilesTableContainer').html(html).css('opacity', '1');
+                        $('#tableLoading').addClass('d-none');
+                        const newCount = $('#soLuongHocVienMoi').val() || 0;
+                        $('#filterCount').text(newCount);
+                    },
+                    error: function () {
+                        $('#profilesTableContainer').css('opacity', '1');
+                        $('#tableLoading').addClass('d-none');
+                        showToast("Lỗi khi lọc danh sách học viên!", "danger");
+                    }
+                });
+            }
+        }
+
+        // 3. Đổi trạng thái Khóa / Mở khóa Tài khoản (Entity TaiKhoan)
+        $(document).on('click', '.btn-toggle-lock-acc', function (e) {
+            e.preventDefault();
+            const btn = $(this);
+            const id = btn.data('id');
+            const username = btn.data('username');
+
+            btn.prop('disabled', true);
+
+            $.ajax({
+                url: '@Url.Action("ToggleTaiKhoanStatus", "HocVien")',
+                type: 'POST',
+                data: { id: id },
+                success: function (res) {
+                    btn.prop('disabled', false);
+                    if (res.success) {
+                        const badgeCell = $('#status-account-badge-' + id);
+                        if (res.newStatus) {
+                            badgeCell.html(`
+                                <span class="badge rounded-pill bg-success bg-opacity-10 text-success" style="font-size: 0.72rem;">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Hoạt động
+                                </span>
+                            `);
+                            btn.removeClass('danger').attr('title', 'Khóa tài khoản');
+                            btn.html('<i class="bi bi-lock"></i>');
+                            showToast(`✅ Đã mở khóa tài khoản @@${username} thành công!`, 'info');
+                        } else {
+                            badgeCell.html(`
+                                <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger" style="font-size: 0.72rem;">
+                                    <i class="bi bi-lock-fill me-1"></i> Đang bị khóa
+                                </span>
+                            `);
+                            btn.addClass('danger').attr('title', 'Mở khóa');
+                            btn.html('<i class="bi bi-unlock text-success"></i>');
+                            showToast(`🔒 Đã khóa tài khoản @@${username}. Người dùng này sẽ không thể đăng nhập!`, 'warning');
+                        }
+                    } else {
+                        showToast(res.message || 'Không thể đổi trạng thái tài khoản.', 'danger');
+                    }
+                },
+                error: function () {
+                    btn.prop('disabled', false);
+                    showToast('Lỗi kết nối máy chủ!', 'danger');
+                }
+            });
+        });
+
+        // 4. Cấp lại mật khẩu
+        $(document).on('click', '.btn-reset-pass', function (e) {
+            e.preventDefault();
+            const id = $(this).data('id');
+            const username = $(this).data('username');
+
+            const newPass = prompt(`Cấp lại mật khẩu mới cho tài khoản @@${username}:`, '123456');
+            if (newPass !== null && newPass.trim() !== '') {
+                $.ajax({
+                    url: '@Url.Action("ResetMatKhau", "HocVien")',
+                    type: 'POST',
+                    data: { id: id, newPassword: newPass },
+                    success: function (res) {
+                        if (res.success) {
+                            showToast(`🔑 Đã cập nhật mật khẩu mới cho @@${username}!`, 'info');
+                        } else {
+                            showToast(res.message, 'danger');
+                        }
+                    },
+                    error: function () {
+                        showToast('Lỗi khi cấp lại mật khẩu!', 'danger');
+                    }
+                });
+            }
+        });
+
+        // 5. Xem hồ sơ chi tiết học viên (Mục 7.1) render vào Modal
+        $(document).on('click', '.btn-view-profile-modal', function (e) {
+            e.preventDefault();
+            const id = $(this).data('id');
+
+            $.ajax({
+                url: '@Url.Action("GetChiTietHocVienJson", "HocVien")',
+                type: 'GET',
+                data: { id: id },
+                success: function (res) {
+                    if (res.success && res.data) {
+                        const s = res.data;
+                        const maHienThi = s.maHocVien < 10 ? `#HV0${s.maHocVien}` : `#HV${s.maHocVien}`;
+                        $('#profileModalTitle').html(`<i class="bi bi-person-vcard me-2"></i>Hồ sơ Học viên: ${s.hoTen} (${maHienThi})`);
+
+                        $('#profileModalBody').html(`
+                            <div class="p-3 rounded-3 border mb-3 small" style="background: var(--surface-variant); border-color: var(--border-color) !important;">
+                                <div class="row g-2">
+                                    <div class="col-6"><strong>Mã học viên (PK):</strong> <code>MaHocVien = ${s.maHocVien}</code></div>
+                                    <div class="col-6"><strong>Mã tài khoản (FK):</strong> #${s.maTaiKhoan || 'Chưa cấp'}</div>
+                                    <div class="col-6"><strong>Họ và tên:</strong> <strong style="color: var(--primary-rose);">${s.hoTen}</strong></div>
+                                    <div class="col-6"><strong>Ngày sinh:</strong> ${s.ngaySinh}</div>
+                                    <div class="col-6"><strong>Giới tính:</strong> ${s.gioiTinh}</div>
+                                    <div class="col-6"><strong>Số điện thoại:</strong> ${s.soDienThoai}</div>
+                                    <div class="col-6"><strong>Email:</strong> ${s.email}</div>
+                                    <div class="col-6"><strong>Trình độ học vấn:</strong> ${s.trinhDoHocVan}</div>
+                                    <div class="col-6"><strong>Nghề nghiệp:</strong> ${s.ngheNghiep}</div>
+                                    <div class="col-6"><strong>Trạng thái:</strong> <span class="badge bg-success bg-opacity-15 text-success">${s.trangThai}</span></div>
+                                    <div class="col-12 mt-2"><strong>Địa chỉ liên hệ:</strong> ${s.diaChi}</div>
+                                </div>
+                            </div>
+
+                            <div class="p-3 rounded-3 border bg-white mb-0 small">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong><i class="bi bi-journal-bookmark text-primary me-1"></i> Lớp học đang đăng ký:</strong>
+                                    <span class="badge rounded-pill" style="background: var(--surface-container); color: var(--primary-rose); font-size: 0.75rem;">${s.lopHocDangKy}</span>
+                                </div>
+                                <div class="text-muted" style="font-size: 0.74rem;">Dữ liệu tự động đồng bộ từ Entity <code>DangKyHoc</code> (Mục 7.2 & Mục 8).</div>
+                            </div>
+                        `);
+
+                        new bootstrap.Modal(document.getElementById('modalChiTietHocVien')).show();
+                    } else {
+                        showToast(res.message || 'Không tìm thấy dữ liệu học viên!', 'danger');
+                    }
+                },
+                error: function () {
+                    showToast('Lỗi khi lấy thông tin chi tiết học viên!', 'danger');
+                }
+            });
+        });
+
+        // 6. Mở Modal Thêm mới tài khoản
+        function openAddAccountModal() {
+            $('#newUsername').val('');
+            $('#newFullName').val('');
+            $('#newEmail').val('');
+            $('#newPassword').val('123456');
+            $('#newRole').val('Học viên');
+            new bootstrap.Modal(document.getElementById('modalThemTaiKhoan')).show();
+        }
+
+        // 7. Lưu tài khoản mới qua AJAX
+        function saveNewAccount(e) {
+            e.preventDefault();
+            const u = $('#newUsername').val().trim();
+            const p = $('#newPassword').val().trim();
+            const fn = $('#newFullName').val().trim();
+            const em = $('#newEmail').val().trim();
+            const r = $('#newRole').val();
+
+            $('#btnSubmitAddAccount').prop('disabled', true);
+
+            $.ajax({
+                url: '@Url.Action("ThemNguoiDungAjax", "HocVien")',
+                type: 'POST',
+                data: {
+                    TenDangNhap: u,
+                    MatKhau: p,
+                    HoTen: fn,
+                    Email: em,
+                    VaiTro: r
+                },
+                success: function (res) {
+                    $('#btnSubmitAddAccount').prop('disabled', false);
+                    if (res.success) {
+                        bootstrap.Modal.getInstance(document.getElementById('modalThemTaiKhoan')).hide();
+                        showToast(`🎉 ${res.message}`, 'info');
+                        applyFilter();
+                    } else {
+                        showToast(res.message, 'danger');
+                    }
+                },
+                error: function () {
+                    $('#btnSubmitAddAccount').prop('disabled', false);
+                    showToast('Lỗi khi lưu tài khoản!', 'danger');
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            // Live Search với Debounce 300ms
+            $('#searchKeyword').on('keyup', function () {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(function () {
+                    applyFilter();
+                }, 300);
+            });
+
+            // Lọc theo Vai trò
+            $('#filterRole').on('change', function () {
+                applyFilter();
+            });
+
+            // Lọc theo Trạng thái
+            $('#filterStatus').on('change', function () {
+                applyFilter();
+            });
+
+            // ĐẶC BIỆT: Lọc theo Lớp học
+            $('#filterClass').on('change', function () {
+                applyFilter();
+            });
+
+            // Nút Reset bộ lọc
+            $('#btnResetFilter').on('click', function () {
+                $('#searchKeyword').val('');
+                $('#filterRole').val('');
+                $('#filterStatus').val('');
+                $('#filterClass').val('');
+                applyFilter();
+                $('#searchKeyword').focus();
+            });
+        });
+    </script>
+}

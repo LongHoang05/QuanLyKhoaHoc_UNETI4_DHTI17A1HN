@@ -1,0 +1,81 @@
+@model List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.HocVien>
+
+<!-- Bảng Hồ Sơ Chi Tiết Học Viên (Entity HocVien - Chuẩn Mục 7.1 & admin-tai-khoan.html) -->
+<table class="modern-table">
+    <thead>
+        <tr>
+            <th style="width: 80px;" class="text-center">Mã HV</th>
+            <th>Học viên & Ngày sinh</th>
+            <th>Giới tính</th>
+            <th>Số điện thoại</th>
+            <th>Email</th>
+            <th>Trình độ học vấn</th>
+            <th>Nghề nghiệp</th>
+            <th class="text-end" style="width: 100px;">Chi tiết</th>
+        </tr>
+    </thead>
+    <tbody id="profilesTableBody">
+        @if (Model == null || !Model.Any())
+        {
+            <tr>
+                <td colspan="8" class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox fs-1 d-block mb-2" style="color: var(--primary-light);"></i>
+                    <span class="fw-semibold">Không tìm thấy học viên nào phù hợp với bộ lọc và lớp học đã chọn.</span>
+                </td>
+            </tr>
+        }
+        else
+        {
+            <input type="hidden" id="soLuongHocVienMoi" value="@Model.Count" />
+            foreach (var s in Model)
+            {
+                var initialLetter = string.IsNullOrEmpty(s.HoTen) ? "H" : s.HoTen.Trim().Substring(s.HoTen.Trim().LastIndexOf(' ') + 1).Substring(0, 1).ToUpper();
+                var maHienThi = s.MaHocVien < 10 ? $"#HV0{s.MaHocVien}" : $"#HV{s.MaHocVien}";
+                var ngaySinhHienThi = s.NgaySinh.HasValue ? s.NgaySinh.Value.ToString("yyyy-MM-dd") : "Chưa cập nhật";
+
+                <tr id="row-hocvien-@s.MaHocVien">
+                    <td class="fw-bold text-center" style="color: var(--primary-rose);">@maHienThi</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="avatar-circle">@initialLetter</div>
+                            <div>
+                                <div class="fw-semibold" style="color: var(--text-dark);">@s.HoTen</div>
+                                <div class="small" style="font-size: 0.74rem; color: var(--text-muted);">
+                                    <i class="bi bi-calendar3 me-1"></i>@ngaySinhHienThi
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge rounded-pill bg-light text-dark border">
+                            @(s.GioiTinh ?? "Khác")
+                        </span>
+                    </td>
+                    <td>
+                        <small class="text-secondary">
+                            <i class="bi bi-telephone me-1"></i>@(s.SoDienThoai ?? "Chưa có")
+                        </small>
+                    </td>
+                    <td><small class="text-secondary">@s.Email</small></td>
+                    <td><small class="fw-medium">@(s.TrinhDoHocVan ?? "Đại học")</small></td>
+                    <td><small class="text-muted">@(s.NgheNghiep ?? "Sinh viên")</small></td>
+                    <td class="text-end">
+                        <div class="d-inline-flex gap-1">
+                            <!-- Nút Xem Modal Chi Tiết Học Viên chuẩn admin-tai-khoan.html -->
+                            <button type="button" 
+                                    class="btn-action-icon btn-view-profile-modal" 
+                                    data-id="@s.MaHocVien" 
+                                    title="Xem hồ sơ chi tiết">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <!-- Nút Chỉnh sửa nhanh -->
+                            <a asp-action="Edit" asp-route-id="@s.MaHocVien" class="btn-action-icon" title="Chỉnh sửa thông tin">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

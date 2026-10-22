@@ -40,7 +40,21 @@ builder.Services.AddScoped<IChuongTrinhDaoTaoService, ChuongTrinhDaoTaoService>(
 // Đăng ký dịch vụ Controllers with Views
 builder.Services.AddControllersWithViews();
 
+// ========================================================
+// 3. Đăng ký Dependency Injection (Repository & Service)
+// ========================================================
+// Module 3 - Nguyễn Đức Linh (23103100042)
+builder.Services.AddScoped<IHocVienRepository, HocVienRepository>();
+builder.Services.AddScoped<IHocVienService, HocVienService>();
+
 var app = builder.Build();
+
+// Tự động nạp dữ liệu mẫu phong phú (Seed Mock Data) để test toàn bộ giao diện
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    DbSeeder.SeedMockData(context);
+}
 
 // ========================================================
 // 4. Cấu hình Middleware HTTP pipeline
