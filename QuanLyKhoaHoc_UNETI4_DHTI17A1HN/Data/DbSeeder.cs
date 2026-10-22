@@ -449,6 +449,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
             {
                 var dks = context.DangKyHocs
                     .Where(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học")
+                    .OrderBy(d => d.MaDangKy)
                     .Take(3)
                     .ToList();
 

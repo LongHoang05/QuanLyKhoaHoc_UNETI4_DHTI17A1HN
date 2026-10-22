@@ -53,11 +53,21 @@ builder.Services.AddScoped<IHocVienService, HocVienService>();
 
 var app = builder.Build();
 
-// Tự động nạp dữ liệu mẫu phong phú (Seed Mock Data) để test toàn bộ giao diện
+// Tự động kiểm tra / khởi tạo database và nạp dữ liệu mẫu phong phú (Seed Mock Data)
 using (var scope = app.Services.CreateScope())
 {
-    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    DbSeeder.SeedMockData(context);
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        context.Database.Migrate();
+        DbSeeder.SeedMockData(context);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Lưu ý khi kết nối Database: Đảm bảo SQL Server đang chạy và chuỗi kết nối DefaultConnection chính xác.");
+    }
 }
 
 // ========================================================
