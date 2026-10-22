@@ -1,633 +1,938 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kết quả học tập & Nhập điểm (KetQuaHocTap) - UNETI EDU</title>
-    <!-- Google Fonts: Playfair Display + Montserrat (Floral Haven) -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Bootstrap 5 CSS & Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="web_standard" name="shell-type">
+    <title>Kết quả học tập - UNETI ĐÀO TẠO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --sidebar-width: 275px;
-            --primary-rose: #0284c7;     /* Sky Blue 600 */
-            --primary-light: #38bdf8;    /* Sky Light 400 */
-            --primary-blush: #7dd3fc;    /* Sky Soft 300 */
-            --primary-dark: #0369a1;     /* Sky Dark 700 */
-            --bg-color: #f0f7fd;
-            --surface-card: #ffffff;
-            --surface-container: #e0f2fe;
-            --surface-variant: #f8fafc;
-            --text-dark: #0f172a;
-            --text-gray: #334155;
-            --text-muted: #64748b;
-            --border-color: #bae6fd;
-            --border-light: #e2e8f0;
-            --glass-bg: rgba(255, 255, 255, 0.92);
-            --card-shadow: 0 4px 20px rgba(2, 132, 199, 0.06);
-            --card-hover: 0 10px 28px rgba(2, 132, 199, 0.12);
-            --font-serif: "Playfair Display", Georgia, serif;
-            --font-sans: "Montserrat", -apple-system, BlinkMacSystemFont, sans-serif;
-            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        @layer base {
+            html, body { margin: 0; padding: 0; font-family: 'Be Vietnam Pro', 'Inter', sans-serif; }
+            body { overscroll-behavior: none; }
+            main > :first-child { margin-top: 0 !important; }
+            main > :last-child { margin-bottom: 0 !important; }
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background-color: var(--bg-color);
-            font-family: var(--font-sans);
-            color: var(--text-dark);
-            overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(2, 132, 199, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.06) 0%, transparent 40%);
+        ::-webkit-scrollbar { display: none; }
+        .custom-scrollbar::-webkit-scrollbar {
+            display: block !important;
+            height: 6px !important;
+            width: 6px !important;
         }
-
-        /* Sidebar Trái */
-        .sidebar {
-            width: var(--sidebar-width);
-            height: 100vh;
-            background: linear-gradient(180deg, #07172c 0%, #0c2d48 55%, #051324 100%);
-            color: #e0f2fe;
-            position: fixed;
-            top: 0;
-            left: 0;
-            display: flex;
-            flex-direction: column;
-            z-index: 1000;
-            box-shadow: 4px 0 30px rgba(2, 132, 199, 0.15);
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #F1F5F9;
+            border-radius: 9999px;
         }
-
-        .sidebar-brand {
-            padding: 1.35rem 1.4rem;
-            font-family: var(--font-serif);
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: #38bdf8;
-            border-bottom: 1px solid rgba(56, 189, 248, 0.15);
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
         }
-
-        .brand-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #0284c7, #38bdf8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
-            font-size: 1.2rem;
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #0052cc;
         }
-
-        .sidebar-menu {
-            list-style: none;
-            padding: 1.1rem 0.85rem;
-            margin: 0;
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-
-        .sidebar-category {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            color: #64748b;
-            padding: 0.85rem 1rem 0.35rem 1rem;
-        }
-
-        .sidebar-menu li { margin-bottom: 0.25rem; }
-
-        .sidebar-link {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.68rem 0.95rem;
-            color: #d4a0b0;
-            text-decoration: none;
-            border-radius: 0.65rem;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-
-        .sidebar-link-left { display: flex; align-items: center; gap: 12px; }
-        .sidebar-link i { font-size: 1.1rem; }
-
-        .sidebar-link:hover {
-            background-color: rgba(2, 132, 199, 0.25);
-            color: #e0f2fe;
-            transform: translateX(3px);
-        }
-
-        .sidebar-link.active {
-            background: linear-gradient(90deg, var(--primary-rose), var(--primary-light));
-            color: #ffffff;
-            font-weight: 600;
-            box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
-        }
-
-        .sidebar-footer {
-            padding: 1rem 1.25rem;
-            border-top: 1px solid rgba(56, 189, 248, 0.1);
-            background-color: rgba(15, 3, 8, 0.6);
-            font-size: 0.8rem;
-            color: #64748b;
-        }
-
-        /* Main Content */
-        .main-wrapper {
-            margin-left: var(--sidebar-width);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .topbar {
-            height: 66px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border-color);
-            padding: 0 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 999;
-        }
-
-        .content-area {
-            padding: 1.75rem 2rem 2.5rem 2rem;
-            flex-grow: 1;
-            max-width: 1440px;
-            width: 100%;
-            margin: 0 auto;
-        }
-
-        /* Hero Banner */
-        .page-hero {
-            background: linear-gradient(135deg, #071e3d 0%, #0c3d6d 50%, #051426 100%);
-            border-radius: 1.25rem;
-            padding: 1.5rem 1.85rem;
-            color: #ffffff;
-            box-shadow: 0 10px 30px rgba(45, 10, 26, 0.1);
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 1.5rem;
-        }
-
-        .hero-title {
-            font-family: var(--font-serif);
-            font-size: 1.45rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-        }
-
-        /* Content Card & Table */
-        .content-card {
-            background: var(--surface-card);
-            border: 1px solid var(--border-color);
-            border-radius: 1.15rem;
-            box-shadow: var(--card-shadow);
-            overflow: hidden;
-        }
-
-        .toolbar {
-            padding: 1.15rem 1.5rem;
-            border-bottom: 1px solid var(--border-light);
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-        }
-
-        .modern-table { width: 100%; border-collapse: collapse; }
-        .modern-table thead th {
-            background-color: var(--surface-variant);
-            color: var(--text-gray);
-            font-size: 0.74rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            padding: 0.95rem 1.15rem;
-            border-bottom: 1px solid var(--border-color);
-            white-space: nowrap;
-        }
-        .modern-table tbody td {
-            padding: 0.95rem 1.15rem;
-            vertical-align: middle;
-            font-size: 0.85rem;
-            border-bottom: 1px solid var(--border-light);
-        }
-        .modern-table tbody tr:hover { background-color: #fff9fa; }
-
-        /* Grade inputs */
-        .grade-input {
-            width: 75px;
-            text-align: center;
-            font-weight: 700;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            padding: 0.3rem 0.5rem;
-            font-size: 0.88rem;
-            transition: var(--transition);
-        }
-        .grade-input:focus {
-            border-color: var(--primary-rose);
-            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
-            outline: none;
-        }
-
-        /* Toast Container */
-        .toast-container-custom {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 99999;
-        }
-        .custom-toast {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 0.85rem 1.15rem;
-            box-shadow: 0 10px 30px rgba(2, 132, 199, 0.15);
-            border-left: 4px solid var(--primary-rose);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            min-width: 320px;
-            font-size: 0.85rem;
-            margin-bottom: 8px;
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #F1F5F9;
         }
     </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-error-container": "#93000a",
+                        "brand-deep": "#001656",
+                        "border-subtle": "#F1F5F9",
+                        "secondary": "#994700",
+                        "canvas-base": "#F8FAFC",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed": "#321200",
+                        "secondary-container": "#fb7800",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#001848",
+                        "tertiary-fixed-dim": "#b7c4ff",
+                        "success-emerald": "#10B981",
+                        "tertiary": "#475797",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary-container": "#592600",
+                        "on-background": "#0b1c30",
+                        "border-standard": "#E2E8F0",
+                        "outline": "#727687",
+                        "primary-container": "#0068ff",
+                        "tertiary-container": "#6070b1",
+                        "secondary-fixed": "#ffdbc8",
+                        "on-primary": "#ffffff",
+                        "surface-white": "#FFFFFF",
+                        "surface-container-highest": "#d3e4fe",
+                        "secondary-fixed-dim": "#ffb68b",
+                        "outline-variant": "#c2c6d8",
+                        "surface-container-low": "#eff4ff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#753400",
+                        "error": "#ba1a1a",
+                        "inverse-surface": "#213145",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-primary-fixed-variant": "#0040a2",
+                        "on-tertiary-container": "#fcf9ff",
+                        "primary": "#0052cc",
+                        "on-primary-container": "#fbf9ff",
+                        "surface": "#f8f9ff",
+                        "on-tertiary-fixed-variant": "#324381",
+                        "surface-variant": "#d3e4fe",
+                        "inverse-primary": "#b2c5ff",
+                        "surface-container": "#e5eeff",
+                        "primary-fixed-dim": "#b2c5ff",
+                        "tertiary-fixed": "#dde1ff",
+                        "on-surface-variant": "#424655",
+                        "on-tertiary-fixed": "#001552",
+                        "primary-fixed": "#dae2ff",
+                        "surface-tint": "#0055d4",
+                        "surface-container-high": "#dce9ff",
+                        "surface-bright": "#f8f9ff",
+                        "on-surface": "#0b1c30",
+                        "danger-crimson": "#EF4444",
+                        "background": "#f8f9ff",
+                        "warning-amber": "#F59E0B"
+                    },
+                    borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" },
+                    spacing: {
+                        "space-xl": "2rem",
+                        "space-sm": "0.5rem",
+                        "space-xs": "0.25rem",
+                        "gutter-mobile": "0.75rem",
+                        "space-md": "1rem",
+                        "margin-mobile": "1rem",
+                        gutter: "1.25rem",
+                        "space-lg": "1.5rem",
+                        margin: "2rem"
+                    },
+                    fontFamily: {
+                        display: ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "headline-md": ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "label-md": ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "headline-lg-mobile": ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "headline-sm": ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "body-lg": ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "metric-stat": ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "label-sm": ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "body-sm": ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "display-mobile": ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "body-md": ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "headline-lg": ["'Be Vietnam Pro'", "Inter", "sans-serif"]
+                    }
+                }
+            }
+        };
+    </script>
 </head>
+<body class="bg-canvas-base font-body-md text-body-md text-on-surface antialiased min-h-screen">
+    <div class="flex min-h-screen w-full bg-canvas-base">
 
-<body>
+        <!-- Left Sidebar Navigation (Prep.vn Style) -->
+        <aside class="w-64 lg:w-72 flex-shrink-0 bg-surface-white border-r border-border-standard h-screen sticky top-0 flex flex-col justify-between p-4 lg:p-5 z-40 select-none">
+            <div class="flex flex-col gap-4 overflow-hidden">
+                <!-- Logo & School Brand -->
+                <div class="flex flex-col gap-3">
+                    <a href="index.html" class="flex items-center gap-3 group">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-primary-container text-surface-white flex items-center justify-center font-bold text-xl shadow-sm shadow-primary/20 group-hover:scale-105 transition-transform shrink-0">
+                            <span class="material-symbols-outlined text-[24px]">school</span>
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                            <span class="font-headline-sm text-[15px] text-brand-deep tracking-tight font-extrabold leading-tight truncate">UNETI ĐÀO TẠO</span>
+                            <span class="font-label-sm text-[10px] text-outline leading-tight truncate">Quản Lý Đăng Ký Khóa Học</span>
+                        </div>
+                    </a>
 
-    <div id="toastContainer" class="toast-container-custom"></div>
+                    <!-- Semester Selector -->
+                    <button class="w-full inline-flex items-center justify-between px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-brand-deep font-label-md text-label-md transition-colors border border-border-subtle cursor-pointer" type="button">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm text-primary leading-none">calendar_month</span>
+                            <span class="font-semibold text-xs">Năm học 2024 - 2025</span>
+                        </div>
+                        <span class="material-symbols-outlined text-xs leading-none text-outline">arrow_drop_down</span>
+                    </button>
+                </div>
 
-    <!-- ==================== SIDEBAR TRÁI ==================== -->
-    <aside class="sidebar">
-        <div class="sidebar-brand">
-            <div class="brand-icon">
-                <i class="bi bi-mortarboard-fill"></i>
+                <!-- Vertical Navigation Links (Scrollable) -->
+                <nav class="flex flex-col gap-1 overflow-y-auto max-h-[calc(100vh-230px)] pr-1 custom-scrollbar" id="sidebar-nav">
+                    <div class="text-[10px] font-bold text-outline uppercase tracking-wider px-3 mt-2.5 mb-1 font-label-sm">Quản trị đào tạo</div>
+
+                <a href="index.html" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[19px] text-outline">dashboard</span>
+                        <span>Tổng quan</span>
+                    </div>
+                </a>
+
+                <a href="admin-chuong-trinh.html" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[19px] text-outline">layers</span>
+                        <span>Chương trình ĐT</span>
+                    </div>
+                </a>
+
+                <a href="admin-lop-hoc.html" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[19px] text-outline">meeting_room</span>
+                        <span>Quản lý Lớp học</span>
+                    </div>
+                </a>
+
+                <a href="admin-dang-ky.html" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[19px] text-outline">how_to_reg</span>
+                        <span>Xét duyệt & Học phí</span>
+                    </div>
+                </a>
+
+                <a href="admin-buoi-hoc.html" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[19px] text-outline">calendar_today</span>
+                        <span>Lịch học (Buổi học)</span>
+                    </div>
+                </a>
+
+                <a href="admin-ket-qua.html" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl bg-primary text-surface-white font-bold shadow-sm transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[19px] text-white">workspace_premium</span>
+                        <span>Kết quả học tập</span>
+                    </div>
+                </a>
+
+                <a href="admin-thong-ke.html" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[19px] text-outline">bar_chart</span>
+                        <span>Báo cáo thống kê</span>
+                    </div>
+                </a>
+
+                <a href="admin-hoc-vien.html" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[19px] text-outline">group</span>
+                        <span>Quản lý Học viên</span>
+                    </div>
+                </a>
+
+                <a href="admin-tai-khoan.html" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[19px] text-outline">manage_accounts</span>
+                        <span>Quản lý Tài khoản</span>
+                    </div>
+                </a>
+<div class="text-[10px] font-bold text-outline uppercase tracking-wider px-3 mt-2.5 mb-1 font-label-sm">Cổng sinh viên</div>
+
+                <a href="hoc-vien.html" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[19px] text-outline">app_registration</span>
+                        <span>Cổng học viên</span>
+                    </div>
+                </a>
+                </nav>
             </div>
-            <div>
-                <div style="line-height: 1.15;">UNETI EDU</div>
-                <div style="font-size: 0.65rem; color: #64748b; font-weight: 500; font-family: var(--font-sans);">Khoa CNTT - Nhóm 4</div>
+
+            <!-- Sidebar Bottom User Profile -->
+            <div class="flex flex-col gap-2 pt-3 border-t border-border-standard">
+                <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low/60 hover:bg-surface-container-low transition-colors">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-primary-container text-surface-white font-bold text-xs flex items-center justify-center ring-2 ring-border-standard shrink-0">
+                            A
+                        </div>
+                        <div class="flex flex-col text-left truncate">
+                            <span class="font-label-md text-xs text-brand-deep leading-tight font-bold truncate">Nguyễn Tùng Dương</span>
+                            <span class="font-label-sm text-[11px] text-outline leading-tight font-medium">Admin Quản trị viên</span>
+                        </div>
+                    </div>
+                    <a href="dang-nhap.html" title="Đăng xuất" class="p-1.5 rounded-lg text-outline hover:text-rose-600 hover:bg-rose-50 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">logout</span>
+                    </a>
+                </div>
+                <div class="flex items-center justify-between text-[10px] text-outline px-1 font-label-sm">
+                    <span>Đề tài 36 • .NET 10</span>
+                    <span class="inline-flex items-center gap-1 text-success-emerald font-semibold">
+                        <span class="w-1.5 h-1.5 rounded-full bg-success-emerald animate-pulse"></span>Trực tuyến
+                    </span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right Content Main Wrapper -->
+        <div class="flex-1 min-w-0 flex flex-col min-h-screen bg-canvas-base">
+            <!-- Compact Top Navigation Header -->
+            <header class="w-full bg-surface-white border-b border-border-subtle h-16 px-gutter flex items-center justify-between sticky top-0 z-30 shadow-[0_1px_8px_rgba(0,22,86,0.03)]">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">search</span>
+                        <input id="globalTopSearch" class="w-64 sm:w-80 pl-9 pr-10 py-1.5 rounded-xl bg-canvas-base border border-border-standard text-on-surface placeholder:text-outline font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container transition-all" placeholder="Tìm kiếm nhanh toàn hệ thống..." type="text">
+                        <span class="absolute right-2.5 top-1/2 -translate-y-1/2 font-label-sm text-label-sm text-outline border border-border-standard rounded px-1.5 py-0.5 bg-surface-white pointer-events-none">⌘K</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-space-sm">
+                    <!-- Quick Role Switch / Test Account helper -->
+                    <a href="dang-nhap.html" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-brand-deep font-semibold text-xs transition-colors border border-border-subtle" title="Chuyển tài khoản">
+                        <span class="material-symbols-outlined text-sm text-primary">switch_account</span>
+                        <span class="hidden sm:inline">Admin / Giáo vụ</span>
+                    </a>
+                    <button onclick="location.reload()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-white border border-border-standard text-brand-deep hover:bg-canvas-base font-label-md text-label-md transition-colors text-xs shadow-xs cursor-pointer" type="button" title="Làm mới trang">
+                        <span class="material-symbols-outlined text-sm text-outline">sync</span>
+                        <span class="hidden sm:inline">Đồng bộ</span>
+                    </button>
+                    <button onclick="showToast('Bạn có 1 thông báo mới: 12 học viên vừa nộp đơn đăng ký lớp ASP.NET Core', 'info')" class="relative p-2 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors cursor-pointer" title="Thông báo" type="button">
+                        <span class="material-symbols-outlined text-xl">notifications</span>
+                        <span class="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-danger-crimson text-white font-label-sm text-[9px] font-bold">1</span>
+                    </button>
+                    <a href="index.html" class="p-2 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors cursor-pointer" title="Trợ giúp & Tổng quan">
+                        <span class="material-symbols-outlined text-xl">help_outline</span>
+                    </a>
+                </div>
+            </header>
+
+            <!-- Main Content Body -->
+            <main class="flex-1 px-gutter py-space-lg flex flex-col gap-y-6">
+
+<div id="ketqua-content-area" class="flex flex-col gap-y-6 transition-opacity duration-200">
+    <!-- Sub-header Navigation Bar -->
+    <section class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border-standard">
+        <div>
+            <div class="flex items-center gap-2 text-outline font-label-sm text-label-sm uppercase tracking-wider mb-1">
+                <span>MODULE 5 • NGUYỄN TÙNG DƯƠNG</span>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <span class="text-brand-deep font-semibold">KẾT QUẢ HỌC TẬP</span>
+            </div>
+            <h1 class="font-headline-md text-headline-md text-brand-deep font-bold tracking-tight flex items-center gap-2">
+                Quản lý Kết quả học tập & Bảng điểm
+                <span class="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold">23103100003</span>
+            </h1>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+            <button onclick="exportTableToCSV('bang-diem-sinh-vien.csv')" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-3.5 py-2.5 rounded-xl transition-all shadow-xs cursor-pointer">
+                <span class="material-symbols-outlined text-[18px] text-primary">file_download</span>
+                <span class="hidden sm:inline">Xuất bảng điểm</span>
+            </button>
+            <button onclick="openGradeModal('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-[#0047b3] text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]">add_task</span>
+                <span>Nhập điểm học viên</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- 4 Stat Cards & Distribution (Top KPI) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-outline font-label-md text-label-md">Đã vào điểm</span>
+                <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined text-[20px]">grading</span>
+                </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+                <span class="font-display text-[30px] leading-8 text-brand-deep tracking-tight font-black font-mono">450</span>
+                <span class="text-xs text-outline font-medium">học viên</span>
             </div>
         </div>
 
-        <ul class="sidebar-menu">
-            <div class="sidebar-category">Bảng điều khiển</div>
-            <li>
-                <a href="/" class="sidebar-link">
-                    <span class="sidebar-link-left"><i class="bi bi-speedometer2"></i> Tổng quan</span>
-                </a>
-            </li>
-
-            <div class="sidebar-category">Quản lý đào tạo (5 Module)</div>
-            <li>
-                <a href="admin-chuong-trinh.html" class="sidebar-link">
-                    <span class="sidebar-link-left"><i class="bi bi-journal-bookmark-fill"></i> Chương trình ĐT (M1)</span>
-                    <span class="badge bg-secondary bg-opacity-50 rounded-pill">6</span>
-                </a>
-            </li>
-            <li>
-                <a href="admin-lop-hoc.html" class="sidebar-link">
-                    <span class="sidebar-link-left"><i class="bi bi-easel2-fill"></i> Quản lý Lớp học (M2)</span>
-                    <span class="badge bg-success bg-opacity-75 rounded-pill">18</span>
-                </a>
-            </li>
-            <li>
-                <a href="/HocVien" class="sidebar-link">
-                    <span class="sidebar-link-left"><i class="bi bi-person-lines-fill"></i> Học viên & Hồ sơ (M3)</span>
-                </a>
-            </li>
-            <li>
-                <a href="admin-dang-ky.html" class="sidebar-link">
-                    <span class="sidebar-link-left"><i class="bi bi-clipboard2-check-fill"></i> Duyệt ĐK & Học phí (M4)</span>
-                    <span class="badge rounded-pill fw-bold" style="background: var(--primary-rose); color: #fff;">03 mới</span>
-                </a>
-            </li>
-            <li>
-                <a href="admin-buoi-hoc.html" class="sidebar-link">
-                    <span class="sidebar-link-left"><i class="bi bi-calendar-week-fill"></i> Lịch học & Buổi học (M5)</span>
-                </a>
-            </li>
-            <li>
-                <a href="admin-ket-qua.html" class="sidebar-link active">
-                    <span class="sidebar-link-left"><i class="bi bi-award-fill"></i> Kết quả học tập (M5)</span>
-                    <span class="badge rounded-pill bg-success fw-bold">Tính điểm</span>
-                </a>
-            </li>
-
-            <div class="sidebar-category">Thống kê & Cổng ngoài</div>
-            <li>
-                <a href="admin-thong-ke.html" class="sidebar-link">
-                    <span class="sidebar-link-left"><i class="bi bi-bar-chart-line-fill"></i> Báo cáo LINQ (M5)</span>
-                </a>
-            </li>
-            <li>
-                <a href="hoc-vien.html" class="sidebar-link text-warning">
-                    <span class="sidebar-link-left"><i class="bi bi-box-arrow-up-right"></i> Cổng Học viên (Mục 17.1)</span>
-                </a>
-            </li>
-        </ul>
-
-        <div class="sidebar-footer">
-            <div class="d-flex align-items-center justify-content-between mb-1">
-                <span><i class="bi bi-person-badge me-1" style="color: var(--primary-blush);"></i> Phụ trách M5:</span>
-                <span class="text-white fw-semibold">Vũ Đình Trường</span>
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-outline font-label-md text-label-md">Tỷ lệ Đạt (Pass)</span>
+                <div class="w-9 h-9 rounded-xl bg-success-emerald/10 flex items-center justify-center text-success-emerald">
+                    <span class="material-symbols-outlined text-[20px]">verified</span>
+                </div>
             </div>
-            <div class="small" style="font-size: 0.72rem; color: #64748b;">
-                Kết quả học tập & Đánh giá • Mục 9.4
+            <div class="flex items-baseline gap-2">
+                <span class="font-display text-[30px] leading-8 text-success-emerald tracking-tight font-black font-mono">94.2%</span>
+                <span class="text-xs text-success-emerald font-medium">424 HV qua môn</span>
             </div>
         </div>
-    </aside>
 
-    <!-- ==================== MAIN WRAPPER ==================== -->
-    <div class="main-wrapper">
-        <header class="topbar">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0 small">
-                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted">Tổng quan</a></li>
-                    <li class="breadcrumb-item active fw-semibold" style="color: var(--text-dark);">Kết quả học tập & Nhập điểm (Module 5)</li>
-                </ol>
-            </nav>
-
-            <div class="d-flex align-items-center gap-3">
-                <a href="hoc-vien.html" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1" style="font-size: 0.8rem;">
-                    <i class="bi bi-person-workspace me-1"></i> Cổng Học viên
-                </a>
-                <div class="vr"></div>
-                <div class="text-end d-none d-sm-block">
-                    <div class="fw-bold small" style="color: var(--text-dark);">Giáo vụ Khảo thí</div>
-                    <div style="font-size: 0.72rem; color: var(--text-muted);">khaothi@uneti.edu.vn</div>
-                </div>
-                <a href="dang-nhap.html" class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: var(--surface-container); color: var(--primary-rose); border: 1px solid var(--border-color);" title="Đăng xuất">
-                    <i class="bi bi-box-arrow-right"></i>
-                </a>
-            </div>
-        </header>
-
-        <main class="content-area">
-
-            <!-- 1. HERO BANNER TỐI GIẢN -->
-            <div class="page-hero">
-                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                    <div>
-                        <div class="d-flex align-items-center gap-2 mb-2">
-                            <span class="badge rounded-pill px-3 py-1" style="background: rgba(56, 189, 248, 0.2); color: var(--primary-blush); border: 1px solid rgba(56, 189, 248, 0.35);">
-                                <i class="bi bi-award me-1"></i> Entity KetQuaHocTap
-                            </span>
-                            <span class="small" style="color: #bae6fd;">Mục 9.4 Đề tài 16 UNETI</span>
-                        </div>
-                        <h1 class="hero-title">Nhập Điểm, Đánh Giá Hoàn Thành & Công Thức Tự Động</h1>
-                        <p class="mb-0 small" style="color: #f7d6df;">
-                            Công thức tính điểm chuẩn: <code>DiemTongKet = 0.2 * DiemChuyenCan + 0.8 * DiemCuoiKhoa</code>. Chỉ lớp đã hoàn thành toàn bộ buổi học mới được công bố bảng điểm.
-                        </p>
-                    </div>
-
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-sm px-3 py-2 rounded-pill fw-semibold text-white" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); font-size: 0.82rem;" onclick="window.print()">
-                            <i class="bi bi-printer me-1"></i> In bảng điểm
-                        </button>
-                        <button type="button" class="btn btn-sm px-3 py-2 rounded-pill fw-semibold text-white" style="background: var(--primary-rose); border: 1px solid rgba(56,189,248,0.4); font-size: 0.82rem;" onclick="saveAllGrades()">
-                            <i class="bi bi-cloud-arrow-up-fill me-1"></i> Lưu toàn bộ bảng điểm
-                        </button>
-                    </div>
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-outline font-label-md text-label-md">Điểm trung bình</span>
+                <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined text-[20px]">insights</span>
                 </div>
             </div>
-
-            <!-- Cảnh báo nếu lớp chưa hoàn thành toàn bộ buổi học (Mục 9.4) -->
-            <div id="incompleteClassAlert" class="alert alert-warning py-2 px-3 small border-warning mb-3 d-none">
-                <i class="bi bi-exclamation-circle-fill me-1"></i>
-                <strong>Lưu ý Mục 9.4:</strong> Lớp học này đang diễn ra và chưa hoàn thành toàn bộ số buổi học. Hệ thống chỉ cho phép xem trước, việc xác nhận bảng điểm tốt nghiệp cuối cùng bị khóa cho đến khi toàn bộ buổi học kết thúc.
+            <div class="flex items-baseline gap-2">
+                <span class="font-display text-[30px] leading-8 text-brand-deep tracking-tight font-black font-mono">7.82</span>
+                <span class="text-xs text-outline font-medium">thang điểm 10</span>
             </div>
+        </div>
 
-            <!-- 2. BẢNG KẾT QUẢ HỌC TẬP & NHẬP ĐIỂM -->
-            <div class="content-card">
-                <div class="toolbar">
-                    <div class="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
-                        <!-- Chọn Lớp học -->
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="small fw-bold text-muted text-nowrap"><i class="bi bi-easel me-1"></i>Lớp học:</span>
-                            <select id="selectedClass" onchange="onClassChange()" class="form-select form-select-sm" style="min-width: 280px;">
-                                <option value="NETCORE10-K01" data-completed="true">NETCORE10-K01 (.NET Fullstack - Đã học xong)</option>
-                                <option value="PYTHON-K02" data-completed="true">PYTHON-K02 (Python AI Data - Đã học xong)</option>
-                                <option value="REACT-K05" data-completed="false">REACT-K05 (React & Next.js - Đang học, chưa kết thúc)</option>
-                                <option value="TOEIC-K12" data-completed="false">TOEIC-K12 (Tiếng Anh TOEIC - Đang học)</option>
-                            </select>
-                        </div>
-
-                        <!-- Lọc Đánh giá -->
-                        <select id="filterPassFail" onchange="renderGradesTable()" class="form-select form-select-sm" style="max-width: 200px;">
-                            <option value="">-- Tất cả kết quả --</option>
-                            <option value="Hoàn thành">Hoàn thành (>= 5.0)</option>
-                            <option value="Không hoàn thành">Không hoàn thành (< 5.0)</option>
-                        </select>
-                    </div>
-
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="small text-muted">
-                            Sĩ số lớp: <strong id="classStudentCount">0</strong> học viên
-                        </div>
-                        <div class="small text-success">
-                            Tỷ lệ đạt: <strong id="passRateText">100%</strong>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="modern-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 70px;">Mã HV</th>
-                                <th>Học viên</th>
-                                <th>Email liên hệ</th>
-                                <th style="width: 130px;" class="text-center">Chuyên cần (20%)</th>
-                                <th style="width: 130px;" class="text-center">Cuối khóa (80%)</th>
-                                <th style="width: 130px;" class="text-center">Điểm tổng kết</th>
-                                <th style="width: 140px;" class="text-center">Đánh giá</th>
-                                <th style="width: 130px;" class="text-center">Xếp loại</th>
-                                <th>Nhận xét của Giáo vụ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="gradesTableBody">
-                            <!-- Render by JS -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="p-3 bg-light border-top d-flex justify-content-between align-items-center small text-muted">
-                    <div><i class="bi bi-info-circle text-primary me-1"></i> Điểm tổng kết tự động tính theo thời gian thực: <code>TK = 0.2 * CC + 0.8 * CK</code>. Đạt >= 5.0 được ghi nhận "Hoàn thành" và cấp chứng nhận.</div>
-                    <span class="badge rounded-pill" style="background: var(--surface-container); color: var(--primary-rose);">Mục 9.4: KetQuaHocTap</span>
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-outline font-label-md text-label-md">Phân loại điểm</span>
+                <div class="w-9 h-9 rounded-xl bg-purple-50 flex items-center justify-center text-purple-700">
+                    <span class="material-symbols-outlined text-[20px]">pie_chart</span>
                 </div>
             </div>
-
-        </main>
+            <div class="flex items-center gap-1.5 text-[11px] font-mono font-bold">
+                <span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">A: 125</span>
+                <span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">B: 180</span>
+                <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">C: 95</span>
+                <span class="px-1.5 py-0.5 rounded bg-rose-100 text-rose-800">F: 25</span>
+            </div>
+        </div>
     </div>
 
-    <!-- Bootstrap 5 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Filter Toolbar -->
+    <div class="bg-surface-white rounded-2xl p-4 border border-border-subtle shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto flex-1">
+            <div class="relative flex-1 min-w-[240px]">
+                <span class="material-symbols-outlined text-outline absolute left-3 top-1/2 -translate-y-1/2 text-[18px]">search</span>
+                <input id="kqSearchInput" onkeyup="filterKqTable()" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep font-body-sm text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Tìm theo tên học viên, mã HV, lớp..." type="text">
+            </div>
 
-    <script>
-        // Dataset Kết quả học tập chuẩn BTL 16 (Entity KetQuaHocTap)
-        let gradeRecords = [
-            // Lớp NETCORE10-K01 (Đã học xong toàn bộ buổi học)
-            { id: "HV-01", name: "Nguyễn Văn An", email: "an.nguyen@gmail.com", classCode: "NETCORE10-K01", cc: 9.0, ck: 8.5, note: "Chuyên cần xuất sắc, đồ án cuối khóa hoàn thiện tốt." },
-            { id: "HV-02", name: "Trần Minh Tuấn", email: "tuan.tm@gmail.com", classCode: "NETCORE10-K01", cc: 9.0, ck: 8.5, note: "Nắm vững Clean Architecture & Blazor." },
-            { id: "HV-05", name: "Lê Hoàng Nam", email: "nam.lh@gmail.com", classCode: "NETCORE10-K01", cc: 8.0, ck: 7.5, note: "Kỹ năng lập trình tốt, tiếp thu nhanh." },
-            { id: "HV-07", name: "Vũ Hải Đăng", email: "dang.vh@gmail.com", classCode: "NETCORE10-K01", cc: 6.0, ck: 4.0, note: "Chưa hoàn thành bài tập lớn cuối khóa." },
-            { id: "HV-11", name: "Nguyễn Trọng Hiếu", email: "hieu.nt@gmail.com", classCode: "NETCORE10-K01", cc: 8.5, ck: 9.0, note: "Đồ án xuất sắc đạt điểm tối đa." },
+            <div class="relative">
+                <select id="filterKqResult" onchange="filterKqTable()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary">
+                    <option value="">Tất cả kết quả</option>
+                    <option value="Đạt">● Kết quả: Đạt (Pass)</option>
+                    <option value="Không đạt">✕ Kết quả: Chưa đạt (Fail)</option>
+                </select>
+                <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
+            </div>
+        </div>
 
-            // Lớp PYTHON-K02 (Đã học xong)
-            { id: "HV-04", name: "Phạm Quốc Bảo", email: "bao.pq@gmail.com", classCode: "PYTHON-K02", cc: 9.0, ck: 8.0, note: "Phân tích dữ liệu tốt." },
-            { id: "HV-06", name: "Đỗ Thùy Linh", email: "linh.dt@gmail.com", classCode: "PYTHON-K02", cc: 8.5, ck: 7.0, note: "Hiểu rõ các thuật toán máy học cơ bản." },
-            { id: "HV-09", name: "Bùi Quốc Huy", email: "huy.bq@gmail.com", classCode: "PYTHON-K02", cc: 7.0, ck: 6.5, note: "Chăm chỉ hoàn thành bài tập." },
+        <div class="text-xs text-outline flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px] text-primary">calculate</span>
+            <span>Công thức: <strong class="text-brand-deep font-mono">CC×10% + KT×30% + Thi×60%</strong></span>
+        </div>
+    </div>
 
-            // Lớp REACT-K05 (Đang học, chưa kết thúc)
-            { id: "HV-10", name: "Đặng Phương Thảo", email: "thao.dp@gmail.com", classCode: "REACT-K05", cc: 9.0, ck: 0, note: "Đang tham gia các buổi học theo lịch." },
-            { id: "HV-12", name: "Trịnh Kim Ngân", email: "ngan.tk@gmail.com", classCode: "REACT-K05", cc: 8.5, ck: 0, note: "Đang học phần Next.js Server Components." }
-        ];
-
-        // Toast Helper
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = 'custom-toast';
-            toast.innerHTML = `
-                <i class="bi bi-check-circle-fill text-success fs-5"></i>
-                <div class="flex-grow-1">
-                    <div class="fw-bold" style="color: var(--text-dark);">${message}</div>
-                    <div style="font-size: 0.7rem; color: var(--text-muted);">${new Date().toLocaleTimeString()}</div>
-                </div>
-                <button type="button" class="btn-close btn-sm" onclick="this.parentElement.remove()"></button>
-            `;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 4000);
-        }
-
-        // Đổi Lớp học
-        function onClassChange() {
-            const sel = document.getElementById('selectedClass');
-            const opt = sel.options[sel.selectedIndex];
-            const isCompleted = opt.getAttribute('data-completed') === 'true';
-            const alertEl = document.getElementById('incompleteClassAlert');
-
-            if (!isCompleted) {
-                alertEl.classList.remove('d-none');
-            } else {
-                alertEl.classList.add('d-none');
-            }
-
-            renderGradesTable();
-        }
-
-        // Render Bảng Điểm
-        function renderGradesTable() {
-            const selClass = document.getElementById('selectedClass').value;
-            const filterPF = document.getElementById('filterPassFail').value;
-            const tbody = document.getElementById('gradesTableBody');
-
-            const classRecords = gradeRecords.filter(r => r.classCode === selClass);
-            document.getElementById('classStudentCount').innerText = classRecords.length;
-
-            let passCount = 0;
-
-            const filtered = classRecords.filter(r => {
-                const total = (0.2 * r.cc + 0.8 * r.ck).toFixed(1);
-                const isPass = total >= 5.0;
-                if (isPass) passCount++;
-
-                const evalStr = isPass ? 'Hoàn thành' : 'Không hoàn thành';
-                return !filterPF || evalStr === filterPF;
-            });
-
-            const rate = classRecords.length > 0 ? Math.round((passCount / classRecords.length) * 100) : 0;
-            document.getElementById('passRateText').innerText = `${rate}% (${passCount}/${classRecords.length})`;
-
-            tbody.innerHTML = filtered.map(r => {
-                const total = (0.2 * r.cc + 0.8 * r.ck).toFixed(1);
-                const isPass = total >= 5.0;
-                
-                let evalBadge = isPass 
-                    ? '<span class="badge bg-success bg-opacity-75">Hoàn thành</span>' 
-                    : '<span class="badge bg-danger">Không hoàn thành</span>';
-                
-                let rank = '';
-                if (total >= 9.0) rank = '<span class="badge bg-primary bg-opacity-10 text-primary border border-primary">Xuất sắc</span>';
-                else if (total >= 8.0) rank = '<span class="badge bg-success bg-opacity-10 text-success border border-success">Giỏi</span>';
-                else if (total >= 6.5) rank = '<span class="badge bg-info bg-opacity-10 text-dark border">Khá</span>';
-                else if (total >= 5.0) rank = '<span class="badge bg-warning bg-opacity-10 text-dark border">Trung bình</span>';
-                else rank = '<span class="badge bg-danger bg-opacity-10 text-danger border border-danger">Yếu</span>';
-
-                return `
-                    <tr>
-                        <td class="fw-bold" style="color: var(--primary-rose);">${r.id}</td>
-                        <td><strong>${r.name}</strong></td>
-                        <td class="text-muted small">${r.email}</td>
-                        <td class="text-center">
-                            <input type="number" step="0.5" min="0" max="10" class="grade-input" value="${r.cc}" onchange="updateScore('${r.id}', 'cc', this.value)">
+    <!-- Data Table Card -->
+    <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[960px]" id="kqTable">
+                <thead>
+                    <tr class="bg-surface-container-lowest border-b border-border-standard text-[11px] font-bold text-outline uppercase tracking-wider">
+                        <th class="py-3.5 px-4 w-12 text-center">#</th>
+                        <th class="py-3.5 px-4">Học Viên</th>
+                        <th class="py-3.5 px-4">Lớp Học Phần</th>
+                        <th class="py-3.5 px-3 text-center">Chuyên Cần (10%)</th>
+                        <th class="py-3.5 px-3 text-center">Kiểm Tra (30%)</th>
+                        <th class="py-3.5 px-3 text-center">Thi Cuối Kỳ (60%)</th>
+                        <th class="py-3.5 px-3 text-center">Tổng Kết</th>
+                        <th class="py-3.5 px-3 text-center">Điểm Chữ</th>
+                        <th class="py-3.5 px-4 text-center">Kết Quả</th>
+                        <th class="py-3.5 px-4 text-right">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle text-xs text-brand-deep" id="kqTableBody">
+                    <!-- Row 1 -->
+                    <tr class="kq-row hover:bg-canvas-base/60 transition-colors" data-id="1" data-name="Nguyễn Văn An" data-mahv="HV001" data-class="ASP.NET Core MVC Nâng cao" data-cc="9.0" data-kt="8.5" data-thi="8.5" data-tk="8.55" data-grade="A" data-result="Đạt">
+                        <td class="py-3.5 px-4 text-center font-mono text-outline">1</td>
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-7 h-7 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-[11px] shrink-0">A</div>
+                                <div>
+                                    <span class="font-bold text-brand-deep block">Nguyễn Văn An</span>
+                                    <span class="text-[11px] text-outline font-mono">#HV001 • K17A1</span>
+                                </div>
+                            </div>
                         </td>
-                        <td class="text-center">
-                            <input type="number" step="0.5" min="0" max="10" class="grade-input" value="${r.ck}" onchange="updateScore('${r.id}', 'ck', this.value)">
+                        <td class="py-3.5 px-4 font-semibold text-brand-deep">
+                            ASP.NET Core MVC Nâng cao
                         </td>
-                        <td class="text-center">
-                            <strong class="fs-6 ${isPass ? 'text-success' : 'text-danger'}">${total}</strong>
+                        <td class="py-3.5 px-3 text-center font-mono font-bold">9.0</td>
+                        <td class="py-3.5 px-3 text-center font-mono font-bold">8.5</td>
+                        <td class="py-3.5 px-3 text-center font-mono font-bold">8.5</td>
+                        <td class="py-3.5 px-3 text-center font-mono font-black text-brand-deep text-sm">8.55</td>
+                        <td class="py-3.5 px-3 text-center">
+                            <span class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold font-mono">A</span>
                         </td>
-                        <td class="text-center">${evalBadge}</td>
-                        <td class="text-center">${rank}</td>
-                        <td>
-                            <input type="text" class="form-control form-control-sm" value="${r.note}" onchange="updateNote('${r.id}', this.value)" style="border-color: var(--border-color);">
+                        <td class="py-3.5 px-4 text-center">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-success-emerald/10 text-success-emerald font-label-sm font-semibold">
+                                <span class="h-1.5 w-1.5 rounded-full bg-success-emerald"></span>Đạt
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right">
+                            <div class="inline-flex items-center gap-1">
+                                <button onclick="openEditGrade(this)" class="p-1.5 rounded-lg text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors" title="Sửa điểm">
+                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                </button>
+                                <button onclick="confirmDeleteKq(1, 'Nguyễn Văn An')" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50 transition-colors" title="Xóa">
+                                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                                </button>
+                            </div>
                         </td>
                     </tr>
-                `;
-            }).join('');
+
+                    <!-- Row 2 -->
+                    <tr class="kq-row hover:bg-canvas-base/60 transition-colors" data-id="2" data-name="Trần Minh Tuấn" data-mahv="HV002" data-class="React.js & TypeScript" data-cc="8.0" data-kt="7.5" data-thi="8.0" data-tk="7.85" data-grade="B+" data-result="Đạt">
+                        <td class="py-3.5 px-4 text-center font-mono text-outline">2</td>
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-[11px] shrink-0">T</div>
+                                <div>
+                                    <span class="font-bold text-brand-deep block">Trần Minh Tuấn</span>
+                                    <span class="text-[11px] text-outline font-mono">#HV002 • K17A2</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 font-semibold text-brand-deep">
+                            React.js & TypeScript
+                        </td>
+                        <td class="py-3.5 px-3 text-center font-mono font-bold">8.0</td>
+                        <td class="py-3.5 px-3 text-center font-mono font-bold">7.5</td>
+                        <td class="py-3.5 px-3 text-center font-mono font-bold">8.0</td>
+                        <td class="py-3.5 px-3 text-center font-mono font-black text-brand-deep text-sm">7.85</td>
+                        <td class="py-3.5 px-3 text-center">
+                            <span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 font-bold font-mono">B+</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-center">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-success-emerald/10 text-success-emerald font-label-sm font-semibold">
+                                <span class="h-1.5 w-1.5 rounded-full bg-success-emerald"></span>Đạt
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right">
+                            <div class="inline-flex items-center gap-1">
+                                <button onclick="openEditGrade(this)" class="p-1.5 rounded-lg text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors" title="Sửa điểm">
+                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                </button>
+                                <button onclick="confirmDeleteKq(2, 'Trần Minh Tuấn')" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50 transition-colors" title="Xóa">
+                                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Row 3 -->
+                    <tr class="kq-row hover:bg-canvas-base/60 transition-colors" data-id="3" data-name="Lê Thu Hà" data-mahv="HV003" data-class="Python Data Science" data-cc="10.0" data-kt="9.0" data-thi="9.5" data-tk="9.40" data-grade="A" data-result="Đạt">
+                        <td class="py-3.5 px-4 text-center font-mono text-outline">3</td>
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-7 h-7 rounded-full bg-purple-100 text-purple-800 font-bold flex items-center justify-center text-[11px] shrink-0">H</div>
+                                <div>
+                                    <span class="font-bold text-brand-deep block">Lê Thu Hà</span>
+                                    <span class="text-[11px] text-outline font-mono">#HV003 • K17DS</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 font-semibold text-brand-deep">
+                            Python Data Science
+                        </td>
+                        <td class="py-3.5 px-3 text-center font-mono font-bold">10.0</td>
+                        <td class="py-3.5 px-3 text-center font-mono font-bold">9.0</td>
+                        <td class="py-3.5 px-3 text-center font-mono font-bold">9.5</td>
+                        <td class="py-3.5 px-3 text-center font-mono font-black text-brand-deep text-sm">9.40</td>
+                        <td class="py-3.5 px-3 text-center">
+                            <span class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold font-mono">A</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-center">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-success-emerald/10 text-success-emerald font-label-sm font-semibold">
+                                <span class="h-1.5 w-1.5 rounded-full bg-success-emerald"></span>Đạt
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right">
+                            <div class="inline-flex items-center gap-1">
+                                <button onclick="openEditGrade(this)" class="p-1.5 rounded-lg text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors" title="Sửa điểm">
+                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                </button>
+                                <button onclick="confirmDeleteKq(3, 'Lê Thu Hà')" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50 transition-colors" title="Xóa">
+                                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Row 4 -->
+                    <tr class="kq-row hover:bg-canvas-base/60 transition-colors" data-id="4" data-name="Đặng Quốc Huy" data-mahv="HV009" data-class="ASP.NET Core MVC Nâng cao" data-cc="4.0" data-kt="3.5" data-thi="3.0" data-tk="3.25" data-grade="F" data-result="Không đạt">
+                        <td class="py-3.5 px-4 text-center font-mono text-outline">4</td>
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-7 h-7 rounded-full bg-rose-100 text-rose-800 font-bold flex items-center justify-center text-[11px] shrink-0">H</div>
+                                <div>
+                                    <span class="font-bold text-brand-deep block">Đặng Quốc Huy</span>
+                                    <span class="text-[11px] text-outline font-mono">#HV009 • K17A1</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 font-semibold text-brand-deep">
+                            ASP.NET Core MVC Nâng cao
+                        </td>
+                        <td class="py-3.5 px-3 text-center font-mono font-bold text-rose-600">4.0</td>
+                        <td class="py-3.5 px-3 text-center font-mono font-bold text-rose-600">3.5</td>
+                        <td class="py-3.5 px-3 text-center font-mono font-bold text-rose-600">3.0</td>
+                        <td class="py-3.5 px-3 text-center font-mono font-black text-rose-600 text-sm">3.25</td>
+                        <td class="py-3.5 px-3 text-center">
+                            <span class="px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 font-bold font-mono">F</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-center">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-600 font-label-sm font-semibold">
+                                <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>Không đạt
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right">
+                            <div class="inline-flex items-center gap-1">
+                                <button onclick="openEditGrade(this)" class="p-1.5 rounded-lg text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors" title="Sửa điểm">
+                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                </button>
+                                <button onclick="confirmDeleteKq(4, 'Đặng Quốc Huy')" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50 transition-colors" title="Xóa">
+                                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL NHẬP ĐIỂM ================= -->
+<div id="gradeModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-deep/50 backdrop-blur-xs hidden transition-all duration-300">
+    <div class="bg-surface-white max-w-lg w-full rounded-3xl shadow-2xl border border-border-subtle p-6 space-y-4 animate-scale-up" onclick="event.stopPropagation()">
+        <div class="flex items-center justify-between pb-3 border-b border-border-standard">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[24px]">grade</span>
+                </div>
+                <div>
+                    <h3 class="font-bold text-base text-brand-deep" id="gradeModalTitle">Nhập Điểm Học Viên</h3>
+                    <p class="text-xs text-outline">Hệ thống tính điểm tổng kết và xếp loại tự động</p>
+                </div>
+            </div>
+            <button onclick="closeGradeModal()" class="p-1.5 rounded-xl hover:bg-surface-container-low text-outline">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+
+        <form onsubmit="handleGradeSubmit(event)" class="space-y-3.5 text-xs">
+            <div>
+                <label class="block font-bold text-brand-deep uppercase mb-1">Học viên <span class="text-rose-500">*</span></label>
+                <input type="text" id="gradeStudentName" required placeholder="Nguyễn Văn An" class="w-full px-3 py-2 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep">
+            </div>
+
+            <div>
+                <label class="block font-bold text-brand-deep uppercase mb-1">Lớp học phần <span class="text-rose-500">*</span></label>
+                <select id="gradeClassName" class="w-full px-3 py-2 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep">
+                    <option value="ASP.NET Core MVC Nâng cao">ASP.NET Core MVC Nâng cao</option>
+                    <option value="React.js & TypeScript">React.js & TypeScript</option>
+                    <option value="Python Data Science">Python Data Science</option>
+                    <option value="Machine Learning AI">Machine Learning AI</option>
+                </select>
+            </div>
+
+            <!-- 3 Component Scores -->
+            <div class="grid grid-cols-3 gap-3">
+                <div>
+                    <label class="block font-bold text-brand-deep uppercase mb-1">Chuyên cần (10%)</label>
+                    <input type="number" id="gradeCC" min="0" max="10" step="0.5" value="8.0" oninput="calculateFinalGrade()" class="w-full px-3 py-2 rounded-xl border border-border-standard font-mono font-bold text-center">
+                </div>
+                <div>
+                    <label class="block font-bold text-brand-deep uppercase mb-1">Kiểm tra (30%)</label>
+                    <input type="number" id="gradeKT" min="0" max="10" step="0.5" value="7.5" oninput="calculateFinalGrade()" class="w-full px-3 py-2 rounded-xl border border-border-standard font-mono font-bold text-center">
+                </div>
+                <div>
+                    <label class="block font-bold text-brand-deep uppercase mb-1">Thi KTHP (60%)</label>
+                    <input type="number" id="gradeThi" min="0" max="10" step="0.5" value="8.0" oninput="calculateFinalGrade()" class="w-full px-3 py-2 rounded-xl border border-border-standard font-mono font-bold text-center">
+                </div>
+            </div>
+
+            <!-- Auto calculation box -->
+            <div class="p-3.5 rounded-2xl bg-canvas-base border border-border-subtle flex items-center justify-between">
+                <div>
+                    <span class="text-outline block text-[11px]">Tổng kết hệ 10:</span>
+                    <strong class="text-brand-deep text-lg font-mono" id="previewFinal">7.85</strong>
+                </div>
+                <div>
+                    <span class="text-outline block text-[11px]">Điểm chữ:</span>
+                    <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold font-mono text-sm" id="previewGrade">B+</span>
+                </div>
+                <div>
+                    <span class="text-outline block text-[11px]">Trạng thái:</span>
+                    <span class="text-success-emerald font-bold" id="previewResult">Đạt</span>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-border-standard flex items-center justify-end gap-2">
+                <button type="button" onclick="closeGradeModal()" class="px-4 py-2 rounded-xl border border-border-standard text-outline hover:text-brand-deep">Hủy</button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-primary text-surface-white font-bold hover:bg-[#0047b3] shadow-md shadow-primary/20 flex items-center gap-1.5 cursor-pointer">
+                    <span class="material-symbols-outlined text-[16px]">save</span>
+                    <span>Lưu kết quả</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let editingGradeRow = null;
+
+    function calculateFinalGrade() {
+        const cc = parseFloat(document.getElementById('gradeCC').value) || 0;
+        const kt = parseFloat(document.getElementById('gradeKT').value) || 0;
+        const thi = parseFloat(document.getElementById('gradeThi').value) || 0;
+
+        const finalScore = Math.round((cc * 0.1 + kt * 0.3 + thi * 0.6) * 100) / 100;
+        document.getElementById('previewFinal').innerText = finalScore.toFixed(2);
+
+        let letter = 'F';
+        let isPass = (finalScore >= 4.0);
+
+        if (finalScore >= 8.5) letter = 'A';
+        else if (finalScore >= 8.0) letter = 'B+';
+        else if (finalScore >= 7.0) letter = 'B';
+        else if (finalScore >= 6.5) letter = 'C+';
+        else if (finalScore >= 5.5) letter = 'C';
+        else if (finalScore >= 5.0) letter = 'D+';
+        else if (finalScore >= 4.0) letter = 'D';
+
+        document.getElementById('previewGrade').innerText = letter;
+        const resEl = document.getElementById('previewResult');
+        if (isPass) {
+            resEl.className = 'text-success-emerald font-bold';
+            resEl.innerText = 'Đạt';
+        } else {
+            resEl.className = 'text-danger-crimson font-bold';
+            resEl.innerText = 'Không đạt';
         }
+    }
 
-        // Cập nhật điểm thời gian thực
-        function updateScore(id, field, val) {
-            const num = parseFloat(val);
-            if (isNaN(num) || num < 0 || num > 10) {
-                alert('Quy định Mục 9.4: Điểm chuyên cần và điểm cuối khóa phải nằm trong khoảng từ 0.0 đến 10.0!');
-                renderGradesTable();
-                return;
-            }
+    function openGradeModal(mode) {
+        editingGradeRow = null;
+        document.getElementById('gradeModalTitle').innerText = 'Nhập Điểm Học Viên';
+        document.getElementById('gradeStudentName').value = '';
+        document.getElementById('gradeCC').value = '8.0';
+        document.getElementById('gradeKT').value = '7.5';
+        document.getElementById('gradeThi').value = '8.0';
+        calculateFinalGrade();
+        document.getElementById('gradeModal').classList.remove('hidden');
+    }
 
-            const item = gradeRecords.find(x => x.id === id);
-            if (item) {
-                item[field] = num;
-                renderGradesTable();
-            }
+    function closeGradeModal() {
+        document.getElementById('gradeModal').classList.add('hidden');
+    }
+
+    function openEditGrade(btn) {
+        editingGradeRow = btn.closest('tr');
+        document.getElementById('gradeModalTitle').innerText = 'Chỉnh Sửa Điểm Học Viên';
+        document.getElementById('gradeStudentName').value = editingGradeRow.dataset.name;
+        document.getElementById('gradeClassName').value = editingGradeRow.dataset.class;
+        document.getElementById('gradeCC').value = editingGradeRow.dataset.cc;
+        document.getElementById('gradeKT').value = editingGradeRow.dataset.kt;
+        document.getElementById('gradeThi').value = editingGradeRow.dataset.thi;
+        calculateFinalGrade();
+        document.getElementById('gradeModal').classList.remove('hidden');
+    }
+
+    function handleGradeSubmit(e) {
+        e.preventDefault();
+        const name = document.getElementById('gradeStudentName').value;
+        const finalScore = document.getElementById('previewFinal').innerText;
+        const gradeLetter = document.getElementById('previewGrade').innerText;
+        const result = document.getElementById('previewResult').innerText;
+
+        if (editingGradeRow) {
+            editingGradeRow.dataset.cc = document.getElementById('gradeCC').value;
+            editingGradeRow.dataset.kt = document.getElementById('gradeKT').value;
+            editingGradeRow.dataset.thi = document.getElementById('gradeThi').value;
+            editingGradeRow.dataset.tk = finalScore;
+            editingGradeRow.dataset.grade = gradeLetter;
+            editingGradeRow.dataset.result = result;
+
+            editingGradeRow.children[3].innerText = document.getElementById('gradeCC').value;
+            editingGradeRow.children[4].innerText = document.getElementById('gradeKT').value;
+            editingGradeRow.children[5].innerText = document.getElementById('gradeThi').value;
+            editingGradeRow.children[6].innerText = finalScore;
+            editingGradeRow.children[7].querySelector('span').innerText = gradeLetter;
+
+            showToast(`Đã cập nhật bảng điểm cho học viên "${name}"!`, 'success');
+        } else {
+            showToast(`Đã thêm bảng điểm thành công cho "${name}" (Tổng kết: ${finalScore})!`, 'success');
         }
+        closeGradeModal();
+    }
 
-        function updateNote(id, noteVal) {
-            const item = gradeRecords.find(x => x.id === id);
-            if (item) {
-                item.note = noteVal;
-            }
-        }
+    function confirmDeleteKq(id, name) {
+        openGlobalDeleteModal({
+            title: 'Xóa kết quả học tập?',
+            itemName: name,
+            message: `Bạn có chắc chắn muốn xóa bản ghi kết quả của học viên <strong class="text-brand-deep">${name}</strong>?`,
+            warning: 'Thao tác này sẽ hủy điểm học phần đã lưu.',
+            submitText: 'Xóa kết quả',
+            onConfirm: function() {
+                const row = document.querySelector(`tr.kq-row[data-id="${id}"]`);
+                if (row) row.remove();
+            },
+            successMsg: `Đã xóa kết quả học tập thành công!`
+        });
+    }
 
-        // Lưu toàn bộ bảng điểm
-        function saveAllGrades() {
-            showToast('✅ Đã lưu toàn bộ bảng điểm vào cơ sở dữ liệu Entity KetQuaHocTap thành công!');
-        }
+    function filterKqTable() {
+        const query = document.getElementById('kqSearchInput').value.toLowerCase().trim();
+        const res = document.getElementById('filterKqResult').value;
 
-        // Khởi tạo
-        document.addEventListener('DOMContentLoaded', onClassChange);
+        const rows = document.querySelectorAll('#kqTableBody tr.kq-row');
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            const rowRes = row.dataset.result;
+
+            const matchQuery = (!query || text.includes(query));
+            const matchRes = (!res || rowRes === res);
+
+            row.style.display = (matchQuery && matchRes) ? '' : 'none';
+        });
+    }
+
+    function exportTableToCSV(filename) {
+        showToast(`Đã xuất bảng điểm sinh viên ra file "${filename}"!`, 'success');
+    }
+</script>
+
+            </main>
+
+            <!-- Footer inside main wrapper -->
+            <footer class="w-full bg-surface-white border-t border-border-subtle py-6">
+                <div class="w-full px-gutter flex flex-col md:flex-row items-center justify-between gap-space-sm text-on-surface-variant font-body-sm text-body-sm">
+                    <div class="flex items-center gap-space-xs">
+                        <span class="font-label-md text-label-md text-brand-deep font-bold">TRƯỜNG ĐẠI HỌC KINH TẾ - KỸ THUẬT CÔNG NGHIỆP</span>
+                        <span class="">•</span>
+                        <span class="">Hệ thống Quản lý Khóa học &amp; Đào tạo</span>
+                    </div>
+                    <div class="font-label-sm text-label-sm text-outline text-right">
+                        © 2025 UNETI. Thực hiện bởi: <strong class="text-brand-deep">Nhóm 5</strong> • Vũ Đình Trường (M1) - Nguyễn Đình Kiên (M2) - Nguyễn Đức Linh (M3) - Nguyễn Hoàng Long (M4) - Nguyễn Tùng Dương (M5).
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Global Delete Modal Component -->
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-deep/40 backdrop-blur-xs hidden transition-all duration-300" id="global-delete-modal">
+        <div class="bg-surface-white max-w-md w-full rounded-2xl shadow-2xl border border-border-subtle p-6 space-y-4 animate-scale-up" onclick="event.stopPropagation()">
+            <div class="w-12 h-12 rounded-2xl bg-[#EF4444]/10 text-danger-crimson flex items-center justify-center">
+                <span class="material-symbols-outlined text-[28px]" id="global-delete-icon">delete_forever</span>
+            </div>
+            <div class="space-y-1.5">
+                <h3 class="font-headline-sm text-headline-sm text-brand-deep font-bold" id="global-delete-title">
+                    Xác nhận xóa?
+                </h3>
+                <p class="font-body-sm text-body-sm text-outline leading-relaxed" id="global-delete-msg">
+                    Bạn có chắc chắn muốn xóa bản ghi này?
+                </p>
+            </div>
+            <div class="bg-error-container/30 border border-danger-crimson/20 rounded-xl p-3 flex items-start gap-2.5">
+                <span class="material-symbols-outlined text-danger-crimson text-[18px] flex-shrink-0 mt-0.5">warning</span>
+                <span class="font-body-sm text-[12px] text-danger-crimson font-medium" id="global-delete-warning">
+                    Hành động này mang tính vĩnh viễn và không thể hoàn tác sau khi xác nhận.
+                </span>
+            </div>
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button type="button" class="border border-border-standard text-brand-deep px-4 py-2 rounded-xl font-label-md text-label-md hover:bg-surface-container-low transition-colors cursor-pointer" onclick="closeGlobalDeleteModal()">
+                    Hủy bỏ
+                </button>
+                <button type="button" id="global-delete-confirm-btn" class="bg-danger-crimson hover:bg-[#d93838] text-surface-white px-4 py-2 rounded-xl font-label-md text-label-md shadow-sm flex items-center gap-1.5 transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                    <span id="global-delete-btn-text">Xóa vĩnh viễn</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Prep.vn Toast Notification Container -->
+    <div id="global-toast-container" class="fixed top-5 right-5 z-[100] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+    <script>
+        // Universal Toast Notification
+        window.showToast = function(message, type = 'success') {{
+            const container = document.getElementById('global-toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            
+            let bgClasses = 'bg-emerald-50/95 border-emerald-200 text-emerald-900';
+            let iconText = 'check_circle';
+            let iconColor = 'text-success-emerald';
+            
+            if (type === 'error') {{
+                bgClasses = 'bg-red-50/95 border-red-200 text-danger-crimson';
+                iconText = 'error';
+                iconColor = 'text-danger-crimson';
+            }} else if (type === 'info') {{
+                bgClasses = 'bg-blue-50/95 border-blue-200 text-brand-deep';
+                iconText = 'info';
+                iconColor = 'text-primary';
+            }}
+
+            toast.className = `pointer-events-auto flex items-center justify-between p-4 rounded-2xl shadow-xl border transition-all duration-300 transform -translate-y-2 opacity-0 backdrop-blur-sm ${bgClasses}`;
+            toast.innerHTML = `
+                <div class="flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-[22px] flex-shrink-0 ${iconColor}">
+                        ${iconText}
+                    </span>
+                    <span class="font-label-md text-label-md font-semibold leading-snug break-words">${message}</span>
+                </div>
+                <button type="button" class="ml-3 text-outline hover:text-brand-deep cursor-pointer flex-shrink-0">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+            `;
+
+            const closeBtn = toast.querySelector('button');
+            const removeToast = () => {{
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', '-translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }};
+            closeBtn.onclick = removeToast;
+
+            container.appendChild(toast);
+            void toast.offsetWidth;
+            toast.classList.remove('opacity-0', '-translate-y-2');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(removeToast, 4000);
+        }};
+
+        // Universal Delete Modal Helper
+        let pendingDeleteCallback = null;
+        window.openGlobalDeleteModal = function(options) {{
+            options = options || {{}};
+            const modal = document.getElementById('global-delete-modal');
+            if (!modal) return;
+            const titleEl = document.getElementById('global-delete-title');
+            const msgEl = document.getElementById('global-delete-msg');
+            const warningEl = document.getElementById('global-delete-warning');
+            const btnTextEl = document.getElementById('global-delete-btn-text');
+            const confirmBtn = document.getElementById('global-delete-confirm-btn');
+
+            if (options.title) titleEl.innerText = options.title;
+            if (options.message) {{
+                msgEl.innerHTML = options.message;
+            }} else if (options.itemName) {{
+                msgEl.innerHTML = `Bạn có chắc chắn muốn xóa <span class="font-semibold text-brand-deep">${options.itemName}</span>?`;
+            }} else {{
+                msgEl.innerText = 'Bạn có chắc chắn muốn xóa bản ghi này?';
+            }}
+            if (options.warning) warningEl.innerText = options.warning;
+            if (options.submitText) btnTextEl.innerText = options.submitText;
+
+            pendingDeleteCallback = options.onConfirm || null;
+            confirmBtn.onclick = function() {{
+                if (pendingDeleteCallback) pendingDeleteCallback();
+                closeGlobalDeleteModal();
+                showToast(options.successMsg || 'Đã thực hiện xóa dữ liệu thành công!', 'success');
+            }};
+
+            modal.classList.remove('hidden');
+        }};
+
+        window.closeGlobalDeleteModal = function() {{
+            const modal = document.getElementById('global-delete-modal');
+            if (modal) modal.classList.add('hidden');
+            pendingDeleteCallback = null;
+        }};
+
+        document.addEventListener('DOMContentLoaded', () => {{
+            const modal = document.getElementById('global-delete-modal');
+            if (modal) {{
+                modal.addEventListener('click', (e) => {{
+                    if (e.target === modal) closeGlobalDeleteModal();
+                }});
+            }}
+        }});
     </script>
 </body>
-
 </html>
-
-
-

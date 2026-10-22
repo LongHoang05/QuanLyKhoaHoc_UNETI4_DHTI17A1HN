@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="web_standard" name="shell-type">
+    <title>Quản lý Học viên - UNETI ĐÀO TẠO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        @layer base {
+            html, body { margin: 0; padding: 0; font-family: 'Be Vietnam Pro', 'Inter', sans-serif; }
+            body { overscroll-behavior: none; }
+            main > :first-child { margin-top: 0 !important; }
+            main > :last-child { margin-bottom: 0 !important; }
+        }
+        ::-webkit-scrollbar { display: none; }
+        .custom-scrollbar::-webkit-scrollbar {
+            display: block !important;
+            height: 6px !important;
+            width: 6px !important;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #F1F5F9;
+            border-radius: 9999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #0052cc;
+        }
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #F1F5F9;
+        }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-error-container": "#93000a",
+                        "brand-deep": "#001656",
+                        "border-subtle": "#F1F5F9",
+                        "secondary": "#994700",
+                        "canvas-base": "#F8FAFC",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed": "#321200",
+                        "secondary-container": "#fb7800",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#001848",
+                        "tertiary-fixed-dim": "#b7c4ff",
+                        "success-emerald": "#10B981",
+                        "tertiary": "#475797",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary-container": "#592600",
+                        "on-background": "#0b1c30",
+                        "border-standard": "#E2E8F0",
+                        "outline": "#727687",
+                        "primary-container": "#0068ff",
+                        "tertiary-container": "#6070b1",
+                        "secondary-fixed": "#ffdbc8",
+                        "on-primary": "#ffffff",
+                        "surface-white": "#FFFFFF",
+                        "surface-container-highest": "#d3e4fe",
+                        "secondary-fixed-dim": "#ffb68b",
+                        "outline-variant": "#c2c6d8",
+                        "surface-container-low": "#eff4ff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#753400",
+                        "error": "#ba1a1a",
+                        "inverse-surface": "#213145",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-primary-fixed-variant": "#0040a2",
+                        "on-tertiary-container": "#fcf9ff",
+                        "primary": "#0052cc",
+                        "on-primary-container": "#fbf9ff",
+                        "surface": "#f8f9ff",
+                        "on-tertiary-fixed-variant": "#324381",
+                        "surface-variant": "#d3e4fe",
+                        "inverse-primary": "#b2c5ff",
+                        "surface-container": "#e5eeff",
+                        "primary-fixed-dim": "#b2c5ff",
+                        "tertiary-fixed": "#dde1ff",
+                        "on-surface-variant": "#424655",
+                        "on-tertiary-fixed": "#001552",
+                        "primary-fixed": "#dae2ff",
+                        "surface-tint": "#0055d4",
+                        "surface-container-high": "#dce9ff",
+                        "surface-bright": "#f8f9ff",
+                        "on-surface": "#0b1c30",
+                        "danger-crimson": "#EF4444",
+                        "background": "#f8f9ff",
+                        "warning-amber": "#F59E0B"
+                    },
+                    borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" },
+                    spacing: {
+                        "space-xl": "2rem",
+                        "space-sm": "0.5rem",
+                        "space-xs": "0.25rem",
+                        "gutter-mobile": "0.75rem",
+                        "space-md": "1rem",
+                        "margin-mobile": "1rem",
+                        gutter: "1.25rem",
+                        "space-lg": "1.5rem",
+                        margin: "2rem"
+                    },
+                    fontFamily: {
+                        display: ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "headline-md": ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "label-md": ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "headline-lg-mobile": ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "headline-sm": ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "body-lg": ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "metric-stat": ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "label-sm": ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "body-sm": ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "display-mobile": ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "body-md": ["'Be Vietnam Pro'", "Inter", "sans-serif"],
+                        "headline-lg": ["'Be Vietnam Pro'", "Inter", "sans-serif"]
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="bg-canvas-base font-body-md text-body-md text-on-surface antialiased min-h-screen">
+    <div class="flex min-h-screen w-full bg-canvas-base">
+
+        <!-- Left Sidebar Navigation (Prep.vn Style) -->
+        <aside class="w-64 lg:w-72 flex-shrink-0 bg-surface-white border-r border-border-standard h-screen sticky top-0 flex flex-col justify-between p-4 lg:p-5 z-40 select-none">
+            <div class="flex flex-col gap-4 overflow-hidden">
+                <!-- Logo & School Brand -->
+                <div class="flex flex-col gap-3">
+                    <a href="index.html" class="flex items-center gap-3 group">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-primary-container text-surface-white flex items-center justify-center font-bold text-xl shadow-sm shadow-primary/20 group-hover:scale-105 transition-transform shrink-0">
+                            <span class="material-symbols-outlined text-[24px]">school</span>
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                            <span class="font-headline-sm text-[15px] text-brand-deep tracking-tight font-extrabold leading-tight truncate">UNETI ĐÀO TẠO</span>
+                            <span class="font-label-sm text-[10px] text-outline leading-tight truncate">Quản Lý Đăng Ký Khóa Học</span>
+                        </div>
+                    </a>
+
+                    <!-- Semester Selector -->
+                    <button class="w-full inline-flex items-center justify-between px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-brand-deep font-label-md text-label-md transition-colors border border-border-subtle cursor-pointer" type="button">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm text-primary leading-none">calendar_month</span>
+                            <span class="font-semibold text-xs">Năm học 2024 - 2025</span>
+                        </div>
+                        <span class="material-symbols-outlined text-xs leading-none text-outline">arrow_drop_down</span>
+                    </button>
+                </div>
+
+                <!-- Vertical Navigation Links (Scrollable) -->
+                <nav class="flex flex-col gap-1 overflow-y-auto max-h-[calc(100vh-230px)] pr-1 custom-scrollbar" id="sidebar-nav">
+                    <div class="text-[10px] font-bold text-outline uppercase tracking-wider px-3 mt-2.5 mb-1 font-label-sm">Quản trị đào tạo</div>
+
+                <a href="index.html" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[19px] text-outline">dashboard</span>
+                        <span>Tổng quan</span>
+                    </div>
+                </a>
+
+                <a href="admin-chuong-trinh.html" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[19px] text-outline">layers</span>
+                        <span>Chương trình ĐT</span>
+                    </div>
+                </a>
+
+                <a href="admin-lop-hoc.html" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[19px] text-outline">meeting_room</span>
+                        <span>Quản lý Lớp học</span>
+                    </div>
+                </a>
+
+                <a href="admin-dang-ky.html" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[19px] text-outline">how_to_reg</span>
+                        <span>Xét duyệt & Học phí</span>
+                    </div>
+                </a>
+
+                <a href="admin-buoi-hoc.html" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[19px] text-outline">calendar_today</span>
+                        <span>Lịch học (Buổi học)</span>
+                    </div>
+                </a>
+
+                <a href="admin-ket-qua.html" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[19px] text-outline">workspace_premium</span>
+                        <span>Kết quả học tập</span>
+                    </div>
+                </a>
+
+                <a href="admin-thong-ke.html" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[19px] text-outline">bar_chart</span>
+                        <span>Báo cáo thống kê</span>
+                    </div>
+                </a>
+
+                <a href="admin-hoc-vien.html" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl bg-primary text-surface-white font-bold shadow-sm transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[19px] text-white">group</span>
+                        <span>Quản lý Học viên</span>
+                    </div>
+                </a>
+
+                <a href="admin-tai-khoan.html" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[19px] text-outline">manage_accounts</span>
+                        <span>Quản lý Tài khoản</span>
+                    </div>
+                </a>
+<div class="text-[10px] font-bold text-outline uppercase tracking-wider px-3 mt-2.5 mb-1 font-label-sm">Cổng sinh viên</div>
+
+                <a href="hoc-vien.html" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-[19px] text-outline">app_registration</span>
+                        <span>Cổng học viên</span>
+                    </div>
+                </a>
+                </nav>
+            </div>
+
+            <!-- Sidebar Bottom User Profile -->
+            <div class="flex flex-col gap-2 pt-3 border-t border-border-standard">
+                <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low/60 hover:bg-surface-container-low transition-colors">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-primary-container text-surface-white font-bold text-xs flex items-center justify-center ring-2 ring-border-standard shrink-0">
+                            A
+                        </div>
+                        <div class="flex flex-col text-left truncate">
+                            <span class="font-label-md text-xs text-brand-deep leading-tight font-bold truncate">Nguyễn Tùng Dương</span>
+                            <span class="font-label-sm text-[11px] text-outline leading-tight font-medium">Admin Quản trị viên</span>
+                        </div>
+                    </div>
+                    <a href="dang-nhap.html" title="Đăng xuất" class="p-1.5 rounded-lg text-outline hover:text-rose-600 hover:bg-rose-50 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">logout</span>
+                    </a>
+                </div>
+                <div class="flex items-center justify-between text-[10px] text-outline px-1 font-label-sm">
+                    <span>Đề tài 36 • .NET 10</span>
+                    <span class="inline-flex items-center gap-1 text-success-emerald font-semibold">
+                        <span class="w-1.5 h-1.5 rounded-full bg-success-emerald animate-pulse"></span>Trực tuyến
+                    </span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right Content Main Wrapper -->
+        <div class="flex-1 min-w-0 flex flex-col min-h-screen bg-canvas-base">
+            <!-- Compact Top Navigation Header -->
+            <header class="w-full bg-surface-white border-b border-border-subtle h-16 px-gutter flex items-center justify-between sticky top-0 z-30 shadow-[0_1px_8px_rgba(0,22,86,0.03)]">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">search</span>
+                        <input id="globalTopSearch" class="w-64 sm:w-80 pl-9 pr-10 py-1.5 rounded-xl bg-canvas-base border border-border-standard text-on-surface placeholder:text-outline font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container transition-all" placeholder="Tìm kiếm nhanh toàn hệ thống..." type="text">
+                        <span class="absolute right-2.5 top-1/2 -translate-y-1/2 font-label-sm text-label-sm text-outline border border-border-standard rounded px-1.5 py-0.5 bg-surface-white pointer-events-none">⌘K</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-space-sm">
+                    <!-- Quick Role Switch / Test Account helper -->
+                    <a href="dang-nhap.html" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-brand-deep font-semibold text-xs transition-colors border border-border-subtle" title="Chuyển tài khoản">
+                        <span class="material-symbols-outlined text-sm text-primary">switch_account</span>
+                        <span class="hidden sm:inline">Admin / Giáo vụ</span>
+                    </a>
+                    <button onclick="location.reload()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-white border border-border-standard text-brand-deep hover:bg-canvas-base font-label-md text-label-md transition-colors text-xs shadow-xs cursor-pointer" type="button" title="Làm mới trang">
+                        <span class="material-symbols-outlined text-sm text-outline">sync</span>
+                        <span class="hidden sm:inline">Đồng bộ</span>
+                    </button>
+                    <button onclick="showToast('Bạn có 1 thông báo mới: 12 học viên vừa nộp đơn đăng ký lớp ASP.NET Core', 'info')" class="relative p-2 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors cursor-pointer" title="Thông báo" type="button">
+                        <span class="material-symbols-outlined text-xl">notifications</span>
+                        <span class="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-danger-crimson text-white font-label-sm text-[9px] font-bold">1</span>
+                    </button>
+                    <a href="index.html" class="p-2 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors cursor-pointer" title="Trợ giúp & Tổng quan">
+                        <span class="material-symbols-outlined text-xl">help_outline</span>
+                    </a>
+                </div>
+            </header>
+
+            <!-- Main Content Body -->
+            <main class="flex-1 px-gutter py-space-lg flex flex-col gap-y-6">
+
+<div id="hocvien-content-area" class="flex flex-col gap-y-6 transition-opacity duration-200">
+    <!-- Sub-header Navigation Bar -->
+    <section class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border-standard">
+        <div>
+            <div class="flex items-center gap-2 text-outline font-label-sm text-label-sm uppercase tracking-wider mb-1">
+                <span>MODULE 3 • NGUYỄN ĐỨC LINH</span>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <span class="text-brand-deep font-semibold">QUẢN LÝ HỌC VIÊN</span>
+            </div>
+            <h1 class="font-headline-md text-headline-md text-brand-deep font-bold tracking-tight flex items-center gap-2">
+                Danh sách Hồ sơ Học viên
+                <span class="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold">23103100042</span>
+            </h1>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+            <button onclick="exportTableToCSV('danh-sach-hoc-vien.csv')" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-surface-container-low text-brand-deep font-label-md text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-xs cursor-pointer">
+                <span class="material-symbols-outlined text-[18px] text-primary">file_download</span>
+                <span class="hidden sm:inline">Xuất Excel</span>
+            </button>
+            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-[#0047b3] text-surface-white font-label-md text-xs px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]">person_add</span>
+                <span>Thêm học viên</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- 3 Stat Cards (Top KPI) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-outline font-label-md text-label-md">Tổng số học viên</span>
+                <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined text-[20px]">group</span>
+                </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+                <span class="font-display text-[30px] leading-8 text-brand-deep tracking-tight font-black font-mono">1,420</span>
+                <span class="text-xs text-outline font-medium">hồ sơ đã lưu</span>
+            </div>
+        </div>
+
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-outline font-label-md text-label-md">Học viên đang học</span>
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                    <span class="material-symbols-outlined text-[20px]">school</span>
+                </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+                <span class="font-display text-[30px] leading-8 text-emerald-700 tracking-tight font-black font-mono">1,280</span>
+                <span class="text-xs text-emerald-600 font-medium">hồ sơ tích cực</span>
+            </div>
+        </div>
+
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-outline font-label-md text-label-md">Đã tốt nghiệp / Hoàn thành</span>
+                <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                    <span class="material-symbols-outlined text-[20px]">verified</span>
+                </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+                <span class="font-display text-[30px] leading-8 text-blue-700 tracking-tight font-black font-mono">140</span>
+                <span class="text-xs text-blue-600 font-medium">đạt chứng nhận</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters & Search Toolbar -->
+    <div class="bg-surface-white rounded-2xl p-4 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
+            <div class="relative flex-1 min-w-[220px]">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span>
+                <input type="text" id="hvSearchInput" onkeyup="filterHvTable()" placeholder="Tìm theo họ tên, email, SĐT, mã HV..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep">
+            </div>
+
+            <!-- Filter Trạng thái -->
+            <div class="min-w-[150px]">
+                <select id="filterHvStatus" onchange="filterHvTable()" class="w-full px-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:border-primary text-brand-deep">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="Đang học">Đang học</option>
+                    <option value="Đã tốt nghiệp">Đã tốt nghiệp</option>
+                    <option value="Bảo lưu">Bảo lưu</option>
+                    <option value="Đã nghỉ">Đã nghỉ</option>
+                </select>
+            </div>
+
+            <!-- Filter Trình độ học vấn -->
+            <div class="min-w-[160px]">
+                <select id="filterHvLevel" onchange="filterHvTable()" class="w-full px-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:border-primary text-brand-deep">
+                    <option value="">Tất cả trình độ</option>
+                    <option value="Đại học">Đại học</option>
+                    <option value="Cao đẳng">Cao đẳng</option>
+                    <option value="THPT">THPT</option>
+                    <option value="Sau đại học">Sau đại học</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[960px]" id="hvTable">
+                <thead>
+                    <tr class="bg-surface-container-lowest border-b border-border-standard text-[11px] font-bold text-outline uppercase tracking-wider">
+                        <th class="py-3.5 px-4 w-12 text-center">#</th>
+                        <th class="py-3.5 px-4">Mã HV</th>
+                        <th class="py-3.5 px-4">Họ và Tên</th>
+                        <th class="py-3.5 px-4">Liên hệ</th>
+                        <th class="py-3.5 px-4">Ngày sinh / Giới tính</th>
+                        <th class="py-3.5 px-4">Trình độ & Nghề nghiệp</th>
+                        <th class="py-3.5 px-4 text-center">Trạng thái</th>
+                        <th class="py-3.5 px-4 text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle text-xs text-brand-deep" id="hvTableBody">
+                    <!-- Row 1 -->
+                    <tr class="hv-row hover:bg-canvas-base/60 transition-colors" data-id="1" data-mahv="HV001" data-name="Nguyễn Văn An" data-email="an.nguyen@gmail.com" data-phone="0912345601" data-birth="15/05/2003" data-gender="Nam" data-address="Hà Nội" data-level="Đại học" data-job="Sinh viên CNTT UNETI" data-status="Đang học">
+                        <td class="py-3.5 px-4 text-center text-outline font-mono text-[11px]">1</td>
+                        <td class="py-3.5 px-4 font-mono font-semibold text-primary">#HV001</td>
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-xs shrink-0">A</div>
+                                <div>
+                                    <a href="javascript:void(0)" onclick="openStudentDetails(1)" class="font-bold text-brand-deep hover:text-primary transition-colors">
+                                        Nguyễn Văn An
+                                    </a>
+                                    <span class="text-[11px] text-outline block">Tài khoản: hocvien01</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 font-mono">
+                            <span class="text-brand-deep block">an.nguyen@gmail.com</span>
+                            <span class="text-outline text-[11px]">0912345601</span>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <span class="font-mono text-brand-deep block">15/05/2003</span>
+                            <span class="text-outline text-[11px]">Nam</span>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <span class="font-semibold text-brand-deep block">Đại học</span>
+                            <span class="text-outline text-[11px]">Sinh viên CNTT UNETI</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-center">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-success-emerald/10 text-success-emerald font-semibold text-[11px]">
+                                <span class="h-1.5 w-1.5 rounded-full bg-success-emerald"></span>Đang học
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right">
+                            <div class="inline-flex items-center gap-1">
+                                <button onclick="openStudentDetails(1)" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container-low" title="Xem chi tiết">
+                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                </button>
+                                <button onclick="openEditDrawerFromHv(this)" class="p-1.5 rounded-lg text-outline hover:text-brand-deep hover:bg-surface-container-low" title="Sửa hồ sơ">
+                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                </button>
+                                <button onclick="confirmDeleteHv(1, 'Nguyễn Văn An')" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50" title="Xóa">
+                                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Row 2 -->
+                    <tr class="hv-row hover:bg-canvas-base/60 transition-colors" data-id="2" data-mahv="HV002" data-name="Trần Minh Tuấn" data-email="tuan.tm@gmail.com" data-phone="0912345602" data-birth="20/08/2002" data-gender="Nam" data-address="Bắc Ninh" data-level="Đại học" data-job="Lập trình viên Frontend" data-status="Đang học">
+                        <td class="py-3.5 px-4 text-center text-outline font-mono text-[11px]">2</td>
+                        <td class="py-3.5 px-4 font-mono font-semibold text-primary">#HV002</td>
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-xs shrink-0">T</div>
+                                <div>
+                                    <a href="javascript:void(0)" onclick="openStudentDetails(2)" class="font-bold text-brand-deep hover:text-primary transition-colors">
+                                        Trần Minh Tuấn
+                                    </a>
+                                    <span class="text-[11px] text-outline block">Tài khoản: hocvien02</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 font-mono">
+                            <span class="text-brand-deep block">tuan.tm@gmail.com</span>
+                            <span class="text-outline text-[11px]">0912345602</span>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <span class="font-mono text-brand-deep block">20/08/2002</span>
+                            <span class="text-outline text-[11px]">Nam</span>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <span class="font-semibold text-brand-deep block">Đại học</span>
+                            <span class="text-outline text-[11px]">Lập trình viên Frontend</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-center">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-success-emerald/10 text-success-emerald font-semibold text-[11px]">
+                                <span class="h-1.5 w-1.5 rounded-full bg-success-emerald"></span>Đang học
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right">
+                            <div class="inline-flex items-center gap-1">
+                                <button onclick="openStudentDetails(2)" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container-low" title="Xem chi tiết">
+                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                </button>
+                                <button onclick="openEditDrawerFromHv(this)" class="p-1.5 rounded-lg text-outline hover:text-brand-deep hover:bg-surface-container-low" title="Sửa hồ sơ">
+                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                </button>
+                                <button onclick="confirmDeleteHv(2, 'Trần Minh Tuấn')" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50" title="Xóa">
+                                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Row 3 -->
+                    <tr class="hv-row hover:bg-canvas-base/60 transition-colors" data-id="3" data-mahv="HV003" data-name="Lê Thu Hà" data-email="ha.lt@gmail.com" data-phone="0912345603" data-birth="10/11/2004" data-gender="Nữ" data-address="Hà Nội" data-level="Đại học" data-job="Chuyên viên dữ liệu" data-status="Đang học">
+                        <td class="py-3.5 px-4 text-center text-outline font-mono text-outline text-[11px]">3</td>
+                        <td class="py-3.5 px-4 font-mono font-semibold text-primary">#HV003</td>
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-800 font-bold flex items-center justify-center text-xs shrink-0">H</div>
+                                <div>
+                                    <a href="javascript:void(0)" onclick="openStudentDetails(3)" class="font-bold text-brand-deep hover:text-primary transition-colors">
+                                        Lê Thu Hà
+                                    </a>
+                                    <span class="text-[11px] text-outline block">Tài khoản: hocvien03</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 font-mono">
+                            <span class="text-brand-deep block">ha.lt@gmail.com</span>
+                            <span class="text-outline text-[11px]">0912345603</span>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <span class="font-mono text-brand-deep block">10/11/2004</span>
+                            <span class="text-outline text-[11px]">Nữ</span>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <span class="font-semibold text-brand-deep block">Đại học</span>
+                            <span class="text-outline text-[11px]">Chuyên viên dữ liệu</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-center">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-success-emerald/10 text-success-emerald font-semibold text-[11px]">
+                                <span class="h-1.5 w-1.5 rounded-full bg-success-emerald"></span>Đang học
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right">
+                            <div class="inline-flex items-center gap-1">
+                                <button onclick="openStudentDetails(3)" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container-low" title="Xem chi tiết">
+                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                </button>
+                                <button onclick="openEditDrawerFromHv(this)" class="p-1.5 rounded-lg text-outline hover:text-brand-deep hover:bg-surface-container-low" title="Sửa hồ sơ">
+                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                </button>
+                                <button onclick="confirmDeleteHv(3, 'Lê Thu Hà')" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50" title="Xóa">
+                                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Row 4 -->
+                    <tr class="hv-row hover:bg-canvas-base/60 transition-colors" data-id="4" data-mahv="HV005" data-name="Lê Hoàng Nam" data-email="nam.lh@gmail.com" data-phone="0912345605" data-birth="18/07/2001" data-gender="Nam" data-address="Nam Định" data-level="Đại học" data-job="UI/UX Designer" data-status="Đã tốt nghiệp">
+                        <td class="py-3.5 px-4 text-center text-outline font-mono text-[11px]">4</td>
+                        <td class="py-3.5 px-4 font-mono font-semibold text-primary">#HV005</td>
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-800 font-bold flex items-center justify-center text-xs shrink-0">N</div>
+                                <div>
+                                    <a href="javascript:void(0)" onclick="openStudentDetails(4)" class="font-bold text-brand-deep hover:text-primary transition-colors">
+                                        Lê Hoàng Nam
+                                    </a>
+                                    <span class="text-[11px] text-outline block">Tài khoản: hocvien05</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 font-mono">
+                            <span class="text-brand-deep block">nam.lh@gmail.com</span>
+                            <span class="text-outline text-[11px]">0912345605</span>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <span class="font-mono text-brand-deep block">18/07/2001</span>
+                            <span class="text-outline text-[11px]">Nam</span>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <span class="font-semibold text-brand-deep block">Đại học</span>
+                            <span class="text-outline text-[11px]">UI/UX Designer</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-center">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 font-semibold text-[11px]">
+                                <span class="h-1.5 w-1.5 rounded-full bg-primary"></span>Đã tốt nghiệp
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right">
+                            <div class="inline-flex items-center gap-1">
+                                <button onclick="openStudentDetails(4)" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container-low" title="Xem chi tiết">
+                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                </button>
+                                <button onclick="openEditDrawerFromHv(this)" class="p-1.5 rounded-lg text-outline hover:text-brand-deep hover:bg-surface-container-low" title="Sửa hồ sơ">
+                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                </button>
+                                <button onclick="confirmDeleteHv(4, 'Lê Hoàng Nam')" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50" title="Xóa">
+                                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ================= RIGHT SLIDE-OVER DRAWER (CREATE / EDIT STUDENT) ================= -->
+<div id="drawer-backdrop" onclick="closeDrawer()" class="fixed inset-0 bg-brand-deep/40 backdrop-blur-xs z-50 transition-opacity duration-300 opacity-0 pointer-events-none"></div>
+
+<aside id="drawer" class="fixed top-0 right-0 h-full w-full max-w-lg bg-surface-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+    <div class="p-6 border-b border-border-standard flex items-center justify-between bg-surface-container-lowest">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-[22px]">person_add</span>
+            </div>
+            <div>
+                <h2 class="font-bold text-base text-brand-deep" id="drawer-title">Thêm Học Viên Mới</h2>
+                <p class="text-xs text-outline">Nhập thông tin hồ sơ học viên</p>
+            </div>
+        </div>
+        <button onclick="closeDrawer()" class="p-2 rounded-xl hover:bg-surface-container-high text-outline hover:text-brand-deep">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+    </div>
+
+    <form id="drawer-form" onsubmit="handleDrawerSubmit(event)" class="flex-1 overflow-y-auto p-6 space-y-4 text-xs">
+        <input type="hidden" id="drawer-mahv" value="0">
+
+        <div>
+            <label class="block font-bold text-brand-deep uppercase mb-1">Họ và tên <span class="text-rose-500">*</span></label>
+            <input type="text" id="drawer-name" required placeholder="Nguyễn Văn A" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label class="block font-bold text-brand-deep uppercase mb-1">Số điện thoại <span class="text-rose-500">*</span></label>
+                <input type="tel" id="drawer-phone" required placeholder="0912345678" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-surface-white font-mono focus:outline-none focus:border-primary text-brand-deep">
+            </div>
+            <div>
+                <label class="block font-bold text-brand-deep uppercase mb-1">Email <span class="text-rose-500">*</span></label>
+                <input type="email" id="drawer-email" required placeholder="student@gmail.com" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label class="block font-bold text-brand-deep uppercase mb-1">Ngày sinh</label>
+                <input type="date" id="drawer-birth" value="2003-05-15" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-surface-white font-mono focus:outline-none focus:border-primary text-brand-deep">
+            </div>
+            <div>
+                <label class="block font-bold text-brand-deep uppercase mb-1">Giới tính</label>
+                <select id="drawer-gender" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep">
+                    <option value="Nam">Nam</option>
+                    <option value="Nữ">Nữ</option>
+                </select>
+            </div>
+        </div>
+
+        <div>
+            <label class="block font-bold text-brand-deep uppercase mb-1">Địa chỉ thường trú</label>
+            <input type="text" id="drawer-address" placeholder="Hà Nội" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label class="block font-bold text-brand-deep uppercase mb-1">Trình độ học vấn</label>
+                <select id="drawer-level" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep">
+                    <option value="Đại học">Đại học</option>
+                    <option value="Cao đẳng">Cao đẳng</option>
+                    <option value="THPT">THPT</option>
+                    <option value="Sau đại học">Sau đại học</option>
+                </select>
+            </div>
+            <div>
+                <label class="block font-bold text-brand-deep uppercase mb-1">Trạng thái</label>
+                <select id="drawer-status" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep">
+                    <option value="Đang học">Đang học</option>
+                    <option value="Đã tốt nghiệp">Đã tốt nghiệp</option>
+                    <option value="Bảo lưu">Bảo lưu</option>
+                    <option value="Đã nghỉ">Đã nghỉ</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-border-standard flex items-center justify-end gap-3">
+            <button type="button" onclick="closeDrawer()" class="px-4 py-2.5 font-semibold rounded-xl border border-border-standard text-outline hover:text-brand-deep">Hủy bỏ</button>
+            <button type="submit" class="px-5 py-2.5 font-semibold rounded-xl bg-primary text-surface-white hover:bg-[#0047b3] shadow-md shadow-primary/20 flex items-center gap-1.5 cursor-pointer">
+                <span class="material-symbols-outlined text-[16px]">save</span>
+                <span>Lưu hồ sơ</span>
+            </button>
+        </div>
+    </form>
+</aside>
+
+<!-- ================= STUDENT DETAILS MODAL ================= -->
+<div id="studentDetailsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-deep/50 backdrop-blur-xs hidden transition-all duration-300">
+    <div class="bg-surface-white max-w-xl w-full rounded-3xl shadow-2xl border border-border-subtle p-6 space-y-4 animate-scale-up" onclick="event.stopPropagation()">
+        <div class="flex items-center justify-between pb-3 border-b border-border-standard">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
+                    HV
+                </div>
+                <div>
+                    <h3 class="font-bold text-base text-brand-deep" id="detailHvName">Hồ Sơ Học Viên</h3>
+                    <p class="text-xs text-outline" id="detailHvSub">Mã học viên: #HV001</p>
+                </div>
+            </div>
+            <button onclick="closeStudentDetails()" class="p-1.5 rounded-xl hover:bg-surface-container-low text-outline">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 bg-canvas-base/80 p-4 rounded-2xl border border-border-subtle text-xs">
+            <div>
+                <span class="text-outline block mb-0.5">Họ và tên:</span>
+                <strong class="text-brand-deep text-sm" id="detailHvFullName">Nguyễn Văn An</strong>
+            </div>
+            <div>
+                <span class="text-outline block mb-0.5">Số điện thoại:</span>
+                <span class="font-mono text-brand-deep font-semibold" id="detailHvPhone">0912345601</span>
+            </div>
+            <div>
+                <span class="text-outline block mb-0.5">Email liên hệ:</span>
+                <span class="font-mono text-brand-deep font-semibold" id="detailHvEmail">an.nguyen@gmail.com</span>
+            </div>
+            <div>
+                <span class="text-outline block mb-0.5">Địa chỉ:</span>
+                <span class="text-brand-deep font-semibold" id="detailHvAddress">Hà Nội</span>
+            </div>
+            <div>
+                <span class="text-outline block mb-0.5">Trình độ:</span>
+                <span class="text-brand-deep font-semibold" id="detailHvLevel">Đại học</span>
+            </div>
+            <div>
+                <span class="text-outline block mb-0.5">Trạng thái:</span>
+                <span class="px-2 py-0.5 rounded-full bg-success-emerald/10 text-success-emerald font-semibold" id="detailHvStatus">Đang học</span>
+            </div>
+        </div>
+
+        <div class="pt-2 flex justify-end">
+            <button onclick="closeStudentDetails()" class="px-4 py-2 rounded-xl bg-surface-container-low text-brand-deep hover:bg-surface-container font-semibold text-xs">
+                Đóng
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const drawerBackdrop = document.getElementById('drawer-backdrop');
+    const drawer = document.getElementById('drawer');
+    let editingHvRow = null;
+
+    function openDrawer(mode) {
+        drawerBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+        drawerBackdrop.classList.add('opacity-100');
+        drawer.classList.remove('translate-x-full');
+        editingHvRow = null;
+        document.getElementById('drawer-title').innerText = 'Thêm Học Viên Mới';
+        document.getElementById('drawer-name').value = '';
+        document.getElementById('drawer-phone').value = '';
+        document.getElementById('drawer-email').value = '';
+    }
+
+    function closeDrawer() {
+        drawerBackdrop.classList.remove('opacity-100');
+        drawerBackdrop.classList.add('opacity-0', 'pointer-events-none');
+        drawer.classList.add('translate-x-full');
+    }
+
+    function openEditDrawerFromHv(btn) {
+        editingHvRow = btn.closest('tr');
+        document.getElementById('drawer-title').innerText = 'Chỉnh Sửa Hồ Sơ Học Viên';
+        document.getElementById('drawer-name').value = editingHvRow.dataset.name;
+        document.getElementById('drawer-phone').value = editingHvRow.dataset.phone;
+        document.getElementById('drawer-email').value = editingHvRow.dataset.email;
+        document.getElementById('drawer-address').value = editingHvRow.dataset.address;
+        document.getElementById('drawer-level').value = editingHvRow.dataset.level;
+        document.getElementById('drawer-status').value = editingHvRow.dataset.status;
+
+        drawerBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+        drawerBackdrop.classList.add('opacity-100');
+        drawer.classList.remove('translate-x-full');
+    }
+
+    function handleDrawerSubmit(e) {
+        e.preventDefault();
+        const name = document.getElementById('drawer-name').value;
+        const phone = document.getElementById('drawer-phone').value;
+        const email = document.getElementById('drawer-email').value;
+
+        if (editingHvRow) {
+            editingHvRow.dataset.name = name;
+            editingHvRow.dataset.phone = phone;
+            editingHvRow.dataset.email = email;
+            editingHvRow.querySelector('a').innerText = name;
+            editingHvRow.children[3].children[0].innerText = email;
+            editingHvRow.children[3].children[1].innerText = phone;
+            showToast(`Đã cập nhật hồ sơ học viên "${name}" thành công!`, 'success');
+        } else {
+            showToast(`Đã thêm mới học viên "${name}" thành công!`, 'success');
+        }
+        closeDrawer();
+    }
+
+    function openStudentDetails(id) {
+        const row = document.querySelector(`tr.hv-row[data-id="${id}"]`);
+        if (!row) return;
+
+        document.getElementById('detailHvName').innerText = `Hồ Sơ: ${row.dataset.name}`;
+        document.getElementById('detailHvSub').innerText = `Mã học viên: #${row.dataset.mahv} • Ngày sinh: ${row.dataset.birth}`;
+        document.getElementById('detailHvFullName').innerText = row.dataset.name;
+        document.getElementById('detailHvPhone').innerText = row.dataset.phone;
+        document.getElementById('detailHvEmail').innerText = row.dataset.email;
+        document.getElementById('detailHvAddress').innerText = row.dataset.address;
+        document.getElementById('detailHvLevel').innerText = row.dataset.level;
+        document.getElementById('detailHvStatus').innerText = row.dataset.status;
+
+        document.getElementById('studentDetailsModal').classList.remove('hidden');
+    }
+
+    function closeStudentDetails() {
+        document.getElementById('studentDetailsModal').classList.add('hidden');
+    }
+
+    function confirmDeleteHv(id, name) {
+        openGlobalDeleteModal({
+            title: 'Xóa hồ sơ học viên?',
+            itemName: name,
+            message: `Bạn có chắc chắn muốn xóa hồ sơ học viên <strong class="text-brand-deep">${name}</strong>?`,
+            warning: 'Thao tác này sẽ loại bỏ toàn bộ dữ liệu đăng ký và học phí liên quan.',
+            submitText: 'Xóa hồ sơ',
+            onConfirm: function() {
+                const row = document.querySelector(`tr.hv-row[data-id="${id}"]`);
+                if (row) row.remove();
+            },
+            successMsg: `Đã xóa hồ sơ học viên "${name}" thành công!`
+        });
+    }
+
+    function filterHvTable() {
+        const query = document.getElementById('hvSearchInput').value.toLowerCase().trim();
+        const status = document.getElementById('filterHvStatus').value;
+        const level = document.getElementById('filterHvLevel').value;
+
+        const rows = document.querySelectorAll('#hvTableBody tr.hv-row');
+        rows.forEach(row => {
+            const name = row.dataset.name.toLowerCase();
+            const mahv = row.dataset.mahv.toLowerCase();
+            const email = row.dataset.email.toLowerCase();
+            const phone = row.dataset.phone;
+            const rowStatus = row.dataset.status;
+            const rowLevel = row.dataset.level;
+
+            const matchQuery = (!query || name.includes(query) || mahv.includes(query) || email.includes(query) || phone.includes(query));
+            const matchStatus = (!status || rowStatus === status);
+            const matchLevel = (!level || rowLevel === level);
+
+            row.style.display = (matchQuery && matchStatus && matchLevel) ? '' : 'none';
+        });
+    }
+
+    function exportTableToCSV(filename) {
+        showToast(`Đã xuất danh sách hồ sơ học viên ra file "${filename}"!`, 'success');
+    }
+</script>
+
+            </main>
+
+            <!-- Footer inside main wrapper -->
+            <footer class="w-full bg-surface-white border-t border-border-subtle py-6">
+                <div class="w-full px-gutter flex flex-col md:flex-row items-center justify-between gap-space-sm text-on-surface-variant font-body-sm text-body-sm">
+                    <div class="flex items-center gap-space-xs">
+                        <span class="font-label-md text-label-md text-brand-deep font-bold">TRƯỜNG ĐẠI HỌC KINH TẾ - KỸ THUẬT CÔNG NGHIỆP</span>
+                        <span class="">•</span>
+                        <span class="">Hệ thống Quản lý Khóa học &amp; Đào tạo</span>
+                    </div>
+                    <div class="font-label-sm text-label-sm text-outline text-right">
+                        © 2025 UNETI. Thực hiện bởi: <strong class="text-brand-deep">Nhóm 5</strong> • Vũ Đình Trường (M1) - Nguyễn Đình Kiên (M2) - Nguyễn Đức Linh (M3) - Nguyễn Hoàng Long (M4) - Nguyễn Tùng Dương (M5).
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Global Delete Modal Component -->
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-deep/40 backdrop-blur-xs hidden transition-all duration-300" id="global-delete-modal">
+        <div class="bg-surface-white max-w-md w-full rounded-2xl shadow-2xl border border-border-subtle p-6 space-y-4 animate-scale-up" onclick="event.stopPropagation()">
+            <div class="w-12 h-12 rounded-2xl bg-[#EF4444]/10 text-danger-crimson flex items-center justify-center">
+                <span class="material-symbols-outlined text-[28px]" id="global-delete-icon">delete_forever</span>
+            </div>
+            <div class="space-y-1.5">
+                <h3 class="font-headline-sm text-headline-sm text-brand-deep font-bold" id="global-delete-title">
+                    Xác nhận xóa?
+                </h3>
+                <p class="font-body-sm text-body-sm text-outline leading-relaxed" id="global-delete-msg">
+                    Bạn có chắc chắn muốn xóa bản ghi này?
+                </p>
+            </div>
+            <div class="bg-error-container/30 border border-danger-crimson/20 rounded-xl p-3 flex items-start gap-2.5">
+                <span class="material-symbols-outlined text-danger-crimson text-[18px] flex-shrink-0 mt-0.5">warning</span>
+                <span class="font-body-sm text-[12px] text-danger-crimson font-medium" id="global-delete-warning">
+                    Hành động này mang tính vĩnh viễn và không thể hoàn tác sau khi xác nhận.
+                </span>
+            </div>
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button type="button" class="border border-border-standard text-brand-deep px-4 py-2 rounded-xl font-label-md text-label-md hover:bg-surface-container-low transition-colors cursor-pointer" onclick="closeGlobalDeleteModal()">
+                    Hủy bỏ
+                </button>
+                <button type="button" id="global-delete-confirm-btn" class="bg-danger-crimson hover:bg-[#d93838] text-surface-white px-4 py-2 rounded-xl font-label-md text-label-md shadow-sm flex items-center gap-1.5 transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                    <span id="global-delete-btn-text">Xóa vĩnh viễn</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Prep.vn Toast Notification Container -->
+    <div id="global-toast-container" class="fixed top-5 right-5 z-[100] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+    <script>
+        // Universal Toast Notification
+        window.showToast = function(message, type = 'success') {{
+            const container = document.getElementById('global-toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            
+            let bgClasses = 'bg-emerald-50/95 border-emerald-200 text-emerald-900';
+            let iconText = 'check_circle';
+            let iconColor = 'text-success-emerald';
+            
+            if (type === 'error') {{
+                bgClasses = 'bg-red-50/95 border-red-200 text-danger-crimson';
+                iconText = 'error';
+                iconColor = 'text-danger-crimson';
+            }} else if (type === 'info') {{
+                bgClasses = 'bg-blue-50/95 border-blue-200 text-brand-deep';
+                iconText = 'info';
+                iconColor = 'text-primary';
+            }}
+
+            toast.className = `pointer-events-auto flex items-center justify-between p-4 rounded-2xl shadow-xl border transition-all duration-300 transform -translate-y-2 opacity-0 backdrop-blur-sm ${bgClasses}`;
+            toast.innerHTML = `
+                <div class="flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-[22px] flex-shrink-0 ${iconColor}">
+                        ${iconText}
+                    </span>
+                    <span class="font-label-md text-label-md font-semibold leading-snug break-words">${message}</span>
+                </div>
+                <button type="button" class="ml-3 text-outline hover:text-brand-deep cursor-pointer flex-shrink-0">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+            `;
+
+            const closeBtn = toast.querySelector('button');
+            const removeToast = () => {{
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', '-translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }};
+            closeBtn.onclick = removeToast;
+
+            container.appendChild(toast);
+            void toast.offsetWidth;
+            toast.classList.remove('opacity-0', '-translate-y-2');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(removeToast, 4000);
+        }};
+
+        // Universal Delete Modal Helper
+        let pendingDeleteCallback = null;
+        window.openGlobalDeleteModal = function(options) {{
+            options = options || {{}};
+            const modal = document.getElementById('global-delete-modal');
+            if (!modal) return;
+            const titleEl = document.getElementById('global-delete-title');
+            const msgEl = document.getElementById('global-delete-msg');
+            const warningEl = document.getElementById('global-delete-warning');
+            const btnTextEl = document.getElementById('global-delete-btn-text');
+            const confirmBtn = document.getElementById('global-delete-confirm-btn');
+
+            if (options.title) titleEl.innerText = options.title;
+            if (options.message) {{
+                msgEl.innerHTML = options.message;
+            }} else if (options.itemName) {{
+                msgEl.innerHTML = `Bạn có chắc chắn muốn xóa <span class="font-semibold text-brand-deep">${options.itemName}</span>?`;
+            }} else {{
+                msgEl.innerText = 'Bạn có chắc chắn muốn xóa bản ghi này?';
+            }}
+            if (options.warning) warningEl.innerText = options.warning;
+            if (options.submitText) btnTextEl.innerText = options.submitText;
+
+            pendingDeleteCallback = options.onConfirm || null;
+            confirmBtn.onclick = function() {{
+                if (pendingDeleteCallback) pendingDeleteCallback();
+                closeGlobalDeleteModal();
+                showToast(options.successMsg || 'Đã thực hiện xóa dữ liệu thành công!', 'success');
+            }};
+
+            modal.classList.remove('hidden');
+        }};
+
+        window.closeGlobalDeleteModal = function() {{
+            const modal = document.getElementById('global-delete-modal');
+            if (modal) modal.classList.add('hidden');
+            pendingDeleteCallback = null;
+        }};
+
+        document.addEventListener('DOMContentLoaded', () => {{
+            const modal = document.getElementById('global-delete-modal');
+            if (modal) {{
+                modal.addEventListener('click', (e) => {{
+                    if (e.target === modal) closeGlobalDeleteModal();
+                }});
+            }}
+        }});
+    </script>
+</body>
+</html>
