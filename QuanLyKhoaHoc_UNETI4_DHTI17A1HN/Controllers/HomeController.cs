@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 
@@ -19,7 +19,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
         public IActionResult Index()
         {
-            // Trang chủ tổng quan dự án, dẫn tới các Module của 5 thành viên
+            return View();
+        }
+
+        public IActionResult AccessDenied()
+        {
             return View();
         }
 

@@ -26,7 +26,7 @@
                 <div>
                     <strong>QUY TẮC MIGRATION (ĐỂ KHÔNG BỊ XUNG ĐỘT GIT):</strong>
                     <p class="small mb-1">Dự án đã có sẵn Migration nền tảng <code>InitialCreate</code> cùng toàn bộ Models và Seed Data.</p>
-                    <p class="small mb-0 fw-bold text-danger">Mọi thành viên KHÔNG ĐƯỢC chạy "Add-Migration". Mỗi người chỉ cần mở Terminal gõ duy nhất lệnh:</p>
+                    <p class="small mb-0 fw-bold text-danger">Mọi thành viên KHÔNG ĐƯỢC chạy ""Add-Migration"". Mỗi người chỉ cần mở Terminal gõ duy nhất lệnh:</p>
                     <code class="bg-dark text-warning p-1 rounded d-inline-block mt-1">dotnet ef database update</code>
                 </div>
             </div>
@@ -63,15 +63,28 @@
                         <code>TaiKhoan</code>, <code>ChuongTrinhDaoTao</code>
                     </div>
 
-                    <div class="small">
+                    <div class="small mb-3">
                         <strong class="text-danger">File tự tạo trong branch:</strong>
                         <ul class="ps-3 mb-0 text-muted">
                             <li><code>Controllers/TaiKhoanController.cs</code></li>
                             <li><code>Controllers/ChuongTrinhDaoTaoController.cs</code></li>
-                            <li><code>Views/TaiKhoan/DangNhap.cshtml</code></li>
-                            <li><code>Views/ChuongTrinhDaoTao/Index.cshtml</code></li>
-                            <li><code>Views/ChuongTrinhDaoTao/Create.cshtml</code></li>
+                            <li><code>Controllers/AdminController.cs</code></li>
                         </ul>
+                    </div>
+
+                    <div class="pt-2 border-top">
+                        <strong class="text-primary small d-block mb-2">Truy cập nhanh chức năng:</strong>
+                        <div class="d-flex flex-column gap-1">
+                            <a asp-controller="ChuongTrinhDaoTao" asp-action="Index" class="btn btn-sm btn-primary text-start">
+                                <i class="bi bi-collection me-1"></i> Chương trình đào tạo (M1)
+                            </a>
+                            <a asp-controller="TaiKhoan" asp-action="Index" class="btn btn-sm btn-outline-danger text-start">
+                                <i class="bi bi-people me-1"></i> Quản lý Tài khoản (Admin)
+                            </a>
+                            <a asp-controller="Admin" asp-action="Index" class="btn btn-sm btn-outline-warning text-start">
+                                <i class="bi bi-speedometer2 me-1"></i> Admin Dashboard (Chart.js)
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -204,7 +217,7 @@
                 <div class="card-body">
                     <p class="small text-muted mb-2">1. Clone & tạo branch làm bài riêng:</p>
                     <div class="p-2 bg-light border rounded mb-2 font-monospace small">
-                        git checkout -b feature/m[X]-[ten-sv]
+                        git checkout -b feature/module-1-truong
                     </div>
                     <p class="small text-muted mb-2">2. Cập nhật database mẫu:</p>
                     <div class="p-2 bg-light border rounded mb-2 font-monospace small">
@@ -213,8 +226,8 @@
                     <p class="small text-muted mb-2">3. Sau khi code xong commit & push:</p>
                     <div class="p-2 bg-light border rounded font-monospace small">
                         git add .<br/>
-                        git commit -m "[MaSV] [Module X] Noi dung"<br/>
-                        git push origin feature/m[X]-[ten-sv]
+                        git commit -m ""[23103100026] [Module 1] Hoan thanh""<br/>
+                        git push origin feature/module-1-truong
                     </div>
                 </div>
             </div>

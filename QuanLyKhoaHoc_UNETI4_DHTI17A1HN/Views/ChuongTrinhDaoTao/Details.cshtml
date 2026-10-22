@@ -1,0 +1,129 @@
+@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.ChuongTrinhDaoTao
+@using Microsoft.AspNetCore.Http
+@{
+    ViewData["Title"] = "Chi Tiết Chương Trình Đào Tạo";
+    var vaiTro = Context.Session.GetString("VaiTro");
+    var isAdmin = vaiTro == "Admin";
+}
+
+<!--
+// ========================================================
+// Họ và tên: Vũ Đình Trường - MSV: 23103100026
+// Phụ trách: Module 1 - Chi tiết Chương trình đào tạo & Lớp học trực thuộc
+// ========================================================
+-->
+
+<div class="container py-4">
+    <!-- Breadcrumb & Nav -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a asp-action="Index" class="btn btn-outline-secondary px-3 py-2 rounded-3">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+        </a>
+        @if (isAdmin)
+        {
+            <div class="d-flex gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.MaChuongTrinh" class="btn btn-warning px-3 py-2 fw-semibold rounded-3">
+                    <i class="bi bi-pencil-square me-1"></i> Chỉnh Sửa
+                </a>
+            </div>
+        }
+    </div>
+
+    <!-- Thông tin chi tiết Card -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="card-header bg-gradient bg-primary text-white py-4 px-4 border-0">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="badge bg-white text-primary px-3 py-2 fw-bold">MÃ: #@Model.MaChuongTrinh</span>
+                @if (Model.TrangThai)
+                {
+                    <span class="badge bg-success px-3 py-2"><i class="bi bi-check-circle me-1"></i> Đang hoạt động</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary px-3 py-2"><i class="bi bi-pause-circle me-1"></i> Tạm ngưng</span>
+                }
+            </div>
+            <h3 class="fw-bold mt-3 mb-1">@Model.TenChuongTrinh</h3>
+            <p class="text-white-50 small mb-0">Ngày tạo: @Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</p>
+        </div>
+
+        <div class="card-body p-4 bg-white">
+            <div class="row g-4">
+                <div class="col-md-8">
+                    <h6 class="fw-bold text-secondary text-uppercase small mb-2">Mô tả chương trình</h6>
+                    <p class="text-dark bg-light p-3 rounded-3 mb-0" style="white-space: pre-line;">
+                        @(string.IsNullOrEmpty(Model.MoTa) ? "Chưa có nội dung mô tả cho chương trình đào tạo này." : Model.MoTa)
+                    </p>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-light bg-light rounded-3 p-3">
+                        <h6 class="fw-bold text-secondary text-uppercase small mb-3">Thông tin liên hệ</h6>
+                        <div class="mb-2">
+                            <i class="bi bi-envelope-at-fill text-primary me-2"></i>
+                            <strong>Email:</strong> @(Model.EmailLienHe ?? "Chưa thiết lập")
+                        </div>
+                        <div>
+                            <i class="bi bi-collection text-primary me-2"></i>
+                            <strong>Số lớp học mở:</strong> @(Model.LopHocs?.Count ?? 0) lớp
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách các lớp học trực thuộc chương trình -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-white py-3 px-4 border-0 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold text-primary mb-0">
+                <i class="bi bi-collection me-2"></i>DANH SÁCH LỚP HỌC TRỰC THUỘC (@(Model.LopHocs?.Count ?? 0))
+            </h5>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-secondary small text-uppercase">
+                    <tr>
+                        <th class="ps-4">Mã</th>
+                        <th>Tên lớp học</th>
+                        <th>Giảng viên</th>
+                        <th>Sĩ số tối đa</th>
+                        <th>Học phí</th>
+                        <th>Ngày khai giảng</th>
+                        <th class="text-center">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.LopHocs != null && Model.LopHocs.Any())
+                    {
+                        foreach (var lop in Model.LopHocs)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold text-muted">#@lop.MaLopHoc</td>
+                                <td>
+                                    <span class="fw-bold text-dark">@lop.TenLop</span>
+                                </td>
+                                <td>@(lop.TenGiangVien ?? "Chưa phân công")</td>
+                                <td>@lop.SiSoToiDa học viên</td>
+                                <td class="fw-bold text-primary">@lop.HocPhi.ToString("N0") VNĐ</td>
+                                <td>@lop.NgayKhaiGiang.ToString("dd/MM/yyyy")</td>
+                                <td class="text-center">
+                                    <span class="badge bg-info-subtle text-info border px-2 py-1 rounded-pill">@lop.TrangThai</span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                <i class="bi bi-collection-play fs-2 d-block mb-1"></i>
+                                Chưa có lớp học nào được tạo trong chương trình đào tạo này.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

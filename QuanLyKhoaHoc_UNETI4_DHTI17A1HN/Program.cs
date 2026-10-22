@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 // 1. Cấu hình DbContext kết nối SQL Server
 // ========================================================
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? "Server=.;Database=QuanLyKhoaHoc_UNETI4_DB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true";
+    ?? "Server=.\\SQLEXPRESS;Database=QuanLyKhoaHoc_UNETI4_DB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true";
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -22,6 +24,18 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+builder.Services.AddHttpContextAccessor();
+
+// ========================================================
+// 3. Đăng ký Dependency Injection (DI) - Module 1 (Vũ Đình Trường - 23103100026)
+// ========================================================
+builder.Services.AddScoped<ITaiKhoanRepository, TaiKhoanRepository>();
+builder.Services.AddScoped<IChuongTrinhDaoTaoRepository, ChuongTrinhDaoTaoRepository>();
+
+builder.Services.AddScoped<ITaiKhoanService, TaiKhoanService>();
+builder.Services.AddScoped<IChuongTrinhDaoTaoService, ChuongTrinhDaoTaoService>();
+
 
 // Đăng ký dịch vụ Controllers with Views
 builder.Services.AddControllersWithViews();

@@ -1,0 +1,160 @@
+@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels.DangNhapViewModel
+@{
+    ViewData["Title"] = "Đăng Nhập Hệ Thống";
+}
+
+<!--
+// ========================================================
+// Họ và tên: Vũ Đình Trường - MSV: 23103100026
+// Phụ trách: Module 1 - Giao diện Đăng nhập Hệ thống
+// Chuẩn Prototype Giao_DIen_Test (Tone Xanh Da Trời & Trắng)
+// ========================================================
+-->
+
+<div class="row justify-content-center py-4">
+    <div class="col-md-7 col-lg-5">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden" style="border: 1px solid var(--border-color); background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px);">
+            <!-- Top Gradient Bar -->
+            <div style="height: 6px; background: linear-gradient(90deg, #0284c7, #38bdf8, #06b6d4);"></div>
+
+            <div class="p-4 p-md-5">
+                <!-- Brand Header -->
+                <div class="d-flex align-items-center justify-content-center gap-3 mb-3">
+                    <div class="brand-icon">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold fs-4 text-primary" style="font-family: var(--font-serif); line-height: 1.1;">UNETI EDU</div>
+                        <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 500;">Hệ thống Quản lý Đào tạo</div>
+                    </div>
+                </div>
+
+                <h3 class="text-center fw-bold text-dark mb-1" style="font-family: var(--font-serif); font-size: 1.4rem;">Chào mừng trở lại</h3>
+                <p class="text-center text-muted small mb-4">Đăng nhập tài khoản hệ thống (Mục 5.1 & 5.2 - Vũ Đình Trường)</p>
+
+                <!-- Chọn vai trò nhanh (Phục vụ chấm điểm & kiểm thử) -->
+                <div class="d-flex bg-light p-1 rounded-pill mb-4 border" style="background-color: var(--surface-container) !important;">
+                    <button type="button" class="btn btn-sm flex-fill rounded-pill py-1 fw-bold role-select-btn active" data-user="admin" data-pass="admin123" style="font-size: 0.8rem;">
+                        <i class="bi bi-shield-lock-fill me-1 text-danger"></i> Admin
+                    </button>
+                    <button type="button" class="btn btn-sm flex-fill rounded-pill py-1 fw-bold role-select-btn" data-user="giaovu" data-pass="giaovu123" style="font-size: 0.8rem;">
+                        <i class="bi bi-briefcase-fill me-1 text-primary"></i> Giáo vụ
+                    </button>
+                    <button type="button" class="btn btn-sm flex-fill rounded-pill py-1 fw-bold role-select-btn" data-user="hocvien" data-pass="hocvien123" style="font-size: 0.8rem;">
+                        <i class="bi bi-mortarboard-fill me-1 text-success"></i> Học viên
+                    </button>
+                </div>
+
+                <!-- Form Đăng Nhập -->
+                <form asp-action="DangNhap" method="post" id="loginForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="ReturnUrl" />
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 py-2 small mb-3" role="alert"></div>
+
+                    <!-- Tên đăng nhập -->
+                    <div class="mb-3">
+                        <label asp-for="TenDangNhap" class="form-label fw-semibold small text-muted">
+                            <i class="bi bi-person me-1 text-primary"></i> TÊN ĐĂNG NHẬP
+                        </label>
+                        <input asp-for="TenDangNhap" class="form-control rounded-3 py-2" id="inputTenDangNhap" value="admin" placeholder="Nhập tên đăng nhập..." autocomplete="username" />
+                        <span asp-validation-for="TenDangNhap" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Mật khẩu -->
+                    <div class="mb-3">
+                        <label asp-for="MatKhau" class="form-label fw-semibold small text-muted">
+                            <i class="bi bi-lock me-1 text-primary"></i> MẬT KHẨU
+                        </label>
+                        <div class="input-group">
+                            <input asp-for="MatKhau" class="form-control rounded-start-3 py-2" id="inputMatKhau" value="admin123" placeholder="Nhập mật khẩu..." autocomplete="current-password" />
+                            <button type="button" class="btn btn-outline-secondary rounded-end-3" id="btnTogglePassword" title="Ẩn/Hiện mật khẩu">
+                                <i class="bi bi-eye-slash" id="iconEye"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="MatKhau" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Ghi nhớ -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="form-check">
+                            <input asp-for="GhiNho" class="form-check-input" />
+                            <label asp-for="GhiNho" class="form-check-label small text-muted">Ghi nhớ đăng nhập</label>
+                        </div>
+                    </div>
+
+                    <!-- Nút submit -->
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold rounded-pill shadow-sm mb-3 text-uppercase" style="background: linear-gradient(135deg, var(--primary-rose), var(--primary-light)); border: none; letter-spacing: 0.5px;">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> ĐĂNG NHẬP HỆ THỐNG
+                    </button>
+
+                    <div class="text-center small text-muted">
+                        Chưa có tài khoản học viên?
+                        <a asp-action="DangKy" class="fw-bold text-decoration-none text-primary">Đăng ký ngay</a>
+                    </div>
+                </form>
+
+                <!-- Chips tài khoản demo nhanh -->
+                <div class="mt-4 pt-3 border-top">
+                    <div class="small fw-bold text-muted text-uppercase text-center mb-2" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                        <i class="bi bi-lightning-charge-fill text-warning me-1"></i> Tài khoản Demo mẫu:
+                    </div>
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 btn-quick-chip" data-user="admin" data-pass="admin123">
+                            <i class="bi bi-shield-shaded me-1"></i> admin
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 btn-quick-chip" data-user="giaovu" data-pass="giaovu123">
+                            <i class="bi bi-briefcase me-1"></i> giaovu
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1 btn-quick-chip" data-user="hocvien" data-pass="hocvien123">
+                            <i class="bi bi-mortarboard me-1"></i> hocvien
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Toggle ẩn/hiện mật khẩu
+        document.getElementById('btnTogglePassword')?.addEventListener('click', function () {
+            const pwdInput = document.getElementById('inputMatKhau');
+            const iconEye = document.getElementById('iconEye');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                iconEye.classList.remove('bi-eye-slash');
+                iconEye.classList.add('bi-eye');
+            } else {
+                pwdInput.type = 'password';
+                iconEye.classList.remove('bi-eye');
+                iconEye.classList.add('bi-eye-slash');
+            }
+        });
+
+        // Xử lý Role Selector Tabs
+        document.querySelectorAll('.role-select-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.role-select-btn').forEach(b => {
+                    b.classList.remove('active', 'btn-primary');
+                    b.classList.add('btn-light');
+                });
+                this.classList.add('active', 'btn-primary');
+                this.classList.remove('btn-light');
+
+                document.getElementById('inputTenDangNhap').value = this.dataset.user;
+                document.getElementById('inputMatKhau').value = this.dataset.pass;
+            });
+        });
+
+        // Điền nhanh thông tin tài khoản demo
+        document.querySelectorAll('.btn-quick-chip').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.getElementById('inputTenDangNhap').value = this.dataset.user;
+                document.getElementById('inputMatKhau').value = this.dataset.pass;
+            });
+        });
+    </script>
+}
