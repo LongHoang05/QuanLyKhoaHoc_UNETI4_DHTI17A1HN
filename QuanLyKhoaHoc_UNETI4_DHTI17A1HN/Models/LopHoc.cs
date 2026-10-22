@@ -30,6 +30,14 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
         [Display(Name = "Tên giảng viên")]
         public string? TenGiangVien { get; set; }
 
+        /// <summary>
+        /// Mã giảng viên - [NotMapped]: chỉ dùng để binding form chọn GV,
+        /// không lưu vào DB. Tên GV sau đó được đồng bộ vào TenGiangVien.
+        /// </summary>
+        [NotMapped]
+        [Display(Name = "Giảng viên phụ trách")]
+        public int? MaGiangVien { get; set; }
+
         [StringLength(100)]
         [Display(Name = "Trình độ đầu vào")]
         public string? TrinhDoDauVao { get; set; } // Cơ bản, Trung cấp, Nâng cao

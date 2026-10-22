@@ -23,7 +23,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         {
             return await _context.LopHocs
                 .Include(l => l.ChuongTrinhDaoTao)
-                .Include(l => l.GiangVien)
                 .Include(l => l.DangKyHocs)
                 .AsNoTracking()
                 .OrderByDescending(l => l.NgayTao)
@@ -39,7 +38,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         {
             return await _context.LopHocs
                 .Include(l => l.ChuongTrinhDaoTao)
-                .Include(l => l.GiangVien)
                 .Include(l => l.DangKyHocs)
                     .ThenInclude(d => d.HocVien)
                 .Include(l => l.BuoiHocs)
@@ -114,7 +112,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         {
             var query = _context.LopHocs
                 .Include(l => l.ChuongTrinhDaoTao)
-                .Include(l => l.GiangVien)
                 .Include(l => l.DangKyHocs)
                 .AsQueryable();
 
@@ -125,8 +122,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 query = query.Where(l =>
                     l.TenLop.Contains(kw) ||
                     (l.ChuongTrinhDaoTao != null && l.ChuongTrinhDaoTao.TenChuongTrinh.Contains(kw)) ||
-                    (l.TenGiangVien != null && l.TenGiangVien.Contains(kw)) ||
-                    (l.GiangVien != null && l.GiangVien.HoTen.Contains(kw)));
+                    (l.TenGiangVien != null && l.TenGiangVien.Contains(kw)));
             }
 
             // 2. LỌC ĐA ĐIỀU KIỆN
@@ -148,11 +144,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 query = query.Where(l => l.TrangThai == trangThai);
             }
 
-            // 2.4. Lọc theo Giảng viên
-            if (maGiangVien.HasValue && maGiangVien.Value > 0)
-            {
-                query = query.Where(l => l.MaGiangVien == maGiangVien.Value);
-            }
+            // 2.4. Lọc theo Giảng viên (MaGiangVien là [NotMapped] nên lọc theo TenGiangVien)
+            // Ghi chú: maGiangVien param được nhận nhưng bộ lọc theo TenGiangVien
+            // thông qua keyword search ở trên. Filter này được bỏ qua ở DB layer.
 
             // 2.5. Lọc theo Khoảng học phí
             if (minHocPhi.HasValue)

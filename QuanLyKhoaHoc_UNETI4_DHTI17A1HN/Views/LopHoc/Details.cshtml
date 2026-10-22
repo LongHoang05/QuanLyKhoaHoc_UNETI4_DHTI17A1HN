@@ -1,0 +1,479 @@
+@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc
+
+@{
+    ViewData["Title"] = $"Chi tiết: {Model.TenLop}";
+    int soHocVienDaDuyet = (int)(ViewBag.SoHocVienDaDuyet ?? 0);
+    double phanTramSiSo = Model.SiSoToiDa > 0
+        ? Math.Round((double)soHocVienDaDuyet / Model.SiSoToiDa * 100, 1)
+        : 0;
+    bool conCho = soHocVienDaDuyet < Model.SiSoToiDa;
+    bool conHan = Model.HanDangKy >= DateTime.Today;
+
+    string badgeClass = Model.TrangThai switch
+    {
+        "Đang mở đăng ký" => "success",
+        "Chưa mở"         => "secondary",
+        "Tạm dừng"        => "warning",
+        "Đã đóng đăng ký" => "danger",
+        _                  => "secondary"
+    };
+    string progressColor = phanTramSiSo >= 100 ? "#ef4444"
+                         : phanTramSiSo >= 75  ? "#f59e0b"
+                         : "#22c55e";
+    string progressBarClass = phanTramSiSo >= 100 ? "bg-danger"
+                            : phanTramSiSo >= 75  ? "bg-warning"
+                            : "bg-success";
+}
+
+<div class="container py-3" style="max-width: 1050px;">
+
+    @* Breadcrumb *@
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index">Quản lý Lớp học</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Chi tiết: @Model.TenLop</li>
+        </ol>
+    </nav>
+
+    @* HERO HEADER *@
+    <div class="card border-0 shadow-sm rounded-4 mb-4 text-white overflow-hidden"
+         style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #0c4a6e 100%);">
+        <div class="card-body p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-light text-primary fw-bold px-3 py-1 rounded-pill">
+                            <i class="bi bi-easel2-fill me-1"></i> Module 2 • Chi tiết lớp học
+                        </span>
+                        <span class="badge bg-@badgeClass px-3 py-1 rounded-pill">
+                            <i class="bi bi-circle-fill me-1" style="font-size: 0.55rem;"></i>
+                            @Model.TrangThai
+                        </span>
+                    </div>
+                    <h2 class="fw-bold mb-1 text-white">@Model.TenLop</h2>
+                    <p class="mb-0 text-white-50 small">
+                        <i class="bi bi-bookmark-fill me-1"></i>
+                        @(Model.ChuongTrinhDaoTao?.TenChuongTrinh ?? "Chưa xác định chương trình")
+                        @if (!string.IsNullOrWhiteSpace(Model.TrinhDoDauVao))
+                        {
+                            <span class="ms-2 badge bg-white bg-opacity-20 text-white">@Model.TrinhDoDauVao</span>
+                        }
+                    </p>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a asp-action="Edit" asp-route-id="@Model.MaLopHoc"
+                       class="btn btn-sm btn-light text-primary fw-bold rounded-pill px-3 py-2 shadow-sm">
+                        <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa
+                    </a>
+                    <a asp-action="Index" class="btn btn-sm btn-outline-light rounded-pill px-3 py-2">
+                        <i class="bi bi-arrow-left me-1"></i> Danh sách
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        @* CỘT TRÁI: Thông tin chi tiết *@
+        <div class="col-lg-8">
+
+            @* Thông tin cơ bản *@
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="mb-0 fw-bold text-primary">
+                        <i class="bi bi-info-circle-fill me-2"></i>Thông Tin Cơ Bản
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-borderless mb-0">
+                        <tbody>
+                            <tr class="border-bottom">
+                                <td class="ps-4 py-3 text-muted small fw-semibold" style="width: 200px;">
+                                    <i class="bi bi-hash me-1"></i> Mã lớp học
+                                </td>
+                                <td class="py-3 fw-bold text-dark">
+                                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-bold fs-6">
+                                        #@Model.MaLopHoc
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr class="border-bottom">
+                                <td class="ps-4 py-3 text-muted small fw-semibold">
+                                    <i class="bi bi-journal-bookmark-fill me-1"></i> Chương trình ĐT
+                                </td>
+                                <td class="py-3 fw-semibold">
+                                    @(Model.ChuongTrinhDaoTao?.TenChuongTrinh ?? "Chưa liên kết")
+                                </td>
+                            </tr>
+                            <tr class="border-bottom">
+                                <td class="ps-4 py-3 text-muted small fw-semibold">
+                                    <i class="bi bi-person-workspace me-1"></i> Giảng viên
+                                </td>
+                                <td class="py-3">
+                                    @if (!string.IsNullOrWhiteSpace(Model.TenGiangVien))
+                                    {
+                                        <span class="fw-semibold">@Model.TenGiangVien</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic">Chưa phân công giảng viên</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr class="border-bottom">
+                                <td class="ps-4 py-3 text-muted small fw-semibold">
+                                    <i class="bi bi-speedometer2 me-1"></i> Trình độ đầu vào
+                                </td>
+                                <td class="py-3">
+                                    @if (!string.IsNullOrWhiteSpace(Model.TrinhDoDauVao))
+                                    {
+                                        <span class="badge bg-info bg-opacity-15 text-info px-3 py-2 rounded-pill fw-semibold">
+                                            @Model.TrinhDoDauVao
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr class="border-bottom">
+                                <td class="ps-4 py-3 text-muted small fw-semibold">
+                                    <i class="bi bi-geo-alt-fill me-1"></i> Phòng học
+                                </td>
+                                <td class="py-3 fw-semibold">
+                                    @(string.IsNullOrWhiteSpace(Model.PhongHoc) ? "Chưa sắp xếp" : Model.PhongHoc)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="ps-4 py-3 text-muted small fw-semibold">
+                                    <i class="bi bi-calendar-plus me-1"></i> Ngày tạo hồ sơ
+                                </td>
+                                <td class="py-3 text-muted small">@Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            @* Lịch trình & Học phí *@
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="mb-0 fw-bold text-success">
+                        <i class="bi bi-calendar3 me-2"></i>Lịch Trình Đăng Ký & Học Phí
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="rounded-3 p-3 bg-light border text-center">
+                                <div class="text-muted small fw-semibold text-uppercase mb-1">
+                                    <i class="bi bi-calendar-check me-1"></i>Mở đăng ký
+                                </div>
+                                <div class="fw-bold text-dark">@Model.NgayBatDauDangKy.ToString("dd/MM/yyyy")</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            @{
+                                string hanDkClass = conHan ? "bg-success bg-opacity-10 border-success" : "bg-danger bg-opacity-10 border-danger";
+                                string hanDkTextClass = conHan ? "text-success" : "text-danger";
+                            }
+                            <div class="rounded-3 p-3 border text-center @hanDkClass">
+                                <div class="text-muted small fw-semibold text-uppercase mb-1">
+                                    <i class="bi bi-calendar-x me-1"></i>Hạn chót ĐK
+                                </div>
+                                <div class="fw-bold @hanDkTextClass">
+                                    @Model.HanDangKy.ToString("dd/MM/yyyy")
+                                </div>
+                                <div class="small mt-1">
+                                    @if (conHan)
+                                    {
+                                        <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i>Còn hạn</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-danger"><i class="bi bi-x-circle-fill me-1"></i>Đã hết hạn</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="rounded-3 p-3 bg-primary bg-opacity-10 border border-primary text-center">
+                                <div class="text-muted small fw-semibold text-uppercase mb-1">
+                                    <i class="bi bi-mortarboard-fill me-1"></i>Khai giảng
+                                </div>
+                                <div class="fw-bold text-primary">@Model.NgayKhaiGiang.ToString("dd/MM/yyyy")</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="rounded-3 p-3 bg-light border text-center">
+                                <div class="text-muted small fw-semibold text-uppercase mb-1">
+                                    <i class="bi bi-cash-coin me-1"></i>Học phí
+                                </div>
+                                <div class="fw-bold fs-5 text-dark">
+                                    @Model.HocPhi.ToString("N0") <small class="fw-normal text-muted">VNĐ</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="rounded-3 p-3 bg-light border text-center">
+                                <div class="text-muted small fw-semibold text-uppercase mb-1">
+                                    <i class="bi bi-calendar-week me-1"></i>Số buổi học
+                                </div>
+                                <div class="fw-bold fs-5 text-dark">@Model.SoBuoiHoc <small class="fw-normal text-muted">buổi</small></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="rounded-3 p-3 bg-light border text-center">
+                                <div class="text-muted small fw-semibold text-uppercase mb-1">
+                                    <i class="bi bi-people-fill me-1"></i>Sĩ số tối đa
+                                </div>
+                                <div class="fw-bold fs-5 text-dark">@Model.SiSoToiDa <small class="fw-normal text-muted">học viên</small></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* Mô tả & Yêu cầu *@
+            @if (!string.IsNullOrWhiteSpace(Model.MoTa) || !string.IsNullOrWhiteSpace(Model.YeuCauHocVien))
+            {
+                <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h6 class="mb-0 fw-bold text-secondary">
+                            <i class="bi bi-file-text-fill me-2"></i>Mô Tả & Yêu Cầu Học Viên
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        @if (!string.IsNullOrWhiteSpace(Model.MoTa))
+                        {
+                            <div class="mb-3">
+                                <div class="text-muted small fw-semibold text-uppercase mb-2">
+                                    <i class="bi bi-chat-quote me-1"></i>Mô tả khóa học
+                                </div>
+                                <p class="mb-0 text-dark" style="white-space: pre-wrap;">@Model.MoTa</p>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.YeuCauHocVien))
+                        {
+                            <div>
+                                <div class="text-muted small fw-semibold text-uppercase mb-2">
+                                    <i class="bi bi-check2-all me-1"></i>Yêu cầu đối với học viên
+                                </div>
+                                <p class="mb-0 text-dark" style="white-space: pre-wrap;">@Model.YeuCauHocVien</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Danh sách học viên đăng ký *@
+            <div class="card border-0 shadow-sm rounded-4 bg-white">
+                <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-bold text-dark">
+                        <i class="bi bi-people-fill me-2 text-primary"></i>
+                        Danh Sách Học Viên Đăng Ký
+                    </h6>
+                    <span class="badge bg-primary rounded-pill">@Model.DangKyHocs.Count đăng ký</span>
+                </div>
+                <div class="card-body p-0">
+                    @if (!Model.DangKyHocs.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox display-5 text-muted opacity-50"></i>
+                            <p class="text-muted mt-3 mb-0">Chưa có học viên nào đăng ký lớp học này.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light text-uppercase small" style="font-size: 0.72rem; letter-spacing: 0.03em;">
+                                    <tr>
+                                        <th class="ps-3 py-3">STT</th>
+                                        <th class="py-3">Học viên</th>
+                                        <th class="py-3">Ngày đăng ký</th>
+                                        <th class="py-3 text-center">Trạng thái</th>
+                                        <th class="py-3 text-end pe-3">Đã đóng học phí</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{int stt = 0;}
+                                    @foreach (var dk in Model.DangKyHocs.OrderByDescending(d => d.NgayDangKy))
+                                    {
+                                        stt++;
+                                        string dkBadge = dk.TrangThai switch
+                                        {
+                                            "Đã duyệt"        => "success",
+                                            "Chờ duyệt"       => "warning",
+                                            "Đã đóng học phí" => "primary",
+                                            "Đang học"        => "info",
+                                            "Hoàn thành"      => "success",
+                                            "Từ chối"         => "danger",
+                                            _                  => "secondary"
+                                        };
+                                        <tr>
+                                            <td class="ps-3 py-3 text-muted small">@stt</td>
+                                            <td class="py-3">
+                                                <div class="fw-semibold small">
+                                                    @(dk.HocVien?.HoTen ?? $"Học viên #{dk.MaHocVien}")
+                                                </div>
+                                                @if (dk.HocVien?.Email != null)
+                                                {
+                                                    <div class="text-muted small">@dk.HocVien.Email</div>
+                                                }
+                                            </td>
+                                            <td class="py-3 text-muted small">@dk.NgayDangKy.ToString("dd/MM/yyyy")</td>
+                                            <td class="py-3 text-center">
+                                                <span class="badge bg-@dkBadge rounded-pill px-2 py-1 small">
+                                                    @dk.TrangThai
+                                                </span>
+                                            </td>
+                                            <td class="py-3 text-end pe-3 small fw-semibold">
+                                                @if (dk.SoTienDaDong > 0)
+                                                {
+                                                    <span class="text-success">@dk.SoTienDaDong.ToString("N0") đ</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">—</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+
+        </div>
+
+        @* CỘT PHẢI: Stats + Actions *@
+        <div class="col-lg-4">
+
+            @* Tiến độ sĩ số *@
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="mb-0 fw-bold text-dark">
+                        <i class="bi bi-bar-chart-fill me-2 text-primary"></i>Tiến Độ Sĩ Số
+                    </h6>
+                </div>
+                <div class="card-body text-center py-4">
+                    @{
+                        double dashVal = Math.Min(phanTramSiSo, 100);
+                    }
+                    <div class="position-relative d-inline-block mb-3" style="width:130px; height:130px;">
+                        <svg viewBox="0 0 36 36" style="width:130px; height:130px; transform: rotate(-90deg);">
+                            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f1f5f9" stroke-width="3"></circle>
+                            <circle cx="18" cy="18" r="15.9" fill="none"
+                                    stroke="@progressColor"
+                                    stroke-width="3"
+                                    stroke-dasharray="@dashVal, 100"
+                                    stroke-linecap="round"></circle>
+                        </svg>
+                        <div class="position-absolute top-50 start-50 translate-middle text-center">
+                            <div class="fw-bold fs-4 text-dark">@soHocVienDaDuyet</div>
+                            <div class="text-muted" style="font-size:0.7rem;">/ @Model.SiSoToiDa</div>
+                        </div>
+                    </div>
+                    <div class="fw-bold fs-5 mb-1">@phanTramSiSo%</div>
+                    <div class="text-muted small mb-3">đã lấp đầy</div>
+                    <div class="progress rounded-pill mb-3" style="height: 8px;">
+                        <div class="progress-bar @progressBarClass rounded-pill"
+                             role="progressbar"
+                             style="width: @(Math.Min(dashVal, 100))%"
+                             aria-valuenow="@phanTramSiSo" aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+                    @if (conCho)
+                    {
+                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">
+                            <i class="bi bi-check-circle-fill me-1"></i>
+                            Còn @(Model.SiSoToiDa - soHocVienDaDuyet) chỗ trống
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3 py-2">
+                            <i class="bi bi-x-circle-fill me-1"></i>Đã hết chỗ
+                        </span>
+                    }
+                </div>
+            </div>
+
+            @* Thống kê đăng ký *@
+            @{
+                var dsDangKy = Model.DangKyHocs;
+                int soChoDuyet  = dsDangKy.Count(d => d.TrangThai == "Chờ duyệt");
+                int soDaDuyet   = dsDangKy.Count(d => d.TrangThai == "Đã duyệt"
+                                                    || d.TrangThai == "Đã đóng học phí"
+                                                    || d.TrangThai == "Đang học"
+                                                    || d.TrangThai == "Hoàn thành");
+                int soTuChoi    = dsDangKy.Count(d => d.TrangThai == "Từ chối");
+            }
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="mb-0 fw-bold text-dark">
+                        <i class="bi bi-clipboard-data-fill me-2 text-success"></i>Thống Kê Đăng Ký
+                    </h6>
+                </div>
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <span class="text-muted small">Tổng đơn đăng ký</span>
+                        <span class="fw-bold">@dsDangKy.Count</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <span class="text-muted small">
+                            <i class="bi bi-hourglass-split me-1 text-warning"></i>Chờ duyệt
+                        </span>
+                        <span class="badge bg-warning text-dark rounded-pill">@soChoDuyet</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <span class="text-muted small">
+                            <i class="bi bi-check-circle me-1 text-success"></i>Đã được duyệt
+                        </span>
+                        <span class="badge bg-success rounded-pill">@soDaDuyet</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center py-2">
+                        <span class="text-muted small">
+                            <i class="bi bi-x-circle me-1 text-danger"></i>Từ chối
+                        </span>
+                        <span class="badge bg-danger rounded-pill">@soTuChoi</span>
+                    </div>
+                </div>
+            </div>
+
+            @* Thao tác nhanh *@
+            <div class="card border-0 shadow-sm rounded-4 bg-white">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="mb-0 fw-bold text-dark">
+                        <i class="bi bi-gear-fill me-2 text-secondary"></i>Thao Tác Nhanh
+                    </h6>
+                </div>
+                <div class="card-body d-grid gap-2 py-3">
+                    <a asp-action="Edit" asp-route-id="@Model.MaLopHoc"
+                       class="btn btn-primary rounded-pill fw-semibold" id="btn-edit-@Model.MaLopHoc">
+                        <i class="bi bi-pencil-square me-2"></i>Chỉnh sửa lớp học
+                    </a>
+                    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill">
+                        <i class="bi bi-arrow-left me-2"></i>Quay lại danh sách
+                    </a>
+                    <hr class="my-1" />
+                    <form asp-action="Delete" asp-route-id="@Model.MaLopHoc" method="post"
+                          onsubmit="return confirm('Bạn có chắc chắn muốn XÓA lớp học này không?\nHành động này không thể hoàn tác!')">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-danger rounded-pill w-100"
+                                id="btn-delete-@Model.MaLopHoc">
+                            <i class="bi bi-trash3-fill me-2"></i>Xóa lớp học này
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

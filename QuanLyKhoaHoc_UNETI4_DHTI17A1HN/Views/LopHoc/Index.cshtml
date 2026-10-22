@@ -269,27 +269,23 @@
 
                                 <!-- Giảng viên -->
                                 <td>
-                                    @if (item.GiangVien != null)
+                                    @if (!string.IsNullOrEmpty(item.TenGiangVien))
                                     {
                                         <div class="d-flex align-items-center">
                                             <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-2 fw-bold" style="width: 32px; height: 32px; font-size: 0.8rem;">
-                                                @(item.GiangVien.HoTen.Substring(0, 1))
+                                                @(item.TenGiangVien.Substring(0, 1))
                                             </div>
                                             <div>
-                                                <div class="small fw-semibold text-dark">@item.GiangVien.HoTen</div>
-                                                <div class="text-muted" style="font-size: 0.72rem;">@item.GiangVien.Email</div>
+                                                <div class="small fw-semibold text-dark">@item.TenGiangVien</div>
                                             </div>
                                         </div>
-                                    }
-                                    else if (!string.IsNullOrEmpty(item.TenGiangVien))
-                                    {
-                                        <span class="small fw-semibold text-dark">@item.TenGiangVien</span>
                                     }
                                     else
                                     {
                                         <span class="text-muted fst-italic small">Chưa phân công</span>
                                     }
                                 </td>
+
 
                                 <!-- Học phí -->
                                 <td>

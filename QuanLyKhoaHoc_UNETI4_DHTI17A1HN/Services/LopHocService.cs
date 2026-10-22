@@ -57,10 +57,10 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
             int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
             if (totalPages < 1) totalPages = 1;
 
-            // 2. Lấy thống kê nhanh
+
             var (tongSoLop, soLopDangMo, soLopDaDong, soLopTamDung) = await _lopHocRepo.GetThongKeNhanhAsync();
 
-            // 3. Lấy dữ liệu cho dropdown filter
+            
             var chuongTrinhs = await _lopHocRepo.GetChuongTrinhListAsync();
             var giangViens = await _giangVienRepo.GetAllAsync();
 
