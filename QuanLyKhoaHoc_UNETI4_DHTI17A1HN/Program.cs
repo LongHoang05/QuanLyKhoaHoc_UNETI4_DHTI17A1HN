@@ -43,6 +43,10 @@ builder.Services.AddControllersWithViews();
 // ========================================================
 // 3. Đăng ký Dependency Injection (Repository & Service)
 // ========================================================
+// Module 2 - Nguyễn Đình Kiên (23103100020)
+builder.Services.AddScoped<ILopHocRepository, LopHocRepository>();
+builder.Services.AddScoped<ILopHocService, LopHocService>();
+
 // Module 3 - Nguyễn Đức Linh (23103100042)
 builder.Services.AddScoped<IHocVienRepository, HocVienRepository>();
 builder.Services.AddScoped<IHocVienService, HocVienService>();

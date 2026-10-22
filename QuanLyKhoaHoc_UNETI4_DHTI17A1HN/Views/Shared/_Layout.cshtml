@@ -23,6 +23,7 @@
     <!-- Bootstrap 5 CSS & Icons -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
@@ -68,7 +69,7 @@
             </li>
 
             <li>
-                <a href="/prototype/admin-lop-hoc.html" class="sidebar-link" title="Module 2 - Phụ trách: Nguyễn Đình Kiên">
+                <a asp-controller="LopHoc" asp-action="Index" class="sidebar-link @(currentController == "LopHoc" ? "active" : "")" title="Module 2 - Phụ trách: Nguyễn Đình Kiên">
                     <span class="sidebar-link-left"><i class="bi bi-easel2-fill"></i> Quản lý Lớp học (M2)</span>
                     <span class="badge bg-success bg-opacity-75 rounded-pill">M2</span>
                 </a>
@@ -99,28 +100,36 @@
             </li>
 
             <li>
-                <a href="/prototype/admin-buoi-hoc.html" class="sidebar-link" title="Module 5 - Phụ trách: Nguyễn Tùng Dương">
+                <a asp-controller="BuoiHoc" asp-action="Index" class="sidebar-link @(currentController == "BuoiHoc" ? "active" : "")" title="Module 5 - Phụ trách: Nguyễn Tùng Dương">
                     <span class="sidebar-link-left"><i class="bi bi-calendar-week-fill"></i> Lịch học & Buổi học (M5)</span>
-                    <span class="badge bg-secondary bg-opacity-50 rounded-pill">M5</span>
+                    <span class="badge bg-info bg-opacity-75 text-dark rounded-pill">M5</span>
                 </a>
             </li>
 
             <li>
-                <a href="/prototype/admin-ket-qua.html" class="sidebar-link" title="Module 5: Kết quả học tập & Bảng điểm">
+                <a asp-controller="KetQuaHocTap" asp-action="Index" class="sidebar-link @(currentController == "KetQuaHocTap" ? "active" : "")" title="Module 5: Kết quả học tập & Bảng điểm">
                     <span class="sidebar-link-left"><i class="bi bi-award-fill"></i> Kết quả học tập (M5)</span>
+                    <span class="badge bg-warning bg-opacity-75 text-dark rounded-pill">M5</span>
                 </a>
             </li>
 
             <div class="sidebar-category">Cổng Sinh Viên & Thống kê</div>
             <li>
-                <a asp-controller="HocVien" asp-action="Portal" class="sidebar-link @(currentAction == "Portal" ? "active" : "") text-warning fw-semibold">
-                    <span class="sidebar-link-left"><i class="bi bi-box-arrow-up-right"></i> Cổng Học Viên</span>
-                    <span class="badge bg-warning text-dark rounded-pill">Portal</span>
+                <a asp-controller="ThongKe" asp-action="Dashboard" class="sidebar-link @(currentController == "ThongKe" && currentAction == "Dashboard" ? "active" : "")" title="Module 5: Dashboard Học vụ">
+                    <span class="sidebar-link-left"><i class="bi bi-grid-1x2-fill"></i> Dashboard Học vụ (M5)</span>
+                    <span class="badge bg-primary rounded-pill">M5</span>
                 </a>
             </li>
             <li>
-                <a href="/prototype/admin-thong-ke.html" class="sidebar-link" title="Module 5: Báo cáo Thống kê LINQ">
+                <a asp-controller="ThongKe" asp-action="Index" class="sidebar-link @(currentController == "ThongKe" && currentAction == "Index" ? "active" : "")" title="Module 5: Báo cáo Thống kê LINQ">
                     <span class="sidebar-link-left"><i class="bi bi-bar-chart-line-fill"></i> Báo cáo LINQ (M5)</span>
+                    <span class="badge bg-primary bg-opacity-50 rounded-pill">M5</span>
+                </a>
+            </li>
+            <li>
+                <a asp-controller="CongHocVien" asp-action="DangKy" class="sidebar-link @(currentController == "CongHocVien" ? "active" : "") text-warning fw-semibold">
+                    <span class="sidebar-link-left"><i class="bi bi-box-arrow-up-right"></i> Cổng Học Viên</span>
+                    <span class="badge bg-warning text-dark rounded-pill">Portal</span>
                 </a>
             </li>
         </ul>
@@ -169,6 +178,26 @@
                         {
                             <li class="breadcrumb-item active">@currentAction</li>
                         }
+                    }
+                    else if (currentController == "LopHoc")
+                    {
+                        <li class="breadcrumb-item"><a asp-controller="LopHoc" asp-action="Index">Quản lý Lớp học (M2)</a></li>
+                        @if (currentAction != "Index") { <li class="breadcrumb-item active">@currentAction</li> }
+                    }
+                    else if (currentController == "BuoiHoc")
+                    {
+                        <li class="breadcrumb-item"><a asp-controller="BuoiHoc" asp-action="Index">Lịch học & Buổi học (M5)</a></li>
+                        @if (currentAction != "Index") { <li class="breadcrumb-item active">@currentAction</li> }
+                    }
+                    else if (currentController == "KetQuaHocTap")
+                    {
+                        <li class="breadcrumb-item"><a asp-controller="KetQuaHocTap" asp-action="Index">Kết quả học tập (M5)</a></li>
+                        @if (currentAction != "Index") { <li class="breadcrumb-item active">@currentAction</li> }
+                    }
+                    else if (currentController == "ThongKe")
+                    {
+                        <li class="breadcrumb-item"><a asp-controller="ThongKe" asp-action="Index">Báo cáo & Dashboard (M5)</a></li>
+                        @if (currentAction != "Index") { <li class="breadcrumb-item active">@currentAction</li> }
                     }
                     else
                     {
@@ -333,6 +362,7 @@
         }
     </script>
 
+    @await Html.PartialAsync("_DeleteModal")
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

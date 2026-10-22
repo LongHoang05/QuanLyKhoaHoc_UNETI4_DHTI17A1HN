@@ -1,0 +1,159 @@
+@*
+    Universal Reusable Delete Confirmation Modal
+    Họ và tên: Nguyễn Tùng Dương - MSV: 23103100003
+*@
+
+<!-- GLOBAL DELETE CONFIRMATION MODAL -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs hidden transition-all duration-300" id="global-delete-modal">
+    <div class="bg-white max-w-md w-full rounded-2xl shadow-2xl border border-gray-100 p-6 space-y-4" onclick="event.stopPropagation()">
+        <!-- Icon Container -->
+        <div class="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center">
+            <span class="material-symbols-outlined text-[28px]" id="global-delete-icon">delete_forever</span>
+        </div>
+
+        <!-- Title & Description -->
+        <div class="space-y-1.5">
+            <h3 class="text-lg text-gray-900 font-bold" id="global-delete-title">
+                Xác nhận xóa?
+            </h3>
+            <p class="text-sm text-gray-500 leading-relaxed" id="global-delete-msg">
+                Bạn có chắc chắn muốn xóa bản ghi này?
+            </p>
+        </div>
+
+        <!-- Warning Alert Box -->
+        <div class="bg-red-50 border border-red-200 rounded-xl p-3 flex items-start gap-2.5">
+            <span class="material-symbols-outlined text-red-600 text-[18px] flex-shrink-0 mt-0.5">warning</span>
+            <span class="text-xs text-red-700 font-medium" id="global-delete-warning">
+                Hành động này mang tính vĩnh viễn và không thể hoàn tác sau khi xác nhận.
+            </span>
+        </div>
+
+        <!-- Action Form -->
+        <form method="post" id="global-delete-form" action="">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" id="global-delete-id" value="0"/>
+
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button type="button" class="border border-gray-300 text-gray-700 px-4 py-2 rounded-xl text-sm hover:bg-gray-50 transition-colors cursor-pointer" onclick="closeGlobalDeleteModal()">
+                    Hủy bỏ
+                </button>
+                <button type="submit" id="global-delete-submit-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-sm shadow-sm flex items-center gap-1.5 transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                    <span id="global-delete-btn-text">Xóa vĩnh viễn</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    window.openGlobalDeleteModal = function(options) {
+        options = options || {};
+        const modal = document.getElementById('global-delete-modal');
+        if (!modal) return;
+
+        const form = document.getElementById('global-delete-form');
+        const idInput = document.getElementById('global-delete-id');
+        const titleEl = document.getElementById('global-delete-title');
+        const msgEl = document.getElementById('global-delete-msg');
+        const warningEl = document.getElementById('global-delete-warning');
+        const btnTextEl = document.getElementById('global-delete-btn-text');
+        const iconEl = document.getElementById('global-delete-icon');
+
+        if (options.action) form.action = options.action;
+        if (options.id !== undefined) idInput.value = options.id;
+        if (options.title) titleEl.innerText = options.title;
+
+        if (options.message) {
+            msgEl.innerHTML = options.message;
+        } else if (options.itemName) {
+            msgEl.innerHTML = `Bạn có chắc chắn muốn xóa <span class="font-semibold text-gray-900">${options.itemName}</span>? Tất cả dữ liệu liên quan sẽ bị gián đoạn.`;
+        } else {
+            msgEl.innerText = 'Bạn có chắc chắn muốn xóa bản ghi này?';
+        }
+
+        if (options.warning) warningEl.innerText = options.warning;
+        if (options.submitText) btnTextEl.innerText = options.submitText;
+        if (options.icon) iconEl.innerText = options.icon;
+
+        modal.classList.remove('hidden');
+    };
+
+    window.closeGlobalDeleteModal = function() {
+        const modal = document.getElementById('global-delete-modal');
+        if (modal) modal.classList.add('hidden');
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('global-delete-modal');
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeGlobalDeleteModal();
+                }
+            });
+        }
+
+        document.addEventListener('click', (e) => {
+            const trigger = e.target.closest('.btn-open-delete-modal');
+            if (trigger) {
+                e.preventDefault();
+                openGlobalDeleteModal({
+                    action: trigger.dataset.deleteAction,
+                    id: trigger.dataset.deleteId,
+                    title: trigger.dataset.deleteTitle,
+                    itemName: trigger.dataset.deleteName,
+                    message: trigger.dataset.deleteMessage,
+                    warning: trigger.dataset.deleteWarning,
+                    submitText: trigger.dataset.deleteSubmit,
+                    icon: trigger.dataset.deleteIcon
+                });
+            }
+        });
+
+        const deleteForm = document.getElementById('global-delete-form');
+        if (deleteForm) {
+            deleteForm.addEventListener('submit', async function(e) {
+                if (typeof window.onDeleteSuccess === 'function') {
+                    e.preventDefault();
+                    const submitBtn = document.getElementById('global-delete-submit-btn');
+                    const btnText = document.getElementById('global-delete-btn-text');
+                    const originalText = btnText ? btnText.innerText : 'Xóa vĩnh viễn';
+                    if (submitBtn) submitBtn.disabled = true;
+                    if (btnText) btnText.innerText = 'Đang xóa...';
+
+                    try {
+                        const formData = new FormData(deleteForm);
+                        const res = await fetch(deleteForm.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        });
+                        
+                        const contentType = res.headers.get("content-type");
+                        if (contentType && contentType.indexOf("application/json") !== -1) {
+                            const data = await res.json();
+                            closeGlobalDeleteModal();
+                            if (data.success) {
+                                if (window.showToast) window.showToast(data.message, 'success');
+                                window.onDeleteSuccess(data);
+                            } else {
+                                if (window.showToast) window.showToast(data.message, 'error');
+                            }
+                        } else {
+                            closeGlobalDeleteModal();
+                            window.location.reload();
+                        }
+                    } catch (err) {
+                        console.error('Lỗi khi xóa:', err);
+                        if (window.showToast) window.showToast('Đã xảy ra lỗi khi thực hiện xóa.', 'error');
+                    } finally {
+                        if (submitBtn) submitBtn.disabled = false;
+                        if (btnText) btnText.innerText = originalText;
+                    }
+                }
+            });
+        }
+    });
+</script>

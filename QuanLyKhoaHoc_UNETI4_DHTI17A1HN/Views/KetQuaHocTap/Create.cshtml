@@ -1,0 +1,138 @@
+﻿@*
+Họ và tên: Nguyễn Tùng Dương
+Mã sinh viên: 23103100003
+Nội dung thực hiện: Module 5 - Form vào điểm học viên chuẩn phong cách Prep.vn
+*@
+
+@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.KetQuaHocTap
+@{
+    ViewData["Title"] = "Vào điểm học viên";
+    var eligibleDangKys = ViewBag.EligibleDangKys as IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc>();
+}
+
+<div class="max-w-3xl mx-auto flex flex-col gap-y-6">
+    <!-- Header Card -->
+    <div class="bg-surface-white p-6 rounded-2xl border border-border-subtle shadow-sm flex items-center justify-between">
+        <div>
+            <div class="flex items-center gap-1.5 text-outline font-label-sm text-label-sm tracking-wide">
+                <span>ĐÀO TẠO UNETI</span>
+                <span class="material-symbols-outlined text-[13px]">chevron_right</span>
+                <span>KẾT QUẢ HỌC TẬP</span>
+                <span class="material-symbols-outlined text-[13px]">chevron_right</span>
+                <span class="text-primary-container font-semibold">VÀO ĐIỂM</span>
+            </div>
+            <h1 class="font-headline-md text-headline-md text-brand-deep tracking-tight font-extrabold mt-1">
+                Ghi nhận kết quả học tập
+            </h1>
+            <p class="font-body-sm text-body-sm text-outline mt-0.5">
+                Nhập điểm chuyên cần, điểm thi cuối khóa và xác nhận hoàn thành chương trình.
+            </p>
+        </div>
+        <a href="/KetQuaHocTap/Index" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-border-standard text-brand-deep font-label-md text-label-md hover:bg-surface-container-low transition-colors">
+            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+            <span>Về danh sách</span>
+        </a>
+    </div>
+
+    <!-- Main Form Card -->
+    <div class="bg-surface-white p-8 rounded-2xl border border-border-subtle shadow-sm">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-danger-crimson text-sm font-medium">
+                <div asp-validation-summary="All"></div>
+            </div>
+        }
+
+        <form asp-action="Create" method="post" class="space-y-6">
+            @Html.AntiForgeryToken()
+
+            <!-- Học viên -->
+            <div class="space-y-1.5">
+                <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                    Học viên / Lớp học <span class="text-danger-crimson">*</span>
+                </label>
+                <div class="relative">
+                    <select asp-for="MaDangKy" required class="w-full appearance-none bg-surface-white border border-border-standard rounded-xl px-4 py-3 font-body-md text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                        @if (!eligibleDangKys.Any())
+                        {
+                            <option value="">Không có hồ sơ học viên đang học</option>
+                        }
+                        else
+                        {
+                            @foreach (var dk in eligibleDangKys)
+                            {
+                                <option value="@dk.MaDangKy">
+                                    @(dk.HocVien?.HoTen ?? $"HV #{dk.MaHocVien}") - Lớp @(dk.LopHoc?.TenLop ?? "")
+                                </option>
+                            }
+                        }
+                    </select>
+                    <span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">expand_more</span>
+                </div>
+                <span asp-validation-for="MaDangKy" class="text-danger-crimson text-xs"></span>
+            </div>
+
+            <!-- Điểm thành phần -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                        Điểm chuyên cần (30%) <span class="text-danger-crimson">*</span>
+                    </label>
+                    <input asp-for="DiemChuyenCan" type="number" step="0.1" min="0" max="10" required id="inp-cc" oninput="calcTotal()" class="w-full bg-surface-white border border-border-standard rounded-xl px-4 py-3 font-mono text-base font-semibold text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
+                    <span asp-validation-for="DiemChuyenCan" class="text-danger-crimson text-xs"></span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                        Điểm cuối khóa (70%) <span class="text-danger-crimson">*</span>
+                    </label>
+                    <input asp-for="DiemCuoiKhoa" type="number" step="0.1" min="0" max="10" required id="inp-ck" oninput="calcTotal()" class="w-full bg-surface-white border border-border-standard rounded-xl px-4 py-3 font-mono text-base font-semibold text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
+                    <span asp-validation-for="DiemCuoiKhoa" class="text-danger-crimson text-xs"></span>
+                </div>
+            </div>
+
+            <!-- Auto Total Preview Box -->
+            <div class="p-4 rounded-xl bg-gradient-to-tr from-primary/5 to-primary-container/10 border border-primary/20 flex items-center justify-between">
+                <div>
+                    <span class="text-xs uppercase font-bold text-primary block tracking-wider">Điểm tổng kết ước tính</span>
+                    <span class="text-xs text-outline">Công thức: 30% Chuyên cần + 70% Cuối khóa</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="font-mono text-2xl font-black text-brand-deep tabular-nums" id="lbl-total">--</span>
+                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg font-bold font-mono text-xs bg-primary text-surface-white" id="lbl-grade">--</span>
+                </div>
+            </div>
+
+            <!-- Nhận xét -->
+            <div class="space-y-1.5">
+                <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Nhận xét của Giáo vụ</label>
+                <textarea asp-for="NhanXet" rows="3" class="w-full bg-surface-white border border-border-standard rounded-xl p-3.5 font-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none" placeholder="Đánh giá năng lực và chuyên cần của học viên..."></textarea>
+            </div>
+
+            <div class="pt-4 border-t border-border-subtle flex items-center justify-end gap-3">
+                <a href="/KetQuaHocTap/Index" class="border border-border-standard bg-surface-white hover:bg-surface-container-low text-brand-deep font-label-md px-5 py-2.5 rounded-xl transition-colors">
+                    Hủy bỏ
+                </a>
+                <button type="submit" class="bg-primary hover:bg-[#0047b3] text-surface-white font-label-md px-6 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all">
+                    <span class="material-symbols-outlined text-[18px]">save</span>
+                    <span>Lưu kết quả</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function calcTotal() {
+        const cc = parseFloat(document.getElementById('inp-cc').value) || 0;
+        const ck = parseFloat(document.getElementById('inp-ck').value) || 0;
+        const total = Math.round((cc * 0.3 + ck * 0.7) * 100) / 100;
+        document.getElementById('lbl-total').innerText = total.toFixed(2);
+        let grade = 'F';
+        if (total >= 8.5) grade = 'A';
+        else if (total >= 7.0) grade = 'B';
+        else if (total >= 5.5) grade = 'C';
+        else if (total >= 4.0) grade = 'D';
+        document.getElementById('lbl-grade').innerText = grade;
+    }
+</script>

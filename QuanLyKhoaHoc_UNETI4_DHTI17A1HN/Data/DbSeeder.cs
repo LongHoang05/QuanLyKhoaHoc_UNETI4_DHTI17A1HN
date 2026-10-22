@@ -372,6 +372,120 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                 }
                 context.SaveChanges();
             }
+
+            // 4. Bổ sung Buổi học mẫu (Module 5) nếu chưa có
+            if (!context.BuoiHocs.Any())
+            {
+                var lopNet = context.LopHocs.FirstOrDefault(l => l.TenLop == "NETCORE10-K01");
+                var lopPy = context.LopHocs.FirstOrDefault(l => l.TenLop == "PYTHON-K02");
+                var lopReact = context.LopHocs.FirstOrDefault(l => l.TenLop == "REACT-K05");
+
+                var buoiHocs = new List<BuoiHoc>();
+                if (lopNet != null)
+                {
+                    buoiHocs.Add(new BuoiHoc
+                    {
+                        MaLopHoc = lopNet.MaLopHoc,
+                        ThoiGianBatDau = DateTime.Today.AddDays(1).AddHours(8),
+                        ThoiGianKetThuc = DateTime.Today.AddDays(1).AddHours(11).AddMinutes(30),
+                        PhongHoc = "Lab 402",
+                        GiangVien = "ThS. Trần Văn Hùng",
+                        NoiDung = "Tổng quan ASP.NET Core 10, Dependency Injection & Middleware",
+                        GhiChu = "Yêu cầu cài sẵn .NET 10 SDK & Visual Studio 2026",
+                        TrangThai = "Đã lên lịch"
+                    });
+                    buoiHocs.Add(new BuoiHoc
+                    {
+                        MaLopHoc = lopNet.MaLopHoc,
+                        ThoiGianBatDau = DateTime.Today.AddDays(3).AddHours(8),
+                        ThoiGianKetThuc = DateTime.Today.AddDays(3).AddHours(11).AddMinutes(30),
+                        PhongHoc = "Lab 402",
+                        GiangVien = "ThS. Trần Văn Hùng",
+                        NoiDung = "Entity Framework Core 10, Repository & Unit of Work Pattern",
+                        GhiChu = "Thực hành kết nối SQL Server",
+                        TrangThai = "Đã lên lịch"
+                    });
+                }
+
+                if (lopPy != null)
+                {
+                    buoiHocs.Add(new BuoiHoc
+                    {
+                        MaLopHoc = lopPy.MaLopHoc,
+                        ThoiGianBatDau = DateTime.Today.AddDays(2).AddHours(13).AddMinutes(30),
+                        ThoiGianKetThuc = DateTime.Today.AddDays(2).AddHours(17),
+                        PhongHoc = "Lab 305",
+                        GiangVien = "ThS. Nguyễn Văn A",
+                        NoiDung = "Lập trình Python cơ bản & cấu trúc dữ liệu",
+                        GhiChu = "Chuẩn bị Anaconda / Jupyter Notebook",
+                        TrangThai = "Đã lên lịch"
+                    });
+                }
+
+                if (lopReact != null)
+                {
+                    buoiHocs.Add(new BuoiHoc
+                    {
+                        MaLopHoc = lopReact.MaLopHoc,
+                        ThoiGianBatDau = DateTime.Today.AddDays(-2).AddHours(18),
+                        ThoiGianKetThuc = DateTime.Today.AddDays(-2).AddHours(21),
+                        PhongHoc = "Phòng 201",
+                        GiangVien = "Cô Hoàng Thị Lan",
+                        NoiDung = "React 19 Hooks, JSX & State Management",
+                        GhiChu = "Đã hoàn thành tốt",
+                        TrangThai = "Đã hoàn thành"
+                    });
+                }
+
+                if (buoiHocs.Any())
+                {
+                    context.BuoiHocs.AddRange(buoiHocs);
+                    context.SaveChanges();
+                }
+            }
+
+            // 5. Bổ sung Kết quả học tập mẫu (Module 5) nếu chưa có
+            if (!context.KetQuaHocTaps.Any())
+            {
+                var dks = context.DangKyHocs
+                    .Where(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học")
+                    .Take(3)
+                    .ToList();
+
+                var kqs = new List<KetQuaHocTap>();
+                if (dks.Count > 0)
+                {
+                    kqs.Add(new KetQuaHocTap
+                    {
+                        MaDangKy = dks[0].MaDangKy,
+                        DiemChuyenCan = 9.0,
+                        DiemCuoiKhoa = 8.5,
+                        DiemTongKet = 8.65,
+                        KetQua = "Hoàn thành",
+                        NhanXet = "Học viên chuyên cần, nắm vững kiến thức lập trình thực tế",
+                        NgayCapNhat = DateTime.Now.AddDays(-5)
+                    });
+                }
+                if (dks.Count > 1)
+                {
+                    kqs.Add(new KetQuaHocTap
+                    {
+                        MaDangKy = dks[1].MaDangKy,
+                        DiemChuyenCan = 8.0,
+                        DiemCuoiKhoa = 7.5,
+                        DiemTongKet = 7.65,
+                        KetQua = "Hoàn thành",
+                        NhanXet = "Làm bài tập đầy đủ, tích cực tham gia thảo luận",
+                        NgayCapNhat = DateTime.Now.AddDays(-3)
+                    });
+                }
+
+                if (kqs.Any())
+                {
+                    context.KetQuaHocTaps.AddRange(kqs);
+                    context.SaveChanges();
+                }
+            }
         }
     }
 }

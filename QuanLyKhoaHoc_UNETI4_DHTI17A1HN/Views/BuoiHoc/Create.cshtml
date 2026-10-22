@@ -1,0 +1,126 @@
+@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.BuoiHoc
+@{
+    ViewData["Title"] = "Xếp Lịch Học Mới";
+    var lopHocs = ViewBag.LopHocList as List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>();
+}
+
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between pb-4 border-b border-border-standard">
+        <div>
+            <div class="flex items-center gap-1.5 text-outline font-label-sm text-label-sm tracking-wide">
+                <span>ĐÀO TẠO UNETI</span>
+                <span class="material-symbols-outlined text-[13px]">chevron_right</span>
+                <span>LỊCH HỌC</span>
+                <span class="material-symbols-outlined text-[13px]">chevron_right</span>
+                <span class="text-primary-container font-semibold">TẠO MỚI</span>
+            </div>
+            <h1 class="font-headline-md text-headline-md text-brand-deep tracking-tight font-extrabold mt-1">
+                Xếp lịch học mới
+            </h1>
+            <p class="font-body-sm text-body-sm text-outline mt-0.5">
+                Thiết lập phòng máy, giảng viên và thời gian học cho lớp đào tạo (Module 5 - Nguyễn Tùng Dương).
+            </p>
+        </div>
+        <a href="/BuoiHoc/Index" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-border-standard text-brand-deep font-label-md text-label-md hover:bg-surface-container-low transition-colors">
+            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+            <span>Về danh sách</span>
+        </a>
+    </div>
+
+    <!-- Main Form Card -->
+    <div class="bg-surface-white p-8 rounded-2xl border border-border-subtle shadow-sm">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-danger-crimson text-sm font-medium">
+                <div asp-validation-summary="All"></div>
+            </div>
+        }
+
+        <form asp-action="Create" method="post" class="space-y-6">
+            @Html.AntiForgeryToken()
+
+            <!-- Lớp học -->
+            <div class="space-y-1.5">
+                <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                    Lớp học đào tạo <span class="text-danger-crimson text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <select asp-for="MaLopHoc" required class="w-full appearance-none bg-surface-white border border-border-standard rounded-xl px-4 py-3 font-body-md text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                        @foreach (var lop in lopHocs)
+                        {
+                            <option value="@lop.MaLopHoc">@lop.TenLop (@(lop.SiSoToiDa) Học viên)</option>
+                        }
+                    </select>
+                    <span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">expand_more</span>
+                </div>
+                <span asp-validation-for="MaLopHoc" class="text-red-500 text-xs"></span>
+            </div>
+
+            <!-- Phòng học & Giảng viên -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                        Phòng học / Phòng máy <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input asp-for="PhongHoc" required class="w-full bg-surface-white border border-border-standard rounded-xl px-4 py-3 font-mono font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary uppercase" placeholder="P.301, Lab CNTT..."/>
+                        <span class="material-symbols-outlined text-outline absolute right-3.5 top-1/2 -translate-y-1/2 text-[18px]">meeting_room</span>
+                    </div>
+                    <span asp-validation-for="PhongHoc" class="text-red-500 text-xs"></span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                        Giảng viên phụ trách <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input asp-for="GiangVien" required class="w-full bg-surface-white border border-border-standard rounded-xl px-4 py-3 font-body-md text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="ThS. Nguyễn Văn A..."/>
+                        <span class="material-symbols-outlined text-outline absolute right-3.5 top-1/2 -translate-y-1/2 text-[18px]">person</span>
+                    </div>
+                    <span asp-validation-for="GiangVien" class="text-red-500 text-xs"></span>
+                </div>
+            </div>
+
+            <!-- Thời gian -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                        Thời gian bắt đầu <span class="text-red-500">*</span>
+                    </label>
+                    <input asp-for="ThoiGianBatDau" type="datetime-local" required class="w-full bg-surface-white border border-border-standard rounded-xl px-4 py-3 font-mono text-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
+                    <span asp-validation-for="ThoiGianBatDau" class="text-red-500 text-xs"></span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                        Thời gian kết thúc <span class="text-red-500">*</span>
+                    </label>
+                    <input asp-for="ThoiGianKetThuc" type="datetime-local" required class="w-full bg-surface-white border border-border-standard rounded-xl px-4 py-3 font-mono text-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
+                    <span asp-validation-for="ThoiGianKetThuc" class="text-red-500 text-xs"></span>
+                </div>
+            </div>
+
+            <!-- Nội dung & Ghi chú -->
+            <div class="space-y-1.5">
+                <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Nội dung bài học</label>
+                <textarea asp-for="NoiDung" rows="2" class="w-full bg-surface-white border border-border-standard rounded-xl p-3.5 font-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none" placeholder="Nội dung tóm tắt buổi giảng..."></textarea>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Ghi chú</label>
+                <textarea asp-for="GhiChu" rows="2" class="w-full bg-surface-white border border-border-standard rounded-xl p-3.5 font-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none" placeholder="Ghi chú về thiết bị hoặc tài liệu..."></textarea>
+            </div>
+
+            <div class="pt-4 border-t border-border-subtle flex items-center justify-end gap-3">
+                <a href="/BuoiHoc/Index" class="border border-border-standard bg-surface-white hover:bg-surface-container-low text-brand-deep font-label-md px-5 py-2.5 rounded-xl transition-colors">
+                    Hủy bỏ
+                </a>
+                <button type="submit" class="bg-primary hover:bg-[#0047b3] text-white font-label-md px-6 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all">
+                    <span class="material-symbols-outlined text-[18px]">save</span>
+                    <span>Lưu lịch học</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
