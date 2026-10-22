@@ -1,4 +1,9 @@
 @model List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.TaiKhoan>
+@using Microsoft.AspNetCore.Http
+@{
+    var currentSessionRole = Context.Session.GetString("VaiTro");
+    var isCurrentUserAdmin = (currentSessionRole == "Admin");
+}
 
 <!-- Bảng Danh Sách Tài Khoản Hệ Thống (Entity TaiKhoan - Chuẩn Mục 5.1 & admin-tai-khoan.html) -->
 <table class="modern-table">
@@ -51,6 +56,10 @@
                     roleText = "Học viên";
                 }
 
+                // Phân quyền nghiệp vụ: Giáo vụ chỉ thao tác trên tài khoản Học viên, Admin thao tác được tất cả
+                var isTargetHocVien = (a.VaiTro == "HocVien" || a.VaiTro == "Học viên");
+                var canManage = isCurrentUserAdmin || isTargetHocVien;
+
                 var initialLetter = string.IsNullOrEmpty(a.HoTen) ? "U" : a.HoTen.Trim().Substring(a.HoTen.Trim().LastIndexOf(' ') + 1).Substring(0, 1).ToUpper();
 
                 <tr id="row-account-@a.MaTaiKhoan">
@@ -87,21 +96,41 @@
                     <td><small class="text-muted">@a.NgayTao.ToString("yyyy-MM-dd")</small></td>
                     <td class="text-end">
                         <div class="d-inline-flex gap-1">
-                            <button type="button" 
-                                    class="btn-action-icon @(a.TrangThai ? "danger" : "") btn-toggle-lock-acc" 
-                                    id="btn-lock-acc-@a.MaTaiKhoan"
-                                    data-id="@a.MaTaiKhoan" 
-                                    data-username="@a.TenDangNhap"
-                                    title="@(a.TrangThai ? "Khóa tài khoản" : "Mở khóa")">
-                                <i class="bi @(a.TrangThai ? "bi-lock" : "bi-unlock text-success")"></i>
-                            </button>
-                            <button type="button" 
-                                    class="btn-action-icon btn-reset-pass" 
-                                    data-id="@a.MaTaiKhoan" 
-                                    data-username="@a.TenDangNhap"
-                                    title="Cấp lại mật khẩu">
-                                <i class="bi bi-key"></i>
-                            </button>
+                            @if (canManage)
+                            {
+                                <button type="button" 
+                                        class="btn-action-icon @(a.TrangThai ? "danger" : "") btn-toggle-lock-acc" 
+                                        id="btn-lock-acc-@a.MaTaiKhoan"
+                                        data-id="@a.MaTaiKhoan" 
+                                        data-username="@a.TenDangNhap"
+                                        title="@(a.TrangThai ? "Khóa tài khoản" : "Mở khóa")">
+                                    <i class="bi @(a.TrangThai ? "bi-lock" : "bi-unlock text-success")"></i>
+                                </button>
+                                <button type="button" 
+                                        class="btn-action-icon btn-reset-pass" 
+                                        data-id="@a.MaTaiKhoan" 
+                                        data-username="@a.TenDangNhap"
+                                        title="Cấp lại mật khẩu">
+                                    <i class="bi bi-key"></i>
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" 
+                                        class="btn-action-icon" 
+                                        disabled
+                                        style="opacity: 0.35; cursor: not-allowed; background: #f1f5f9; color: #94a3b8;" 
+                                        title="Giáo vụ chỉ được phép khóa/mở khóa tài khoản Học viên (Cần quyền Admin để thao tác trên @roleText)">
+                                    <i class="bi bi-lock-fill"></i>
+                                </button>
+                                <button type="button" 
+                                        class="btn-action-icon" 
+                                        disabled
+                                        style="opacity: 0.35; cursor: not-allowed; background: #f1f5f9; color: #94a3b8;" 
+                                        title="Giáo vụ chỉ được phép cấp lại mật khẩu cho Học viên">
+                                    <i class="bi bi-key-fill"></i>
+                                </button>
+                            }
                         </div>
                     </td>
                 </tr>

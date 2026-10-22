@@ -532,6 +532,8 @@ body {
     padding: 0.38rem 0.9rem;
     color: var(--text-gray);
     font-weight: 500;
+    width: auto !important;
+    min-width: 150px;
 }
 
 .filter-select:focus {

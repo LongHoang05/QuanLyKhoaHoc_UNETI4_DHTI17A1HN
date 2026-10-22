@@ -195,6 +195,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
         // ========================================================
         // 5. AJAX KHÓA / MỞ KHÓA TÀI KHOẢN (Entity TaiKhoan - Mục 5.1)
+        // Nghiệp vụ: Giáo vụ chỉ khóa được tài khoản học viên, Admin có thể khóa tất cả
         // ========================================================
         [HttpPost]
         public async Task<IActionResult> ToggleTaiKhoanStatus(int id)
@@ -204,12 +205,29 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return Json(new { success = false, message = "Bạn không có quyền quản trị." });
             }
 
+            var currentRole = HttpContext.Session.GetString("VaiTro");
+            var targetAccount = await _context.TaiKhoans.FindAsync(id);
+            if (targetAccount == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy tài khoản." });
+            }
+
+            var isTargetHocVien = (targetAccount.VaiTro == "HocVien" || targetAccount.VaiTro == "Học viên");
+            if (currentRole != "Admin" && !isTargetHocVien)
+            {
+                return Json(new { 
+                    success = false, 
+                    message = $"Giáo vụ chỉ được phép khóa/mở khóa tài khoản Học viên! Không có quyền khóa tài khoản {targetAccount.VaiTro} (Cần quyền Admin)." 
+                });
+            }
+
             var (success, error, newStatus, username) = await _hocVienService.DoiTrangThaiTaiKhoanAsync(id);
             return Json(new { success, message = error, newStatus, username });
         }
 
         // ========================================================
         // 6. AJAX CẤP LẠI MẬT KHẨU TÀI KHOẢN
+        // Nghiệp vụ: Giáo vụ chỉ cấp lại mật khẩu cho học viên
         // ========================================================
         [HttpPost]
         public async Task<IActionResult> ResetMatKhau(int id, string? newPassword)
@@ -219,12 +237,29 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return Json(new { success = false, message = "Bạn không có quyền quản trị." });
             }
 
+            var currentRole = HttpContext.Session.GetString("VaiTro");
+            var targetAccount = await _context.TaiKhoans.FindAsync(id);
+            if (targetAccount == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy tài khoản." });
+            }
+
+            var isTargetHocVien = (targetAccount.VaiTro == "HocVien" || targetAccount.VaiTro == "Học viên");
+            if (currentRole != "Admin" && !isTargetHocVien)
+            {
+                return Json(new { 
+                    success = false, 
+                    message = $"Giáo vụ chỉ được phép cấp lại mật khẩu cho Học viên! Không có quyền đổi mật khẩu của {targetAccount.VaiTro}." 
+                });
+            }
+
             var (success, error) = await _hocVienService.ResetMatKhauTaiKhoanAsync(id, newPassword);
             return Json(new { success, message = error ?? "Cấp lại mật khẩu thành công!" });
         }
 
         // ========================================================
         // 7. AJAX THÊM TÀI KHOẢN MỚI TỪ MODAL
+        // Nghiệp vụ: Giáo vụ chỉ thêm được tài khoản học viên
         // ========================================================
         [HttpPost]
         public async Task<IActionResult> ThemNguoiDungAjax(ThemTaiKhoanViewModel model)
@@ -232,6 +267,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             if (!CoQuyenQuanTri(out _))
             {
                 return Json(new { success = false, message = "Bạn không có quyền quản trị." });
+            }
+
+            var currentRole = HttpContext.Session.GetString("VaiTro");
+            var isNewHocVien = (model.VaiTro == "HocVien" || model.VaiTro == "Học viên");
+            if (currentRole != "Admin" && !isNewHocVien)
+            {
+                return Json(new { 
+                    success = false, 
+                    message = "Giáo vụ chỉ được phép tạo tài khoản Học viên! Chỉ Admin mới có quyền tạo tài khoản Giáo vụ hoặc Admin." 
+                });
             }
 
             if (!ModelState.IsValid)

@@ -1,6 +1,9 @@
 @model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels.HocVienIndexViewModel
+@using Microsoft.AspNetCore.Http
 @{
     ViewData["Title"] = "Quản lý Tài khoản & Hồ sơ Học viên (Mục 5 & Mục 7)";
+    var currentRole = Context.Session.GetString("VaiTro");
+    var isUserAdmin = (currentRole == "Admin");
 }
 
 <!-- ==================== 1. HERO BANNER TỐI GIẢN (Chuẩn admin-tai-khoan.html) ==================== -->
@@ -105,7 +108,7 @@
             </div>
 
             <!-- Filter Vai trò (chỉ hiện khi xem Tab Accounts) -->
-            <select id="filterRole" class="form-select form-select-sm filter-select">
+            <select id="filterRole" class="form-select form-select-sm filter-select" style="width: auto; min-width: 160px;">
                 <option value="">-- Tất cả vai trò --</option>
                 <option value="Học viên">Học viên</option>
                 <option value="Giáo vụ">Giáo vụ</option>
@@ -113,14 +116,14 @@
             </select>
 
             <!-- Filter Trạng thái (dùng chung cho cả 2 tab) -->
-            <select id="filterStatus" class="form-select form-select-sm filter-select">
+            <select id="filterStatus" class="form-select form-select-sm filter-select" style="width: auto; min-width: 150px;">
                 <option value="">-- Trạng thái --</option>
                 <option value="active">Đang hoạt động</option>
                 <option value="locked">Đang bị khóa</option>
             </select>
 
             <!-- Filter Lớp học: YÊU CẦU ĐẶC BIỆT (chỉ hiện khi xem Tab Profiles Học viên) -->
-            <select id="filterClass" class="form-select form-select-sm filter-select" style="display: none; max-width: 230px;">
+            <select id="filterClass" class="form-select form-select-sm filter-select" style="display: none; width: auto; min-width: 200px;">
                 <option value="">-- Tất cả lớp học --</option>
                 @if (Model.DanhSachLopHoc != null)
                 {
@@ -132,7 +135,7 @@
             </select>
 
             <!-- Nút Reset bộ lọc -->
-            <button type="button" id="btnResetFilter" class="btn btn-sm btn-outline-secondary rounded-pill px-3" style="font-size: 0.8rem;">
+            <button type="button" id="btnResetFilter" class="btn btn-sm btn-outline-secondary rounded-pill px-3" style="font-size: 0.8rem; white-space: nowrap;">
                 <i class="bi bi-arrow-counterclockwise me-1"></i> Đặt lại
             </button>
         </div>
@@ -206,9 +209,16 @@
                             <label class="form-label fw-bold small">Vai trò (VaiTro)</label>
                             <select id="newRole" class="form-select form-select-sm" style="border-color: var(--border-color);">
                                 <option value="Học viên">Học viên</option>
-                                <option value="Giáo vụ">Giáo vụ</option>
-                                <option value="Admin">Admin</option>
+                                @if (isUserAdmin)
+                                {
+                                    <option value="Giáo vụ">Giáo vụ</option>
+                                    <option value="Admin">Admin</option>
+                                }
                             </select>
+                            @if (!isUserAdmin)
+                            {
+                                <div class="text-muted mt-1" style="font-size: 0.7rem;">(Giáo vụ chỉ tạo tài khoản Học viên)</div>
+                            }
                         </div>
                     </div>
                 </div>
