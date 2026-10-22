@@ -16,6 +16,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                 {
                     TenLop = "PYTHON-K02",
                     MaChuongTrinh = 2,
+                    MaGiangVien = 1,
                     TenGiangVien = "ThS. Trần Văn Hùng",
                     TrinhDoDauVao = "Cơ bản",
                     SiSoToiDa = 30,
@@ -33,6 +34,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                 {
                     TenLop = "REACT-K05",
                     MaChuongTrinh = 1,
+                    MaGiangVien = 1,
                     TenGiangVien = "ThS. Trần Văn Hùng",
                     TrinhDoDauVao = "Trung cấp",
                     SiSoToiDa = 25,
@@ -50,6 +52,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                 {
                     TenLop = "TOEIC-K12",
                     MaChuongTrinh = 1,
+                    MaGiangVien = 1,
                     TenGiangVien = "Cô Hoàng Thị Lan",
                     TrinhDoDauVao = "Cơ bản",
                     SiSoToiDa = 35,
