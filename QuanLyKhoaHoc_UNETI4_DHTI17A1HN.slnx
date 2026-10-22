@@ -1,3 +1,15 @@
 <Solution>
+  <Folder Name="/Giao_DIen_Test/">
+    <File Path="Giao_DIen_Test/index.html" />
+    <File Path="Giao_DIen_Test/admin-buoi-hoc.html" />
+    <File Path="Giao_DIen_Test/admin-chuong-trinh.html" />
+    <File Path="Giao_DIen_Test/admin-dang-ky.html" />
+    <File Path="Giao_DIen_Test/admin-ket-qua.html" />
+    <File Path="Giao_DIen_Test/admin-lop-hoc.html" />
+    <File Path="Giao_DIen_Test/admin-tai-khoan.html" />
+    <File Path="Giao_DIen_Test/admin-thong-ke.html" />
+    <File Path="Giao_DIen_Test/dang-nhap.html" />
+    <File Path="Giao_DIen_Test/hoc-vien.html" />
+  </Folder>
   <Project Path="QuanLyKhoaHoc_UNETI4_DHTI17A1HN/QuanLyKhoaHoc_UNETI4_DHTI17A1HN.csproj" />
 </Solution>
