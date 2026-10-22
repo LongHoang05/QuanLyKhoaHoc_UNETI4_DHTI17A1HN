@@ -15,13 +15,13 @@ Khung dự án này là **nền tảng chung duy nhất** đã được cấu h�
 
 ### Những thành phần ĐÃ ĐƯỢC LÀM SẴN trong khung:
 1. **Toàn bộ Entity Models (`Models/*.cs`):**
-   - Đầy đủ 10 model chuẩn theo nghiệp vụ: `TaiKhoan`, `DanhMucKhoaHoc`, `KhoaHoc`, `LopHoc`, `GiangVien`, `HocVien`, `DangKyHoc`, `BuoiHoc`, `KetQuaHocTap`, `ThanhToan`.
+   - Đầy đủ 7 model chuẩn theo đặc tả Đề tài BTL: `TaiKhoan`, `ChuongTrinhDaoTao`, `LopHoc`, `HocVien`, `DangKyHoc`, `BuoiHoc`, `KetQuaHocTap`.
    - Đã khai báo đầy đủ khóa chính, khóa ngoại, DataAnnotations (Validation, MaxLength, DisplayName).
 2. **Cơ sở dữ liệu & Cấu hình quan hệ (`Data/ApplicationDbContext.cs`):**
-   - Đã cấu hình quan hệ 1-N, N-N, các chỉ mục (Indexes).
-   - Đã cấu hình sẵn **Seed Data** (tạo sẵn dữ liệu mẫu cho tài khoản test, danh mục, khóa học, giảng viên, lớp học).
-3. **Migration nền tảng gốc (`Migrations/20261014070040_InitialCreate.cs`):**
-   - Đã tạo sẵn 1 migration duy nhất cho toàn bộ bảng.
+   - Đã cấu hình quan hệ 1-N (ChuongTrinhDaoTao -> LopHoc -> DangKyHoc...), 1-1 (DangKyHoc -> KetQuaHocTap).
+   - Đã cấu hình sẵn **Seed Data** (tạo sẵn dữ liệu mẫu cho tài khoản test, chương trình đào tạo, lớp học, học viên).
+3. **Migration nền tảng gốc (`Migrations/*_InitialCreate.cs`):**
+   - Đã tạo sẵn 1 migration duy nhất cho toàn bộ 7 bảng cốt lõi.
 4. **Cấu hình ứng dụng (`Program.cs`, `appsettings.json`):**
    - Đã bật sẵn kết nối SQL Server, Session 60 phút, Routing MVC.
 5. **Giao diện dùng chung (`Views/Shared/_Layout.cshtml`, `Views/Home/Index.cshtml`):**
@@ -57,7 +57,76 @@ Khung dự án này là **nền tảng chung duy nhất** đã được cấu h�
 
 ---
 
-## 🏗️ 3. HƯỚNG DẪN CHI TIẾT VỀ REPOSITORY PATTERN & SERVICE LAYER
+## 🌿 3. QUY TRÌNH PHỐI HỢP GIT & PULL REQUEST (CHUẨN LÀM VIỆC NHÓM)
+
+### 📌 Bước 1: Quy tắc phân chia công việc theo nhánh (Best Practice)
+- **Tuyệt đối không code trực tiếp trên nhánh `main`**. Nhánh `main` chỉ dùng để chứa code đã chạy ổn định, kiểm thử hoàn thiện và chuẩn bị nộp bài.
+- Mỗi thành viên làm việc độc lập trên nhánh module của mình (ví dụ: `long`, `duong`, `ndlinh` hoặc chuẩn feature `feature/module-1-truong`, `feature/module-2-kien`...).
+
+---
+
+### 🔄 Bước 2: Quy trình cập nhật code mới nhất từ `main` về nhánh cá nhân
+> [!IMPORTANT]
+> **Quy tắc sống còn:** Trước khi bạn muốn merge code của mình lên `main`, bạn **phải kéo code mới nhất từ `main` về nhánh của bạn trước** để giải quyết xung đột (nếu có) ngay trên máy cá nhân, tránh làm hỏng hoặc "sập" nhánh `main` chung của cả nhóm!
+
+1. **Commit code hiện tại trên nhánh của bạn:**
+   ```bash
+   git add .
+   git commit -m "feat: hoàn thành phần việc của tôi"
+   ```
+
+2. **Chuyển về nhánh `main` và lấy code mới nhất:**
+   ```bash
+   git checkout main
+   git pull origin main
+   ```
+
+3. **Chuyển lại nhánh của bạn và cập nhật (Merge hoặc Rebase) từ `main` vào:**
+   ```bash
+   git checkout <ten-nhanh-cua-ban>
+   git merge main
+   ```
+   *(Hoặc dùng `git rebase main` nếu muốn lịch sử commit tuyến tính, sạch sẽ hơn)*.
+
+4. **Xử lý Conflict (nếu có xung đột code):**
+   - Nếu có file bị trùng lặp chỉnh sửa, Git sẽ đánh dấu xung đột.
+   - Mở **Visual Studio 2022** hoặc **VS Code**, chọn giữ lại đoạn code đúng (*Accept Current Change*, *Accept Incoming Change*, hoặc kết hợp cả hai).
+   - Sau khi giải quyết xong conflict, lưu file và chạy lệnh:
+     ```bash
+     git add .
+     git commit -m "fix: giải quyết conflict với main"
+     ```
+
+---
+
+### 🚀 Bước 3: Đưa code lên GitHub và tạo Pull Request (PR) an toàn
+Thay vì đứng ở máy cá nhân gõ lệnh ép merge thẳng lên `main`, hãy dùng cơ chế **Pull Request (PR)** trên GitHub để hệ thống kiểm tra xung đột tự động:
+
+1. **Đẩy nhánh của bạn lên GitHub:**
+   ```bash
+   git push origin <ten-nhanh-cua-ban>
+   ```
+
+2. **Tạo Pull Request trên giao diện GitHub:**
+   - Truy cập vào repository: [QuanLyKhoaHoc_UNETI4_DHTI17A1HN](https://github.com/LongHoang05/QuanLyKhoaHoc_UNETI4_DHTI17A1HN).
+   - Chuyển sang tab **Pull requests** $\rightarrow$ Bấm nút **New pull request**.
+   - Chọn:
+     - **base:** `main`
+     - **compare:** `<ten-nhanh-cua-ban>` (ví dụ: `long`, `duong`...)
+
+3. **Kiểm tra trạng thái Merge:**
+   - ✅ Nếu hiện dòng **"Able to merge"**: Mọi thứ hoàn hảo! Bạn bấm **Create pull request** $\rightarrow$ Sau đó bấm **Merge pull request** $\rightarrow$ **Confirm merge**.
+   - ⚠️ Nếu hiện dòng **"Can't automatically merge"**: Nghĩa là có đoạn code bị xung đột. Bạn cần làm lại **Bước 2** trên máy cá nhân để giải quyết dứt điểm conflict trước khi tạo lại PR.
+
+---
+
+### 💡 Mẹo nhỏ cho nhóm khi làm việc:
+1. **Giao tiếp trước khi sửa file chung:** Các file cấu hình chung như `appsettings.json`, `ApplicationDbContext.cs`, hoặc `Program.cs` rất dễ bị conflict. Cả nhóm nên trao đổi trước khi sửa các file cốt lõi này để tránh việc mọi người cùng sửa một chỗ.
+2. **Kéo code về thường xuyên:** Sau khi một thành viên đã merge code thành công vào `main`, các thành viên còn lại nhớ chạy `git checkout main && git pull origin main` về nhánh của mình sớm nhất có thể để luôn làm việc trên nền tảng code mới nhất.
+
+---
+
+## 🏗️ 4. HƯỚNG DẪN CHI TIẾT VỀ REPOSITORY PATTERN & SERVICE LAYER
 
 > [!IMPORTANT]
 > **TIÊU CHÍ CHẤM ĐIỂM BẮT BUỘC CỦA THẦY CÔ:**
@@ -367,21 +436,21 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
 ---
 
-## 📋 4. BẢNG PHÂN CHIA REPOSITORY & SERVICE CỤ THỂ CHO 5 THÀNH VIÊN
+## 📋 5. BẢNG PHÂN CHIA REPOSITORY & SERVICE CỤ THỂ CHO 5 THÀNH VIÊN
 
 Mỗi bạn căn cứ vào bảng này để tạo đúng file và viết các hàm nghiệp vụ tương ứng:
 
 | Thành viên | Module | File Repository cần tạo | File Service cần tạo | Các phương thức nghiệp vụ trọng tâm |
 | :--- | :---: | :--- | :--- | :--- |
-| **Vũ Đình Trường**<br>`23103100026` | **Module 1** | - `ITaiKhoanRepository.cs`<br>- `TaiKhoanRepository.cs`<br>- `IKhoaHocRepository.cs`<br>- `KhoaHocRepository.cs` | - `ITaiKhoanService.cs`<br>- `TaiKhoanService.cs`<br>- `IKhoaHocService.cs`<br>- `KhoaHocService.cs` | - `KiemTraDangNhap(tenDangNhap, matKhau)`<br>- `TaoTaiKhoanHocVien(taiKhoan)`<br>- `LuuSession(MaTaiKhoan, HoTen, VaiTro)`<br>- CRUD Danh mục & Khóa học đào tạo |
-| **Nguyễn Đình Kiên**<br>`23103100020` | **Module 2** | - `ILopHocRepository.cs`<br>- `LopHocRepository.cs`<br>- `IGiangVienRepository.cs`<br>- `GiangVienRepository.cs` | - `ILopHocService.cs`<br>- `LopHocService.cs` | - `GetPagedAsync(keyword, trangThai, maGV, sapXep, page, size)`<br>- **LINQ Skip() & Take() phân trang server**<br>- Validation logic ngày mở, hạn nộp, ngày khai giảng |
-| **Nguyễn Đức Linh**<br>`23103100042` | **Module 3** | - `IHocVienRepository.cs`<br>- `HocVienRepository.cs`<br>- `IDangKyHocRepository.cs`<br>- `DangKyHocRepository.cs` | - `IHocVienService.cs`<br>- `HocVienService.cs` | - `LayHoSoTheoTaiKhoan(maTaiKhoan)`<br>- `CapNhatHoSo(hocVien)`<br>- `LayDanhSachLopDangMo()`<br>- `DangKyLop(maHocVien, maLop)`: Kiểm tra bằng LINQ: lớp còn mở, còn chỗ, không đăng ký trùng |
-| **Nguyễn Hoàng Long**<br>`23103100046` | **Module 4** | - `IQuanLyDangKyRepository.cs`<br>- `QuanLyDangKyRepository.cs`<br>- `IThanhToanRepository.cs`<br>- `ThanhToanRepository.cs` | - `IQuanLyDangKyService.cs`<br>- `QuanLyDangKyService.cs` | - `LayDanhSachDonDangKy(maLop, trangThai)`<br>- **LINQ đếm sĩ số lớp đã duyệt < SiSoToiDa**<br>- `DuyetDon(maDangKy, ghiChu)`<br>- `TuChoiDon(maDangKy, lyDo)`<br>- `GhiNhanDongHocPhi(thanhToan)` & cập nhật trạng thái đơn |
-| **Nguyễn Tùng Dương**<br>`23103100003` | **Module 5** | - `IBuoiHocRepository.cs`<br>- `BuoiHocRepository.cs`<br>- `IKetQuaHocTapRepository.cs`<br>- `KetQuaHocTapRepository.cs` | - `ILichHocService.cs`<br>- `LichHocService.cs`<br>- `IThongKeService.cs`<br>- `ThongKeService.cs` | - **Thuật toán LINQ kiểm tra trùng lịch:** Không trùng phòng, không trùng GV, không trùng lớp trong cùng khung giờ<br>- Nhập điểm & tính điểm tổng kết: `0.2 * CC + 0.8 * CK`, xếp loại học lực<br>- **Dashboard thống kê LINQ**: Doanh thu, Top khóa học, Tỷ lệ đỗ/trượt |
+| **Vũ Đình Trường**<br>`23103100026` | **Module 1** | - `ITaiKhoanRepository.cs`<br>- `TaiKhoanRepository.cs`<br>- `IChuongTrinhDaoTaoRepository.cs`<br>- `ChuongTrinhDaoTaoRepository.cs` | - `ITaiKhoanService.cs`<br>- `TaiKhoanService.cs`<br>- `IChuongTrinhDaoTaoService.cs`<br>- `ChuongTrinhDaoTaoService.cs` | - `KiemTraDangNhap(tenDangNhap, matKhau)`<br>- `TaoTaiKhoanHocVien(taiKhoan)`<br>- `LuuSession(MaTaiKhoan, HoTen, VaiTro)`<br>- Phân quyền (Admin, GiaoVu, HocVien)<br>- CRUD Chương trình đào tạo |
+| **Nguyễn Đình Kiên**<br>`23103100020` | **Module 2** | - `ILopHocRepository.cs`<br>- `LopHocRepository.cs` | - `ILopHocService.cs`<br>- `LopHocService.cs` | - `GetPagedAsync(keyword, trangThai, sapXep, page, size)`<br>- **LINQ Skip() & Take() phân trang server**<br>- Validation ngày mở, hạn nộp, ngày khai giảng<br>- Quản lý lớp học (CRUD) |
+| **Nguyễn Đức Linh**<br>`23103100042` | **Module 3** | - `IHocVienRepository.cs`<br>- `HocVienRepository.cs`<br>- `IDangKyHocRepository.cs`<br>- `DangKyHocRepository.cs` | - `IHocVienService.cs`<br>- `HocVienService.cs` | - `LayHoSoTheoTaiKhoan(maTaiKhoan)`<br>- `CapNhatHoSo(hocVien)`<br>- `LayDanhSachLopDangMo()`<br>- `DangKyLop(maHocVien, maLop)`: Kiểm tra bằng LINQ: lớp còn mở, còn chỗ, không trùng đơn |
+| **Nguyễn Hoàng Long**<br>`23103100046` | **Module 4** | - `IQuanLyDangKyRepository.cs`<br>- `QuanLyDangKyRepository.cs` | - `IQuanLyDangKyService.cs`<br>- `QuanLyDangKyService.cs` | - `LayDanhSachDonDangKy(maLop, trangThai)`<br>- **LINQ đếm sĩ số lớp đã duyệt < SiSoToiDa**<br>- `DuyetDon(maDangKy, ghiChu)`<br>- `TuChoiDon(maDangKy, lyDo)`<br>- `XacNhanDongHocPhi(maDangKy, soTien, ngayDong)` |
+| **Nguyễn Tùng Dương**<br>`23103100003` | **Module 5** | - `IBuoiHocRepository.cs`<br>- `BuoiHocRepository.cs`<br>- `IKetQuaHocTapRepository.cs`<br>- `KetQuaHocTapRepository.cs` | - `ILichHocService.cs`<br>- `LichHocService.cs`<br>- `IThongKeService.cs`<br>- `ThongKeService.cs` | - **Thuật toán LINQ kiểm tra trùng lịch:** Không trùng phòng, không trùng GV, không trùng lớp trong cùng khung giờ<br>- Quản lý điểm & xếp loại học tập<br>- **Dashboard thống kê LINQ**: Doanh thu, Tỷ lệ đăng ký, Sĩ số các lớp |
 
 ---
 
-## 💻 5. HƯỚNG DẪN THỰC THI TRÊN VISUAL STUDIO 2022 (TÍM)
+## 💻 6. HƯỚNG DẪN THỰC THI TRÊN VISUAL STUDIO 2022 (TÍM)
 
 ### Bước 1: Mở Solution
 1. Mở **Visual Studio 2022**.
