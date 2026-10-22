@@ -441,7 +441,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             var lopHocDangMos = await _context.LopHocs
                 .Include(l => l.ChuongTrinhDaoTao)
-                .Include(l => l.GiangVien)
                 .Where(l => l.TrangThai == "Đang mở đăng ký")
                 .ToListAsync();
 
