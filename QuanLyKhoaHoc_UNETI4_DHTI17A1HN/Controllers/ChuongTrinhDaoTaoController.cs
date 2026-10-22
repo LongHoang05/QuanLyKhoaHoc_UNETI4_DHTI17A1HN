@@ -4,156 +4,179 @@
 // Phụ trách: Module 1 - Tài khoản, Đăng nhập, Phân quyền và Chương trình đào tạo
 // ========================================================
 
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
+using Microsoft.EntityFrameworkCore;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
-using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 {
     public class ChuongTrinhDaoTaoController : Controller
     {
-        private readonly IChuongTrinhDaoTaoService _chuongTrinhService;
+        private readonly ApplicationDbContext _context;
 
-        public ChuongTrinhDaoTaoController(IChuongTrinhDaoTaoService chuongTrinhService)
+        public ChuongTrinhDaoTaoController(ApplicationDbContext context)
         {
-            _chuongTrinhService = chuongTrinhService;
+            _context = context;
         }
 
-        // ========================================================
-        // 1. DANH SÁCH CHƯƠNG TRÌNH ĐÀO TẠO (Tìm kiếm + Lọc + Phân trang LINQ)
-        // ========================================================
-        [HttpGet]
-        public async Task<IActionResult> Index(string? keyword, bool? trangThai, int page = 1)
+        public async Task<IActionResult> Index(int page = 1, string search = "", string trangThai = "")
         {
-            var viewModel = await _chuongTrinhService.GetPagedAsync(keyword, trangThai, page, 8);
-            return View(viewModel);
-        }
+            int pageSize = 8;
+            var query = _context.ChuongTrinhDaoTaos.AsQueryable();
 
-        // ========================================================
-        // 2. CHI TIẾT CHƯƠNG TRÌNH ĐÀO TẠO (Kèm danh sách các lớp học trực thuộc)
-        // ========================================================
-        [HttpGet]
-        public async Task<IActionResult> Details(int id)
-        {
-            var chuongTrinh = await _chuongTrinhService.GetByIdWithDetailsAsync(id);
-            if (chuongTrinh == null)
+            if (!string.IsNullOrWhiteSpace(search))
             {
-                return NotFound();
+                string s = search.ToLower().Trim();
+                query = query.Where(c => c.TenChuongTrinh.ToLower().Contains(s) || 
+                                         (c.MoTa != null && c.MoTa.ToLower().Contains(s)) ||
+                                         (c.EmailLienHe != null && c.EmailLienHe.ToLower().Contains(s)));
             }
-            return View(chuongTrinh);
+
+            if (!string.IsNullOrWhiteSpace(trangThai))
+            {
+                if (trangThai == "Đang hoạt động" || trangThai == "1" || trangThai.ToLower() == "true")
+                {
+                    query = query.Where(c => c.TrangThai);
+                }
+                else if (trangThai == "Tạm dừng" || trangThai == "0" || trangThai.ToLower() == "false")
+                {
+                    query = query.Where(c => !c.TrangThai);
+                }
+            }
+
+            int totalItems = await query.CountAsync();
+            int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            if (totalPages < 1) totalPages = 1;
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+
+            var items = await query
+                .OrderByDescending(c => c.MaChuongTrinh)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Tính số lớp học tương ứng cho từng CTĐT để hiển thị trên bảng
+            var ctdtIds = items.Select(c => c.MaChuongTrinh).ToList();
+            var classCounts = await _context.LopHocs
+                .Where(l => ctdtIds.Contains(l.MaChuongTrinh))
+                .GroupBy(l => l.MaChuongTrinh)
+                .Select(g => new { MaChuongTrinh = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.MaChuongTrinh, x => x.Count);
+
+            ViewBag.ClassCounts = classCounts;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalItems = totalItems;
+            ViewBag.Search = search;
+            ViewBag.SelectedTrangThai = trangThai;
+
+            // 3 thẻ KPI
+            ViewBag.TongCTDT = await _context.ChuongTrinhDaoTaos.CountAsync();
+            ViewBag.DangHoatDong = await _context.ChuongTrinhDaoTaos.CountAsync(c => c.TrangThai);
+            ViewBag.TongLopLienKet = await _context.LopHocs.CountAsync();
+
+            return View(items);
         }
 
-        // ========================================================
-        // 3. THÊM MỚI CHƯƠNG TRÌNH ĐÀO TẠO (Yêu cầu quyền Admin)
-        // ========================================================
-        [SessionAuthorize("Admin")]
-        [HttpGet]
-        public IActionResult Create()
-        {
-            return View(new ChuongTrinhDaoTao { TrangThai = true });
-        }
-
-        [SessionAuthorize("Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ChuongTrinhDaoTao chuongTrinh)
+        public async Task<IActionResult> CreatePost(ChuongTrinhDaoTao ctdt)
         {
-            if (!ModelState.IsValid)
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+
+            if (string.IsNullOrWhiteSpace(ctdt.TenChuongTrinh))
             {
-                return View(chuongTrinh);
+                if (isAjax) return Json(new { success = false, message = "Tên chương trình đào tạo bắt buộc nhập." });
+                TempData["Error"] = "Tên chương trình đào tạo bắt buộc nhập.";
+                return RedirectToAction(nameof(Index));
             }
 
-            var (success, errorMessage) = await _chuongTrinhService.ThemChuongTrinhAsync(chuongTrinh);
-            if (!success)
+            ctdt.TenChuongTrinh = ctdt.TenChuongTrinh.Trim();
+            bool exists = await _context.ChuongTrinhDaoTaos.AnyAsync(c => c.TenChuongTrinh.ToLower() == ctdt.TenChuongTrinh.ToLower());
+            if (exists)
             {
-                ModelState.AddModelError(string.Empty, errorMessage ?? "Không thể thêm chương trình đào tạo.");
-                return View(chuongTrinh);
+                if (isAjax) return Json(new { success = false, message = "Tên chương trình đào tạo này đã tồn tại." });
+                TempData["Error"] = "Tên chương trình đào tạo này đã tồn tại.";
+                return RedirectToAction(nameof(Index));
             }
 
-            TempData["Success"] = $"Thêm mới chương trình '{chuongTrinh.TenChuongTrinh}' thành công!";
+            ctdt.TrangThai = true;
+            if (string.IsNullOrEmpty(ctdt.EmailLienHe)) ctdt.EmailLienHe = "contact@uneti.edu.vn";
+
+            _context.Add(ctdt);
+            await _context.SaveChangesAsync();
+
+            if (isAjax) return Json(new { success = true, message = "Tạo chương trình đào tạo mới thành công!" });
+            TempData["Success"] = "Tạo chương trình đào tạo mới thành công!";
             return RedirectToAction(nameof(Index));
         }
 
-        // ========================================================
-        // 4. CHỈNH SỬA CHƯƠNG TRÌNH ĐÀO TẠO (Yêu cầu quyền Admin)
-        // ========================================================
-        [SessionAuthorize("Admin")]
-        [HttpGet]
-        public async Task<IActionResult> Edit(int id)
-        {
-            var chuongTrinh = await _chuongTrinhService.GetByIdAsync(id);
-            if (chuongTrinh == null)
-            {
-                return NotFound();
-            }
-            return View(chuongTrinh);
-        }
-
-        [SessionAuthorize("Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, ChuongTrinhDaoTao chuongTrinh)
+        public async Task<IActionResult> EditPost(int maChuongTrinh, string tenChuongTrinh, string? moTa, string? emailLienHe, string trangThai)
         {
-            if (id != chuongTrinh.MaChuongTrinh)
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            var ctdt = await _context.ChuongTrinhDaoTaos.FindAsync(maChuongTrinh);
+            if (ctdt == null)
             {
-                return NotFound();
+                if (isAjax) return Json(new { success = false, message = "Không tìm thấy chương trình đào tạo cần sửa." });
+                TempData["Error"] = "Không tìm thấy chương trình đào tạo.";
+                return RedirectToAction(nameof(Index));
             }
 
-            if (!ModelState.IsValid)
+            tenChuongTrinh = tenChuongTrinh.Trim();
+            bool exists = await _context.ChuongTrinhDaoTaos
+                .AnyAsync(c => c.MaChuongTrinh != maChuongTrinh && c.TenChuongTrinh.ToLower() == tenChuongTrinh.ToLower());
+            if (exists)
             {
-                return View(chuongTrinh);
+                if (isAjax) return Json(new { success = false, message = "Tên chương trình đào tạo này đã trùng với chương trình khác." });
+                TempData["Error"] = "Tên chương trình đào tạo này đã trùng.";
+                return RedirectToAction(nameof(Index));
             }
 
-            var (success, errorMessage) = await _chuongTrinhService.CapNhatChuongTrinhAsync(chuongTrinh);
-            if (!success)
-            {
-                ModelState.AddModelError(string.Empty, errorMessage ?? "Không thể cập nhật chương trình đào tạo.");
-                return View(chuongTrinh);
-            }
+            ctdt.TenChuongTrinh = tenChuongTrinh;
+            ctdt.MoTa = moTa ?? "";
+            ctdt.EmailLienHe = emailLienHe ?? "contact@uneti.edu.vn";
+            ctdt.TrangThai = trangThai == "Đang hoạt động" || trangThai == "1" || trangThai.ToLower() == "true";
 
-            TempData["Success"] = $"Cập nhật chương trình '{chuongTrinh.TenChuongTrinh}' thành công!";
+            await _context.SaveChangesAsync();
+
+            if (isAjax) return Json(new { success = true, message = "Cập nhật chương trình đào tạo thành công!" });
+            TempData["Success"] = "Cập nhật chương trình đào tạo thành công!";
             return RedirectToAction(nameof(Index));
         }
 
-        // ========================================================
-        // 5. XÓA CHƯƠNG TRÌNH ĐÀO TẠO (Yêu cầu quyền Admin)
-        // Kiểm soát an toàn CSDL: Chặn xóa nếu có lớp học liên quan
-        // ========================================================
-        [SessionAuthorize("Admin")]
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeletePost(int id)
         {
-            var (success, errorMessage) = await _chuongTrinhService.XoaChuongTrinhAsync(id);
-            if (!success)
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            var ctdt = await _context.ChuongTrinhDaoTaos.FindAsync(id);
+            if (ctdt == null)
             {
-                TempData["Error"] = errorMessage;
+                if (isAjax) return Json(new { success = false, message = "Chương trình đào tạo không tồn tại." });
+                return RedirectToAction(nameof(Index));
             }
-            else
-            {
-                TempData["Success"] = "Đã xóa chương trình đào tạo thành công!";
-            }
-            return RedirectToAction(nameof(Index));
-        }
 
-        // ========================================================
-        // 6. ĐỔI TRẠNG THÁI HOẠT ĐỘNG (Yêu cầu quyền Admin)
-        // ========================================================
-        [SessionAuthorize("Admin")]
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ToggleStatus(int id)
-        {
-            var (success, errorMessage) = await _chuongTrinhService.ToggleTrangThaiAsync(id);
-            if (!success)
+            // Quy định nghiệp vụ Mục 5.5: Không được xóa chương trình nếu có lớp học liên quan
+            int countLop = await _context.LopHocs.CountAsync(l => l.MaChuongTrinh == id);
+            if (countLop > 0)
             {
-                TempData["Error"] = errorMessage;
+                string msg = $"Không thể xóa chương trình '{ctdt.TenChuongTrinh}' vì đang có {countLop} lớp học trực thuộc. Vui lòng chuyển hoặc xóa các lớp học trước.";
+                if (isAjax) return Json(new { success = false, message = msg });
+                TempData["Error"] = msg;
+                return RedirectToAction(nameof(Index));
             }
-            else
-            {
-                TempData["Success"] = "Đã cập nhật trạng thái hoạt động của chương trình đào tạo!";
-            }
+
+            _context.ChuongTrinhDaoTaos.Remove(ctdt);
+            await _context.SaveChangesAsync();
+
+            if (isAjax) return Json(new { success = true, message = $"Đã xóa chương trình đào tạo '{ctdt.TenChuongTrinh}' thành công." });
+            TempData["Success"] = "Đã xóa chương trình đào tạo thành công.";
             return RedirectToAction(nameof(Index));
         }
     }

@@ -272,6 +272,146 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             return Json(new { success, message = error ?? "Đã xóa học viên thành công!" });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetHocVienJson(int id)
+        {
+            var hv = await _context.HocViens
+                .Include(h => h.TaiKhoan)
+                .Include(h => h.DangKyHocs)
+                    .ThenInclude(d => d.LopHoc)
+                .FirstOrDefaultAsync(h => h.MaHocVien == id);
+
+            if (hv == null) return Json(new { success = false, message = "Không tìm thấy học viên." });
+
+            return Json(new
+            {
+                success = true,
+                data = new
+                {
+                    maHocVien = hv.MaHocVien,
+                    hoTen = hv.HoTen,
+                    email = hv.Email,
+                    soDienThoai = hv.SoDienThoai ?? "",
+                    ngaySinh = hv.NgaySinh?.ToString("yyyy-MM-dd") ?? "",
+                    gioiTinh = hv.GioiTinh ?? "Nam",
+                    diaChi = hv.DiaChi ?? "",
+                    trinhDoHocVan = hv.TrinhDoHocVan ?? "Đại học",
+                    ngheNghiep = hv.NgheNghiep ?? "",
+                    trangThai = hv.TrangThai,
+                    tenDangNhap = hv.TaiKhoan?.TenDangNhap ?? "",
+                    soLop = hv.DangKyHocs.Count
+                }
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreatePost(HocVien hocVien)
+        {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            if (!CoQuyenQuanTri(out var redirectResult))
+            {
+                if (isAjax) return Json(new { success = false, message = "Bạn không có quyền quản trị." });
+                return redirectResult!;
+            }
+
+            if (!hocVien.NgaySinh.HasValue)
+            {
+                ModelState.AddModelError(nameof(HocVien.NgaySinh), "Ngày tháng năm sinh không được để trống.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                if (isAjax)
+                {
+                    var errors = string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                    return Json(new { success = false, message = errors });
+                }
+                return View(nameof(Create), hocVien);
+            }
+
+            var (success, error) = await _hocVienService.ThemHocVienAsync(hocVien);
+            if (!success)
+            {
+                if (isAjax) return Json(new { success = false, message = error });
+                ModelState.AddModelError("", error!);
+                return View(nameof(Create), hocVien);
+            }
+
+            string msg = $"Thêm mới học viên '{hocVien.HoTen}' thành công!";
+            if (isAjax) return Json(new { success = true, message = msg });
+            TempData["Success"] = msg;
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditPost(int id, HocVien hocVien)
+        {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            if (!CoQuyenQuanTri(out var redirectResult))
+            {
+                if (isAjax) return Json(new { success = false, message = "Bạn không có quyền quản trị." });
+                return redirectResult!;
+            }
+
+            if (id != hocVien.MaHocVien) return NotFound();
+
+            if (!hocVien.NgaySinh.HasValue)
+            {
+                ModelState.AddModelError(nameof(HocVien.NgaySinh), "Ngày tháng năm sinh không được để trống.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                if (isAjax)
+                {
+                    var errors = string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                    return Json(new { success = false, message = errors });
+                }
+                return View(nameof(Edit), hocVien);
+            }
+
+            var (success, error) = await _hocVienService.CapNhatHocVienAsync(hocVien);
+            if (!success)
+            {
+                if (isAjax) return Json(new { success = false, message = error });
+                ModelState.AddModelError("", error!);
+                return View(nameof(Edit), hocVien);
+            }
+
+            string msg = $"Cập nhật thông tin học viên '{hocVien.HoTen}' thành công!";
+            if (isAjax) return Json(new { success = true, message = msg });
+            TempData["Success"] = msg;
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePost(int id)
+        {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            if (!CoQuyenQuanTri(out var redirectResult))
+            {
+                if (isAjax) return Json(new { success = false, message = "Bạn không có quyền quản trị." });
+                return redirectResult!;
+            }
+
+            var (success, error) = await _hocVienService.XoaHocVienAsync(id);
+            if (!success)
+            {
+                if (isAjax) return Json(new { success = false, message = error });
+                TempData["Error"] = error;
+            }
+            else
+            {
+                if (isAjax) return Json(new { success = true, message = "Đã xóa học viên thành công!" });
+                TempData["Success"] = "Đã xóa học viên thành công!";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
         // ========================================================
         // 10. ACTION DETAILS: XEM CHI TIẾT ĐẦY ĐỦ
         // ========================================================

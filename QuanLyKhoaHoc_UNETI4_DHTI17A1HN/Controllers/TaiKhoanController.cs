@@ -5,6 +5,8 @@
 // ========================================================
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services;
@@ -15,10 +17,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
     public class TaiKhoanController : Controller
     {
         private readonly ITaiKhoanService _taiKhoanService;
+        private readonly ApplicationDbContext _context;
 
-        public TaiKhoanController(ITaiKhoanService taiKhoanService)
+        public TaiKhoanController(ITaiKhoanService taiKhoanService, ApplicationDbContext context)
         {
             _taiKhoanService = taiKhoanService;
+            _context = context;
         }
 
         // ========================================================
@@ -352,6 +356,153 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             {
                 TempData["Success"] = "Đã đặt lại mật khẩu về mặc định '123456'!";
             }
+            return RedirectToAction(nameof(Index));
+        }
+
+        [SessionAuthorize("Admin")]
+        [HttpGet]
+        public async Task<IActionResult> GetTaiKhoanJson(int id)
+        {
+            var tk = await _taiKhoanService.GetTaiKhoanByIdAsync(id);
+            if (tk == null) return Json(new { success = false, message = "Không tìm thấy tài khoản." });
+            return Json(new
+            {
+                success = true,
+                data = new
+                {
+                    maTaiKhoan = tk.MaTaiKhoan,
+                    tenDangNhap = tk.TenDangNhap,
+                    hoTen = tk.HoTen,
+                    email = tk.Email,
+                    vaiTro = tk.VaiTro,
+                    trangThai = tk.TrangThai
+                }
+            });
+        }
+
+        [SessionAuthorize("Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreatePost(string tenDangNhap, string hoTen, string email, string vaiTro, bool trangThai, string? matKhau)
+        {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            var tk = new TaiKhoan
+            {
+                TenDangNhap = tenDangNhap?.Trim() ?? "",
+                HoTen = hoTen?.Trim() ?? "",
+                Email = email?.Trim() ?? "",
+                VaiTro = string.IsNullOrWhiteSpace(vaiTro) ? "HocVien" : vaiTro,
+                TrangThai = trangThai,
+                MatKhau = string.IsNullOrWhiteSpace(matKhau) ? "123456" : matKhau
+            };
+
+            var (success, errorMessage) = await _taiKhoanService.TaoTaiKhoanAsync(tk);
+            if (!success)
+            {
+                if (isAjax) return Json(new { success = false, message = errorMessage ?? "Không thể tạo tài khoản." });
+                TempData["Error"] = errorMessage;
+                return RedirectToAction(nameof(Index));
+            }
+
+            string msg = $"Tạo tài khoản '{tk.TenDangNhap}' thành công!";
+            if (isAjax) return Json(new { success = true, message = msg });
+            TempData["Success"] = msg;
+            return RedirectToAction(nameof(Index));
+        }
+
+        [SessionAuthorize("Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditPost(int maTaiKhoan, string tenDangNhap, string hoTen, string email, string vaiTro, bool trangThai)
+        {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            var tk = await _taiKhoanService.GetTaiKhoanByIdAsync(maTaiKhoan);
+            if (tk == null)
+            {
+                if (isAjax) return Json(new { success = false, message = "Không tìm thấy tài khoản." });
+                TempData["Error"] = "Không tìm thấy tài khoản.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            tk.TenDangNhap = tenDangNhap?.Trim() ?? tk.TenDangNhap;
+            tk.HoTen = hoTen?.Trim() ?? tk.HoTen;
+            tk.Email = email?.Trim() ?? tk.Email;
+            tk.VaiTro = string.IsNullOrWhiteSpace(vaiTro) ? tk.VaiTro : vaiTro;
+            tk.TrangThai = trangThai;
+
+            var (success, errorMessage) = await _taiKhoanService.CapNhatTaiKhoanAsync(tk);
+            if (!success)
+            {
+                if (isAjax) return Json(new { success = false, message = errorMessage ?? "Cập nhật tài khoản thất bại." });
+                TempData["Error"] = errorMessage;
+                return RedirectToAction(nameof(Index));
+            }
+
+            string msg = $"Cập nhật tài khoản '{tk.TenDangNhap}' thành công!";
+            if (isAjax) return Json(new { success = true, message = msg });
+            TempData["Success"] = msg;
+            return RedirectToAction(nameof(Index));
+        }
+
+        [SessionAuthorize("Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleStatusAjax(int id)
+        {
+            var (success, errorMessage) = await _taiKhoanService.KhoaMoKhoaTaiKhoanAsync(id);
+            var tk = await _taiKhoanService.GetTaiKhoanByIdAsync(id);
+            return Json(new { success, message = errorMessage ?? "Cập nhật trạng thái thành công!", newStatus = tk?.TrangThai ?? false });
+        }
+
+        [SessionAuthorize("Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPasswordPost(int id, string? newPassword)
+        {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            string pwd = string.IsNullOrWhiteSpace(newPassword) ? "123456" : newPassword;
+            var (success, errorMessage) = await _taiKhoanService.ResetMatKhauAsync(id, pwd);
+            if (!success)
+            {
+                if (isAjax) return Json(new { success = false, message = errorMessage });
+                TempData["Error"] = errorMessage;
+            }
+            else
+            {
+                if (isAjax) return Json(new { success = true, message = $"Đã đặt lại mật khẩu về '{pwd}' thành công!" });
+                TempData["Success"] = $"Đã đặt lại mật khẩu về '{pwd}' thành công!";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        [SessionAuthorize("Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePost(int id)
+        {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            var tk = await _context.TaiKhoans.FindAsync(id);
+            if (tk == null)
+            {
+                if (isAjax) return Json(new { success = false, message = "Không tìm thấy tài khoản." });
+                TempData["Error"] = "Không tìm thấy tài khoản.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (tk.VaiTro == "Admin" && tk.TenDangNhap.ToLower() == "admin")
+            {
+                string warn = "Không thể xóa tài khoản Quản trị viên cấp cao nhất!";
+                if (isAjax) return Json(new { success = false, message = warn });
+                TempData["Error"] = warn;
+                return RedirectToAction(nameof(Index));
+            }
+
+            _context.TaiKhoans.Remove(tk);
+            await _context.SaveChangesAsync();
+
+            string msg = $"Đã xóa tài khoản '{tk.TenDangNhap}' thành công!";
+            if (isAjax) return Json(new { success = true, message = msg });
+            TempData["Success"] = msg;
             return RedirectToAction(nameof(Index));
         }
     }
