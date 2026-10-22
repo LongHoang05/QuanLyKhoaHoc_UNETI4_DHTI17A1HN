@@ -1,8 +1,7 @@
 // ========================================================
 // Họ và tên: Vũ Đình Trường
 // Mã sinh viên: 23103100026
-// Phụ trách: Module 1 - Trang Quản Trị Hệ Thống (Admin Dashboard)
-// Luồng xử lý: Controller -> Service -> Repository -> ApplicationDbContext
+// Phụ trách: Module 1 - Tài khoản, Đăng nhập, Phân quyền và Chương trình đào tạo
 // ========================================================
 
 using Microsoft.AspNetCore.Mvc;

@@ -7,7 +7,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
     // Họ và tên: Nguyễn Hoàng Long
     // Mã sinh viên: 23103100046
     // Phụ trách: Module 4 - Tiếp nhận, Xét duyệt, Học phí và Quản lý trạng thái đăng ký
-    // Entity DangKyHoc - Chuẩn Mục 7.2 & 8.4 Đề tài BTL UNETI
     // ========================================================
     [Table("DangKyHoc")]
     public class DangKyHoc

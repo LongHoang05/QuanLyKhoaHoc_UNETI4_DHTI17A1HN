@@ -6,8 +6,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
     // ========================================================
     // Họ và tên: Vũ Đình Trường
     // Mã sinh viên: 23103100026
-    // Phụ trách: Module 1 - Tài khoản, Đăng nhập, Phân quyền & Quản lý Chương trình đào tạo
-    // Entity ChuongTrinhDaoTao - Chuẩn Mục 5.5 Đề tài BTL UNETI
+    // Phụ trách: Module 1 - Tài khoản, Đăng nhập, Phân quyền và Chương trình đào tạo
     // ========================================================
     [Table("ChuongTrinhDaoTao")]
     public class ChuongTrinhDaoTao

@@ -6,8 +6,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
     // ========================================================
     // Họ và tên: Nguyễn Đình Kiên
     // Mã sinh viên: 23103100020
-    // Phụ trách: Module 2 - Quản lý lớp học, Tìm kiếm, Lọc, Sắp xếp, Phân trang
-    // Entity LopHoc - Chuẩn Mục 6.1 Đề tài BTL UNETI
+    // Phụ trách: Module 2 - Quản lý lớp học, Tìm kiếm, Lọc, Sắp xếp và Phân trang
     // ========================================================
     [Table("LopHoc")]
     public class LopHoc

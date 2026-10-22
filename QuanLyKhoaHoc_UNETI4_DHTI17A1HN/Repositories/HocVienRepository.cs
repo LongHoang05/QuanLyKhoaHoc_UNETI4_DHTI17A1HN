@@ -5,10 +5,9 @@ using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
 {
     // ========================================================
-    // Họ và tên: Nguyễn Đức Linh - MSV: 23103100042
-    // Module 3: Cài đặt HocVienRepository
-    // Chuẩn theo giáo trình bài giảng khoa CNTT UNETI (Slide 107, 121, 389)
-    // Tối ưu hóa truy vấn Entity Framework Core, loại bỏ hoàn toàn code thừa
+    // Họ và tên: Nguyễn Đức Linh
+    // Mã sinh viên: 23103100042
+    // Phụ trách: Module 3 - Quản lý học viên, Hồ sơ cá nhân và Đăng ký học
     // ========================================================
     public class HocVienRepository : IHocVienRepository
     {

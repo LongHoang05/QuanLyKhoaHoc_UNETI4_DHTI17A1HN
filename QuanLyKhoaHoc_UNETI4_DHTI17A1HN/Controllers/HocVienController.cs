@@ -8,11 +8,9 @@ using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels;
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 {
     // ========================================================
-    // Họ và tên: Nguyễn Đức Linh - MSV: 23103100042
-    // Module 3: HocVienController
-    // Quản lý 2 Tab chuẩn đề tài 16: TaiKhoan (Mục 5) & HocVien (Mục 7)
-    // Chuẩn kiến trúc phân lớp: Controller -> Service -> Repository -> ApplicationDbContext
-    // Kết hợp kỹ thuật jQuery AJAX và Phân quyền Session theo giáo trình UNETI
+    // Họ và tên: Nguyễn Đức Linh
+    // Mã sinh viên: 23103100042
+    // Phụ trách: Module 3 - Quản lý học viên, Hồ sơ cá nhân và Đăng ký học
     // ========================================================
     public class HocVienController : Controller
     {

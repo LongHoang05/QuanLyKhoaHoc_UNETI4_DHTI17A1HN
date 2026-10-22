@@ -1,7 +1,7 @@
-﻿// ========================================================
+// ========================================================
 // Họ và tên: Vũ Đình Trường
 // Mã sinh viên: 23103100026
-// Phụ trách: Module 1 - Quản lý Chương trình đào tạo (ChuongTrinhDaoTao)
+// Phụ trách: Module 1 - Tài khoản, Đăng nhập, Phân quyền và Chương trình đào tạo
 // ========================================================
 
 using Microsoft.EntityFrameworkCore;

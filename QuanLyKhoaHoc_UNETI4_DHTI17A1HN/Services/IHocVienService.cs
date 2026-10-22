@@ -4,10 +4,9 @@ using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels;
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
 {
     // ========================================================
-    // Họ và tên: Nguyễn Đức Linh - MSV: 23103100042
-    // Module 3: Tầng Service Quản lý Học viên & Tài khoản (Mục 5 & 7)
-    // Đảm nhiệm toàn bộ quy tắc nghiệp vụ doanh nghiệp (Business Logic Layer)
-    // Luồng: Controller -> Service -> Repository -> ApplicationDbContext
+    // Họ và tên: Nguyễn Đức Linh
+    // Mã sinh viên: 23103100042
+    // Phụ trách: Module 3 - Quản lý học viên, Hồ sơ cá nhân và Đăng ký học
     // ========================================================
     public interface IHocVienService
     {

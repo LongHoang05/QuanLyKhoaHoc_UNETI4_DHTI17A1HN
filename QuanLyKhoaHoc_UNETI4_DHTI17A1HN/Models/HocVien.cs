@@ -6,7 +6,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
     // ========================================================
     // Họ và tên: Nguyễn Đức Linh
     // Mã sinh viên: 23103100042
-    // Phụ trách: Module 3 - Quản lý học viên, Hồ sơ cá nhân, Đăng ký lớp học
+    // Phụ trách: Module 3 - Quản lý học viên, Hồ sơ cá nhân và Đăng ký học
     // ========================================================
     [Table("HocVien")]
     public class HocVien

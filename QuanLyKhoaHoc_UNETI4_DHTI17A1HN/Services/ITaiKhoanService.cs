@@ -1,8 +1,7 @@
 // ========================================================
 // Họ và tên: Vũ Đình Trường
 // Mã sinh viên: 23103100026
-// Phụ trách: Module 1 - Tầng Service Quản lý Tài khoản & Phân quyền
-// Nghiệp vụ doanh nghiệp: Đăng nhập, Đăng ký, Đổi mật khẩu, Khóa/Mở tài khoản
+// Phụ trách: Module 1 - Tài khoản, Đăng nhập, Phân quyền và Chương trình đào tạo
 // ========================================================
 
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
