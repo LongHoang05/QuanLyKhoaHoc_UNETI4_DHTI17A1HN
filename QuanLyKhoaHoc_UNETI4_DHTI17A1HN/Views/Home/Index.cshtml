@@ -1,237 +1,350 @@
+@using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
 @{
-    ViewData["Title"] = "Khung Dự Án & Phân Công Nhiệm Vụ 5 Thành Viên";
+    ViewData["Title"] = "Tổng quan Hệ thống Quản lý Đào tạo";
+    var chuongTrinhs = ViewBag.ChuongTrinhs as List<ChuongTrinhDaoTao> ?? new List<ChuongTrinhDaoTao>();
+    var lopHocs = ViewBag.LopHocs as List<LopHoc> ?? new List<LopHoc>();
+    var recentDangKys = ViewBag.RecentDangKys as List<DangKyHoc> ?? new List<DangKyHoc>();
+    var hoTen = Context.Session.GetString("HoTen");
+    var vaiTro = Context.Session.GetString("VaiTro");
 }
 
-<div class="container py-4">
-    <!-- Header Banner -->
-    <div class="p-4 mb-4 bg-primary text-white rounded-3 shadow">
-        <div class="row align-items-center">
-            <div class="col-md-9">
-                <span class="badge bg-warning text-dark mb-2 px-3 py-2 fw-bold">BÀI TẬP LỚN MÔN THỰC HÀNH LẬP TRÌNH .NET</span>
-                <h1 class="display-6 fw-bold">Khung Dự Án: Quản Lý Đăng Ký Khóa Học & Học Viên</h1>
-                <p class="lead mb-1">Cấu trúc: ASP.NET Core 10 MVC | Entity Framework Core 10 | SQL Server</p>
-                <p class="mb-0 text-white-50">Nhóm: <strong>UNETI 4</strong> | Lớp: <strong>DHTI17A1HN</strong> | Hệ thống: <strong>5 Module độc lập cho 5 sinh viên</strong></p>
+<!-- 1. HERO BANNER GREETING -->
+<div class="page-hero">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="hero-badge"><i class="bi bi-stars"></i> UNETI Training Portal</span>
+                <span class="badge bg-white bg-opacity-25 text-white">Khoa CNTT • Nhóm 4 (DHTI17A1HN)</span>
             </div>
-            <div class="col-md-3 text-end d-none d-md-block">
-                <i class="bi bi-mortarboard-fill display-1 opacity-50"></i>
+            <h1 class="hero-title">Xin chào, @(hoTen ?? "Quý Thầy Cô & Học Viên") 👋</h1>
+            <p class="hero-subtitle">
+                Hệ thống hiện có <strong class="text-white">@ViewBag.TotalChuongTrinh chương trình đào tạo</strong>, 
+                <strong class="text-white">@ViewBag.OpenLopHoc lớp đang tuyển sinh</strong> và 
+                <strong class="text-white">@ViewBag.PendingDangKy đơn đăng ký mới</strong> đang chờ xét duyệt.
+            </p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-controller="ChuongTrinhDaoTao" asp-action="Index" class="btn btn-light rounded-pill px-3 py-2 fw-bold text-primary shadow-sm" style="font-size: 0.85rem;">
+                <i class="bi bi-journal-bookmark-fill me-1"></i> Chương trình ĐT (M1)
+            </a>
+            @if (vaiTro == "Admin")
+            {
+                <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold" style="font-size: 0.85rem;">
+                    <i class="bi bi-speedometer2 me-1"></i> Admin Dashboard
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- 2. 4 THẺ CHỈ SỐ KPI TỔNG QUAN -->
+<div class="row g-3 mb-4">
+    <!-- KPI 1: Lớp đang mở tuyển sinh -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="mini-stat-card">
+            <div>
+                <div class="mini-stat-label">Lớp đang mở tuyển sinh</div>
+                <div class="mini-stat-num text-success">@ViewBag.OpenLopHoc</div>
+                <small class="text-muted">Trên tổng số @ViewBag.TotalLopHoc lớp học</small>
+            </div>
+            <div class="mini-stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                <i class="bi bi-door-open-fill"></i>
             </div>
         </div>
     </div>
 
-    <!-- Alert cảnh báo quan trọng về Migration & Code cá nhân -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-6">
-            <div class="alert alert-warning border-warning h-100 d-flex align-items-start mb-0" role="alert">
-                <i class="bi bi-exclamation-triangle-fill fs-3 me-3 text-warning"></i>
-                <div>
-                    <strong>QUY TẮC MIGRATION (ĐỂ KHÔNG BỊ XUNG ĐỘT GIT):</strong>
-                    <p class="small mb-1">Dự án đã có sẵn Migration nền tảng <code>InitialCreate</code> cùng toàn bộ Models và Seed Data.</p>
-                    <p class="small mb-0 fw-bold text-danger">Mọi thành viên KHÔNG ĐƯỢC chạy ""Add-Migration"". Mỗi người chỉ cần mở Terminal gõ duy nhất lệnh:</p>
-                    <code class="bg-dark text-warning p-1 rounded d-inline-block mt-1">dotnet ef database update</code>
-                </div>
+    <!-- KPI 2: Đăng ký chờ xét duyệt -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="mini-stat-card">
+            <div>
+                <div class="mini-stat-label">Đăng ký chờ xét duyệt</div>
+                <div class="mini-stat-num text-warning">@ViewBag.PendingDangKy</div>
+                <small class="text-muted">Trên tổng số @ViewBag.TotalDangKy lượt nộp</small>
             </div>
-        </div>
-        <div class="col-md-6">
-            <div class="alert alert-info border-info h-100 d-flex align-items-start mb-0" role="alert">
-                <i class="bi bi-git fs-3 me-3 text-info"></i>
-                <div>
-                    <strong>QUY TẮC PHÂN CHIA CODE & COMMIT:</strong>
-                    <p class="small mb-1">Dự án chỉ chứa <strong>Models</strong> và <strong>DbContext</strong> dùng chung. Controller, View, Service của module nào thì thành viên đó <strong>tự tạo file mới</strong> trong branch của mình.</p>
-                    <p class="small mb-0">Cú pháp commit: <code>[Mã SV] [Module] Nội dung công việc</code></p>
-                </div>
+            <div class="mini-stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                <i class="bi bi-hourglass-split"></i>
             </div>
         </div>
     </div>
 
-    <!-- Danh sách 5 Module cho 5 Sinh viên -->
-    <h3 class="fw-bold text-secondary mb-3"><i class="bi bi-list-task me-2"></i>Chi Tiết File Cần Tự Tạo Cho Từng Thành Viên</h3>
-    <div class="row g-4 mb-5">
-        
-        <!-- Sinh viên 1: Module 1 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 border-primary shadow-sm">
-                <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
-                    <span>MODULE 1</span>
-                    <span class="badge bg-light text-primary">Vũ Đình Trường</span>
+    <!-- KPI 3: Chương trình đào tạo -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="mini-stat-card">
+            <div>
+                <div class="mini-stat-label">Chương trình đào tạo</div>
+                <div class="mini-stat-num text-primary">@ViewBag.TotalChuongTrinh</div>
+                <small class="text-muted">Khung chuẩn Đề tài 16 BTL</small>
+            </div>
+            <div class="mini-stat-icon" style="background: var(--surface-container); color: var(--primary-rose);">
+                <i class="bi bi-collection-fill"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI 4: Tổng số học viên -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="mini-stat-card">
+            <div>
+                <div class="mini-stat-label">Tổng số học viên</div>
+                <div class="mini-stat-num" style="color: #6366f1;">@ViewBag.TotalHocVien</div>
+                <small class="text-muted">Hệ thống có @ViewBag.TotalTaiKhoan tài khoản</small>
+            </div>
+            <div class="mini-stat-icon" style="background: #eef2ff; color: #6366f1;">
+                <i class="bi bi-mortarboard-fill"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. KHỐI NỘI DUNG CHÍNH (LAYOUT 7 - 5) -->
+<div class="row g-4">
+    <!-- CỘT TRÁI (7 CỘT): CHƯƠNG TRÌNH ĐÀO TẠO & ĐƠN ĐĂNG KÝ GẦN ĐÂY -->
+    <div class="col-xl-7">
+        <div class="d-flex flex-column gap-4">
+            
+            <!-- Khối 1: Danh sách Chương trình Đào tạo nổi bật (Module 1) -->
+            <div class="content-card">
+                <div class="toolbar">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-journal-bookmark-fill me-2 text-primary"></i>Chương trình Đào tạo nổi bật
+                        </h6>
+                        <small class="text-muted">Khung chương trình đào tạo chuyên môn và hướng nghiệp</small>
+                    </div>
+                    <a asp-controller="ChuongTrinhDaoTao" asp-action="Index" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                        Xem tất cả (@ViewBag.TotalChuongTrinh) <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
                 </div>
-                <div class="card-body">
-                    <h6 class="card-subtitle mb-2 text-muted"><strong>Mã SV:</strong> <code>23103100026</code></h6>
-                    <p class="card-text fw-bold text-primary mb-2">Đăng nhập, Phân quyền & Chương trình đào tạo</p>
-                    
-                    <div class="small bg-light p-2 rounded mb-2 border">
-                        <strong class="text-dark">Models có sẵn:</strong><br/>
-                        <code>TaiKhoan</code>, <code>ChuongTrinhDaoTao</code>
-                    </div>
 
-                    <div class="small mb-3">
-                        <strong class="text-danger">File tự tạo trong branch:</strong>
-                        <ul class="ps-3 mb-0 text-muted">
-                            <li><code>Controllers/TaiKhoanController.cs</code></li>
-                            <li><code>Controllers/ChuongTrinhDaoTaoController.cs</code></li>
-                            <li><code>Controllers/AdminController.cs</code></li>
-                        </ul>
+                @if (!chuongTrinhs.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                        Chưa có dữ liệu chương trình đào tạo.
                     </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-custom align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Chương trình đào tạo</th>
+                                    <th>Lớp trực thuộc</th>
+                                    <th>Trạng thái</th>
+                                    <th class="text-end">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var ct in chuongTrinhs)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="avatar-circle">
+                                                    @(ct.TenChuongTrinh?.Length > 0 ? ct.TenChuongTrinh.Substring(0, 1).ToUpper() : "C")
+                                                </div>
+                                                <div>
+                                                    <a asp-controller="ChuongTrinhDaoTao" asp-action="Details" asp-route-id="@ct.MaChuongTrinh" class="fw-bold text-dark text-decoration-none hover-primary">
+                                                        @ct.TenChuongTrinh
+                                                    </a>
+                                                    <div class="small text-muted" style="font-size: 0.75rem;">
+                                                        <i class="bi bi-envelope me-1"></i>@(ct.EmailLienHe ?? "cntt@uneti.edu.vn")
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-primary border px-2 py-1 rounded-pill">
+                                                <i class="bi bi-easel me-1"></i>@(ct.LopHocs?.Count ?? 0) lớp
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if (ct.TrangThai)
+                                            {
+                                                <span class="status-pill active">
+                                                    <span class="status-dot"></span> Đang hoạt động
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="status-pill locked">
+                                                    <span class="status-dot"></span> Tạm dừng
+                                                </span>
+                                            }
+                                        </td>
+                                        <td class="text-end">
+                                            <a asp-controller="ChuongTrinhDaoTao" asp-action="Details" asp-route-id="@ct.MaChuongTrinh" class="btn-action-icon" title="Xem chi tiết">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
 
-                    <div class="pt-2 border-top">
-                        <strong class="text-primary small d-block mb-2">Truy cập nhanh chức năng:</strong>
-                        <div class="d-flex flex-column gap-1">
-                            <a asp-controller="ChuongTrinhDaoTao" asp-action="Index" class="btn btn-sm btn-primary text-start">
-                                <i class="bi bi-collection me-1"></i> Chương trình đào tạo (M1)
-                            </a>
-                            <a asp-controller="TaiKhoan" asp-action="Index" class="btn btn-sm btn-outline-danger text-start">
-                                <i class="bi bi-people me-1"></i> Quản lý Tài khoản (Admin)
-                            </a>
-                            <a asp-controller="Admin" asp-action="Index" class="btn btn-sm btn-outline-warning text-start">
-                                <i class="bi bi-speedometer2 me-1"></i> Admin Dashboard (Chart.js)
-                            </a>
+            <!-- Khối 2: Đơn đăng ký gần đây -->
+            <div class="content-card">
+                <div class="toolbar">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-clipboard2-pulse-fill me-2 text-warning"></i>Đơn đăng ký gần đây
+                        </h6>
+                        <small class="text-muted">Module 4 • Hồ sơ đăng ký học viên mới nộp vào hệ thống</small>
+                    </div>
+                    <span class="badge rounded-pill fw-bold" style="background: var(--surface-container); color: var(--primary-rose);">
+                        @ViewBag.PendingDangKy chờ duyệt
+                    </span>
+                </div>
+
+                @if (!recentDangKys.Any())
+                {
+                    <div class="text-center py-4 text-muted small">
+                        <i class="bi bi-clipboard-x fs-3 d-block mb-1 text-secondary"></i>
+                        Chưa có đơn đăng ký nào được ghi nhận.
+                    </div>
+                }
+                else
+                {
+                    <div class="p-3">
+                        @foreach (var dk in recentDangKys)
+                        {
+                            <div class="p-3 mb-2 rounded-3 border d-flex align-items-center justify-content-between" style="background: var(--surface-variant);">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="avatar-circle" style="background: #e0f2fe; color: #0284c7; width: 36px; height: 36px; font-size: 0.78rem;">
+                                        @(dk.HocVien?.HoTen?.Length > 0 ? dk.HocVien.HoTen.Substring(0, 1).ToUpper() : "H")
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark small">@(dk.HocVien?.HoTen ?? "Học viên #" + dk.MaHocVien)</div>
+                                        <div class="text-muted" style="font-size: 0.74rem;">
+                                            Lớp: <strong class="text-dark">@(dk.LopHoc?.TenLop ?? "Mã lớp #" + dk.MaLopHoc)</strong> • 
+                                            Ngày nộp: @dk.NgayDangKy.ToString("dd/MM/yyyy")
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    @if (dk.TrangThai == "Chờ duyệt")
+                                    {
+                                        <span class="badge bg-warning text-dark rounded-pill px-2 py-1">
+                                            <i class="bi bi-clock-history me-1"></i>Chờ duyệt
+                                        </span>
+                                    }
+                                    else if (dk.TrangThai == "Đã đóng học phí" || dk.TrangThai == "Hoàn thành")
+                                    {
+                                        <span class="badge bg-success rounded-pill px-2 py-1">
+                                            <i class="bi bi-check2-circle me-1"></i>@dk.TrangThai
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info text-white rounded-pill px-2 py-1">
+                                            @dk.TrangThai
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+
+    <!-- CỘT PHẢI (5 CỘT): LỚP HỌC MỚI NHẤT & LỐI TẮT HỆ THỐNG -->
+    <div class="col-xl-5">
+        <div class="d-flex flex-column gap-4">
+
+            <!-- Khối 1: Lớp học tuyển sinh mới nhất -->
+            <div class="content-card">
+                <div class="toolbar">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-easel2-fill me-2 text-success"></i>Lớp học mở tuyển sinh
+                        </h6>
+                        <small class="text-muted">Module 2 • Kế hoạch mở lớp và giảng viên</small>
+                    </div>
+                    <span class="badge bg-success bg-opacity-75 rounded-pill text-white">@ViewBag.OpenLopHoc đang mở</span>
+                </div>
+
+                @if (!lopHocs.Any())
+                {
+                    <div class="text-center py-4 text-muted small">
+                        <i class="bi bi-easel fs-3 d-block mb-1 text-secondary"></i>
+                        Chưa có lớp học nào.
+                    </div>
+                }
+                else
+                {
+                    <div class="p-3">
+                        @foreach (var lop in lopHocs)
+                        {
+                            <div class="p-3 mb-2 rounded-3 border" style="background: #ffffff;">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <div class="fw-bold text-dark">@lop.TenLop</div>
+                                    <span class="badge @(lop.TrangThai == "Đang mở đăng ký" ? "bg-success" : "bg-secondary") rounded-pill" style="font-size: 0.7rem;">
+                                        @lop.TrangThai
+                                    </span>
+                                </div>
+                                <div class="small text-muted mb-2" style="font-size: 0.76rem;">
+                                    <i class="bi bi-journal-text me-1 text-primary"></i>@(lop.ChuongTrinhDaoTao?.TenChuongTrinh ?? "Đào tạo chuyên đề")
+                                </div>
+                                <div class="d-flex flex-wrap justify-content-between align-items-center small text-muted pt-2 border-top" style="font-size: 0.74rem;">
+                                    <span><i class="bi bi-person-workspace me-1"></i>@(lop.TenGiangVien ?? "Chưa phân công")</span>
+                                    <span class="fw-bold text-primary">@lop.HocPhi.ToString("N0") VNĐ</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Khối 2: Lối tắt tác vụ nhanh -->
+            <div class="content-card">
+                <div class="toolbar">
+                    <h6 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-lightning-charge-fill me-2 text-warning"></i>Lối tắt tác vụ nhanh
+                    </h6>
+                </div>
+                <div class="p-3 d-flex flex-column gap-2">
+                    <a asp-controller="ChuongTrinhDaoTao" asp-action="Create" class="btn btn-outline-primary d-flex align-items-center justify-content-between rounded-3 py-2 px-3 text-start">
+                        <span><i class="bi bi-plus-circle-fill me-2 text-primary"></i>Tạo mới Chương trình Đào tạo</span>
+                        <i class="bi bi-chevron-right small text-muted"></i>
+                    </a>
+
+                    @if (vaiTro == "Admin")
+                    {
+                        <a asp-controller="TaiKhoan" asp-action="Create" class="btn btn-outline-danger d-flex align-items-center justify-content-between rounded-3 py-2 px-3 text-start">
+                            <span><i class="bi bi-person-plus-fill me-2 text-danger"></i>Thêm Tài khoản người dùng mới</span>
+                            <i class="bi bi-chevron-right small text-muted"></i>
+                        </a>
+                        <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-warning d-flex align-items-center justify-content-between rounded-3 py-2 px-3 text-start">
+                            <span><i class="bi bi-pie-chart-fill me-2 text-warning"></i>Báo cáo Thống kê & Biểu đồ Chart.js</span>
+                            <i class="bi bi-chevron-right small text-muted"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="TaiKhoan" asp-action="DangNhap" class="btn btn-outline-secondary d-flex align-items-center justify-content-between rounded-3 py-2 px-3 text-start">
+                            <span><i class="bi bi-shield-lock-fill me-2 text-info"></i>Đăng nhập quyền Quản trị (Admin)</span>
+                            <i class="bi bi-chevron-right small text-muted"></i>
+                        </a>
+                    }
+
+                    <div class="p-3 mt-2 rounded-3 border" style="background: var(--surface-container); border-color: var(--border-color) !important;">
+                        <div class="fw-bold small text-primary mb-1">
+                            <i class="bi bi-info-circle-fill me-1"></i>Hệ thống Đào tạo UNETI EDU
+                        </div>
+                        <div class="small text-muted" style="font-size: 0.75rem; line-height: 1.4;">
+                            Đề tài 16: Quản lý đăng ký khóa học & học viên. Hệ thống được tối ưu theo kiến trúc MVC chuẩn, Entity Framework Core và giao diện Xanh Da Trời & Trắng tinh khôi.
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
-
-        <!-- Sinh viên 2: Module 2 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 border-success shadow-sm">
-                <div class="card-header bg-success text-white fw-bold d-flex justify-content-between align-items-center">
-                    <span>MODULE 2</span>
-                    <span class="badge bg-light text-success">Nguyễn Đình Kiên</span>
-                </div>
-                <div class="card-body">
-                    <h6 class="card-subtitle mb-2 text-muted"><strong>Mã SV:</strong> <code>23103100020</code></h6>
-                    <p class="card-text fw-bold text-success mb-2">Quản lý lớp học & Tìm kiếm, Lọc, Phân trang LINQ</p>
-                    
-                    <div class="small bg-light p-2 rounded mb-2 border">
-                        <strong class="text-dark">Models có sẵn:</strong><br/>
-                        <code>LopHoc</code>, <code>ChuongTrinhDaoTao</code>
-                    </div>
-
-                    <div class="small">
-                        <strong class="text-danger">File tự tạo trong branch:</strong>
-                        <ul class="ps-3 mb-0 text-muted">
-                            <li><code>Controllers/LopHocController.cs</code></li>
-                            <li><code>Views/LopHoc/Index.cshtml</code></li>
-                            <li><code>Views/LopHoc/Create.cshtml</code></li>
-                            <li><code>Views/LopHoc/Edit.cshtml</code></li>
-                            <li><code>Views/LopHoc/Details.cshtml</code></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sinh viên 3: Module 3 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 border-warning shadow-sm">
-                <div class="card-header bg-warning text-dark fw-bold d-flex justify-content-between align-items-center">
-                    <span>MODULE 3</span>
-                    <span class="badge bg-dark text-white">Nguyễn Đức Linh</span>
-                </div>
-                <div class="card-body">
-                    <h6 class="card-subtitle mb-2 text-muted"><strong>Mã SV:</strong> <code>23103100042</code></h6>
-                    <p class="card-text fw-bold text-dark mb-2">Hồ sơ học viên & Đăng ký lớp học</p>
-                    
-                    <div class="small bg-light p-2 rounded mb-2 border">
-                        <strong class="text-dark">Models có sẵn:</strong><br/>
-                        <code>HocVien</code>, <code>DangKyHoc</code>, <code>LopHoc</code>
-                    </div>
-
-                    <div class="small">
-                        <strong class="text-danger">File tự tạo trong branch:</strong>
-                        <ul class="ps-3 mb-0 text-muted">
-                            <li><code>Controllers/HocVienController.cs</code></li>
-                            <li><code>Views/HocVien/HoSoCaNhan.cshtml</code></li>
-                            <li><code>Views/HocVien/LopDangMo.cshtml</code></li>
-                            <li><code>Views/HocVien/LichSuDangKy.cshtml</code></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sinh viên 4: Module 4 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 border-danger shadow-sm">
-                <div class="card-header bg-danger text-white fw-bold d-flex justify-content-between align-items-center">
-                    <span>MODULE 4</span>
-                    <span class="badge bg-light text-danger">Nguyễn Hoàng Long</span>
-                </div>
-                <div class="card-body">
-                    <h6 class="card-subtitle mb-2 text-muted"><strong>Mã SV:</strong> <code>23103100046</code></h6>
-                    <p class="card-text fw-bold text-danger mb-2">Tiếp nhận duyệt đăng ký & Quản lý học phí</p>
-                    
-                    <div class="small bg-light p-2 rounded mb-2 border">
-                        <strong class="text-dark">Models có sẵn:</strong><br/>
-                        <code>DangKyHoc</code>, <code>LopHoc</code>
-                    </div>
-
-                    <div class="small">
-                        <strong class="text-danger">File tự tạo trong branch:</strong>
-                        <ul class="ps-3 mb-0 text-muted">
-                            <li><code>Controllers/QuanLyDangKyController.cs</code></li>
-                            <li><code>Views/QuanLyDangKy/Index.cshtml</code></li>
-                            <li><code>Views/QuanLyDangKy/DuyetDon.cshtml</code></li>
-                            <li><code>Views/QuanLyDangKy/ThuHocPhi.cshtml</code></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sinh viên 5: Module 5 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 border-info shadow-sm">
-                <div class="card-header bg-info text-white fw-bold d-flex justify-content-between align-items-center">
-                    <span>MODULE 5</span>
-                    <span class="badge bg-light text-info">Nguyễn Tùng Dương</span>
-                </div>
-                <div class="card-body">
-                    <h6 class="card-subtitle mb-2 text-muted"><strong>Mã SV:</strong> <code>23103100003</code></h6>
-                    <p class="card-text fw-bold text-info mb-2">Lịch học, Trùng lịch, Điểm & Thống kê LINQ</p>
-                    
-                    <div class="small bg-light p-2 rounded mb-2 border">
-                        <strong class="text-dark">Models có sẵn:</strong><br/>
-                        <code>BuoiHoc</code>, <code>KetQuaHocTap</code>
-                    </div>
-
-                    <div class="small">
-                        <strong class="text-danger">File tự tạo trong branch:</strong>
-                        <ul class="ps-3 mb-0 text-muted">
-                            <li><code>Controllers/LichHocController.cs</code></li>
-                            <li><code>Controllers/BaoCaoThongKeController.cs</code></li>
-                            <li><code>Views/LichHoc/Index.cshtml</code></li>
-                            <li><code>Views/LichHoc/XepLich.cshtml</code></li>
-                            <li><code>Views/BaoCaoThongKe/Dashboard.cshtml</code></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Hướng dẫn tạo branch & pull request -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 border-dark shadow-sm bg-white">
-                <div class="card-header bg-dark text-white fw-bold">
-                    <i class="bi bi-terminal me-1"></i> LỆNH GIT CHO TỪNG BẠN
-                </div>
-                <div class="card-body">
-                    <p class="small text-muted mb-2">1. Clone & tạo branch làm bài riêng:</p>
-                    <div class="p-2 bg-light border rounded mb-2 font-monospace small">
-                        git checkout -b feature/module-1-truong
-                    </div>
-                    <p class="small text-muted mb-2">2. Cập nhật database mẫu:</p>
-                    <div class="p-2 bg-light border rounded mb-2 font-monospace small">
-                        dotnet ef database update
-                    </div>
-                    <p class="small text-muted mb-2">3. Sau khi code xong commit & push:</p>
-                    <div class="p-2 bg-light border rounded font-monospace small">
-                        git add .<br/>
-                        git commit -m ""[23103100026] [Module 1] Hoan thanh""<br/>
-                        git push origin feature/module-1-truong
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
 </div>
