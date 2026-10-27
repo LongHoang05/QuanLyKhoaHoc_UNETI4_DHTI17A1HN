@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8">
@@ -109,20 +109,25 @@
 <body class="bg-canvas-base font-body-md text-body-md text-on-surface antialiased min-h-screen">
     <div class="flex min-h-screen w-full bg-canvas-base">
 
-        <!-- Left Sidebar Navigation (Prep.vn Style) -->
-        <aside class="w-64 lg:w-72 flex-shrink-0 bg-surface-white border-r border-border-standard h-screen sticky top-0 flex flex-col justify-between p-4 lg:p-5 z-40 select-none">
+        <!-- Left Sidebar Navigation (Prep.vn Style - Responsive Drawer) -->
+        <aside id="adminSidebar" class="w-64 lg:w-72 flex-shrink-0 bg-surface-white border-r border-border-standard h-screen fixed lg:sticky top-0 -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col justify-between p-4 lg:p-5 z-50 select-none shadow-2xl lg:shadow-none">
             <div class="flex flex-col gap-4 overflow-hidden">
                 <!-- Logo & School Brand -->
                 <div class="flex flex-col gap-3">
-                    <a href="index.html" class="flex items-center gap-3 group">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-primary-container text-surface-white flex items-center justify-center font-bold text-xl shadow-sm shadow-primary/20 group-hover:scale-105 transition-transform shrink-0">
-                            <span class="material-symbols-outlined text-[24px]">school</span>
-                        </div>
-                        <div class="flex flex-col min-w-0">
-                            <span class="font-headline-sm text-[15px] text-brand-deep tracking-tight font-extrabold leading-tight truncate">UNETI ĐÀO TẠO</span>
-                            <span class="font-label-sm text-[10px] text-outline leading-tight truncate">Quản Lý Đăng Ký Khóa Học</span>
-                        </div>
-                    </a>
+                    <div class="flex items-center justify-between">
+                        <a href="index.html" class="flex items-center gap-3 group">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-primary-container text-surface-white flex items-center justify-center font-bold text-xl shadow-sm shadow-primary/20 group-hover:scale-105 transition-transform shrink-0">
+                                <span class="material-symbols-outlined text-[24px]">school</span>
+                            </div>
+                            <div class="flex flex-col min-w-0">
+                                <span class="font-headline-sm text-[15px] text-brand-deep tracking-tight font-extrabold leading-tight truncate">UNETI ĐÀO TẠO</span>
+                                <span class="font-label-sm text-[10px] text-outline leading-tight truncate">Quản Lý Đăng Ký Khóa Học</span>
+                            </div>
+                        </a>
+                        <button type="button" onclick="toggleMobileSidebar()" class="lg:hidden p-1.5 rounded-xl text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors" title="Đóng menu">
+                            <span class="material-symbols-outlined text-xl">close</span>
+                        </button>
+                    </div>
 
                     <!-- Semester Selector -->
                     <button class="w-full inline-flex items-center justify-between px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-brand-deep font-label-md text-label-md transition-colors border border-border-subtle cursor-pointer" type="button">
@@ -266,15 +271,22 @@
             </div>
         </aside>
 
+        <!-- Mobile Sidebar Backdrop Overlay -->
+        <div id="sidebarBackdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-brand-deep/40 backdrop-blur-xs z-40 hidden lg:hidden transition-opacity"></div>
+
         <!-- Right Content Main Wrapper -->
         <div class="flex-1 min-w-0 flex flex-col min-h-screen bg-canvas-base">
             <!-- Compact Top Navigation Header -->
-            <header class="w-full bg-surface-white border-b border-border-subtle h-16 px-gutter flex items-center justify-between sticky top-0 z-30 shadow-[0_1px_8px_rgba(13, 71, 161,0.03)]">
-                <div class="flex items-center gap-3">
+            <header class="w-full bg-surface-white border-b border-border-subtle h-16 px-4 lg:px-gutter flex items-center justify-between sticky top-0 z-30 shadow-[0_1px_8px_rgba(13, 71, 161,0.03)]">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Mobile Hamburger Button -->
+                    <button type="button" onclick="toggleMobileSidebar()" class="lg:hidden p-2 rounded-xl text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors" title="Menu điều hướng">
+                        <span class="material-symbols-outlined text-[22px]">menu</span>
+                    </button>
                     <div class="relative">
                         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">search</span>
-                        <input id="globalTopSearch" class="w-64 sm:w-80 pl-9 pr-10 py-1.5 rounded-xl bg-canvas-base border border-border-standard text-on-surface placeholder:text-outline font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container transition-all" placeholder="Tìm kiếm nhanh toàn hệ thống..." type="text">
-                        <span class="absolute right-2.5 top-1/2 -translate-y-1/2 font-label-sm text-label-sm text-outline border border-border-standard rounded px-1.5 py-0.5 bg-surface-white pointer-events-none">⌘K</span>
+                        <input id="globalTopSearch" class="w-36 sm:w-60 md:w-80 pl-9 pr-9 py-1.5 rounded-xl bg-canvas-base border border-border-standard text-on-surface placeholder:text-outline font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container transition-all" placeholder="Tìm kiếm nhanh..." type="text">
+                        <span class="hidden sm:inline-block absolute right-2.5 top-1/2 -translate-y-1/2 font-label-sm text-label-sm text-outline border border-border-standard rounded px-1.5 py-0.5 bg-surface-white pointer-events-none">⌘K</span>
                     </div>
                 </div>
                 <div class="flex items-center gap-space-sm">
@@ -981,6 +993,24 @@
                 }});
             }}
         }});
+    
+        // Mobile Sidebar Toggle Helper
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('adminSidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (!sidebar) return;
+            const isHidden = sidebar.classList.contains('-translate-x-full');
+            if (isHidden) {
+                sidebar.classList.remove('-translate-x-full');
+                if (backdrop) backdrop.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden', 'lg:overflow-auto');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                if (backdrop) backdrop.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden', 'lg:overflow-auto');
+            }
+        }
+        window.toggleMobileSidebar = toggleMobileSidebar;
     </script>
 </body>
 </html>
