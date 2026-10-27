@@ -45,6 +45,48 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
         [Display(Name = "Ngày cập nhật")]
         public DateTime NgayCapNhat { get; set; } = DateTime.Now;
 
+        #region Thuộc tính mở rộng phục vụ Cổng Giảng viên & Chấm điểm UNETI
+        [NotMapped]
+        [Display(Name = "Điểm giữa kỳ")]
+        public double? DiemGiuaKy { get; set; }
+
+        [NotMapped]
+        [Display(Name = "Điểm cuối kỳ")]
+        public double DiemCuoiKy
+        {
+            get => DiemCuoiKhoa;
+            set => DiemCuoiKhoa = value;
+        }
+
+        [NotMapped]
+        [Display(Name = "Điểm hệ 4")]
+        public double? DiemHe4 { get; set; }
+
+        [NotMapped]
+        [Display(Name = "Điểm chữ")]
+        public string? DiemChu { get; set; }
+
+        [NotMapped]
+        [Display(Name = "Xếp loại")]
+        public string? XepLoai { get; set; }
+
+        [NotMapped]
+        [Display(Name = "Ghi chú")]
+        public string? GhiChu
+        {
+            get => NhanXet;
+            set => NhanXet = value;
+        }
+
+        [NotMapped]
+        [Display(Name = "Ngày đánh giá")]
+        public DateTime NgayDanhGia
+        {
+            get => NgayCapNhat;
+            set => NgayCapNhat = value;
+        }
+        #endregion
+
         // Navigation property
         [ForeignKey("MaDangKy")]
         public virtual DangKyHoc? DangKyHoc { get; set; }

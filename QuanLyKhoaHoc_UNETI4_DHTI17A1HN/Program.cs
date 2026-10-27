@@ -51,6 +51,10 @@ builder.Services.AddScoped<ILopHocService, LopHocService>();
 builder.Services.AddScoped<IHocVienRepository, HocVienRepository>();
 builder.Services.AddScoped<IHocVienService, HocVienService>();
 
+// Module Giảng viên (Portal & Quản lý) - Bổ sung theo yêu cầu giảng viên hướng dẫn
+builder.Services.AddScoped<IGiangVienRepository, GiangVienRepository>();
+builder.Services.AddScoped<IGiangVienService, GiangVienService>();
+
 var app = builder.Build();
 
 // Tự động kiểm tra / khởi tạo database và nạp dữ liệu mẫu phong phú (Seed Mock Data)

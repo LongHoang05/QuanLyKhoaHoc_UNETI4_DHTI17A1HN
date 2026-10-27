@@ -1,0 +1,480 @@
+@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien>
+@{
+    // ========================================================
+    // Bổ sung theo yêu cầu giảng viên hướng dẫn:
+    // Quản lý Hồ sơ Giảng viên (Dành cho Quản trị viên & Giáo vụ)
+    // Thiết kế chuẩn EdTech Prep.vn - UNETI
+    // ========================================================
+    ViewData["Title"] = "Quản lý Giảng viên";
+    string search = ViewBag.Search ?? "";
+    string hocVi = ViewBag.HocVi ?? "";
+
+    int totalTeachers = Model?.Count() ?? 0;
+    int activeTeachers = Model?.Count(g => g.TrangThai) ?? 0;
+    int totalAssignedClasses = Model?.Sum(g => g.LopHocs?.Count ?? 0) ?? 0;
+}
+
+<div id="quanly-giangvien-area" class="flex flex-col gap-y-6 transition-opacity duration-200">
+    <!-- Sub-header Navigation Bar -->
+    <section class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border-standard">
+        <div>
+            <div class="flex items-center gap-2 text-outline font-label-sm text-label-sm uppercase tracking-wider mb-1">
+                <span>QUẢN TRỊ ĐÀO TẠO</span>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <span class="text-brand-deep font-semibold">ĐỘI NGŨ GIẢNG VIÊN</span>
+            </div>
+            <h1 class="font-headline-md text-headline-md text-brand-deep font-bold tracking-tight">
+                Danh Sách Hồ Sơ Giảng Viên
+            </h1>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+            <button onclick="exportTeacherTableToCSV('danh-sach-giang-vien.csv')" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-3.5 py-2.5 rounded-xl transition-all shadow-xs cursor-pointer">
+                <span class="material-symbols-outlined text-[18px] text-primary">file_download</span>
+                <span class="hidden sm:inline">Xuất Excel</span>
+            </button>
+            <button onclick="openTeacherDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-[#0047b3] text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]">person_add</span>
+                <span>Thêm giảng viên</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- 3 Stat Cards (Top KPI) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-outline font-label-md text-label-md">Tổng số giảng viên</span>
+                <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined text-[20px]">badge</span>
+                </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+                <span class="font-display text-[30px] leading-8 text-brand-deep tracking-tight font-black font-mono">@totalTeachers</span>
+                <span class="text-xs text-outline font-medium">thầy cô</span>
+            </div>
+        </div>
+
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-outline font-label-md text-label-md">Đang tham gia giảng dạy</span>
+                <div class="w-9 h-9 rounded-xl bg-success-emerald/10 flex items-center justify-center text-success-emerald">
+                    <span class="material-symbols-outlined text-[20px]">how_to_reg</span>
+                </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+                <span class="font-display text-[30px] leading-8 text-success-emerald tracking-tight font-black font-mono">@activeTeachers</span>
+                <span class="text-xs text-outline font-medium">hồ sơ hoạt động</span>
+            </div>
+        </div>
+
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-outline font-label-md text-label-md">Lớp học phần phân công</span>
+                <div class="w-9 h-9 rounded-xl bg-secondary-container/10 flex items-center justify-center text-secondary-container">
+                    <span class="material-symbols-outlined text-[20px]">meeting_room</span>
+                </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+                <span class="font-display text-[30px] leading-8 text-brand-deep tracking-tight font-black font-mono">@totalAssignedClasses</span>
+                <span class="text-xs text-outline font-medium">lớp được phụ trách</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters & Search Toolbar -->
+    <div class="bg-surface-white rounded-2xl p-4 border border-border-subtle shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
+        <form method="get" action="/GiangVien/QuanLy" class="flex flex-wrap items-center gap-3 w-full">
+            <!-- Search Field -->
+            <div class="relative flex-1 min-w-[240px]">
+                <span class="material-symbols-outlined text-outline absolute left-3 top-1/2 -translate-y-1/2 text-[18px]">search</span>
+                <input name="search" value="@search" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-xs" placeholder="Tìm theo họ tên, email, số điện thoại..." type="text"/>
+            </div>
+
+            <!-- Degree Filter -->
+            <div class="min-w-[160px]">
+                <select name="hocVi" class="w-full bg-surface-container-low border border-border-standard px-3 py-2 rounded-xl text-brand-deep font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-xs">
+                    <option value="">Tất cả học vị</option>
+                    <!option value="ThS." @(hocVi == "ThS." ? "selected" : "")>Thạc sĩ (ThS.)</!option>
+                    <!option value="TS." @(hocVi == "TS." ? "selected" : "")>Tiến sĩ (TS.)</!option>
+                    <!option value="PGS.TS." @(hocVi == "PGS.TS." ? "selected" : "")>Phó Giáo sư (PGS.TS)</!option>
+                    <!option value="GS.TS." @(hocVi == "GS.TS." ? "selected" : "")>Giáo sư (GS.TS)</!option>
+                    <!option value="Kỹ sư" @(hocVi == "Kỹ sư" ? "selected" : "")>Kỹ sư</!option>
+                    <!option value="Cử nhân" @(hocVi == "Cử nhân" ? "selected" : "")>Cử nhân</!option>
+                </select>
+            </div>
+
+            <button type="submit" class="inline-flex items-center gap-1.5 bg-primary hover:bg-[#0047b3] text-surface-white font-label-md text-label-md px-4 py-2 rounded-xl transition-all text-xs cursor-pointer">
+                <span class="material-symbols-outlined text-[16px]">filter_alt</span>
+                <span>Lọc</span>
+            </button>
+
+            @if (!string.IsNullOrEmpty(search) || !string.IsNullOrEmpty(hocVi))
+            {
+                <a href="/GiangVien/QuanLy" class="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant text-xs font-medium transition-colors">
+                    <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                    <span>Đặt lại</span>
+                </a>
+            }
+        </form>
+    </div>
+
+    <!-- Teacher Table -->
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-[0_4px_20px_rgba(0,22,86,0.03)] overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse" id="teacherTable">
+                <thead>
+                    <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-[11px] uppercase tracking-wider border-b border-border-standard">
+                        <th class="py-3.5 px-3 text-center w-12">Mã</th>
+                        <th class="py-3.5 px-4 min-w-[220px]">Giảng viên</th>
+                        <th class="py-3.5 px-3 min-w-[140px]">Học vị &amp; Chuyên ngành</th>
+                        <th class="py-3.5 px-3 min-w-[180px]">Thông tin liên hệ</th>
+                        <th class="py-3.5 px-3 text-center min-w-[130px]">Tài khoản</th>
+                        <th class="py-3.5 px-3 text-center w-24">Lớp dạy</th>
+                        <th class="py-3.5 px-3 text-center w-28">Trạng thái</th>
+                        <th class="py-3.5 px-4 text-center w-36">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle font-body-sm text-xs">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var gv in Model)
+                        {
+                            <tr class="hover:bg-surface-container-low/40 transition-colors">
+                                <td class="py-3.5 px-3 text-center font-mono font-bold text-outline">
+                                    GV-@gv.MaGiangVien.ToString("D3")
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-primary-container text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-xs">
+                                            @gv.HoTen.Substring(0, 1).ToUpper()
+                                        </div>
+                                        <div class="flex flex-col min-w-0">
+                                            <span class="font-bold text-brand-deep text-sm truncate">@gv.HoTen</span>
+                                            <span class="text-[11px] text-outline truncate">
+                                                @(string.IsNullOrWhiteSpace(gv.GioiThieu) ? "Chưa có giới thiệu" : gv.GioiThieu)
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3.5 px-3">
+                                    <div class="flex flex-col gap-0.5">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-primary/10 text-primary w-fit">
+                                            @(gv.HocVi ?? "ThS.")
+                                        </span>
+                                        <span class="text-[11px] text-brand-deep font-medium">@(gv.ChuyenNganh ?? "Công nghệ thông tin")</span>
+                                    </div>
+                                </td>
+                                <td class="py-3.5 px-3">
+                                    <div class="flex flex-col gap-0.5">
+                                        <div class="flex items-center gap-1.5 text-on-surface-variant truncate">
+                                            <span class="material-symbols-outlined text-[14px] text-outline">mail</span>
+                                            <span class="truncate">@gv.Email</span>
+                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(gv.SoDienThoai))
+                                        {
+                                            <div class="flex items-center gap-1.5 text-outline font-mono text-[11px]">
+                                                <span class="material-symbols-outlined text-[14px]">call</span>
+                                                <span>@gv.SoDienThoai</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </td>
+                                <td class="py-3.5 px-3 text-center">
+                                    @if (gv.TaiKhoan != null)
+                                    {
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-50 text-blue-700 border border-blue-200" title="Tài khoản hệ thống">
+                                            <span class="material-symbols-outlined text-[12px]">lock_open</span>
+                                            @gv.TaiKhoan.TenDangNhap
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-[11px] text-outline italic">Chưa cấp</span>
+                                    }
+                                </td>
+                                <td class="py-3.5 px-3 text-center">
+                                    <span class="font-mono font-bold text-brand-deep px-2 py-0.5 rounded-full bg-surface-container text-xs">
+                                        @(gv.LopHocs?.Count ?? 0)
+                                    </span>
+                                </td>
+                                <td class="py-3.5 px-3 text-center">
+                                    @if (gv.TrangThai)
+                                    {
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Đang công tác
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Tạm nghỉ
+                                        </span>
+                                    }
+                                </td>
+                                <td class="py-3.5 px-4 text-center">
+                                    <div class="flex items-center justify-center gap-1">
+                                        <a href="/GiangVien/LichDay" title="Xem lịch dạy" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container transition-colors">
+                                            <span class="material-symbols-outlined text-[18px]">calendar_month</span>
+                                        </a>
+                                        <button type="button" onclick="editTeacher(@gv.MaGiangVien)" title="Chỉnh sửa hồ sơ" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container transition-colors cursor-pointer">
+                                            <span class="material-symbols-outlined text-[18px]">edit</span>
+                                        </button>
+                                        <button type="button" onclick="confirmDeleteTeacher(@gv.MaGiangVien, '@gv.HoTen')" title="Xóa giảng viên" class="p-1.5 rounded-lg text-outline hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer">
+                                            <span class="material-symbols-outlined text-[18px]">delete</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="py-12 text-center text-outline">
+                                <span class="material-symbols-outlined text-[44px] text-outline/40 mb-2">person_off</span>
+                                <p class="text-sm font-semibold">Không tìm thấy giảng viên phù hợp điều kiện lọc.</p>
+                                <p class="text-xs text-outline/80 mt-1">Vui lòng thử lại với từ khóa hoặc tiêu chí khác.</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SLIDE-OVER DRAWER THÊM / SỬA GIẢNG VIÊN -->
+<!-- ========================================== -->
+<div id="teacher-drawer-backdrop" class="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 hidden transition-opacity duration-300" onclick="closeTeacherDrawer()"></div>
+
+<div id="teacher-drawer" class="fixed inset-y-0 right-0 max-w-lg w-full bg-surface-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col justify-between">
+    <!-- Drawer Header -->
+    <div class="p-6 border-b border-border-standard flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+                <span class="material-symbols-outlined text-[20px]" id="drawer-icon">person_add</span>
+            </div>
+            <div>
+                <h3 class="font-headline-sm text-base font-bold text-brand-deep" id="drawer-title">Thêm Mới Giảng Viên</h3>
+                <p class="text-xs text-outline">Cập nhật thông tin giảng viên và cấp tài khoản hệ thống</p>
+            </div>
+        </div>
+        <button onclick="closeTeacherDrawer()" class="p-1.5 rounded-lg text-outline hover:text-brand-deep hover:bg-surface-container transition-colors cursor-pointer">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+    </div>
+
+    <!-- Drawer Form Body -->
+    <form id="teacher-form" method="post" action="/GiangVien/CreatePost" class="flex-1 overflow-y-auto p-6 space-y-4">
+        @Html.AntiForgeryToken()
+        <input type="hidden" id="gv-maGiangVien" name="maGiangVien" value="0" />
+
+        <!-- Họ và tên -->
+        <div>
+            <label class="block text-xs font-bold text-brand-deep uppercase tracking-wider mb-1">Họ và tên giảng viên <span class="text-rose-500">*</span></label>
+            <input type="text" id="gv-hoTen" name="HoTen" required placeholder="Ví dụ: TS. Trần Văn Hùng"
+                   class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep" />
+        </div>
+
+        <!-- Học vị & Chuyên ngành -->
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label class="block text-xs font-bold text-brand-deep uppercase tracking-wider mb-1">Học vị</label>
+                <select id="gv-hocVi" name="HocVi" class="w-full px-3 py-2.5 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep">
+                    <option value="ThS.">Thạc sĩ (ThS.)</option>
+                    <option value="TS.">Tiến sĩ (TS.)</option>
+                    <option value="PGS.TS.">Phó Giáo sư (PGS.TS.)</option>
+                    <option value="GS.TS.">Giáo sư (GS.TS.)</option>
+                    <option value="Kỹ sư">Kỹ sư</option>
+                    <option value="Cử nhân">Cử nhân</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-brand-deep uppercase tracking-wider mb-1">Chuyên ngành</label>
+                <input type="text" id="gv-chuyenNganh" name="ChuyenNganh" placeholder="Ví dụ: Hệ thống thông tin"
+                       class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep" />
+            </div>
+        </div>
+
+        <!-- Email & Số điện thoại -->
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label class="block text-xs font-bold text-brand-deep uppercase tracking-wider mb-1">Email liên hệ <span class="text-rose-500">*</span></label>
+                <input type="email" id="gv-email" name="Email" required placeholder="tvhung@uneti.edu.vn"
+                       class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep" />
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-brand-deep uppercase tracking-wider mb-1">Số điện thoại</label>
+                <input type="tel" id="gv-soDienThoai" name="SoDienThoai" placeholder="0987654321"
+                       class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep" />
+            </div>
+        </div>
+
+        <!-- Giới thiệu / Ghi chú -->
+        <div>
+            <label class="block text-xs font-bold text-brand-deep uppercase tracking-wider mb-1">Giới thiệu tóm tắt</label>
+            <textarea id="gv-gioiThieu" name="GioiThieu" rows="2" placeholder="Kinh nghiệm chuyên môn, hướng nghiên cứu..."
+                      class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep"></textarea>
+        </div>
+
+        <!-- Tài khoản đăng nhập hệ thống -->
+        <div id="account-section" class="p-4 rounded-xl bg-surface-container-low/60 border border-border-standard space-y-3">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-[18px]">lock</span>
+                <span class="font-bold text-xs text-brand-deep">Tài Khoản Đăng Nhập Cổng Giảng Viên</span>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[11px] font-medium text-outline mb-1">Tên đăng nhập</label>
+                    <input type="text" id="gv-tenDangNhap" name="tenDangNhap" placeholder="gv.hungtv"
+                           class="w-full px-3 py-2 text-xs rounded-lg border border-border-standard bg-white focus:ring-2 focus:ring-primary/20 text-brand-deep font-mono" />
+                </div>
+                <div>
+                    <label class="block text-[11px] font-medium text-outline mb-1">Mật khẩu khởi tạo</label>
+                    <input type="password" id="gv-matKhau" name="matKhau" placeholder="123456"
+                           class="w-full px-3 py-2 text-xs rounded-lg border border-border-standard bg-white focus:ring-2 focus:ring-primary/20 text-brand-deep font-mono" />
+                </div>
+            </div>
+            <p class="text-[10px] text-outline italic">Mật khẩu mặc định là <strong>123456</strong> nếu để trống.</p>
+        </div>
+
+        <!-- Trạng thái công tác -->
+        <div class="flex items-center gap-2 pt-1">
+            <input type="checkbox" id="gv-trangThai" name="TrangThai" value="true" checked
+                   class="w-4 h-4 rounded border-border-standard text-primary focus:ring-primary" />
+            <label for="gv-trangThai" class="text-xs font-semibold text-brand-deep cursor-pointer">Đang công tác / Giảng dạy</label>
+        </div>
+    </form>
+
+    <!-- Drawer Footer Actions -->
+    <div class="p-6 border-t border-border-standard flex items-center justify-end gap-3 bg-surface-white">
+        <button type="button" onclick="closeTeacherDrawer()" class="px-4 py-2.5 rounded-xl border border-border-standard text-outline hover:bg-surface-container font-label-md text-xs transition-colors cursor-pointer">
+            Hủy bỏ
+        </button>
+        <button type="button" onclick="submitTeacherForm()" id="btnSubmitDrawer" class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-primary hover:bg-[#0047b3] text-white font-label-md text-xs shadow-sm transition-all cursor-pointer">
+            <span class="material-symbols-outlined text-[16px]">save</span>
+            <span id="btnSubmitText">Lưu Giảng Viên</span>
+        </button>
+    </div>
+</div>
+
+<!-- Modal xác nhận xóa dùng chung -->
+@await Html.PartialAsync("_DeleteModal")
+
+<script>
+    function openTeacherDrawer(mode, data = null) {
+        const backdrop = document.getElementById('teacher-drawer-backdrop');
+        const drawer = document.getElementById('teacher-drawer');
+        const form = document.getElementById('teacher-form');
+        const title = document.getElementById('drawer-title');
+        const icon = document.getElementById('drawer-icon');
+        const btnText = document.getElementById('btnSubmitText');
+        const accountSec = document.getElementById('account-section');
+
+        backdrop.classList.remove('hidden');
+        drawer.classList.remove('translate-x-full');
+
+        if (mode === 'create') {
+            title.textContent = 'Thêm Mới Giảng Viên';
+            icon.textContent = 'person_add';
+            btnText.textContent = 'Thêm mới';
+            form.action = '/GiangVien/CreatePost';
+            accountSec.classList.remove('hidden');
+
+            document.getElementById('gv-maGiangVien').value = '0';
+            document.getElementById('gv-hoTen').value = '';
+            document.getElementById('gv-email').value = '';
+            document.getElementById('gv-soDienThoai').value = '';
+            document.getElementById('gv-chuyenNganh').value = '';
+            document.getElementById('gv-gioiThieu').value = '';
+            document.getElementById('gv-tenDangNhap').value = '';
+            document.getElementById('gv-matKhau').value = '';
+            document.getElementById('gv-trangThai').checked = true;
+        } else {
+            title.textContent = 'Chỉnh Sửa Hồ Sơ Giảng Viên';
+            icon.textContent = 'edit';
+            btnText.textContent = 'Cập nhật';
+            form.action = '/GiangVien/EditPost?maGiangVien=' + data.maGiangVien;
+            accountSec.classList.add('hidden'); // Khi sửa thì không sửa password ở đây
+
+            document.getElementById('gv-maGiangVien').value = data.maGiangVien;
+            document.getElementById('gv-hoTen').value = data.hoTen || '';
+            document.getElementById('gv-email').value = data.email || '';
+            document.getElementById('gv-soDienThoai').value = data.soDienThoai || '';
+            document.getElementById('gv-hocVi').value = data.hocVi || 'ThS.';
+            document.getElementById('gv-chuyenNganh').value = data.chuyenNganh || '';
+            document.getElementById('gv-gioiThieu').value = data.gioiThieu || '';
+            document.getElementById('gv-trangThai').checked = data.trangThai === true;
+        }
+    }
+
+    function closeTeacherDrawer() {
+        const backdrop = document.getElementById('teacher-drawer-backdrop');
+        const drawer = document.getElementById('teacher-drawer');
+        backdrop.classList.add('hidden');
+        drawer.classList.add('translate-x-full');
+    }
+
+    async function editTeacher(id) {
+        try {
+            const res = await fetch('/GiangVien/GetGiangVienJson/' + id);
+            const resData = await res.json();
+            if (resData.success) {
+                openTeacherDrawer('edit', resData.data);
+            } else {
+                if (window.showToast) window.showToast(resData.message, 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            if (window.showToast) window.showToast('Lỗi khi tải thông tin giảng viên.', 'error');
+        }
+    }
+
+    function submitTeacherForm() {
+        const form = document.getElementById('teacher-form');
+        const hoTen = document.getElementById('gv-hoTen').value.trim();
+        const email = document.getElementById('gv-email').value.trim();
+
+        if (!hoTen || !email) {
+            if (window.showToast) window.showToast('Vui lòng nhập họ tên và email hợp lệ!', 'error');
+            return;
+        }
+
+        form.submit();
+    }
+
+    function confirmDeleteTeacher(id, name) {
+        if (window.openGlobalDeleteModal) {
+            window.openGlobalDeleteModal({
+                action: '/GiangVien/DeletePost',
+                id: id,
+                itemName: `Giảng viên "${name}"`,
+                warning: 'Xóa giảng viên chỉ thực hiện được nếu giảng viên không phụ trách lớp học nào.'
+            });
+        }
+    }
+
+    // Export CSV
+    function exportTeacherTableToCSV(filename) {
+        const rows = document.querySelectorAll('#teacherTable tr');
+        let csv = [];
+        for (let i = 0; i < rows.length; i++) {
+            let row = [], cols = rows[i].querySelectorAll('td, th');
+            for (let j = 0; j < cols.length - 1; j++) {
+                let data = cols[j].innerText.trim().replace(/"/g, '""');
+                row.push('"' + data + '"');
+            }
+            csv.push(row.join(','));
+        }
+        const csvFile = new Blob(["\uFEFF" + csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const downloadLink = document.createElement('a');
+        downloadLink.download = filename;
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+        downloadLink.style.display = 'none';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
+</script>

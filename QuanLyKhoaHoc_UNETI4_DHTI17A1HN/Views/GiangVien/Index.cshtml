@@ -1,0 +1,236 @@
+@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien
+@{
+    ViewData["Title"] = "Cổng Giảng Viên - UNETI EDU";
+    var myClasses = ViewBag.MyClasses as List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>();
+    var upcomingSessions = ViewBag.UpcomingSessions as List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.BuoiHoc> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.BuoiHoc>();
+    int totalStudents = ViewBag.TotalStudents ?? 0;
+    int gradedCount = ViewBag.GradedCount ?? 0;
+}
+
+<!--
+// ========================================================
+// Bổ sung theo yêu cầu giảng viên hướng dẫn:
+// Cổng Thông Tin Giảng Viên (Teacher Portal) - Chuẩn Prep.vn Tailwind
+// Xem lịch dạy, lớp phụ trách, theo dõi tiến độ và chấm điểm sinh viên
+// ========================================================
+-->
+
+<div class="flex flex-col gap-y-6">
+    <!-- Top Welcome Banner -->
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-brand-deep via-[#002d80] to-primary p-6 md:p-8 text-surface-white shadow-xl">
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="space-y-2">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-semibold text-blue-200">
+                    <span class="material-symbols-outlined text-[16px] text-amber-300">verified</span>
+                    <span>Cổng Giảng Viên UNETI • @(Model.HocVi ?? "Thạc sĩ") @Model.HoTen</span>
+                </div>
+                <h1 class="text-2xl md:text-3xl font-black tracking-tight">
+                    Xin chào Thầy/Cô, @Model.HoTen 👋
+                </h1>
+                <p class="text-xs md:text-sm text-blue-100/80 max-w-2xl font-light">
+                    Khoa Công nghệ thông tin • Chuyên ngành: @(Model.ChuyenNganh ?? "Công nghệ phần mềm"). Quản lý lớp học, tra cứu lịch giảng dạy và nhập điểm đánh giá học viên trực tiếp trên hệ thống.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="/GiangVien/LichDay" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-white text-brand-deep font-bold text-xs hover:bg-blue-50 transition-all shadow-md">
+                    <span class="material-symbols-outlined text-primary text-[18px]">calendar_month</span>
+                    <span>Xem Lịch Dạy</span>
+                </a>
+                <a href="/GiangVien/ChamDiem" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-brand-deep font-bold text-xs transition-all shadow-md">
+                    <span class="material-symbols-outlined text-[18px]">edit_note</span>
+                    <span>Chấm Điểm Sinh Viên</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4 KPI Stat Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Lớp phụ trách -->
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs font-medium text-outline block mb-1">Lớp đang phụ trách</span>
+                <span class="text-2xl font-black text-brand-deep font-mono">@myClasses.Count</span>
+                <span class="text-[11px] text-primary block mt-1 font-semibold">Được phân công giảng dạy</span>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+                <span class="material-symbols-outlined text-[24px]">meeting_room</span>
+            </div>
+        </div>
+
+        <!-- Tổng sinh viên -->
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs font-medium text-outline block mb-1">Tổng học viên đang học</span>
+                <span class="text-2xl font-black text-emerald-600 font-mono">@totalStudents</span>
+                <span class="text-[11px] text-emerald-600 block mt-1 font-semibold">Đã duyệt & đóng học phí</span>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <span class="material-symbols-outlined text-[24px]">group</span>
+            </div>
+        </div>
+
+        <!-- Buổi dạy sắp tới -->
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs font-medium text-outline block mb-1">Buổi dạy sắp diễn ra</span>
+                <span class="text-2xl font-black text-amber-600 font-mono">@upcomingSessions.Count</span>
+                <span class="text-[11px] text-amber-600 block mt-1 font-semibold">Theo thời khóa biểu</span>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                <span class="material-symbols-outlined text-[24px]">schedule</span>
+            </div>
+        </div>
+
+        <!-- Điểm đã vào -->
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs font-medium text-outline block mb-1">Học viên đã vào điểm</span>
+                <span class="text-2xl font-black text-purple-600 font-mono">@gradedCount</span>
+                <span class="text-[11px] text-purple-600 block mt-1 font-semibold">Có kết quả đánh giá</span>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                <span class="material-symbols-outlined text-[24px]">grade</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content 2 Columns: Classes & Upcoming Schedule -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left: Assigned Classes List (2 Cols) -->
+        <div class="lg:col-span-2 space-y-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="font-bold text-base text-brand-deep">Danh Sách Lớp Học Phụ Trách</h2>
+                    <p class="text-xs text-outline">Các lớp học được Nhà trường phân công giảng dạy</p>
+                </div>
+                <a href="/GiangVien/ChamDiem" class="text-xs text-primary font-semibold hover:underline flex items-center gap-1">
+                    <span>Vào bảng điểm</span>
+                    <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                </a>
+            </div>
+
+            @if (!myClasses.Any())
+            {
+                <div class="bg-surface-white rounded-2xl p-8 border border-border-subtle text-center text-outline">
+                    <span class="material-symbols-outlined text-4xl mb-2 text-outline/50">school</span>
+                    <p class="text-xs font-medium">Hiện tại chưa có lớp học nào được phân công cho Thầy/Cô.</p>
+                </div>
+            }
+            else
+            {
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @foreach (var lop in myClasses)
+                    {
+                        int svCount = lop.DangKyHocs.Count(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học");
+                        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
+                            <div class="space-y-2.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-[11px] font-mono">
+                                        #@lop.TenLop
+                                    </span>
+                                    <span class="inline-flex items-center gap-1 text-[11px] text-emerald-600 font-semibold">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        @lop.TrangThai
+                                    </span>
+                                </div>
+
+                                <h3 class="font-bold text-sm text-brand-deep group-hover:text-primary transition-colors">
+                                    @(lop.ChuongTrinhDaoTao?.TenChuongTrinh ?? "Chương trình Đào tạo")
+                                </h3>
+
+                                <div class="text-xs text-outline space-y-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-[15px] text-outline">meeting_room</span>
+                                        <span>Phòng: <strong class="text-brand-deep">@(lop.PhongHoc ?? "Lab phòng máy")</strong></span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-[15px] text-outline">calendar_today</span>
+                                        <span>Thời lượng: <strong class="text-brand-deep">@lop.SoBuoiHoc buổi học</strong></span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-[15px] text-outline">group</span>
+                                        <span>Sĩ số: <strong class="text-brand-deep">@svCount / @lop.SiSoToiDa học viên</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-4 mt-3 border-t border-border-standard flex items-center justify-between gap-2">
+                                <a href="/GiangVien/LichDay?maLop=@lop.MaLopHoc" class="text-xs font-semibold text-outline hover:text-brand-deep flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[16px]">calendar_month</span>
+                                    <span>Lịch dạy</span>
+                                </a>
+                                <a href="/GiangVien/ChamDiem?maLop=@lop.MaLopHoc" class="px-3 py-1.5 rounded-xl bg-primary hover:bg-[#0047b3] text-surface-white font-bold text-xs flex items-center gap-1 shadow-xs">
+                                    <span class="material-symbols-outlined text-[15px]">edit_note</span>
+                                    <span>Chấm điểm</span>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Right: Upcoming Teaching Schedule (1 Col) -->
+        <div class="space-y-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="font-bold text-base text-brand-deep">Lịch Dạy Sắp Tới</h2>
+                    <p class="text-xs text-outline">Thời khóa biểu các ca dạy gần nhất</p>
+                </div>
+                <a href="/GiangVien/LichDay" class="text-xs text-primary font-semibold hover:underline">Tất cả</a>
+            </div>
+
+            <div class="bg-surface-white rounded-2xl p-4 border border-border-subtle shadow-sm space-y-3">
+                @if (!upcomingSessions.Any())
+                {
+                    <div class="text-center py-6 text-outline text-xs">
+                        <span class="material-symbols-outlined text-3xl mb-1 text-outline/50">event_available</span>
+                        <p>Không có ca dạy nào trong tuần này.</p>
+                    </div>
+                }
+                else
+                {
+                    foreach (var s in upcomingSessions)
+                    {
+                        <div class="p-3 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors border border-border-subtle/80 space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <span class="font-mono text-[11px] font-bold text-primary">
+                                    @(s.LopHoc?.TenLop ?? "Lớp học")
+                                </span>
+                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                                    @s.ThoiGianBatDau.ToString("dd/MM/yyyy")
+                                </span>
+                            </div>
+                            <div class="text-xs font-bold text-brand-deep">
+                                @(string.IsNullOrWhiteSpace(s.NoiDung) ? "Buổi giảng dạy chuyên đề" : s.NoiDung)
+                            </div>
+                            <div class="flex items-center justify-between text-[11px] text-outline font-medium">
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px] text-outline">schedule</span>
+                                    <span>@s.ThoiGianBatDau.ToString("HH:mm") - @s.ThoiGianKetThuc.ToString("HH:mm")</span>
+                                </span>
+                                <span class="flex items-center gap-1 text-brand-deep font-semibold">
+                                    <span class="material-symbols-outlined text-[14px] text-primary">location_on</span>
+                                    <span>@s.PhongHoc</span>
+                                </span>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
+            <!-- Quick Info Box -->
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50/50 rounded-2xl p-4 border border-blue-100 space-y-2">
+                <div class="flex items-center gap-2 text-primary font-bold text-xs">
+                    <span class="material-symbols-outlined text-[18px]">info</span>
+                    <span>Quy chế Chấm điểm & Vào điểm</span>
+                </div>
+                <p class="text-[11px] text-outline leading-relaxed">
+                    Theo quy định đào tạo UNETI: Điểm chuyên cần (10%), Điểm kiểm tra giữa kỳ (40%), Điểm thi kết thúc học phần (50%). Giảng viên lưu điểm trực tiếp trên hệ thống để sinh viên tra cứu trên Cổng học viên.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

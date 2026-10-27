@@ -1,0 +1,501 @@
+@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc>
+@{
+    // ========================================================
+    // Bổ sung theo yêu cầu giảng viên hướng dẫn:
+    // Cổng Giảng viên - Module Chấm điểm & Đánh giá kết quả học tập
+    // Thiết kế chuẩn EdTech Prep.vn - UNETI
+    // ========================================================
+    ViewData["Title"] = "Chấm điểm & Đánh giá học viên";
+    var gv = ViewBag.CurrentGiangVien as QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien;
+    var myClasses = ViewBag.MyClasses as List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>();
+    var currentClass = ViewBag.CurrentClass as QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc;
+    int selectedClassId = ViewBag.SelectedClassId ?? 0;
+
+    int totalStudents = Model?.Count() ?? 0;
+    int gradedCount = Model?.Count(d => d.KetQuaHocTap != null && d.KetQuaHocTap.DiemTongKet > 0) ?? 0;
+    int passedCount = Model?.Count(d => d.KetQuaHocTap != null && d.KetQuaHocTap.KetQua == "Đạt") ?? 0;
+    double avgDiem = Model != null && totalStudents > 0 && gradedCount > 0 
+        ? Math.Round(Model.Where(d => d.KetQuaHocTap != null && d.KetQuaHocTap.DiemTongKet > 0).Average(d => d.KetQuaHocTap!.DiemTongKet), 2) 
+        : 0;
+}
+
+@Html.AntiForgeryToken()
+
+<div id="chamdiem-content-area" class="flex flex-col gap-y-6 transition-opacity duration-200">
+    <!-- Sub-header Navigation Bar -->
+    <section class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border-standard">
+        <div>
+            <div class="flex items-center gap-2 text-outline font-label-sm text-label-sm uppercase tracking-wider mb-1">
+                <span>CỔNG GIẢNG VIÊN</span>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <span class="text-brand-deep font-semibold">SỔ ĐIỂM HỌC VIÊN</span>
+            </div>
+            <h1 class="font-headline-md text-headline-md text-brand-deep font-bold tracking-tight flex items-center gap-2">
+                <span>Chấm Điểm &amp; Đánh Giá Lớp Học Phần</span>
+                <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                    @(gv != null ? $"{gv.HocVi} {gv.HoTen}" : "Giảng viên")
+                </span>
+            </h1>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+            <button onclick="exportGradeTableToCSV('bang-diem-lop-@(selectedClassId).csv')" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-3.5 py-2.5 rounded-xl transition-all shadow-xs cursor-pointer">
+                <span class="material-symbols-outlined text-[18px] text-primary">file_download</span>
+                <span class="hidden sm:inline">Xuất File Excel</span>
+            </button>
+            <button onclick="window.print()" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-3.5 py-2.5 rounded-xl transition-all shadow-xs cursor-pointer">
+                <span class="material-symbols-outlined text-[18px] text-outline">print</span>
+                <span class="hidden sm:inline">In sổ điểm</span>
+            </button>
+            <button onclick="saveAllGrades()" id="btnSaveAll" class="inline-flex items-center gap-1.5 bg-primary hover:bg-[#0047b3] text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]">save</span>
+                <span>Lưu toàn bộ điểm</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Class Selector & Quick KPI Cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <!-- Class Selector Card (Lg: 1 col) -->
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+            <div>
+                <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-2">Chọn Lớp học phần</label>
+                <div class="relative">
+                    <select id="selectClassFilter" onchange="window.location.href='/GiangVien/ChamDiem?maLop=' + this.value"
+                            class="w-full px-3.5 py-2.5 text-xs font-bold rounded-xl border border-primary/30 bg-primary/5 focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep">
+                        @if (myClasses.Any())
+                        {
+                            @foreach (var c in myClasses)
+                            {
+                                <!option value="@c.MaLopHoc" @(c.MaLopHoc == selectedClassId ? "selected" : "")>
+                                    @c.TenLop (@(c.ChuongTrinhDaoTao?.TenChuongTrinh ?? "CTĐT"))
+                                </!option>
+                            }
+                        }
+                        else
+                        {
+                            <option value="0">Chưa được phân công lớp</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            @if (currentClass != null)
+            {
+                <div class="mt-4 pt-3 border-t border-border-subtle flex flex-col gap-1 text-xs">
+                    <div class="flex justify-between text-outline">
+                        <span>Học phí:</span>
+                        <span class="font-bold text-brand-deep">@currentClass.HocPhi.ToString("N0") đ</span>
+                    </div>
+                    <div class="flex justify-between text-outline">
+                        <span>Khai giảng:</span>
+                        <span class="font-medium text-brand-deep">@currentClass.NgayKhaiGiang.ToString("dd/MM/yyyy")</span>
+                    </div>
+                    <div class="flex justify-between text-outline">
+                        <span>Phòng:</span>
+                        <span class="font-medium text-brand-deep">@(currentClass.PhongHoc ?? "Chưa xếp")</span>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- 3 KPI Cards -->
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-outline font-label-md text-label-md">Sĩ số danh sách</span>
+                <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                    <span class="material-symbols-outlined text-[20px]">group</span>
+                </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+                <span class="font-display text-[28px] leading-8 text-blue-700 tracking-tight font-black font-mono">@totalStudents</span>
+                <span class="text-xs text-blue-600 font-medium">học viên</span>
+            </div>
+            <div class="text-[11px] text-outline mt-2">Theo danh sách đăng ký đã duyệt</div>
+        </div>
+
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-outline font-label-md text-label-md">Tiến độ nhập điểm</span>
+                <div class="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                    <span class="material-symbols-outlined text-[20px]">grading</span>
+                </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+                <span class="font-display text-[28px] leading-8 text-amber-700 tracking-tight font-black font-mono">@gradedCount/@totalStudents</span>
+                <span class="text-xs text-amber-600 font-medium font-mono">
+                    (@(totalStudents > 0 ? (gradedCount * 100 / totalStudents) : 0)%)
+                </span>
+            </div>
+            <!-- Progress Bar -->
+            <div class="w-full bg-amber-100 h-1.5 rounded-full overflow-hidden mt-2">
+                <div class="bg-amber-500 h-full rounded-full transition-all duration-500" style="width: @(totalStudents > 0 ? (gradedCount * 100 / totalStudents) : 0)%"></div>
+            </div>
+        </div>
+
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-outline font-label-md text-label-md">Điểm TB / Tỷ lệ Đạt</span>
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                    <span class="material-symbols-outlined text-[20px]">verified</span>
+                </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+                <span class="font-display text-[28px] leading-8 text-emerald-700 tracking-tight font-black font-mono">
+                    @(avgDiem > 0 ? avgDiem.ToString("0.0") : "--")
+                </span>
+                <span class="text-xs text-emerald-600 font-semibold font-mono">
+                    / 10 (@(gradedCount > 0 ? Math.Round((double)passedCount * 100 / gradedCount, 1) : 0)% Đạt)
+                </span>
+            </div>
+            <div class="text-[11px] text-outline mt-2">Học phần đạt chuẩn UNETI (≥ 4.0)</div>
+        </div>
+    </div>
+
+    <!-- Quy chế tính điểm hướng dẫn UNETI -->
+    <div class="bg-primary/5 border border-primary/20 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-brand-deep">
+        <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-primary text-[22px]">info</span>
+            <div>
+                <span class="font-bold">Công thức tính điểm UNETI:</span>
+                <span class="text-on-surface-variant ml-1">
+                    Tổng kết = (CC × 10%) + (GK × 40%) + (CK × 50%). Hệ 4: A (4.0), B+ (3.5), B (3.0), C+ (2.5), C (2.0), D+ (1.5), D (1.0), F (0.0).
+                </span>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+            <span class="px-2 py-1 rounded bg-white font-mono font-bold text-emerald-700 border border-emerald-200">Đạt: ≥ 4.0</span>
+            <span class="px-2 py-1 rounded bg-white font-mono font-bold text-rose-700 border border-rose-200">Học lại: &lt; 4.0</span>
+        </div>
+    </div>
+
+    <!-- Student Grading Table -->
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-[0_4px_20px_rgba(0,22,86,0.03)] overflow-hidden">
+        <div class="p-4 border-b border-border-subtle flex flex-col sm:flex-row items-center justify-between gap-3 bg-surface-container-low/30">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-[20px]">fact_check</span>
+                <h2 class="font-headline-sm text-sm font-bold text-brand-deep">Danh sách học viên &amp; Bảng nhập điểm chi tiết</h2>
+            </div>
+            <div class="text-xs text-outline">
+                Nhập điểm và nhấn <kbd class="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded font-mono text-[10px]">Enter</kbd> hoặc nút <strong class="text-primary font-bold">Lưu</strong> để cập nhật tự động.
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse" id="gradeTable">
+                <thead>
+                    <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-[11px] uppercase tracking-wider border-b border-border-standard">
+                        <th class="py-3 px-3 text-center w-10">STT</th>
+                        <th class="py-3 px-4 min-w-[200px]">Học viên</th>
+                        <th class="py-3 px-3 text-center w-28">Trạng thái</th>
+                        <th class="py-3 px-3 text-center w-28">Chuyên cần (10%)</th>
+                        <th class="py-3 px-3 text-center w-28">Giữa kỳ (40%)</th>
+                        <th class="py-3 px-3 text-center w-28">Cuối kỳ (50%)</th>
+                        <th class="py-3 px-3 text-center w-24">Tổng kết (10)</th>
+                        <th class="py-3 px-3 text-center w-20">Hệ 4</th>
+                        <th class="py-3 px-3 text-center w-20">Điểm chữ</th>
+                        <th class="py-3 px-3 text-center w-24">Đánh giá</th>
+                        <th class="py-3 px-3 min-w-[160px]">Ghi chú</th>
+                        <th class="py-3 px-3 text-center w-24">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle font-body-sm text-xs">
+                    @if (Model != null && Model.Any())
+                    {
+                        int stt = 1;
+                        foreach (var item in Model)
+                        {
+                            var kq = item.KetQuaHocTap;
+                            string rowId = $"row-{item.MaDangKy}";
+                            bool isGraded = kq != null && kq.DiemTongKet > 0;
+                            bool isPass = kq != null && kq.KetQua == "Đạt";
+
+                            <tr id="@rowId" class="grade-row hover:bg-surface-container-low/40 transition-colors" data-dangky="@item.MaDangKy">
+                                <td class="py-3 px-3 text-center font-mono font-bold text-outline">@stt</td>
+                                <td class="py-3 px-4">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center shrink-0">
+                                            @(item.HocVien != null && !string.IsNullOrEmpty(item.HocVien.HoTen) ? item.HocVien.HoTen.Substring(0, 1).ToUpper() : "H")
+                                        </div>
+                                        <div class="flex flex-col min-w-0">
+                                            <span class="font-bold text-brand-deep truncate">@(item.HocVien?.HoTen ?? "Học viên")</span>
+                                            <span class="text-[11px] text-outline font-mono truncate">
+                                                @(item.HocVien?.MaHocVien != null ? $"HV-{item.HocVien.MaHocVien:D4}" : "") • @(item.HocVien?.Email ?? "")
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-3 text-center">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold
+                                        @(item.TrangThai == "Hoàn thành" ? "bg-emerald-100 text-emerald-800" :
+                                          item.TrangThai == "Đang học" ? "bg-blue-100 text-blue-800" :
+                                          "bg-slate-100 text-slate-700")">
+                                        @item.TrangThai
+                                    </span>
+                                </td>
+
+                                <!-- Chuyên cần (10%) -->
+                                <td class="py-2 px-3 text-center">
+                                    <input type="number" step="0.1" min="0" max="10"
+                                           value="@(kq != null ? kq.DiemChuyenCan.ToString("0.0") : "")"
+                                           placeholder="0.0"
+                                           class="input-diem input-cc w-20 px-2 py-1.5 text-center font-mono font-bold rounded-lg border border-border-standard bg-surface-container-lowest focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep text-xs"
+                                           data-dk="@item.MaDangKy" oninput="calculateLivePreview(this)" />
+                                </td>
+
+                                <!-- Giữa kỳ (40%) -->
+                                <td class="py-2 px-3 text-center">
+                                    <input type="number" step="0.1" min="0" max="10"
+                                           value="@(kq?.DiemGiuaKy.HasValue == true ? kq.DiemGiuaKy.Value.ToString("0.0") : "")"
+                                           placeholder="0.0"
+                                           class="input-diem input-gk w-20 px-2 py-1.5 text-center font-mono font-bold rounded-lg border border-border-standard bg-surface-container-lowest focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep text-xs"
+                                           data-dk="@item.MaDangKy" oninput="calculateLivePreview(this)" />
+                                </td>
+
+                                <!-- Cuối kỳ (50%) -->
+                                <td class="py-2 px-3 text-center">
+                                    <input type="number" step="0.1" min="0" max="10"
+                                           value="@(kq != null ? kq.DiemCuoiKy.ToString("0.0") : "")"
+                                           placeholder="0.0"
+                                           class="input-diem input-ck w-20 px-2 py-1.5 text-center font-mono font-bold rounded-lg border border-border-standard bg-surface-container-lowest focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep text-xs"
+                                           data-dk="@item.MaDangKy" oninput="calculateLivePreview(this)" />
+                                </td>
+
+                                <!-- Điểm Tổng kết (10) -->
+                                <td class="py-3 px-3 text-center font-mono font-black text-sm cell-tongket text-brand-deep">
+                                    @((kq != null && kq.DiemTongKet > 0) ? kq.DiemTongKet.ToString("0.0") : "-")
+                                </td>
+
+                                <!-- Hệ 4 -->
+                                <td class="py-3 px-3 text-center font-mono font-bold cell-he4 text-slate-700">
+                                    @(kq?.DiemHe4?.ToString("0.0") ?? "-")
+                                </td>
+
+                                <!-- Điểm chữ -->
+                                <td class="py-3 px-3 text-center font-mono font-bold cell-chu">
+                                    <span class="inline-block px-1.5 py-0.5 rounded text-xs
+                                        @(kq?.DiemChu == "A" || kq?.DiemChu == "B+" ? "bg-emerald-100 text-emerald-800" :
+                                          kq?.DiemChu == "B" || kq?.DiemChu == "C+" ? "bg-blue-100 text-blue-800" :
+                                          kq?.DiemChu == "C" || kq?.DiemChu == "D+" || kq?.DiemChu == "D" ? "bg-amber-100 text-amber-800" :
+                                          kq?.DiemChu == "F" ? "bg-rose-100 text-rose-800" : "text-gray-400")">
+                                        @(kq?.DiemChu ?? "-")
+                                    </span>
+                                </td>
+
+                                <!-- Đánh giá Kết quả -->
+                                <td class="py-3 px-3 text-center cell-ketqua">
+                                    @if (isGraded)
+                                    {
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold @(isPass ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800")">
+                                            @(kq?.KetQua ?? (isPass ? "Đạt" : "Không đạt"))
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-outline text-[11px]">Chưa xong</span>
+                                    }
+                                </td>
+
+                                <!-- Ghi chú -->
+                                <td class="py-2 px-3">
+                                    <input type="text" value="@(kq?.GhiChu ?? "")" placeholder="Nhận xét..."
+                                           class="input-ghichu w-full px-2 py-1.5 text-xs rounded-lg border border-border-standard bg-surface-container-lowest focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary text-brand-deep" />
+                                </td>
+
+                                <!-- Thao tác Lưu từng dòng -->
+                                <td class="py-2 px-3 text-center">
+                                    <button type="button" onclick="saveSingleGrade(this, @item.MaDangKy)"
+                                            class="btn-save-row inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-surface-container-low hover:bg-primary hover:text-white text-primary text-xs font-semibold transition-all cursor-pointer">
+                                        <span class="material-symbols-outlined text-[16px] btn-icon">save</span>
+                                        <span class="btn-text">Lưu</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            stt++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="12" class="py-12 text-center text-outline">
+                                <span class="material-symbols-outlined text-[44px] text-outline/40 mb-2">person_off</span>
+                                <p class="text-sm font-semibold">Chưa có học viên nào trong lớp học phần này.</p>
+                                <p class="text-xs text-outline/80 mt-1">Vui lòng chọn lớp học khác hoặc kiểm tra phân công danh sách học viên.</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Live calculation helper on input typing
+    function calculateLivePreview(inputEl) {
+        const row = inputEl.closest('tr');
+        if (!row) return;
+
+        const ccInput = row.querySelector('.input-cc');
+        const gkInput = row.querySelector('.input-gk');
+        const ckInput = row.querySelector('.input-ck');
+
+        const cc = parseFloat(ccInput.value);
+        const gk = parseFloat(gkInput.value);
+        const ck = parseFloat(ckInput.value);
+
+        const tkCell = row.querySelector('.cell-tongket');
+        const he4Cell = row.querySelector('.cell-he4');
+        const chuCell = row.querySelector('.cell-chu');
+        const kqCell = row.querySelector('.cell-ketqua');
+
+        if (!isNaN(cc) && !isNaN(gk) && !isNaN(ck)) {
+            // UNETI formula: CC 10%, GK 40%, CK 50%
+            const tk = Math.round((cc * 0.1 + gk * 0.4 + ck * 0.5) * 100) / 100;
+            tkCell.textContent = tk.toFixed(1);
+
+            let he4 = 0.0, chu = "F", xepLoai = "Kém", pass = false;
+            if (tk >= 8.5) { chu = "A"; he4 = 4.0; pass = true; }
+            else if (tk >= 8.0) { chu = "B+"; he4 = 3.5; pass = true; }
+            else if (tk >= 7.0) { chu = "B"; he4 = 3.0; pass = true; }
+            else if (tk >= 6.5) { chu = "C+"; he4 = 2.5; pass = true; }
+            else if (tk >= 5.5) { chu = "C"; he4 = 2.0; pass = true; }
+            else if (tk >= 5.0) { chu = "D+"; he4 = 1.5; pass = true; }
+            else if (tk >= 4.0) { chu = "D"; he4 = 1.0; pass = true; }
+            else { chu = "F"; he4 = 0.0; pass = false; }
+
+            he4Cell.textContent = he4.toFixed(1);
+
+            let badgeColor = pass ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800";
+            chuCell.innerHTML = `<span class="inline-block px-1.5 py-0.5 rounded text-xs font-bold ${badgeColor}">${chu}</span>`;
+            kqCell.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeColor}">${pass ? "Đạt" : "Không đạt"}</span>`;
+        }
+    }
+
+    // Save a single row via AJAX
+    async function saveSingleGrade(btn, maDangKy) {
+        const row = btn.closest('tr');
+        if (!row) return;
+
+        const cc = row.querySelector('.input-cc').value;
+        const gk = row.querySelector('.input-gk').value;
+        const ck = row.querySelector('.input-ck').value;
+        const ghiChu = row.querySelector('.input-ghichu').value;
+
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+        const formData = new FormData();
+        formData.append('__RequestVerificationToken', token);
+        formData.append('maDangKy', maDangKy);
+        if (cc !== '') formData.append('diemCC', cc);
+        if (gk !== '') formData.append('diemGK', gk);
+        if (ck !== '') formData.append('diemCK', ck);
+        if (ghiChu !== '') formData.append('ghiChu', ghiChu);
+
+        const icon = btn.querySelector('.btn-icon');
+        const text = btn.querySelector('.btn-text');
+        const oldIcon = icon.textContent;
+        icon.textContent = 'hourglass_empty';
+        btn.classList.add('opacity-75');
+
+        try {
+            const res = await fetch('/GiangVien/LuuDiemAjax', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                icon.textContent = 'check_circle';
+                text.textContent = 'Đã lưu';
+                btn.className = 'btn-save-row inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold transition-all';
+
+                // Update row numbers from server response
+                row.querySelector('.cell-tongket').textContent = data.diemTongKet;
+                row.querySelector('.cell-he4').textContent = data.diemHe4;
+                
+                let pass = data.ketQua === 'Đạt';
+                let badgeColor = pass ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800";
+                row.querySelector('.cell-chu').innerHTML = `<span class="inline-block px-1.5 py-0.5 rounded text-xs font-bold ${badgeColor}">${data.diemChu}</span>`;
+                row.querySelector('.cell-ketqua').innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeColor}">${data.ketQua}</span>`;
+
+                if (window.showToast) window.showToast(data.message, 'success');
+
+                setTimeout(() => {
+                    icon.textContent = 'save';
+                    text.textContent = 'Lưu';
+                    btn.className = 'btn-save-row inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-surface-container-low hover:bg-primary hover:text-white text-primary text-xs font-semibold transition-all cursor-pointer';
+                }, 2000);
+            } else {
+                icon.textContent = 'error';
+                text.textContent = 'Lỗi';
+                if (window.showToast) window.showToast(data.message, 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            icon.textContent = 'error';
+            if (window.showToast) window.showToast('Lỗi khi gửi yêu cầu lưu điểm.', 'error');
+        } finally {
+            btn.classList.remove('opacity-75');
+        }
+    }
+
+    // Save all grades sequentially or in batch
+    async function saveAllGrades() {
+        const rows = document.querySelectorAll('.grade-row');
+        if (!rows.length) return;
+
+        const btnSaveAll = document.getElementById('btnSaveAll');
+        btnSaveAll.disabled = true;
+        btnSaveAll.classList.add('opacity-75');
+        btnSaveAll.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span><span>Đang lưu...</span>';
+
+        let successCount = 0;
+        for (const row of rows) {
+            const dkId = row.getAttribute('data-dangky');
+            const saveBtn = row.querySelector('.btn-save-row');
+            if (saveBtn) {
+                await saveSingleGrade(saveBtn, parseInt(dkId));
+                successCount++;
+            }
+        }
+
+        btnSaveAll.disabled = false;
+        btnSaveAll.classList.remove('opacity-75');
+        btnSaveAll.innerHTML = '<span class="material-symbols-outlined text-[18px]">check_circle</span><span>Đã lưu xong!</span>';
+
+        if (window.showToast) {
+            window.showToast(`Đã đồng bộ lưu điểm cho ${successCount} học viên!`, 'success');
+        }
+
+        setTimeout(() => {
+            btnSaveAll.innerHTML = '<span class="material-symbols-outlined text-[18px]">save</span><span>Lưu toàn bộ điểm</span>';
+        }, 2500);
+    }
+
+    // Export Grade Table to CSV
+    function exportGradeTableToCSV(filename) {
+        const rows = document.querySelectorAll('#gradeTable tr');
+        let csv = [];
+        for (let i = 0; i < rows.length; i++) {
+            let row = [], cols = rows[i].querySelectorAll('td, th');
+            for (let j = 0; j < cols.length - 1; j++) { // exclude action column
+                // Check if column has input
+                let input = cols[j].querySelector('input');
+                let data = input ? input.value : cols[j].innerText.trim();
+                data = data.replace(/"/g, '""');
+                row.push('"' + data + '"');
+            }
+            csv.push(row.join(','));
+        }
+        const csvFile = new Blob(["\uFEFF" + csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const downloadLink = document.createElement('a');
+        downloadLink.download = filename;
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+        downloadLink.style.display = 'none';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
+</script>

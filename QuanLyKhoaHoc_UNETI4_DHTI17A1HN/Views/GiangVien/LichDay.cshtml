@@ -1,0 +1,241 @@
+@model List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.BuoiHoc>
+@{
+    ViewData["Title"] = "Lịch Giảng Dạy - UNETI EDU";
+    var gv = ViewBag.CurrentGiangVien as QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien;
+    var myClasses = ViewBag.MyClasses as List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>();
+    int? selectedMaLop = ViewBag.SelectedMaLop;
+    DateTime selectedWeek = ViewBag.SelectedWeek != null ? (DateTime)ViewBag.SelectedWeek : DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek + 1);
+    int totalSessions = ViewBag.TotalWeekSessions ?? Model.Count;
+
+    var days = new DayOfWeek[] {
+        DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday,
+        DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday
+    };
+
+    var dayNames = new Dictionary<DayOfWeek, string> {
+        { DayOfWeek.Monday, "Thứ 2" },
+        { DayOfWeek.Tuesday, "Thứ 3" },
+        { DayOfWeek.Wednesday, "Thứ 4" },
+        { DayOfWeek.Thursday, "Thứ 5" },
+        { DayOfWeek.Friday, "Thứ 6" },
+        { DayOfWeek.Saturday, "Thứ 7" }
+    };
+}
+
+<!--
+// ========================================================
+// Bổ sung theo yêu cầu giảng viên hướng dẫn:
+// Màn hình Lịch Giảng Dạy Của Giảng Viên (Teaching Schedule)
+// Thời khóa biểu tuần 4 ca học, lọc lớp, xem phòng máy & nội dung giảng dạy
+// ========================================================
+-->
+
+<div class="flex flex-col gap-y-6">
+    <!-- Sub-header Navigation Bar -->
+    <section class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border-standard">
+        <div>
+            <div class="flex items-center gap-2 text-outline font-label-sm text-label-sm uppercase tracking-wider mb-1">
+                <span>CỔNG GIẢNG VIÊN</span>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <span class="text-brand-deep font-semibold">LỊCH GIẢNG DẠY</span>
+            </div>
+            <h1 class="font-headline-md text-headline-md text-brand-deep font-bold tracking-tight flex items-center gap-2">
+                Thời Khóa Biểu Giảng Dạy
+                <span class="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold">@(gv?.HoTen ?? "Giảng viên")</span>
+            </h1>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+            <button onclick="window.print()" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-surface-container-low text-brand-deep font-label-md text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-xs cursor-pointer">
+                <span class="material-symbols-outlined text-[18px] text-primary">print</span>
+                <span class="hidden sm:inline">In Thời Khóa Biểu</span>
+            </button>
+            <a href="/GiangVien/ChamDiem" class="inline-flex items-center gap-1.5 bg-primary hover:bg-[#0047b3] text-surface-white font-label-md text-xs px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]">edit_note</span>
+                <span>Chấm điểm lớp học</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Filter & Week Navigator Bar -->
+    <div class="bg-surface-white rounded-2xl p-4 border border-border-subtle shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+        <form method="get" action="/GiangVien/LichDay" class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            <!-- Lọc lớp học -->
+            <div class="relative min-w-[200px]">
+                <select name="maLop" onchange="this.form.submit()" class="w-full appearance-none bg-surface-container-low border border-border-standard text-brand-deep text-xs px-3.5 py-2.5 pr-8 rounded-xl focus:outline-none focus:border-primary">
+                    <option value="">Tất cả lớp học phụ trách</option>
+                    @foreach (var lop in myClasses)
+                    {
+                        <option value="@lop.MaLopHoc" selected="@(selectedMaLop == lop.MaLopHoc)">@lop.TenLop - @(lop.ChuongTrinhDaoTao?.TenChuongTrinh ?? "")</option>
+                    }
+                </select>
+                <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
+            </div>
+
+            <!-- Tuần hiện tại -->
+            <input type="hidden" name="weekStart" value="@selectedWeek.ToString("yyyy-MM-dd")" />
+        </form>
+
+        <!-- Week Navigator -->
+        <div class="flex items-center gap-2">
+            <a href="/GiangVien/LichDay?weekStart=@selectedWeek.AddDays(-7).ToString("yyyy-MM-dd")&maLop=@selectedMaLop" class="p-2 rounded-xl border border-border-standard hover:bg-surface-container-low text-outline hover:text-brand-deep cursor-pointer" title="Tuần trước">
+                <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+            </a>
+            <div class="px-4 py-1.5 rounded-xl bg-surface-container-low text-xs font-bold text-brand-deep text-center">
+                <span>Tuần từ @selectedWeek.ToString("dd/MM") đến @selectedWeek.AddDays(6).ToString("dd/MM/yyyy")</span>
+            </div>
+            <a href="/GiangVien/LichDay?weekStart=@selectedWeek.AddDays(7).ToString("yyyy-MM-dd")&maLop=@selectedMaLop" class="p-2 rounded-xl border border-border-standard hover:bg-surface-container-low text-outline hover:text-brand-deep cursor-pointer" title="Tuần sau">
+                <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+            </a>
+            <a href="/GiangVien/LichDay?maLop=@selectedMaLop" class="px-3 py-1.5 text-xs font-semibold text-primary hover:underline">
+                Tuần này
+            </a>
+        </div>
+    </div>
+
+    <!-- Weekly Timetable Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3.5">
+        @for (int i = 0; i < 6; i++)
+        {
+            var dayOfWeek = days[i];
+            var currentDayDate = selectedWeek.AddDays(i);
+            bool isToday = currentDayDate.Date == DateTime.Today.Date;
+            var daySessions = Model.Where(b => b.ThoiGianBatDau.Date == currentDayDate.Date).OrderBy(b => b.ThoiGianBatDau).ToList();
+
+            <div class="flex flex-col bg-surface-white rounded-2xl border @(isToday ? "border-primary ring-2 ring-primary/10 shadow-md" : "border-border-subtle shadow-sm") overflow-hidden">
+                <!-- Day Column Header -->
+                <div class="p-3.5 text-center border-b border-border-standard @(isToday ? "bg-primary text-surface-white" : "bg-surface-container-lowest text-brand-deep")">
+                    <span class="block text-xs font-bold uppercase tracking-wider">@dayNames[dayOfWeek]</span>
+                    <span class="block text-sm font-black font-mono mt-0.5 @(isToday ? "text-white" : "text-primary")">
+                        @currentDayDate.ToString("dd/MM")
+                    </span>
+                    @if (isToday)
+                    {
+                        <span class="inline-block px-2 py-0.5 rounded-full bg-white/20 text-[9px] font-bold mt-1">Hôm nay</span>
+                    }
+                </div>
+
+                <!-- Day Sessions Content -->
+                <div class="p-2.5 flex-1 space-y-2.5 min-h-[320px] bg-canvas-base/30">
+                    @if (!daySessions.Any())
+                    {
+                        <div class="h-full flex items-center justify-center text-center py-10 text-outline/50">
+                            <span class="text-[11px] font-medium">Không có ca dạy</span>
+                        </div>
+                    }
+                    else
+                    {
+                        foreach (var session in daySessions)
+                        {
+                            <div class="p-3 rounded-xl bg-surface-white border border-border-subtle shadow-2xs hover:shadow-sm transition-all space-y-1.5 border-l-4 border-l-primary">
+                                <div class="flex items-center justify-between">
+                                    <span class="px-2 py-0.5 rounded-md bg-primary/10 text-primary font-mono text-[10px] font-bold">
+                                        @(session.LopHoc?.TenLop ?? "Lớp học")
+                                    </span>
+                                    <span class="text-[10px] font-bold text-outline">
+                                        @session.TrangThai
+                                    </span>
+                                </div>
+
+                                <div class="text-xs font-bold text-brand-deep line-clamp-2">
+                                    @(string.IsNullOrWhiteSpace(session.NoiDung) ? "Buổi giảng dạy lý thuyết / thực hành" : session.NoiDung)
+                                </div>
+
+                                <div class="text-[11px] text-outline space-y-0.5 pt-1 border-t border-border-standard/50">
+                                    <div class="flex items-center gap-1 font-mono font-semibold text-brand-deep">
+                                        <span class="material-symbols-outlined text-[13px] text-primary">schedule</span>
+                                        <span>@session.ThoiGianBatDau.ToString("HH:mm") - @session.ThoiGianKetThuc.ToString("HH:mm")</span>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[13px] text-outline">location_on</span>
+                                        <span>@session.PhongHoc</span>
+                                    </div>
+                                </div>
+
+                                <div class="pt-1 flex justify-end">
+                                    <a href="/GiangVien/ChamDiem?maLop=@session.MaLopHoc" class="text-[11px] font-bold text-primary hover:underline flex items-center gap-0.5">
+                                        <span>Điểm danh & Chấm điểm</span>
+                                        <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Sessions List Table View (Detail) -->
+    <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-border-standard flex items-center justify-between bg-surface-container-lowest">
+            <div>
+                <h3 class="font-bold text-sm text-brand-deep">Chi Tiết Các Ca Giảng Dạy Trong Tuần</h3>
+                <p class="text-xs text-outline">Tổng cộng @totalSessions ca học</p>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[760px]">
+                <thead>
+                    <tr class="bg-surface-container-lowest border-b border-border-standard text-[11px] font-bold text-outline uppercase tracking-wider">
+                        <th class="py-3 px-4 w-12 text-center">#</th>
+                        <th class="py-3 px-4">Lớp Học</th>
+                        <th class="py-3 px-4">Ngày Dạy</th>
+                        <th class="py-3 px-4">Thời Gian</th>
+                        <th class="py-3 px-4">Phòng Học</th>
+                        <th class="py-3 px-4">Nội Dung Giảng Dạy</th>
+                        <th class="py-3 px-4 text-center">Trạng Thái</th>
+                        <th class="py-3 px-4 text-right">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle text-xs text-brand-deep">
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-10 text-outline">
+                                Không có ca dạy nào trong khoảng thời gian đã chọn.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        int idx = 1;
+                        foreach (var session in Model)
+                        {
+                            <tr class="hover:bg-canvas-base/60 transition-colors">
+                                <td class="py-3 px-4 text-center font-mono text-outline">@(idx++)</td>
+                                <td class="py-3 px-4 font-mono font-bold text-primary">
+                                    @(session.LopHoc?.TenLop ?? $"Lớp #{session.MaLopHoc}")
+                                </td>
+                                <td class="py-3 px-4 font-bold text-brand-deep">
+                                    @session.ThoiGianBatDau.ToString("dd/MM/yyyy")
+                                </td>
+                                <td class="py-3 px-4 font-mono font-semibold">
+                                    @session.ThoiGianBatDau.ToString("HH:mm") - @session.ThoiGianKetThuc.ToString("HH:mm")
+                                </td>
+                                <td class="py-3 px-4 font-semibold text-brand-deep">
+                                    @session.PhongHoc
+                                </td>
+                                <td class="py-3 px-4 max-w-xs truncate">
+                                    @(string.IsNullOrWhiteSpace(session.NoiDung) ? "Giảng dạy bài học theo đề cương" : session.NoiDung)
+                                </td>
+                                <td class="py-3 px-4 text-center">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-success-emerald/10 text-success-emerald font-semibold text-[11px]">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-success-emerald"></span>@session.TrangThai
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-right">
+                                    <a href="/GiangVien/ChamDiem?maLop=@session.MaLopHoc" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-primary font-bold text-xs transition-colors">
+                                        <span class="material-symbols-outlined text-[15px]">edit_note</span>
+                                        <span>Chấm điểm</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

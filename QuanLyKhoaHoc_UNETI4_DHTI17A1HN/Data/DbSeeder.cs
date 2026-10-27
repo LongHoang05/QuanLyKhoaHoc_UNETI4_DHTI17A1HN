@@ -9,6 +9,139 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
     {
         public static void SeedMockData(ApplicationDbContext context)
         {
+            // 0. Bổ sung Giảng viên mẫu nếu chưa có
+            if (!context.GiangViens.Any())
+            {
+                var tkGv1 = context.TaiKhoans.FirstOrDefault(t => t.TenDangNhap == "giangvien");
+                if (tkGv1 == null)
+                {
+                    tkGv1 = new TaiKhoan
+                    {
+                        TenDangNhap = "giangvien",
+                        MatKhau = "123456",
+                        HoTen = "ThS. Trần Văn Hùng",
+                        Email = "hung.tran@uneti.edu.vn",
+                        VaiTro = "GiangVien",
+                        TrangThai = true,
+                        NgayTao = DateTime.Now
+                    };
+                    context.TaiKhoans.Add(tkGv1);
+                    context.SaveChanges();
+                }
+                else
+                {
+                    tkGv1.VaiTro = "GiangVien";
+                }
+
+                var tkGv2 = context.TaiKhoans.FirstOrDefault(t => t.TenDangNhap == "lan.hoang");
+                if (tkGv2 == null)
+                {
+                    tkGv2 = new TaiKhoan
+                    {
+                        TenDangNhap = "lan.hoang",
+                        MatKhau = "123456",
+                        HoTen = "TS. Hoàng Thị Lan",
+                        Email = "lan.hoang@uneti.edu.vn",
+                        VaiTro = "GiangVien",
+                        TrangThai = true,
+                        NgayTao = DateTime.Now
+                    };
+                    context.TaiKhoans.Add(tkGv2);
+                    context.SaveChanges();
+                }
+
+                var tkGv3 = context.TaiKhoans.FirstOrDefault(t => t.TenDangNhap == "nam.nguyen");
+                if (tkGv3 == null)
+                {
+                    tkGv3 = new TaiKhoan
+                    {
+                        TenDangNhap = "nam.nguyen",
+                        MatKhau = "123456",
+                        HoTen = "ThS. Nguyễn Thành Nam",
+                        Email = "nam.nguyen@uneti.edu.vn",
+                        VaiTro = "GiangVien",
+                        TrangThai = true,
+                        NgayTao = DateTime.Now
+                    };
+                    context.TaiKhoans.Add(tkGv3);
+                    context.SaveChanges();
+                }
+
+                var gv1 = new GiangVien
+                {
+                    MaTaiKhoan = tkGv1.MaTaiKhoan,
+                    HoTen = "ThS. Trần Văn Hùng",
+                    Email = "hung.tran@uneti.edu.vn",
+                    SoDienThoai = "0912345678",
+                    HocVi = "Thạc sĩ",
+                    ChuyenNganh = "Kỹ thuật phần mềm & ASP.NET Core",
+                    GioiThieu = "Giảng viên bộ môn Công nghệ phần mềm Khoa CNTT UNETI. Hơn 8 năm kinh nghiệm giảng dạy lập trình C#, .NET và hệ quản trị CSDL.",
+                    TrangThai = true
+                };
+
+                var gv2 = new GiangVien
+                {
+                    MaTaiKhoan = tkGv2.MaTaiKhoan,
+                    HoTen = "TS. Hoàng Thị Lan",
+                    Email = "lan.hoang@uneti.edu.vn",
+                    SoDienThoai = "0987654321",
+                    HocVi = "Tiến sĩ",
+                    ChuyenNganh = "Trí tuệ nhân tạo & Khoa học dữ liệu",
+                    GioiThieu = "Tiến sĩ Khoa học Máy tính. Giảng dạy chuyên sâu về Python, Machine Learning, Deep Learning và Xử lý ngôn ngữ tự nhiên.",
+                    TrangThai = true
+                };
+
+                var gv3 = new GiangVien
+                {
+                    MaTaiKhoan = tkGv3.MaTaiKhoan,
+                    HoTen = "ThS. Nguyễn Thành Nam",
+                    Email = "nam.nguyen@uneti.edu.vn",
+                    SoDienThoai = "0934567890",
+                    HocVi = "Thạc sĩ",
+                    ChuyenNganh = "Mạng máy tính & An toàn thông tin",
+                    GioiThieu = "Thạc sĩ An toàn thông tin. Chuyên trách các học phần Mạng máy tính, Điện toán đám mây và Bảo mật ứng dụng Web.",
+                    TrangThai = true
+                };
+
+                context.GiangViens.AddRange(gv1, gv2, gv3);
+                context.SaveChanges();
+
+                // Gán giảng viên cho các lớp học hiện có
+                var allLops = context.LopHocs.ToList();
+                foreach (var lop in allLops)
+                {
+                    if (lop.TenLop.Contains("NET") || lop.TenLop.Contains("REACT"))
+                    {
+                        lop.MaGiangVien = gv1.MaGiangVien;
+                        lop.TenGiangVien = gv1.HoTen;
+                    }
+                    else if (lop.TenLop.Contains("PYTHON") || lop.TenLop.Contains("AI"))
+                    {
+                        lop.MaGiangVien = gv2.MaGiangVien;
+                        lop.TenGiangVien = gv2.HoTen;
+                    }
+                    else
+                    {
+                        lop.MaGiangVien = gv3.MaGiangVien;
+                        lop.TenGiangVien = gv3.HoTen;
+                    }
+                }
+                context.SaveChanges();
+
+                // Gán giảng viên cho các buổi học hiện có
+                var allBuois = context.BuoiHocs.ToList();
+                foreach (var buoi in allBuois)
+                {
+                    var lopOfBuoi = allLops.FirstOrDefault(l => l.MaLopHoc == buoi.MaLopHoc);
+                    if (lopOfBuoi?.MaGiangVien != null)
+                    {
+                        buoi.MaGiangVien = lopOfBuoi.MaGiangVien;
+                        buoi.GiangVien = lopOfBuoi.TenGiangVien ?? "ThS. Trần Văn Hùng";
+                    }
+                }
+                context.SaveChanges();
+            }
+
             // 1. Kiểm tra và bổ sung Lớp học mẫu nếu mới chỉ có 1 lớp
             if (context.LopHocs.Count() <= 1)
             {

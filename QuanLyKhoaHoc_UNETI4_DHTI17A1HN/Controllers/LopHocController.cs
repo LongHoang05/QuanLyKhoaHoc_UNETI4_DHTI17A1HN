@@ -268,6 +268,15 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             if (string.IsNullOrEmpty(lop.TrinhDoDauVao)) lop.TrinhDoDauVao = "Cơ bản";
             if (string.IsNullOrEmpty(lop.TenGiangVien)) lop.TenGiangVien = "Chưa xếp";
 
+            if (!string.IsNullOrEmpty(lop.TenGiangVien) && lop.TenGiangVien != "Chưa xếp")
+            {
+                var gvMatch = await _context.GiangViens.FirstOrDefaultAsync(g => g.HoTen == lop.TenGiangVien || lop.TenGiangVien.Contains(g.HoTen) || g.HoTen.Contains(lop.TenGiangVien));
+                if (gvMatch != null)
+                {
+                    lop.MaGiangVien = gvMatch.MaGiangVien;
+                }
+            }
+
             _context.Add(lop);
             await _context.SaveChangesAsync();
 
@@ -333,6 +342,20 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             lop.TenLop = tenLop.Trim();
             lop.MaChuongTrinh = maChuongTrinh;
             lop.TenGiangVien = tenGiangVien ?? "Chưa xếp";
+
+            if (!string.IsNullOrEmpty(tenGiangVien) && tenGiangVien != "Chưa xếp")
+            {
+                var gvMatch = await _context.GiangViens.FirstOrDefaultAsync(g => g.HoTen == tenGiangVien || tenGiangVien.Contains(g.HoTen) || g.HoTen.Contains(tenGiangVien));
+                if (gvMatch != null)
+                {
+                    lop.MaGiangVien = gvMatch.MaGiangVien;
+                }
+            }
+            else
+            {
+                lop.MaGiangVien = null;
+            }
+
             lop.TrinhDoDauVao = trinhDoDauVao ?? "Cơ bản";
             lop.SiSoToiDa = siSoToiDa;
             lop.SoBuoiHoc = soBuoiHoc;

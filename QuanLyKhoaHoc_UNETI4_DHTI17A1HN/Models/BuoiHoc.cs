@@ -34,6 +34,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
         [Display(Name = "Phòng học")]
         public string PhongHoc { get; set; } = string.Empty;
 
+        [Display(Name = "Mã giảng viên")]
+        public int? MaGiangVien { get; set; }
+
         [Required(ErrorMessage = "Tên giảng viên không được để trống")]
         [StringLength(200)]
         [Display(Name = "Giảng viên đứng lớp")]
@@ -56,5 +59,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
         // Navigation property
         [ForeignKey("MaLopHoc")]
         public virtual LopHoc? LopHoc { get; set; }
+
+        [ForeignKey("MaGiangVien")]
+        public virtual GiangVien? GiangVienObj { get; set; }
     }
 }

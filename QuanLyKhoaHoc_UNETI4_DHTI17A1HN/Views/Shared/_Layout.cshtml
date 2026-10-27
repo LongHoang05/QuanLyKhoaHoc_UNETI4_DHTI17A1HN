@@ -244,6 +244,13 @@
                             </div>
                         </a>
 
+                        <a href="/GiangVien/QuanLy" data-url="/giangvien/quanly" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                            <div class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-[19px] text-outline">badge</span>
+                                <span>Quản lý Giảng viên</span>
+                            </div>
+                        </a>
+
                         @if (userVaiTro == "Admin")
                         {
                             <a href="/TaiKhoan/Index" data-url="/taikhoan" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
@@ -253,6 +260,29 @@
                                 </div>
                             </a>
                         }
+
+                        <div class="text-[10px] font-bold text-outline uppercase tracking-wider px-3 mt-2.5 mb-1 font-label-sm">Cổng giảng viên</div>
+
+                        <a href="/GiangVien/Index" data-url="/giangvien/index" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                            <div class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-[19px] text-outline">dashboard_customize</span>
+                                <span>Bàn làm việc GV</span>
+                            </div>
+                        </a>
+
+                        <a href="/GiangVien/LichDay" data-url="/giangvien/lichday" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                            <div class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-[19px] text-outline">calendar_month</span>
+                                <span>Lịch giảng dạy</span>
+                            </div>
+                        </a>
+
+                        <a href="/GiangVien/ChamDiem" data-url="/giangvien/chamdiem" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
+                            <div class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-[19px] text-outline">fact_check</span>
+                                <span>Chấm điểm học viên</span>
+                            </div>
+                        </a>
                     }
 
                     <div class="text-[10px] font-bold text-outline uppercase tracking-wider px-3 mt-2.5 mb-1 font-label-sm">Cổng học viên</div>

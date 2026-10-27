@@ -70,6 +70,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             HttpContext.Session.SetString("VaiTro", user.VaiTro);
             HttpContext.Session.SetString("Email", user.Email);
 
+            var gv = await _context.GiangViens.FirstOrDefaultAsync(g => g.MaTaiKhoan == user.MaTaiKhoan);
+            if (gv != null)
+            {
+                HttpContext.Session.SetInt32("MaGiangVien", gv.MaGiangVien);
+            }
+
             TempData["Success"] = $"Chào mừng {user.HoTen} ({user.VaiTro}) đã đăng nhập thành công!";
 
             if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
@@ -82,6 +88,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             {
                 "Admin" => RedirectToAction(nameof(Index)),
                 "GiaoVu" => RedirectToAction("Index", "ChuongTrinhDaoTao"),
+                "GiangVien" => RedirectToAction("Index", "GiangVien"),
                 _ => RedirectToAction("Index", "Home")
             };
         }

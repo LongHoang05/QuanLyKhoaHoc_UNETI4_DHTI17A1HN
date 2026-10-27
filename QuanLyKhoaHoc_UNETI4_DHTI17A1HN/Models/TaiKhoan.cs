@@ -40,7 +40,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
         [Required]
         [StringLength(50)]
         [Display(Name = "Vai trò")]
-        public string VaiTro { get; set; } = "HocVien"; // Admin, GiaoVu, HocVien
+        public string VaiTro { get; set; } = "HocVien"; // Admin, GiaoVu, GiangVien, HocVien
 
         [Display(Name = "Trạng thái hoạt động")]
         public bool TrangThai { get; set; } = true; // true = Hoạt động, false = Bị khóa
@@ -50,5 +50,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
 
         // Navigation property liên kết 1-1 với Học viên nếu vai trò là Học viên
         public virtual HocVien? HocVien { get; set; }
+
+        // Navigation property liên kết 1-1 với Giảng viên nếu vai trò là Giảng viên
+        public virtual GiangVien? GiangVien { get; set; }
     }
 }
