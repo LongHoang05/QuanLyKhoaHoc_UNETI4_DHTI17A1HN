@@ -22,19 +22,19 @@
             width: 6px !important;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-            background: #F1F5F9;
+            background: #E3F2FD;
             border-radius: 9999px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
+            background: #90CAF9;
             border-radius: 9999px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #0052cc;
+            background: #2196F3;
         }
         .custom-scrollbar {
             scrollbar-width: thin;
-            scrollbar-color: #cbd5e1 #F1F5F9;
+            scrollbar-color: #90CAF9 #E3F2FD;
         }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -44,61 +44,36 @@
             theme: {
                 extend: {
                     colors: {
-                        "on-error-container": "#93000a",
-                        "brand-deep": "#001656",
-                        "border-subtle": "#F1F5F9",
-                        "secondary": "#994700",
+                        "brand-deep": "#0D47A1",
+                        "primary": "#2196F3",
+                        "primary-dark": "#1976D2",
+                        "primary-container": "#1E88E5",
+                        "primary-light": "#90CAF9",
+                        "primary-bg": "#E3F2FD",
                         "canvas-base": "#F8FAFC",
-                        "surface-container-lowest": "#ffffff",
-                        "on-error": "#ffffff",
-                        "error-container": "#ffdad6",
-                        "on-secondary-fixed": "#321200",
-                        "secondary-container": "#fb7800",
-                        "on-secondary": "#ffffff",
-                        "on-primary-fixed": "#001848",
-                        "tertiary-fixed-dim": "#b7c4ff",
-                        "success-emerald": "#10B981",
-                        "tertiary": "#475797",
-                        "surface-dim": "#cbdbf5",
-                        "on-secondary-container": "#592600",
-                        "on-background": "#0b1c30",
-                        "border-standard": "#E2E8F0",
-                        "outline": "#727687",
-                        "primary-container": "#0068ff",
-                        "tertiary-container": "#6070b1",
-                        "secondary-fixed": "#ffdbc8",
-                        "on-primary": "#ffffff",
                         "surface-white": "#FFFFFF",
-                        "surface-container-highest": "#d3e4fe",
-                        "secondary-fixed-dim": "#ffb68b",
-                        "outline-variant": "#c2c6d8",
-                        "surface-container-low": "#eff4ff",
-                        "on-tertiary": "#ffffff",
-                        "on-secondary-fixed-variant": "#753400",
-                        "error": "#ba1a1a",
-                        "inverse-surface": "#213145",
-                        "inverse-on-surface": "#eaf1ff",
-                        "on-primary-fixed-variant": "#0040a2",
-                        "on-tertiary-container": "#fcf9ff",
-                        "primary": "#0052cc",
-                        "on-primary-container": "#fbf9ff",
-                        "surface": "#f8f9ff",
-                        "on-tertiary-fixed-variant": "#324381",
-                        "surface-variant": "#d3e4fe",
-                        "inverse-primary": "#b2c5ff",
-                        "surface-container": "#e5eeff",
-                        "primary-fixed-dim": "#b2c5ff",
-                        "tertiary-fixed": "#dde1ff",
-                        "on-surface-variant": "#424655",
-                        "on-tertiary-fixed": "#001552",
-                        "primary-fixed": "#dae2ff",
-                        "surface-tint": "#0055d4",
-                        "surface-container-high": "#dce9ff",
-                        "surface-bright": "#f8f9ff",
-                        "on-surface": "#0b1c30",
+                        "surface-container-lowest": "#FFFFFF",
+                        "surface-container-low": "#E3F2FD",
+                        "surface-container": "#BBDEFB",
+                        "surface-container-high": "#90CAF9",
+                        "surface-container-highest": "#64B5F6",
+                        "surface-dim": "#E3F2FD",
+                        "surface-bright": "#FFFFFF",
+                        "surface": "#F0F7FF",
+                        "border-standard": "#E2E8F0",
+                        "border-subtle": "#E3F2FD",
+                        "border-brand": "#90CAF9",
+                        "outline": "#64748B",
+                        "outline-variant": "#90CAF9",
+                        "on-surface": "#0F172A",
+                        "on-surface-variant": "#334155",
+                        "on-primary": "#FFFFFF",
+                        "on-primary-container": "#FFFFFF",
+                        "success-emerald": "#10B981",
+                        "warning-amber": "#F59E0B",
                         "danger-crimson": "#EF4444",
-                        "background": "#f8f9ff",
-                        "warning-amber": "#F59E0B"
+                        "error": "#EF4444",
+                        "on-error": "#FFFFFF"
                     },
                     borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" },
                     spacing: {
@@ -294,7 +269,7 @@
         <!-- Right Content Main Wrapper -->
         <div class="flex-1 min-w-0 flex flex-col min-h-screen bg-canvas-base">
             <!-- Compact Top Navigation Header -->
-            <header class="w-full bg-surface-white border-b border-border-subtle h-16 px-gutter flex items-center justify-between sticky top-0 z-30 shadow-[0_1px_8px_rgba(0,22,86,0.03)]">
+            <header class="w-full bg-surface-white border-b border-border-subtle h-16 px-gutter flex items-center justify-between sticky top-0 z-30 shadow-[0_1px_8px_rgba(13, 71, 161,0.03)]">
                 <div class="flex items-center gap-3">
                     <div class="relative">
                         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">search</span>
@@ -327,7 +302,7 @@
 
 <div class="flex flex-col gap-y-6">
     <!-- 1. Action Strip (Prep.vn Style) -->
-    <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-surface-white p-5 rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)]">
+    <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-surface-white p-5 rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)]">
         <div class="flex flex-col gap-1">
             <h1 class="font-headline-lg-mobile lg:font-headline-lg text-brand-deep tracking-tight font-extrabold flex items-center gap-2">
                 Chào buổi sáng, Nguyễn Tùng Dương <span class="text-2xl animate-bounce">👋</span>
@@ -358,7 +333,7 @@
     <!-- 2. 4-Column Stats Bento Grid -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <!-- Card 1: Tổng CTĐT -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] hover:shadow-[0_8px_24px_rgba(0,104,255,0.08)] transition-all flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] hover:shadow-[0_8px_24px_rgba(0,104,255,0.08)] transition-all flex flex-col justify-between">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-outline font-label-md text-label-md">Tổng chương trình ĐT</span>
                 <div class="w-9 h-9 rounded-xl bg-surface-container-low flex items-center justify-center text-primary-container">
@@ -377,7 +352,7 @@
         </div>
 
         <!-- Card 2: Sinh viên đăng ký -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] hover:shadow-[0_8px_24px_rgba(0,104,255,0.08)] transition-all flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] hover:shadow-[0_8px_24px_rgba(0,104,255,0.08)] transition-all flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Tổng số sinh viên</span>
                 <div class="w-9 h-9 rounded-xl bg-surface-container-low flex items-center justify-center text-primary-container">
@@ -402,7 +377,7 @@
         </div>
 
         <!-- Card 3: Chờ phê duyệt -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] hover:shadow-[0_8px_24px_rgba(0,104,255,0.08)] transition-all flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] hover:shadow-[0_8px_24px_rgba(0,104,255,0.08)] transition-all flex flex-col justify-between">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-outline font-label-md text-label-md">Chờ phê duyệt</span>
                 <div class="w-9 h-9 rounded-xl bg-warning-amber/10 flex items-center justify-center text-warning-amber">
@@ -427,7 +402,7 @@
         </div>
 
         <!-- Card 4: Tỷ lệ hoàn thành khóa học -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] hover:shadow-[0_8px_24px_rgba(0,104,255,0.08)] transition-all flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] hover:shadow-[0_8px_24px_rgba(0,104,255,0.08)] transition-all flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Kết quả hoàn thành</span>
                 <div class="w-9 h-9 rounded-xl bg-success-emerald/10 flex items-center justify-center text-success-emerald">
@@ -459,7 +434,7 @@
     <!-- 3. Middle Split Section (Lịch học Module 5 & Phân tích Đào tạo) -->
     <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Left: Lịch Lớp Học Phần Sắp Tới (Module 5 BuoiHoc) -->
-        <div class="lg:col-span-2 bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col gap-4">
+        <div class="lg:col-span-2 bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col gap-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border-subtle">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary-container">calendar_clock</span>
@@ -573,7 +548,7 @@
         </div>
 
         <!-- Right: Hiệu suất & Phân tích Đào tạo -->
-        <div class="lg:col-span-1 bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between gap-5">
+        <div class="lg:col-span-1 bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between gap-5">
             <div>
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-2">
@@ -623,7 +598,7 @@
     </section>
 
     <!-- 4. Data Table Section: Hoạt động đăng ký gần đây -->
-    <section id="dashboard-activity-section" class="bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col gap-4 transition-opacity duration-200">
+    <section id="dashboard-activity-section" class="bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col gap-4 transition-opacity duration-200">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-3 border-b border-border-subtle">
             <div class="flex items-center gap-2">
                 <div class="w-8 h-8 rounded-lg bg-primary-container/10 text-primary-container flex items-center justify-center">
