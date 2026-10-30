@@ -1,4 +1,4 @@
-using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
+﻿using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
 {
@@ -10,7 +10,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
         public static void SeedMockData(ApplicationDbContext context)
         {
             // 0. Bổ sung Giảng viên mẫu nếu chưa có
-            if (!context.GiangViens.Any())
+            if (context.GiangViens.Count() <= 1)
             {
                 var tkGv1 = context.TaiKhoans.FirstOrDefault(t => t.TenDangNhap == "giangvien");
                 if (tkGv1 == null)
@@ -390,7 +390,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
             }
 
             // 3. Bổ sung các tài khoản mẫu cho khớp với admin-tai-khoan.html nếu chưa có
-            if (context.TaiKhoans.Count() <= 3)
+            if (!context.TaiKhoans.Any(t => t.TenDangNhap == "giaovu_mai"))
             {
                 var taiKhoanThem = new List<TaiKhoan>
                 {
@@ -621,5 +621,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                 }
             }
         }
+
     }
 }

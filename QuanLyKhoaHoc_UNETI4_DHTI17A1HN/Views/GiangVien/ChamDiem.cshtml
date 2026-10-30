@@ -1,4 +1,4 @@
-@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc>
+﻿@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc>
 @{
     // ========================================================
     // Bổ sung theo yêu cầu giảng viên hướng dẫn:
@@ -13,7 +13,7 @@
 
     int totalStudents = Model?.Count() ?? 0;
     int gradedCount = Model?.Count(d => d.KetQuaHocTap != null && d.KetQuaHocTap.DiemTongKet > 0) ?? 0;
-    int passedCount = Model?.Count(d => d.KetQuaHocTap != null && d.KetQuaHocTap.KetQua == "Đạt") ?? 0;
+    int passedCount = Model?.Count(d => d.KetQuaHocTap != null && (d.KetQuaHocTap.KetQua == "Đạt" || d.KetQuaHocTap.KetQua == "Hoàn thành")) ?? 0;
     double avgDiem = Model != null && totalStudents > 0 && gradedCount > 0 
         ? Math.Round(Model.Where(d => d.KetQuaHocTap != null && d.KetQuaHocTap.DiemTongKet > 0).Average(d => d.KetQuaHocTap!.DiemTongKet), 2) 
         : 0;
@@ -47,7 +47,7 @@
                 <span class="material-symbols-outlined text-[18px] text-outline">print</span>
                 <span class="hidden sm:inline">In sổ điểm</span>
             </button>
-            <button onclick="saveAllGrades()" id="btnSaveAll" class="inline-flex items-center gap-1.5 bg-primary hover:bg-[#0047b3] text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
+            <button onclick="saveAllGrades()" id="btnSaveAll" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">save</span>
                 <span>Lưu toàn bộ điểm</span>
             </button>
@@ -57,7 +57,7 @@
     <!-- Class Selector & Quick KPI Cards -->
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <!-- Class Selector Card (Lg: 1 col) -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
             <div>
                 <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-2">Chọn Lớp học phần</label>
                 <div class="relative">
@@ -100,7 +100,7 @@
         </div>
 
         <!-- 3 KPI Cards -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Sĩ số danh sách</span>
                 <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
@@ -114,7 +114,7 @@
             <div class="text-[11px] text-outline mt-2">Theo danh sách đăng ký đã duyệt</div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Tiến độ nhập điểm</span>
                 <div class="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
@@ -133,7 +133,7 @@
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Điểm TB / Tỷ lệ Đạt</span>
                 <div class="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
@@ -159,7 +159,7 @@
             <div>
                 <span class="font-bold">Công thức tính điểm UNETI:</span>
                 <span class="text-on-surface-variant ml-1">
-                    Tổng kết = (CC × 10%) + (GK × 40%) + (CK × 50%). Hệ 4: A (4.0), B+ (3.5), B (3.0), C+ (2.5), C (2.0), D+ (1.5), D (1.0), F (0.0).
+                    Tổng kết = (Điểm quá trình × 40%) + (Điểm thi cuối kỳ × 60%). Hệ 4: A (4.0), B+ (3.5), B (3.0), C+ (2.5), C (2.0), D+ (1.5), D (1.0), F (0.0).
                 </span>
             </div>
         </div>
@@ -170,7 +170,7 @@
     </div>
 
     <!-- Student Grading Table -->
-    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-[0_4px_20px_rgba(0,22,86,0.03)] overflow-hidden">
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-[0_4px_20px_rgba(13, 71, 161,0.03)] overflow-hidden">
         <div class="p-4 border-b border-border-subtle flex flex-col sm:flex-row items-center justify-between gap-3 bg-surface-container-low/30">
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary text-[20px]">fact_check</span>
@@ -188,9 +188,9 @@
                         <th class="py-3 px-3 text-center w-10">STT</th>
                         <th class="py-3 px-4 min-w-[200px]">Học viên</th>
                         <th class="py-3 px-3 text-center w-28">Trạng thái</th>
-                        <th class="py-3 px-3 text-center w-28">Chuyên cần (10%)</th>
+                        <th class="py-3 px-3 text-center w-28">Điểm quá trình (40%)</th>
                         <th class="py-3 px-3 text-center w-28">Giữa kỳ (40%)</th>
-                        <th class="py-3 px-3 text-center w-28">Cuối kỳ (50%)</th>
+                        <th class="py-3 px-3 text-center w-28">Điểm thi cuối kỳ (60%)</th>
                         <th class="py-3 px-3 text-center w-24">Tổng kết (10)</th>
                         <th class="py-3 px-3 text-center w-20">Hệ 4</th>
                         <th class="py-3 px-3 text-center w-20">Điểm chữ</th>
@@ -208,7 +208,7 @@
                             var kq = item.KetQuaHocTap;
                             string rowId = $"row-{item.MaDangKy}";
                             bool isGraded = kq != null && kq.DiemTongKet > 0;
-                            bool isPass = kq != null && kq.KetQua == "Đạt";
+                            bool isPass = kq != null && (kq.KetQua == "Đạt" || kq.KetQua == "Hoàn thành");
 
                             <tr id="@rowId" class="grade-row hover:bg-surface-container-low/40 transition-colors" data-dangky="@item.MaDangKy">
                                 <td class="py-3 px-3 text-center font-mono font-bold text-outline">@stt</td>
@@ -234,7 +234,7 @@
                                     </span>
                                 </td>
 
-                                <!-- Chuyên cần (10%) -->
+                                <!-- Điểm quá trình (40%) -->
                                 <td class="py-2 px-3 text-center">
                                     <input type="number" step="0.1" min="0" max="10"
                                            value="@(kq != null ? kq.DiemChuyenCan.ToString("0.0") : "")"
@@ -252,7 +252,7 @@
                                            data-dk="@item.MaDangKy" oninput="calculateLivePreview(this)" />
                                 </td>
 
-                                <!-- Cuối kỳ (50%) -->
+                                <!-- Điểm thi cuối kỳ (60%) -->
                                 <td class="py-2 px-3 text-center">
                                     <input type="number" step="0.1" min="0" max="10"
                                            value="@(kq != null ? kq.DiemCuoiKy.ToString("0.0") : "")"
@@ -349,9 +349,9 @@
         const chuCell = row.querySelector('.cell-chu');
         const kqCell = row.querySelector('.cell-ketqua');
 
-        if (!isNaN(cc) && !isNaN(gk) && !isNaN(ck)) {
-            // UNETI formula: CC 10%, GK 40%, CK 50%
-            const tk = Math.round((cc * 0.1 + gk * 0.4 + ck * 0.5) * 100) / 100;
+        if (!isNaN(cc) && !isNaN(ck)) {
+            // Công thức: 40% Điểm quá trình + 60% Điểm thi cuối kỳ
+            const tk = Math.round((cc * 0.4 + ck * 0.6) * 100) / 100;
             tkCell.textContent = tk.toFixed(1);
 
             let he4 = 0.0, chu = "F", xepLoai = "Kém", pass = false;

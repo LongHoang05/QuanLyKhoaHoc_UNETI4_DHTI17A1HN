@@ -1,4 +1,4 @@
-// ========================================================
+﻿// ========================================================
 // Họ và tên: Nguyễn Tùng Dương
 // Mã sinh viên: 23103100003
 // Phụ trách: Module 5 - Lịch học, Kết quả học tập, Dashboard và Thống kê
@@ -20,8 +20,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(int? maLop, string? ketQua, string? search, int page = 1)
+        public async Task<IActionResult> Index(int? maLop, string? ketQua, string? search, string? sortBy, int page = 1)
         {
+            var vaiTro = HttpContext.Session.GetString("VaiTro");
+            if (string.Equals(vaiTro, "HocVien", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction("TienTrinh", "CongHocVien", new { tab = "ketqua" });
+            }
             int pageSize = 8;
             var query = _context.KetQuaHocTaps
                 .Include(k => k.DangKyHoc)
@@ -141,8 +146,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             if (ModelState.IsValid)
             {
-                // Tự động tính điểm tổng kết: 30% CC + 70% CK
-                kq.DiemTongKet = Math.Round((kq.DiemChuyenCan * 0.3) + (kq.DiemCuoiKhoa * 0.7), 2);
+                // Tự động tính điểm tổng kết: 40% Điểm quá trình + 60% Điểm thi cuối kỳ
+                kq.DiemTongKet = Math.Round((kq.DiemChuyenCan * 0.4) + (kq.DiemCuoiKhoa * 0.6), 2);
                 if (string.IsNullOrEmpty(kq.KetQua) || kq.KetQua == "Chưa xét")
                 {
                     kq.KetQua = kq.DiemTongKet >= 5.0 ? "Hoàn thành" : "Không hoàn thành";
@@ -201,7 +206,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             kq.DiemChuyenCan = diemChuyenCan;
             kq.DiemCuoiKhoa = diemCuoiKhoa;
-            kq.DiemTongKet = Math.Round((diemChuyenCan * 0.3) + (diemCuoiKhoa * 0.7), 2);
+            kq.DiemTongKet = Math.Round((diemChuyenCan * 0.4) + (diemCuoiKhoa * 0.6), 2);
             kq.NhanXet = nhanXet ?? "";
             
             if (!string.IsNullOrEmpty(ketQua))

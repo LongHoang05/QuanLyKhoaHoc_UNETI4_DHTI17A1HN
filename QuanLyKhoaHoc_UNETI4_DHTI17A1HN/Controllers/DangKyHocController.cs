@@ -1,4 +1,4 @@
-// ========================================================
+﻿// ========================================================
 // Họ và tên: Nguyễn Hoàng Long
 // Mã sinh viên: 23103100046
 // Phụ trách: Module 4 - Tiếp nhận, Xét duyệt đăng ký và Thu học phí
@@ -34,8 +34,19 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             DateTime? denNgay,
             string? sortBy,
             int page = 1,
-            int pageSize = 10)
+            int pageSize = 6)
         {
+            var vaiTro = HttpContext.Session.GetString("VaiTro");
+            if (string.Equals(vaiTro, "GiangVien", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Error"] = "Giảng viên không có quyền truy cập module Xét duyệt & Thu học phí.";
+                return RedirectToAction("Index", "GiangVien");
+            }
+            if (string.Equals(vaiTro, "HocVien", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction("TienTrinh", "CongHocVien", new { tab = "dangky" });
+            }
+
             var query = _context.DangKyHocs
                 .Include(d => d.HocVien)
                 .Include(d => d.LopHoc)
@@ -127,6 +138,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             ViewBag.TuNgay = tuNgay?.ToString("yyyy-MM-dd");
             ViewBag.DenNgay = denNgay?.ToString("yyyy-MM-dd");
             ViewBag.SortBy = sortBy;
+            ViewBag.PageSize = pageSize;
 
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
@@ -193,6 +205,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             var dk = await _context.DangKyHocs
                 .Include(d => d.LopHoc)
+                .Include(d => d.HocVien)
                 .FirstOrDefaultAsync(d => d.MaDangKy == id);
 
             if (dk == null)
@@ -201,6 +214,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            if (dk.TrangThai != "Chờ duyệt")
+            {
+                if (isAjax) return Json(new { success = false, message = "Chỉ đơn đăng ký ở trạng thái 'Chờ duyệt' mới được xét duyệt." });
+                return RedirectToAction(nameof(Index));
+            }
+            if (dk.HocVien != null && !dk.HocVien.TrangThai)
+            {
+                if (isAjax) return Json(new { success = false, message = "Học viên đang bị khóa, không thể duyệt đăng ký." });
+                return RedirectToAction(nameof(Index));
+            }
             var lop = dk.LopHoc;
             if (lop == null)
             {
@@ -273,6 +296,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             var dk = await _context.DangKyHocs
                 .Include(d => d.LopHoc)
+                .Include(d => d.HocVien)
                 .FirstOrDefaultAsync(d => d.MaDangKy == id);
 
             if (dk == null)

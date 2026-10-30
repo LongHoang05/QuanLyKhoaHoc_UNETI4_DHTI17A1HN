@@ -1,4 +1,4 @@
-﻿@*
+@*
 Họ và tên: Nguyễn Tùng Dương
 Mã sinh viên: 23103100003
 Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biểu dạng tuần kết hợp CRUD chuẩn Prep.vn
@@ -95,7 +95,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
 
 <div id="buoihoc-content-area" class="flex flex-col gap-y-6 transition-opacity duration-200">
     <!-- Contextual Sub-Header & Controls -->
-    <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-surface-white p-5 rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)]">
+    <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-surface-white p-5 rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)]">
         <div class="flex items-center gap-space-sm min-w-0">
             <div class="flex flex-col">
                 <div class="flex items-center gap-1.5 text-outline font-label-sm text-label-sm tracking-wide">
@@ -136,7 +136,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
     <!-- Quick Analytics Stats Row (3 Cards) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         <!-- Stat 1 -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_1px_3px_rgba(0,22,86,0.04),0_8px_24px_-4px_rgba(0,22,86,0.06)] flex items-center justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_1px_3px_rgba(13, 71, 161,0.04),0_8px_24px_-4px_rgba(13, 71, 161,0.06)] flex items-center justify-between">
             <div>
                 <span class="font-label-sm text-label-sm text-outline tracking-wider uppercase block mb-1">Tổng số buổi học</span>
                 <div class="flex items-baseline gap-2">
@@ -157,7 +157,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         </div>
 
         <!-- Stat 2 -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_1px_3px_rgba(0,22,86,0.04),0_8px_24px_-4px_rgba(0,22,86,0.06)] flex items-center justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_1px_3px_rgba(13, 71, 161,0.04),0_8px_24px_-4px_rgba(13, 71, 161,0.06)] flex items-center justify-between">
             <div>
                 <span class="font-label-sm text-label-sm text-outline tracking-wider uppercase block mb-1">Buổi học đã hoàn thành</span>
                 <div class="flex items-baseline gap-2">
@@ -175,7 +175,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         </div>
 
         <!-- Stat 3 -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_1px_3px_rgba(0,22,86,0.04),0_8px_24px_-4px_rgba(0,22,86,0.06)] flex items-center justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_1px_3px_rgba(13, 71, 161,0.04),0_8px_24px_-4px_rgba(13, 71, 161,0.06)] flex items-center justify-between">
             <div class="min-w-0 pr-2">
                 <span class="font-label-sm text-label-sm text-outline tracking-wider uppercase block mb-1">Cảnh báo trùng lịch</span>
                 <p class="font-headline-sm text-headline-sm text-brand-deep truncate">
@@ -236,7 +236,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         </div>
 
         <!-- Weekly Timetable Grid Card -->
-        <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] overflow-hidden w-full relative">
+        <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] overflow-hidden w-full relative">
             <div class="w-full overflow-x-auto custom-scrollbar pb-2.5" id="timetable-scroll-container">
                 <div class="min-w-[960px] w-full flex flex-col">
                     <!-- 1. Header: Days of Week (Thứ 2 -> Thứ 7) -->
@@ -480,7 +480,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                 <a href="/BuoiHoc/Index" onclick="event.preventDefault(); loadBuoiHocPage(this.href);" class="p-2 border border-border-standard rounded-xl text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors cursor-pointer" title="Làm mới bảng">
                     <span class="material-symbols-outlined text-[20px] block">refresh</span>
                 </a>
-                @* <button onclick="openDrawer('create')" class="bg-primary hover:bg-[#0047b3] text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all cursor-pointer">
+                @* <button onclick="openDrawer('create')" class="bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all cursor-pointer">
                     <span class="material-symbols-outlined text-[18px]">add</span>
                     <span>Tạo buổi mới</span>
                 </button> *@
@@ -488,7 +488,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         </div>
 
         <!-- Data Table Container -->
-        <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-[0_1px_3px_rgba(0,22,86,0.04),0_8px_24px_-4px_rgba(0,22,86,0.06)] overflow-hidden">
+        <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-[0_1px_3px_rgba(13, 71, 161,0.04),0_8px_24px_-4px_rgba(13, 71, 161,0.06)] overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse" id="crud-table">
                     <thead>
@@ -780,7 +780,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                     <button type="button" onclick="closeDrawer()" class="border border-border-standard bg-surface-white hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-4 py-2.5 rounded-xl transition-colors cursor-pointer">
                         Hủy bỏ
                     </button>
-                    <button type="submit" class="bg-primary hover:bg-[#0047b3] text-surface-white font-label-md text-label-md px-5 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all cursor-pointer">
+                    <button type="submit" class="bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-5 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all cursor-pointer">
                         <span class="material-symbols-outlined text-[18px]">save</span>
                         <span id="drawer-submit-text">Lưu buổi học</span>
                     </button>

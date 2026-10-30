@@ -1,4 +1,4 @@
-﻿@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.ChuongTrinhDaoTao>
+@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.ChuongTrinhDaoTao>
 @{
     // Họ và tên: Vũ Đình Trường
     // Mã sinh viên: 23103100026
@@ -27,7 +27,7 @@
         </div>
 
         <div class="flex items-center gap-2.5">
-            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-[#0047b3] text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
+            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">add_circle</span>
                 <span>Thêm chương trình</span>
             </button>
@@ -36,7 +36,7 @@
 
     <!-- 3 Stat Cards (Top KPI) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Tổng số chương trình</span>
                 <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
@@ -49,7 +49,7 @@
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Đang hoạt động</span>
                 <div class="w-9 h-9 rounded-xl bg-success-emerald/10 flex items-center justify-center text-success-emerald">
@@ -62,7 +62,7 @@
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Tổng lớp học liên kết</span>
                 <div class="w-9 h-9 rounded-xl bg-secondary-container/10 flex items-center justify-center text-secondary-container">
@@ -289,7 +289,7 @@
                     <button type="button" onclick="closeDrawer()" class="border border-border-standard bg-surface-white hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-4 py-2.5 rounded-xl transition-colors cursor-pointer">
                         Hủy bỏ
                     </button>
-                    <button type="submit" class="bg-primary hover:bg-[#0047b3] text-surface-white font-label-md text-label-md px-5 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all cursor-pointer">
+                    <button type="submit" class="bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-5 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all cursor-pointer">
                         <span class="material-symbols-outlined text-[18px]">save</span>
                         <span id="drawer-submit-text">Lưu chương trình</span>
                     </button>

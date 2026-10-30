@@ -248,6 +248,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels
         public List<LopHoc> LopHocDangMos { get; set; } = new List<LopHoc>();
         public List<DangKyHoc> DanhSachDangKy { get; set; } = new List<DangKyHoc>();
         public List<ChuongTrinhDaoTao> ChuongTrinhs { get; set; } = new List<ChuongTrinhDaoTao>();
+        public List<BuoiHoc> DanhSachBuoiHoc { get; set; } = new List<BuoiHoc>();
+        public List<KetQuaHocTap> DanhSachKetQua { get; set; } = new List<KetQuaHocTap>();
     }
 
     /// <summary>

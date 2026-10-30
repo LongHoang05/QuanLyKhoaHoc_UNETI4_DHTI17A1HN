@@ -1,7 +1,7 @@
 ﻿@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc
 @{
-    // Họ và tên: [Tên SV2]
-    // Mã sinh viên: [Mã SV2]
+    // Họ và tên: Nguyễn Đình Kiên
+    // Mã sinh viên: 23103100020
     // Nội dung thực hiện: Giao diện Chi tiết Lớp học (Module 2) - Phong cách Prep.vn
     ViewData["Title"] = $"Chi tiết lớp: {Model.TenLop}";
     var buoiHocs = ViewBag.BuoiHocs as List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.BuoiHoc> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.BuoiHoc>();
@@ -28,7 +28,7 @@
                     @Model.TenLop
                 </h1>
                 <span class="font-mono text-xs px-2.5 py-1 rounded-md bg-surface-container-high text-brand-deep font-semibold border border-border-standard">
-                    #LH@Model.MaLopHoc.ToString("D3")
+                    #LH@(Model.MaLopHoc.ToString("D3"))
                 </span>
             </div>
         </div>
@@ -38,7 +38,7 @@
                 <span class="material-symbols-outlined text-[18px]">arrow_back</span>
                 <span>Quay lại</span>
             </a>
-            <a asp-controller="BuoiHoc" asp-action="Index" asp-route-maLop="@Model.MaLopHoc" class="inline-flex items-center gap-1.5 bg-primary hover:bg-[#0047b3] text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all">
+            <a asp-controller="BuoiHoc" asp-action="Index" asp-route-maLop="@Model.MaLopHoc" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all">
                 <span class="material-symbols-outlined text-[18px]">calendar_month</span>
                 <span>Quản lý Lịch học</span>
             </a>
@@ -46,7 +46,7 @@
     </section>
 
     <!-- Class Metadata Card -->
-    <div class="bg-surface-white rounded-2xl border border-border-subtle p-6 shadow-[0_2px_12px_rgba(0,22,86,0.03)]">
+    <div class="bg-surface-white rounded-2xl border border-border-subtle p-6 shadow-[0_2px_12px_rgba(13, 71, 161,0.03)]">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Left Info -->
             <div class="lg:col-span-2 space-y-4">
@@ -169,7 +169,7 @@
     <!-- 2 Sub-Sections: Buổi học & Danh sách học viên -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Card 1: Lịch học / Buổi học -->
-        <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] overflow-hidden flex flex-col">
+        <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] overflow-hidden flex flex-col">
             <div class="p-4 sm:p-5 border-b border-border-standard flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
@@ -233,7 +233,7 @@
         </div>
 
         <!-- Card 2: Học viên đăng ký -->
-        <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] overflow-hidden flex flex-col">
+        <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] overflow-hidden flex flex-col">
             <div class="p-4 sm:p-5 border-b border-border-standard flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">

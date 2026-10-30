@@ -30,3 +30,7 @@ extract.ps1
 extract_repo.ps1
 read_docx.ps1
 DocxEditor/
+
+# AI Agent custom configurations
+.agents/
+.claude/

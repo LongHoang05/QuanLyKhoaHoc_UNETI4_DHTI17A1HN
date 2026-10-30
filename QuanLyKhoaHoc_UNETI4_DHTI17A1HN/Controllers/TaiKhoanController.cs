@@ -1,4 +1,4 @@
-// ========================================================
+﻿// ========================================================
 // Họ và tên: Vũ Đình Trường
 // Mã sinh viên: 23103100026
 // Phụ trách: Module 1 - Tài khoản, Đăng nhập, Phân quyền và Chương trình đào tạo
@@ -31,10 +31,10 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         [HttpGet]
         [Route("TaiKhoan/DangNhap")]
         [Route("TaiKhoan/Login")]
-        public IActionResult DangNhap(string? returnUrl = null)
+        public IActionResult DangNhap(string? returnUrl = null, bool switchAccount = false)
         {
-            // Nếu đã đăng nhập rồi thì chuyển hướng
-            if (HttpContext.Session.GetInt32("MaTaiKhoan") != null)
+            // Nếu đã đăng nhập rồi và không phải bấm chuyển tài khoản thì chuyển hướng
+            if (!switchAccount && HttpContext.Session.GetInt32("MaTaiKhoan") != null)
             {
                 return RedirectToAction("Index", "Home");
             }
@@ -63,6 +63,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return View(model);
             }
 
+            // Xóa sạch Session cũ trước khi ghi nhận phiên đăng nhập mới
+            HttpContext.Session.Clear();
+
             // Ghi nhận thông tin vào Session theo yêu cầu mục 5.2 của đề tài
             HttpContext.Session.SetInt32("MaTaiKhoan", user.MaTaiKhoan);
             HttpContext.Session.SetString("TenDangNhap", user.TenDangNhap);
@@ -74,6 +77,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             if (gv != null)
             {
                 HttpContext.Session.SetInt32("MaGiangVien", gv.MaGiangVien);
+            }
+
+            var hv = await _context.HocViens.FirstOrDefaultAsync(h => h.MaTaiKhoan == user.MaTaiKhoan);
+            if (hv != null)
+            {
+                HttpContext.Session.SetInt32("MaHocVien", hv.MaHocVien);
             }
 
             TempData["Success"] = $"Chào mừng {user.HoTen} ({user.VaiTro}) đã đăng nhập thành công!";
@@ -132,6 +141,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             HttpContext.Session.SetString("HoTen", user.HoTen);
             HttpContext.Session.SetString("VaiTro", user.VaiTro);
             HttpContext.Session.SetString("Email", user.Email);
+
+            var hv = await _context.HocViens.FirstOrDefaultAsync(h => h.MaTaiKhoan == user.MaTaiKhoan);
+            if (hv != null)
+            {
+                HttpContext.Session.SetInt32("MaHocVien", hv.MaHocVien);
+            }
 
             TempData["Success"] = "Đăng ký tài khoản học viên thành công! Bạn đã được đăng nhập tự động.";
             return RedirectToAction("Index", "Home");

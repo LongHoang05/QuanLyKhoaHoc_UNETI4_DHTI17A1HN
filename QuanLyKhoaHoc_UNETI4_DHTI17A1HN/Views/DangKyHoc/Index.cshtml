@@ -33,7 +33,7 @@
         </div>
 
         <div class="flex items-center gap-2.5">
-            <button onclick="exportTableToCSV('danh-sach-dang-ky.csv')" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-3.5 py-2.5 rounded-xl transition-all shadow-xs cursor-pointer">
+            <button onclick="exportTableToCSV('danh-sach-dang-ky.csv')" class="hidden">
                 <span class="material-symbols-outlined text-[18px] text-primary">file_download</span>
                 <span class="hidden sm:inline">Xuất Excel</span>
             </button>
@@ -42,7 +42,7 @@
 
     <!-- 3 Stat Cards (Top KPI) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Hồ sơ chờ xét duyệt</span>
                 <div class="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
@@ -55,7 +55,7 @@
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Đã phê duyệt nhập học</span>
                 <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
@@ -68,7 +68,7 @@
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Tổng học phí đã thu</span>
                 <div class="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
@@ -84,7 +84,7 @@
     </div>
 
     <!-- Filters & Search Toolbar -->
-    <div class="bg-surface-white rounded-2xl p-4 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-wrap items-center justify-between gap-3">
+    <div class="bg-surface-white rounded-2xl p-4 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
             <!-- Search Input -->
             <div class="relative flex-1 min-w-[220px]">
@@ -94,7 +94,7 @@
             </div>
 
             <!-- Filter Chương trình đào tạo (Mục 8.1) -->
-            <div class="min-w-[170px]">
+            <div class="hidden">
                 <select id="filterMaCT" class="w-full px-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep">
                     <option value="">Tất cả CTĐT</option>
                     @foreach (var ct in chuongTrinhList)
@@ -130,7 +130,7 @@
             </div>
 
             <!-- Sắp xếp (Mục 8.1) -->
-            <div class="min-w-[150px]">
+            <div class="hidden">
                 <select id="filterSortBy" class="w-full px-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep">
                     <!option value="" @(sortBy == "" ? "selected" : "")>Mới nhất trước</!option>
                     <!option value="ngay_asc" @(sortBy == "ngay_asc" ? "selected" : "")>Cũ nhất trước</!option>
@@ -140,7 +140,7 @@
             </div>
 
             <!-- Date Range Filters -->
-            <div class="flex items-center gap-1.5 text-xs text-outline">
+            <div class="hidden">
                 <span>Từ:</span>
                 <input type="date" id="filterTuNgay" value="@tuNgay" class="px-2 py-1.5 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white font-mono" />
                 <span>Đến:</span>
@@ -294,7 +294,7 @@
                 <button type="button" onclick="closeThuPhiModal()" class="px-4 py-2 text-xs font-semibold text-outline hover:text-brand-deep border border-border-standard rounded-xl hover:bg-surface-container-high transition-colors">
                     Hủy
                 </button>
-                <button type="submit" class="px-5 py-2 text-xs font-semibold text-surface-white bg-primary hover:bg-[#0047b3] rounded-xl shadow-sm transition-all flex items-center gap-1.5">
+                <button type="submit" class="px-5 py-2 text-xs font-semibold text-surface-white bg-primary hover:bg-primary-dark rounded-xl shadow-sm transition-all flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-[16px]">receipt_long</span>
                     <span>Xác nhận thu tiền</span>
                 </button>

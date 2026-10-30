@@ -1,10 +1,15 @@
-@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien
+﻿@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien
 @{
     ViewData["Title"] = "Cổng Giảng Viên - UNETI EDU";
     var myClasses = ViewBag.MyClasses as List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>();
     var upcomingSessions = ViewBag.UpcomingSessions as List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.BuoiHoc> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.BuoiHoc>();
     int totalStudents = ViewBag.TotalStudents ?? 0;
     int gradedCount = ViewBag.GradedCount ?? 0;
+
+    string gvHoTen = Model?.HoTen ?? "ThS. Trần Văn Hùng";
+    string gvHocVi = Model?.HocVi ?? "Thạc sĩ";
+    string gvChuyenNganh = Model?.ChuyenNganh ?? "Khoa học máy tính & Công nghệ Web";
+    if (string.IsNullOrWhiteSpace(gvHoTen)) gvHoTen = "ThS. Trần Văn Hùng";
 }
 
 <!--
@@ -22,13 +27,13 @@
             <div class="space-y-2">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-semibold text-blue-200">
                     <span class="material-symbols-outlined text-[16px] text-amber-300">verified</span>
-                    <span>Cổng Giảng Viên UNETI • @(Model.HocVi ?? "Thạc sĩ") @Model.HoTen</span>
+                    <span>Cổng Giảng Viên UNETI • @gvHocVi @gvHoTen</span>
                 </div>
                 <h1 class="text-2xl md:text-3xl font-black tracking-tight">
-                    Xin chào Thầy/Cô, @Model.HoTen 👋
+                    Xin chào Thầy/Cô, @gvHoTen 👋
                 </h1>
                 <p class="text-xs md:text-sm text-blue-100/80 max-w-2xl font-light">
-                    Khoa Công nghệ thông tin • Chuyên ngành: @(Model.ChuyenNganh ?? "Công nghệ phần mềm"). Quản lý lớp học, tra cứu lịch giảng dạy và nhập điểm đánh giá học viên trực tiếp trên hệ thống.
+                    Khoa Công nghệ thông tin • Chuyên ngành: @gvChuyenNganh. Quản lý lớp học, tra cứu lịch giảng dạy và nhập điểm đánh giá học viên trực tiếp trên hệ thống.
                 </p>
             </div>
 
@@ -161,7 +166,7 @@
                                     <span class="material-symbols-outlined text-[16px]">calendar_month</span>
                                     <span>Lịch dạy</span>
                                 </a>
-                                <a href="/GiangVien/ChamDiem?maLop=@lop.MaLopHoc" class="px-3 py-1.5 rounded-xl bg-primary hover:bg-[#0047b3] text-surface-white font-bold text-xs flex items-center gap-1 shadow-xs">
+                                <a href="/GiangVien/ChamDiem?maLop=@lop.MaLopHoc" class="px-3 py-1.5 rounded-xl bg-primary hover:bg-primary-dark text-surface-white font-bold text-xs flex items-center gap-1 shadow-xs">
                                     <span class="material-symbols-outlined text-[15px]">edit_note</span>
                                     <span>Chấm điểm</span>
                                 </a>

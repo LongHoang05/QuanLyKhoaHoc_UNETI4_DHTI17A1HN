@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services;
@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 // 1. Cấu hình DbContext kết nối SQL Server
 // ========================================================
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? "Server=.\\SQLEXPRESS;Database=QuanLyKhoaHoc_UNETI4_DB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true";
+    ?? "Server=(localdb)\\mssqllocaldb;Database=QuanLyKhoaHoc_UNETI4_DB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true";
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -65,6 +65,47 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
         context.Database.Migrate();
+
+        // Tự động sửa lỗi schema: Bổ sung bảng GiangVien và cột MaGiangVien vào LopHoc, BuoiHoc nếu Database chưa có
+        context.Database.ExecuteSqlRaw(@"
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'GiangVien')
+            BEGIN
+                CREATE TABLE [dbo].[GiangVien] (
+                    [MaGiangVien] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                    [MaTaiKhoan] INT NULL,
+                    [HoTen] NVARCHAR(200) NOT NULL,
+                    [Email] NVARCHAR(200) NOT NULL,
+                    [SoDienThoai] NVARCHAR(20) NULL,
+                    [HocVi] NVARCHAR(100) NULL,
+                    [ChuyenNganh] NVARCHAR(200) NULL,
+                    [GioiThieu] NVARCHAR(500) NULL,
+                    [TrangThai] BIT NOT NULL DEFAULT 1,
+                    [NgayTao] DATETIME2 NOT NULL DEFAULT GETDATE(),
+                    CONSTRAINT [FK_GiangVien_TaiKhoan_MaTaiKhoan] FOREIGN KEY ([MaTaiKhoan]) REFERENCES [dbo].[TaiKhoan] ([MaTaiKhoan]) ON DELETE SET NULL
+                );
+            END;
+
+            IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('LopHoc') AND name = 'MaGiangVien')
+            BEGIN
+                ALTER TABLE [dbo].[LopHoc] ADD [MaGiangVien] INT NULL;
+            END;
+
+            IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_LopHoc_GiangVien_MaGiangVien')
+            BEGIN
+                ALTER TABLE [dbo].[LopHoc] ADD CONSTRAINT [FK_LopHoc_GiangVien_MaGiangVien] FOREIGN KEY ([MaGiangVien]) REFERENCES [dbo].[GiangVien] ([MaGiangVien]) ON DELETE SET NULL;
+            END;
+
+            IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('BuoiHoc') AND name = 'MaGiangVien')
+            BEGIN
+                ALTER TABLE [dbo].[BuoiHoc] ADD [MaGiangVien] INT NULL;
+            END;
+
+            IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_BuoiHoc_GiangVien_MaGiangVien')
+            BEGIN
+                ALTER TABLE [dbo].[BuoiHoc] ADD CONSTRAINT [FK_BuoiHoc_GiangVien_MaGiangVien] FOREIGN KEY ([MaGiangVien]) REFERENCES [dbo].[GiangVien] ([MaGiangVien]) ON DELETE SET NULL;
+            END;
+        ");
+
         DbSeeder.SeedMockData(context);
     }
     catch (Exception ex)

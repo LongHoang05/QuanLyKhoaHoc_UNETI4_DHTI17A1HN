@@ -1,4 +1,4 @@
-@*
+﻿@*
 Họ và tên: Nguyễn Tùng Dương
 Mã sinh viên: 23103100003
 Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
@@ -11,10 +11,10 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
 
 <div class="flex flex-col gap-y-6">
     <!-- 1. Action Strip (Prep.vn Style) -->
-    <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-surface-white p-5 rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)]">
+    <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-surface-white p-5 rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)]">
         <div class="flex flex-col gap-1">
             <h1 class="font-headline-lg-mobile lg:font-headline-lg text-brand-deep tracking-tight font-extrabold flex items-center gap-2">
-                Chào buổi sáng, Nguyễn Tùng Dương <span class="text-2xl animate-bounce">👋</span>
+                Xin chào, @(Context.Session.GetString("HoTen") ?? "Quản trị viên")
             </h1>
             <div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm flex-wrap">
                 <span class="relative flex h-2.5 w-2.5">
@@ -46,7 +46,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
     <!-- 2. 4-Column Stats Bento Grid -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <!-- Card 1: Tổng CTĐT -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] hover:shadow-[0_8px_24px_rgba(0,104,255,0.08)] transition-all flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] hover:shadow-[0_8px_24px_rgba(33, 150, 243,0.08)] transition-all flex flex-col justify-between">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-outline font-label-md text-label-md">Tổng chương trình ĐT</span>
                 <div class="w-9 h-9 rounded-xl bg-surface-container-low flex items-center justify-center text-primary-container">
@@ -65,7 +65,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
         </div>
 
         <!-- Card 2: Sinh viên đăng ký -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] hover:shadow-[0_8px_24px_rgba(0,104,255,0.08)] transition-all flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] hover:shadow-[0_8px_24px_rgba(33, 150, 243,0.08)] transition-all flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Tổng số sinh viên</span>
                 <div class="w-9 h-9 rounded-xl bg-surface-container-low flex items-center justify-center text-primary-container">
@@ -90,7 +90,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
         </div>
 
         <!-- Card 3: Chờ phê duyệt -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] hover:shadow-[0_8px_24px_rgba(0,104,255,0.08)] transition-all flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] hover:shadow-[0_8px_24px_rgba(33, 150, 243,0.08)] transition-all flex flex-col justify-between">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-outline font-label-md text-label-md">Chờ phê duyệt</span>
                 <div class="w-9 h-9 rounded-xl bg-warning-amber/10 flex items-center justify-center text-warning-amber">
@@ -118,7 +118,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
         </div>
 
         <!-- Card 4: Tỷ lệ hoàn thành khóa học -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] hover:shadow-[0_8px_24px_rgba(0,104,255,0.08)] transition-all flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] hover:shadow-[0_8px_24px_rgba(33, 150, 243,0.08)] transition-all flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Kết quả hoàn thành</span>
                 <div class="w-9 h-9 rounded-xl bg-success-emerald/10 flex items-center justify-center text-success-emerald">
@@ -150,7 +150,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
     <!-- 3. Middle Split Section (Lịch học Module 5 & Phân tích Đào tạo) -->
     <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Left: Lịch Lớp Học Phần Sắp Tới (Module 5 BuoiHoc) -->
-        <div class="lg:col-span-2 bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col gap-4">
+        <div class="lg:col-span-2 bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col gap-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border-subtle">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary-container">calendar_clock</span>
@@ -230,7 +230,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
         </div>
 
         <!-- Right: Hiệu suất & Phân tích Đào tạo -->
-        <div class="lg:col-span-1 bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between gap-5">
+        <div class="lg:col-span-1 bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between gap-5">
             <div>
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-2">
@@ -280,7 +280,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
     </section>
 
     <!-- 4. Data Table Section: Hoạt động đăng ký gần đây -->
-    <section id="dashboard-activity-section" class="bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col gap-4 transition-opacity duration-200">
+    <section id="dashboard-activity-section" class="bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col gap-4 transition-opacity duration-200">
         <input type="hidden" id="dashboardCurrentStatus" value="@Model.SelectedStatus" />
         <input type="hidden" id="dashboardCurrentSearch" value="@Model.Search" />
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-3 border-b border-border-subtle">

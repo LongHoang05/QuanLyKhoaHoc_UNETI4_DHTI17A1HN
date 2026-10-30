@@ -1,4 +1,4 @@
-@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien>
+﻿@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien>
 @{
     // ========================================================
     // Bổ sung theo yêu cầu giảng viên hướng dẫn:
@@ -29,11 +29,11 @@
         </div>
 
         <div class="flex items-center gap-2.5">
-            <button onclick="exportTeacherTableToCSV('danh-sach-giang-vien.csv')" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-3.5 py-2.5 rounded-xl transition-all shadow-xs cursor-pointer">
+            <button onclick="exportTeacherTableToCSV('danh-sach-giang-vien.csv')" class="hidden">
                 <span class="material-symbols-outlined text-[18px] text-primary">file_download</span>
                 <span class="hidden sm:inline">Xuất Excel</span>
             </button>
-            <button onclick="openTeacherDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-[#0047b3] text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
+            <button onclick="openTeacherDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">person_add</span>
                 <span>Thêm giảng viên</span>
             </button>
@@ -42,7 +42,7 @@
 
     <!-- 3 Stat Cards (Top KPI) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Tổng số giảng viên</span>
                 <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
@@ -55,7 +55,7 @@
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Đang tham gia giảng dạy</span>
                 <div class="w-9 h-9 rounded-xl bg-success-emerald/10 flex items-center justify-center text-success-emerald">
@@ -68,7 +68,7 @@
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Lớp học phần phân công</span>
                 <div class="w-9 h-9 rounded-xl bg-secondary-container/10 flex items-center justify-center text-secondary-container">
@@ -104,7 +104,7 @@
                 </select>
             </div>
 
-            <button type="submit" class="inline-flex items-center gap-1.5 bg-primary hover:bg-[#0047b3] text-surface-white font-label-md text-label-md px-4 py-2 rounded-xl transition-all text-xs cursor-pointer">
+            <button type="submit" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-4 py-2 rounded-xl transition-all text-xs cursor-pointer">
                 <span class="material-symbols-outlined text-[16px]">filter_alt</span>
                 <span>Lọc</span>
             </button>
@@ -120,7 +120,7 @@
     </div>
 
     <!-- Teacher Table -->
-    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-[0_4px_20px_rgba(0,22,86,0.03)] overflow-hidden">
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-[0_4px_20px_rgba(13, 71, 161,0.03)] overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse" id="teacherTable">
                 <thead>
@@ -140,19 +140,26 @@
                     {
                         foreach (var gv in Model)
                         {
+                            var hoTenGv = gv.HoTen ?? "";
+                            var hocViGv = gv.HocVi ?? "ThS.";
+                            var chuyenNganhGv = gv.ChuyenNganh ?? "Công nghệ thông tin";
+                            var gioiThieuGv = gv.GioiThieu ?? "";
+                            if (string.IsNullOrWhiteSpace(gioiThieuGv)) gioiThieuGv = "Chưa có giới thiệu";
+                            var initialLetter = string.IsNullOrWhiteSpace(hoTenGv) ? "T" : (hoTenGv.Trim().Contains(' ') ? hoTenGv.Trim().Substring(hoTenGv.Trim().LastIndexOf(' ') + 1).Substring(0, 1).ToUpper() : hoTenGv.Substring(0, 1).ToUpper());
+
                             <tr class="hover:bg-surface-container-low/40 transition-colors">
                                 <td class="py-3.5 px-3 text-center font-mono font-bold text-outline">
-                                    GV-@gv.MaGiangVien.ToString("D3")
+                                    GV-@(gv.MaGiangVien.ToString("D3"))
                                 </td>
                                 <td class="py-3.5 px-4">
                                     <div class="flex items-center gap-3">
                                         <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-primary-container text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-xs">
-                                            @gv.HoTen.Substring(0, 1).ToUpper()
+                                            @initialLetter
                                         </div>
                                         <div class="flex flex-col min-w-0">
-                                            <span class="font-bold text-brand-deep text-sm truncate">@gv.HoTen</span>
-                                            <span class="text-[11px] text-outline truncate">
-                                                @(string.IsNullOrWhiteSpace(gv.GioiThieu) ? "Chưa có giới thiệu" : gv.GioiThieu)
+                                            <span class="font-bold text-brand-deep text-sm truncate">@hoTenGv</span>
+                                            <span class="text-[11px] text-outline truncate" title="@gioiThieuGv">
+                                                @gioiThieuGv
                                             </span>
                                         </div>
                                     </div>
@@ -160,9 +167,9 @@
                                 <td class="py-3.5 px-3">
                                     <div class="flex flex-col gap-0.5">
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-primary/10 text-primary w-fit">
-                                            @(gv.HocVi ?? "ThS.")
+                                            @hocViGv
                                         </span>
-                                        <span class="text-[11px] text-brand-deep font-medium">@(gv.ChuyenNganh ?? "Công nghệ thông tin")</span>
+                                        <span class="text-[11px] text-brand-deep font-medium">@chuyenNganhGv</span>
                                     </div>
                                 </td>
                                 <td class="py-3.5 px-3">
@@ -220,7 +227,7 @@
                                         <button type="button" onclick="editTeacher(@gv.MaGiangVien)" title="Chỉnh sửa hồ sơ" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container transition-colors cursor-pointer">
                                             <span class="material-symbols-outlined text-[18px]">edit</span>
                                         </button>
-                                        <button type="button" onclick="confirmDeleteTeacher(@gv.MaGiangVien, '@gv.HoTen')" title="Xóa giảng viên" class="p-1.5 rounded-lg text-outline hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer">
+                                        <button type="button" onclick="confirmDeleteTeacher(@gv.MaGiangVien, '@hoTenGv.Replace("'", "\\'")')" title="Xóa giảng viên" class="p-1.5 rounded-lg text-outline hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer">
                                             <span class="material-symbols-outlined text-[18px]">delete</span>
                                         </button>
                                     </div>
@@ -240,6 +247,51 @@
                     }
                 </tbody>
             </table>
+        </div>
+        <!-- Pagination Footer -->
+        @{
+            int currentPage = ViewBag.CurrentPage ?? 1;
+            int totalPages = ViewBag.TotalPages ?? 1;
+            int totalItems = ViewBag.TotalItems ?? 0;
+            string searchVal = ViewBag.Search ?? "";
+            string hocViVal = ViewBag.HocVi ?? "";
+        }
+        <div class="px-5 py-4 border-t border-border-standard flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-outline">
+            <div>
+                Hiển thị <span class="font-bold text-brand-deep">@(Model?.Count() ?? 0)</span> trên tổng số <span class="font-bold text-brand-deep">@totalItems</span> giảng viên
+            </div>
+
+            <div class="flex items-center gap-1">
+                <a href="/GiangVien/QuanLy?search=@searchVal&hocVi=@hocViVal&page=1" class="p-1.5 rounded-lg border border-border-standard hover:bg-surface-container-low @(currentPage == 1 ? "opacity-40 pointer-events-none" : "")" title="Trang đầu">
+                    <span class="material-symbols-outlined text-[16px] block">first_page</span>
+                </a>
+                <a href="/GiangVien/QuanLy?search=@searchVal&hocVi=@hocViVal&page=@(currentPage - 1)" class="p-1.5 rounded-lg border border-border-standard hover:bg-surface-container-low @(currentPage == 1 ? "opacity-40 pointer-events-none" : "")" title="Trang trước">
+                    <span class="material-symbols-outlined text-[16px] block">chevron_left</span>
+                </a>
+
+                @{
+                    int startP = Math.Max(1, currentPage - 1);
+                    int endP = Math.Min(totalPages, currentPage + 1);
+                    for (int p = startP; p <= endP; p++)
+                    {
+                        if (p == currentPage)
+                        {
+                            <span class="w-8 h-8 rounded-lg bg-primary text-white font-bold flex items-center justify-center font-mono">@p</span>
+                        }
+                        else
+                        {
+                            <a href="/GiangVien/QuanLy?search=@searchVal&hocVi=@hocViVal&page=@p" class="w-8 h-8 rounded-lg border border-border-standard hover:bg-surface-container-low text-brand-deep font-mono flex items-center justify-center">@p</a>
+                        }
+                    }
+                }
+
+                <a href="/GiangVien/QuanLy?search=@searchVal&hocVi=@hocViVal&page=@(currentPage + 1)" class="p-1.5 rounded-lg border border-border-standard hover:bg-surface-container-low @(currentPage >= totalPages ? "opacity-40 pointer-events-none" : "")" title="Trang sau">
+                    <span class="material-symbols-outlined text-[16px] block">chevron_right</span>
+                </a>
+                <a href="/GiangVien/QuanLy?search=@searchVal&hocVi=@hocViVal&page=@totalPages" class="p-1.5 rounded-lg border border-border-standard hover:bg-surface-container-low @(currentPage >= totalPages ? "opacity-40 pointer-events-none" : "")" title="Trang cuối">
+                    <span class="material-symbols-outlined text-[16px] block">last_page</span>
+                </a>
+            </div>
         </div>
     </div>
 </div>
@@ -353,7 +405,7 @@
         <button type="button" onclick="closeTeacherDrawer()" class="px-4 py-2.5 rounded-xl border border-border-standard text-outline hover:bg-surface-container font-label-md text-xs transition-colors cursor-pointer">
             Hủy bỏ
         </button>
-        <button type="button" onclick="submitTeacherForm()" id="btnSubmitDrawer" class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-primary hover:bg-[#0047b3] text-white font-label-md text-xs shadow-sm transition-all cursor-pointer">
+        <button type="button" onclick="submitTeacherForm()" id="btnSubmitDrawer" class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-white font-label-md text-xs shadow-sm transition-all cursor-pointer">
             <span class="material-symbols-outlined text-[16px]">save</span>
             <span id="btnSubmitText">Lưu Giảng Viên</span>
         </button>

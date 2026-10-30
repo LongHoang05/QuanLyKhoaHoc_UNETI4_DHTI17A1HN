@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>
 @{
-    // Họ và tên: [Tên SV2]
-    // Mã sinh viên: [Mã SV2]
+    // Họ và tên: Nguyễn Đình Kiên
+    // Mã sinh viên: 23103100020
     // Nội dung thực hiện: Giao diện Quản lý Lớp học (Module 2) - Phong cách Prep.vn
     ViewData["Title"] = "Quản lý Lớp học";
     int currentPage = ViewBag.CurrentPage ?? 1;
@@ -35,11 +35,11 @@
         </div>
 
         <div class="flex items-center gap-2.5">
-            <button onclick="exportTableToCSV('danh-sach-lop-hoc.csv')" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-3.5 py-2.5 rounded-xl transition-all shadow-xs cursor-pointer">
+            <button onclick="exportTableToCSV('danh-sach-lop-hoc.csv')" class="hidden">
                 <span class="material-symbols-outlined text-[18px] text-primary">file_download</span>
                 <span class="hidden sm:inline">Xuất Excel</span>
             </button>
-            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-[#0047b3] text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
+            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">add_circle</span>
                 <span>Thêm lớp học</span>
             </button>
@@ -48,7 +48,7 @@
 
     <!-- 3 Stat Cards (Top KPI) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Tổng số lớp học</span>
                 <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
@@ -61,7 +61,7 @@
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Đang mở đăng ký</span>
                 <div class="w-9 h-9 rounded-xl bg-success-emerald/10 flex items-center justify-center text-success-emerald">
@@ -74,7 +74,7 @@
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Học viên đang theo học</span>
                 <div class="w-9 h-9 rounded-xl bg-secondary-container/10 flex items-center justify-center text-secondary-container">
@@ -110,7 +110,7 @@
             </div>
 
             <!-- Level Filter -->
-            <div class="relative">
+            <div class="hidden">
                 <select name="trinhDo" onchange="filterLopHocAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
                     <option value="">Trình độ: Tất cả</option>
                     <!option value="Cơ bản" @(selectedTrinhDo == "Cơ bản" ? "selected" : "")>Cơ bản</!option>
@@ -133,7 +133,7 @@
             </div>
 
             <!-- Deadline Filter -->
-            <div class="relative">
+            <div class="hidden">
                 <select name="hanDangKyStatus" onchange="filterLopHocAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
                     <option value="">Hạn ĐK: Tất cả</option>
                     <!option value="con_han" @(hanDangKyStatus == "con_han" ? "selected" : "")>Còn hạn đăng ký</!option>
@@ -143,7 +143,7 @@
             </div>
 
             <!-- Capacity Filter -->
-            <div class="relative">
+            <div class="hidden">
                 <select name="choTrongStatus" onchange="filterLopHocAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
                     <option value="">Sĩ số: Tất cả</option>
                     <!option value="con_cho" @(choTrongStatus == "con_cho" ? "selected" : "")>Còn chỗ trống</!option>
@@ -174,7 +174,7 @@
     </div>
 
     <!-- Data Table Container -->
-    <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-[0_1px_3px_rgba(0,22,86,0.04)] overflow-hidden">
+    <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-[0_1px_3px_rgba(13, 71, 161,0.04)] overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse" id="crud-table">
                 <thead>
@@ -417,7 +417,16 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div class="space-y-1.5">
                         <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Giảng viên phụ trách</label>
-                        <input type="text" name="TenGiangVien" id="drawer-gv" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="ThS. Nguyễn Văn A"/>
+                        <input type="text" name="TenGiangVien" id="drawer-gv" list="giangVienDatalist" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Chọn hoặc nhập giảng viên..."/>
+                        <datalist id="giangVienDatalist">
+                            @if (ViewBag.GiangVienList != null)
+                            {
+                                foreach (var gv in (IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien>)ViewBag.GiangVienList)
+                                {
+                                    <option value="@gv.HocVi @gv.HoTen">@gv.ChuyenNganh</option>
+                                }
+                            }
+                        </datalist>
                     </div>
 
                     <div class="space-y-1.5">
@@ -480,7 +489,7 @@
                     <button type="button" onclick="closeDrawer()" class="border border-border-standard bg-surface-white hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-4 py-2.5 rounded-xl transition-colors cursor-pointer">
                         Hủy bỏ
                     </button>
-                    <button type="submit" class="bg-primary hover:bg-[#0047b3] text-surface-white font-label-md text-label-md px-5 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all cursor-pointer">
+                    <button type="submit" class="bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-5 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all cursor-pointer">
                         <span class="material-symbols-outlined text-[18px]">save</span>
                         <span id="drawer-submit-text">Lưu lớp học</span>
                     </button>

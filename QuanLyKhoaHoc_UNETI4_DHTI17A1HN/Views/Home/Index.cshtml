@@ -10,6 +10,8 @@
     var hotCourses = ViewBag.HotCourses as List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>();
     var upcomingCourses = ViewBag.UpcomingCourses as List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>();
     var siSoMap = ViewBag.SiSoMap as Dictionary<int, int> ?? new Dictionary<int, int>();
+    var allOpenClasses = ViewBag.AllOpenClasses as List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>();
+    var allSiSoMap = ViewBag.AllSiSoMap as Dictionary<int, int> ?? new Dictionary<int, int>();
 
     int totalCourses = ViewBag.TotalCourses ?? 0;
     int totalStudents = ViewBag.TotalStudents ?? 0;
@@ -18,129 +20,851 @@
     var currentStudent = ViewBag.CurrentStudent as QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.HocVien;
     bool isLoggedInStudent = currentStudent != null;
     var myRegistrations = ViewBag.MyRegistrations as Dictionary<int, QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc> ?? new Dictionary<int, QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc>();
+    var studentDangKys = ViewBag.StudentDangKys as List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc>();
     var activeCourse = ViewBag.ActiveCourse as QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc;
     var nextSession = ViewBag.NextSession as QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.BuoiHoc;
     int totalSessions = ViewBag.TotalSessions ?? 0;
     int completedSessions = ViewBag.CompletedSessions ?? 0;
     double progressPercent = totalSessions > 0 ? Math.Min(100.0, Math.Round((double)completedSessions / totalSessions * 100, 1)) : 0;
+
+    var studentBuoiHocs = ViewBag.StudentBuoiHocs as List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.BuoiHoc> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.BuoiHoc>();
+    var studentKetQuas = ViewBag.StudentKetQuas as List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.KetQuaHocTap> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.KetQuaHocTap>();
+    var giangViens = ViewBag.GiangViens as List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien>();
+    double avgScore = ViewBag.AvgScore ?? 0.0;
+    double gpa4 = ViewBag.Gpa4 ?? 0.0;
+    int dangKyCount = ViewBag.DangKyCount ?? 0;
+    int lopDangHocCount = ViewBag.LopDangHocCount ?? 0;
+    int chuyenCanPercent = ViewBag.ChuyenCanPercent ?? 0;
+
+    string studentDisplayName = !string.IsNullOrWhiteSpace(currentStudent?.HoTen) ? currentStudent.HoTen : "Trần Minh Tuấn";
+    string studentIdDisplay = currentStudent != null ? $"HV-{currentStudent.MaHocVien:D2}" : "HV-02";
 }
 
-<div class="space-y-16 sm:space-y-24 pb-16">
+<!-- ================= A. CỔNG HỌC VIÊN CHÍNH THỨC (THEO ĐÚNG LAYOUT ẢNH MẪU KHI ĐĂNG NHẬP) ================= -->
+<div id="studentPortalSection" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-16 space-y-6">
+    
+    <!-- 1. WELCOME BANNER (DARK NAVY GRADIENT MATCHING SCREENSHOT) -->
+    <div class="rounded-3xl bg-gradient-to-r from-[#031B3B] via-[#082B63] to-[#0D47A1] p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+        <!-- Ambient tech glow circles -->
+        <div class="absolute -right-16 -top-16 w-80 h-80 bg-sky-500/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-20 -bottom-20 w-80 h-80 bg-brand-deep/30 rounded-full blur-3xl pointer-events-none"></div>
 
-    <!-- ================= 1. HERO SECTION (THƯƠNG MẠI ĐỈNH CAO) ================= -->
-    <section class="relative bg-gradient-to-b from-[#001242] via-[#001e66] to-[#002f87] text-white pt-12 pb-20 sm:pt-20 sm:pb-32 overflow-hidden">
-        <!-- Background Tech Glow Circles -->
-        <div class="absolute -top-24 -left-24 w-96 h-96 bg-primary/30 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute top-1/2 -right-24 w-[30rem] h-[30rem] bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute inset-0 bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none"></div>
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8 relative z-10">
+            <!-- Left Info Area -->
+            <div class="space-y-4 max-w-2xl">
+                <!-- Pill tag -->
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-medium text-amber-200">
+                    <span class="material-symbols-outlined text-[15px] text-amber-300">sparkles</span>
+                    <span>Cổng Đào Tạo Trực Tuyến UNETI • Phục Vụ Học Viên Chuẩn Mực 17.1 & 25.1</span>
+                </div>
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-                <!-- Left: Hero Headline & Action -->
-                <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold text-amber-300">
-                        <span class="flex h-2 w-2 rounded-full bg-amber-400 animate-ping"></span>
-                        <span>Tuyển sinh Khóa Đào tạo Thực chiến Kỳ Mới 2024 - 2025</span>
+                <!-- Greeting Headline -->
+                <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white flex items-center gap-2.5">
+                    <span>Chào buổi chiều, @studentDisplayName</span>
+                    <span class="material-symbols-outlined text-amber-300 text-2xl sm:text-3xl">sparkles</span>
+                </h1>
+
+                <!-- Subtitle text -->
+                <p class="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
+                    Khám phá các khóa học thực chiến công nghệ, đăng ký lớp học linh hoạt, theo dõi thời khóa biểu và tải chứng chỉ số hoàn thành khóa học từ Trung tâm Đào tạo UNETI.
+                </p>
+
+                <!-- 3 Action Pills -->
+                <div class="flex flex-wrap items-center gap-2.5 pt-1">
+                    <div class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs text-emerald-300 font-semibold backdrop-blur-xs">
+                        <span class="material-symbols-outlined text-[16px] text-emerald-400">check_circle</span>
+                        <span>Tài khoản đã kích hoạt</span>
+                    </div>
+                    <div class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs text-sky-200 font-semibold backdrop-blur-xs">
+                        <span class="material-symbols-outlined text-[16px]">school</span>
+                        <span>Khóa K17 - CNTT</span>
+                    </div>
+                    <button type="button" onclick="openCertificateModal()" class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold shadow-md shadow-sky-500/30 transition-all cursor-pointer">
+                        <span class="material-symbols-outlined text-[16px]">verified</span>
+                        <span>Xem Chứng Chỉ Của Tôi</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right 4 Glassmorphism Metric Cards -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3 shrink-0">
+                <!-- Card 1: ĐƠN ĐK -->
+                <div class="rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-4 text-center min-w-[95px] flex flex-col justify-center">
+                    <span class="text-2xl sm:text-3xl font-black text-white font-mono block">@(dangKyCount < 10 ? $"0{dangKyCount}" : $"{dangKyCount}")</span>
+                    <span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider mt-1 block">ĐƠN ĐK</span>
+                </div>
+                <!-- Card 2: GPA TÍCH LŨY -->
+                <div class="rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-4 text-center min-w-[95px] flex flex-col justify-center">
+                    <span class="text-2xl sm:text-3xl font-black text-emerald-400 font-mono block">@avgScore.ToString("0.0")</span>
+                    <span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider mt-1 block">GPA TÍCH LŨY</span>
+                </div>
+                <!-- Card 3: LỚP ĐANG HỌC -->
+                <div class="rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-4 text-center min-w-[95px] flex flex-col justify-center">
+                    <span class="text-2xl sm:text-3xl font-black text-white font-mono block">@(lopDangHocCount < 10 ? $"0{lopDangHocCount}" : $"{lopDangHocCount}")</span>
+                    <span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider mt-1 block">LỚP ĐANG HỌC</span>
+                </div>
+                <!-- Card 4: CHUYÊN CẦN -->
+                <div class="rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-4 text-center min-w-[95px] flex flex-col justify-center">
+                    <span class="text-2xl sm:text-3xl font-black text-cyan-300 font-mono block">@(chuyenCanPercent)%</span>
+                    <span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider mt-1 block">CHUYÊN CẦN</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. 5-TAB NAVIGATION BAR (WHITE PILL CONTAINER MATCHING SCREENSHOT) -->
+    <div class="bg-white rounded-2xl p-1.5 shadow-xs border border-border-standard flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+        <!-- Tab 1: Khóa học đang mở đăng ký -->
+        <button type="button" onclick="switchPortalTab('courses')" id="portal-tab-courses"
+                class="portal-tab-btn active px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap bg-[#0284c7] text-white shadow-xs">
+            <span class="material-symbols-outlined text-[18px]">grid_view</span>
+            <span>Khóa học đang mở đăng ký</span>
+        </button>
+
+        <!-- Tab 2: Đơn đăng ký & Học phí -->
+        <button type="button" onclick="switchPortalTab('registrations')" id="portal-tab-registrations"
+                class="portal-tab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-700 hover:text-brand-deep hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
+            <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+            <span>Đơn đăng ký & Học phí</span>
+            <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold">@dangKyCount</span>
+        </button>
+
+        <!-- Tab 3: Thời khóa biểu tuần -->
+        <button type="button" onclick="switchPortalTab('schedule')" id="portal-tab-schedule"
+                class="portal-tab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-700 hover:text-brand-deep hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
+            <span class="material-symbols-outlined text-[18px]">calendar_month</span>
+            <span>Thời khóa biểu tuần</span>
+        </button>
+
+        <!-- Tab 4: Bảng điểm & Chứng nhận -->
+        <button type="button" onclick="switchPortalTab('grades')" id="portal-tab-grades"
+                class="portal-tab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-700 hover:text-brand-deep hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
+            <span class="material-symbols-outlined text-[18px]">workspace_premium</span>
+            <span>Bảng điểm & Chứng nhận</span>
+        </button>
+
+        <!-- Tab 5: Thẻ sinh viên & Hồ sơ -->
+        <button type="button" onclick="switchPortalTab('profile')" id="portal-tab-profile"
+                class="portal-tab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-700 hover:text-brand-deep hover:bg-slate-50 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
+            <span class="material-symbols-outlined text-[18px]">badge</span>
+            <span>Thẻ sinh viên & Hồ sơ</span>
+        </button>
+    </div>
+
+    <!-- 3. TAB 1 PANE: KHÓA HỌC ĐANG MỞ ĐĂNG KÝ -->
+    <div id="portal-pane-courses" class="portal-pane space-y-6">
+        <!-- Filter Toolbar -->
+        <div class="bg-white rounded-2xl p-3 border border-border-standard shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 text-xs">
+            <div class="relative flex-1">
+                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+                <input type="text" id="portalCourseSearch" oninput="filterPortalCards()" placeholder="Tìm tên lớp, chương trình đào tạo, giảng viên..."
+                       class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-border-standard bg-slate-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 text-slate-800 placeholder:text-slate-400 transition-all text-xs" />
+            </div>
+
+            <div class="relative">
+                <select id="portalProgramFilter" onchange="filterPortalCards()"
+                        class="w-full md:w-auto px-3.5 py-2.5 rounded-xl border border-border-standard bg-slate-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 text-slate-700 font-medium text-xs cursor-pointer">
+                    <option value="">-- Tất cả Chương trình Đào tạo --</option>
+                    @foreach (var ct in chuongTrinhs)
+                    {
+                        <option value="@ct.TenChuongTrinh">@ct.TenChuongTrinh</option>
+                    }
+                </select>
+            </div>
+
+            <div class="relative">
+                <select id="portalSeatFilter" onchange="filterPortalCards()"
+                        class="w-full md:w-auto px-3.5 py-2.5 rounded-xl border border-border-standard bg-slate-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 text-slate-700 font-medium text-xs cursor-pointer">
+                    <option value="">-- Tình trạng chỗ --</option>
+                    <option value="con-cho">Còn chỗ</option>
+                    <option value="sap-day">Sắp đầy chỗ</option>
+                </select>
+            </div>
+
+            <div class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 font-bold shrink-0 self-start md:self-auto">
+                <span class="material-symbols-outlined text-[16px] text-rose-600">filter_alt</span>
+                <span id="portalCourseCountBadge">@allOpenClasses.Count lớp mở</span>
+            </div>
+        </div>
+
+        <!-- 3-Column Course Cards Grid Matching Screenshot -->
+        <div id="portalCardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach (var cls in allOpenClasses)
+            {
+                int currentSiSo = allSiSoMap.ContainsKey(cls.MaLopHoc) ? allSiSoMap[cls.MaLopHoc] : 0;
+                string seatStatus = currentSiSo >= cls.SiSoToiDa * 0.8 ? "sap-day" : "con-cho";
+                string gvDisplay = !string.IsNullOrWhiteSpace(cls.GiangVien?.HoTen)
+                    ? ($"{cls.GiangVien.HocVi ?? "ThS."} {cls.GiangVien.HoTen}")
+                    : (!string.IsNullOrWhiteSpace(cls.TenGiangVien) ? cls.TenGiangVien : "ThS. Giảng viên UNETI");
+                string hinhAnh = cls.TenLop.Contains("React", StringComparison.OrdinalIgnoreCase)
+                    ? "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=600&q=80"
+                    : (cls.TenLop.Contains("Python", StringComparison.OrdinalIgnoreCase) || cls.TenLop.Contains("AI", StringComparison.OrdinalIgnoreCase))
+                        ? "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=600&q=80"
+                        : "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=600&q=80";
+                string moTa = !string.IsNullOrWhiteSpace(cls.MoTa) ? cls.MoTa : (!string.IsNullOrWhiteSpace(cls.ChuongTrinhDaoTao?.MoTa) ? cls.ChuongTrinhDaoTao.MoTa : "Khóa đào tạo chuyên sâu kiến thức và kỹ năng thực tế với giảng viên hướng dẫn trực tiếp.");
+                string lichHoc = !string.IsNullOrWhiteSpace(cls.PhongHoc) ? $"Phòng {cls.PhongHoc}" : "Phòng Lab CNTT";
+
+                <div class="portal-course-card bg-white rounded-3xl overflow-hidden border border-border-standard shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col group"
+                     data-program="@(cls.ChuongTrinhDaoTao?.TenChuongTrinh ?? "")" data-name="@cls.TenLop" data-lecturer="@gvDisplay" data-seats="@seatStatus">
+                    <div class="relative aspect-video overflow-hidden bg-slate-900">
+                        <img src="@hinhAnh"
+                             alt="@cls.TenLop"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20"></div>
+
+                        <span class="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-black/50 backdrop-blur-md text-white text-[11px] font-mono font-bold tracking-wider border border-white/20">
+                            #LOP@(cls.MaLopHoc.ToString("D2"))
+                        </span>
+
+                        <span class="absolute top-3 right-3 px-3 py-1 rounded-lg bg-emerald-600 text-white text-[11px] font-bold shadow-md shadow-emerald-600/30">
+                            Tuyển sinh
+                        </span>
+
+                        <div class="absolute bottom-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-md text-amber-300 text-xs font-bold border border-white/10">
+                            <span class="material-symbols-outlined text-[15px] text-amber-400">bookmark</span>
+                            <span>@(cls.ChuongTrinhDaoTao?.TenChuongTrinh ?? "Khóa học")</span>
+                        </div>
                     </div>
 
-                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.15] text-white">
+                    <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+                        <div class="space-y-2">
+                            <h3 class="text-base font-bold text-slate-900 line-clamp-1 group-hover:text-primary transition-colors">
+                                @cls.TenLop
+                            </h3>
+                            <p class="text-xs text-outline line-clamp-2">
+                                @moTa
+                            </p>
+                        </div>
+
+                        <div class="space-y-2 pt-2 border-t border-border-standard text-xs text-slate-600">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[16px] text-primary">person</span>
+                                <span class="truncate">@gvDisplay</span>
+                            </div>
+                            <div class="flex items-center gap-2 font-mono">
+                                <span class="material-symbols-outlined text-[16px] text-primary">schedule</span>
+                                <span>@lichHoc • @cls.SoBuoiHoc buổi</span>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-t border-border-standard flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] text-outline uppercase font-semibold block">Học phí</span>
+                                <span class="text-base font-black text-rose-600 font-mono">@cls.HocPhi.ToString("N0") đ</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] text-outline font-mono block">Sĩ số: <strong>@currentSiSo/@cls.SiSoToiDa</strong></span>
+                                <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold @(seatStatus == "con-cho" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700")">
+                                    @(seatStatus == "con-cho" ? "Còn chỗ" : "Sắp đầy")
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="pt-1">
+                            <a href="/CongHocVien/DangKy" class="w-full py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                                <span class="material-symbols-outlined text-[16px]">how_to_reg</span>
+                                <span>Đăng ký tham gia lớp</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- 4. TAB 2 PANE: ĐƠN ĐĂNG KÝ & HỌC PHÍ -->
+    <div id="portal-pane-registrations" class="portal-pane space-y-6 hidden">
+        <!-- Status summary stats -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white rounded-2xl p-4 border border-border-standard shadow-xs flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[24px]">receipt_long</span>
+                </div>
+                <div>
+                    <span class="text-xs text-outline font-medium">Tổng số đơn đăng ký</span>
+                    <h4 class="text-xl font-black text-brand-deep font-mono">@dangKyCount khóa</h4>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-4 border border-border-standard shadow-xs flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[24px]">check_circle</span>
+                </div>
+                <div>
+                    <span class="text-xs text-outline font-medium">Đã hoàn tất học phí</span>
+                    <h4 class="text-xl font-black text-emerald-700 font-mono">@lopDangHocCount khóa</h4>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-4 border border-border-standard shadow-xs flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[24px]">pending_actions</span>
+                </div>
+                <div>
+                    <span class="text-xs text-outline font-medium">Chờ thanh toán / xác nhận</span>
+                    <h4 class="text-xl font-black text-amber-700 font-mono">@(Math.Max(0, dangKyCount - lopDangHocCount)) khóa</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registration Records Table -->
+        <div class="bg-white rounded-3xl border border-border-standard shadow-xs overflow-hidden">
+            <div class="p-5 border-b border-border-standard flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h3 class="text-sm font-bold text-brand-deep">Danh Sách Lớp Học Đã Đăng Ký</h3>
+                    <p class="text-xs text-outline">Theo dõi tình trạng xét duyệt hồ sơ và xác nhận học phí trực tuyến</p>
+                </div>
+                <button type="button" onclick="openVietQRModal('DK05', 'React 19 & Next.js 15 Thực chiến', 3200000)" class="px-3.5 py-2 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer self-start sm:self-auto">
+                    <span class="material-symbols-outlined text-[16px]">qr_code_2</span>
+                    <span>Nộp học phí VietQR</span>
+                </button>
+            </div>
+
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-xs text-left border-collapse min-w-[700px]">
+                    <thead class="bg-slate-50 text-brand-deep border-b border-border-standard font-bold text-[11px] uppercase tracking-wider">
+                        <tr>
+                            <th class="p-3.5 border-r border-border-standard">Mã Đơn / Khóa Học</th>
+                            <th class="p-3.5 border-r border-border-standard">Ngày ĐK</th>
+                            <th class="p-3.5 border-r border-border-standard text-right">Học Phí</th>
+                            <th class="p-3.5 border-r border-border-standard text-right">Đã Đóng</th>
+                            <th class="p-3.5 border-r border-border-standard text-right">Còn Lại</th>
+                            <th class="p-3.5 border-r border-border-standard text-center">Trạng Thái</th>
+                            <th class="p-3.5 text-center">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border-standard">
+                        @if (!studentDangKys.Any())
+                        {
+                            <tr>
+                                <td colspan="7" class="p-8 text-center text-outline">Chưa có đơn đăng ký khóa học nào trong CSDL.</td>
+                            </tr>
+                        }
+                        @foreach (var dk in studentDangKys)
+                        {
+                            decimal hocPhi = dk.LopHoc?.HocPhi ?? 0;
+                            bool daDong = dk.TrangThai == "Đang học" || dk.TrangThai == "Đã đóng học phí";
+                            decimal daDongTien = daDong ? hocPhi : 0;
+                            decimal conLai = hocPhi - daDongTien;
+                            <tr class="hover:bg-slate-50/50">
+                                <td class="p-3.5 border-r border-border-standard">
+                                    <div class="font-bold text-brand-deep">@(dk.LopHoc?.TenLop ?? "Lớp học")</div>
+                                    <span class="text-[10px] text-outline font-mono">Mã đơn: #DK@(dk.MaDangKy.ToString("D2")) • Mã lớp: #LOP@(dk.MaLopHoc.ToString("D2"))</span>
+                                </td>
+                                <td class="p-3.5 border-r border-border-standard font-mono text-outline">@dk.NgayDangKy.ToString("dd/MM/yyyy")</td>
+                                <td class="p-3.5 border-r border-border-standard text-right font-mono font-bold">@hocPhi.ToString("N0") đ</td>
+                                <td class="p-3.5 border-r border-border-standard text-right font-mono font-bold text-emerald-700">@daDongTien.ToString("N0") đ</td>
+                                <td class="p-3.5 border-r border-border-standard text-right font-mono @(conLai > 0 ? "font-bold text-rose-600" : "text-slate-400")">@conLai.ToString("N0") đ</td>
+                                <td class="p-3.5 border-r border-border-standard text-center">
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold @(daDong ? "bg-emerald-100 text-emerald-800 border border-emerald-300" : "bg-amber-100 text-amber-800 border border-amber-300")">
+                                        @dk.TrangThai
+                                    </span>
+                                </td>
+                                <td class="p-3.5 text-center">
+                                    @if (daDong)
+                                    {
+                                        <span class="text-xs font-semibold text-emerald-700">Đã hoàn tất</span>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" onclick="openVietQRModal('DK@(dk.MaDangKy.ToString("D2"))', '@(dk.LopHoc?.TenLop)', @hocPhi)" class="px-3 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold shadow-xs cursor-pointer">
+                                            Thanh toán VietQR
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }</tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. TAB 3 PANE: THỜI KHÓA BIỂU TUẦN -->
+    <div id="portal-pane-schedule" class="portal-pane space-y-4 hidden">
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-border-standard shadow-xs space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <span class="text-outline flex items-center gap-1.5 font-medium">
+                    <span class="material-symbols-outlined text-[18px] text-primary">schedule</span>
+                    <span>Lịch học thực hành Lab tuần này tại cơ sở Lĩnh Nam & Minh Khai - Đại học UNETI</span>
+                </span>
+                <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Đang trong tuần học thứ 8
+                </span>
+            </div>
+
+            <!-- Schedule Matrix Table -->
+            <div class="overflow-x-auto rounded-2xl border border-border-standard bg-white custom-scrollbar">
+                <table class="w-full text-xs text-left border-collapse min-w-[700px]">
+                    <thead class="bg-primary-bg/70 text-brand-deep border-b border-border-brand font-bold text-[11px] uppercase tracking-wider">
+                        <tr>
+                            <th class="p-3.5 border-r border-border-standard w-28 sticky left-0 z-20 bg-primary-bg/95 backdrop-blur-xs shadow-[2px_0_5px_-2px_rgba(0,0,0,0.08)]">Ca Học</th>
+                            <th class="p-3.5 border-r border-border-standard text-center">Thứ 2</th>
+                            <th class="p-3.5 border-r border-border-standard text-center">Thứ 3</th>
+                            <th class="p-3.5 border-r border-border-standard text-center">Thứ 4</th>
+                            <th class="p-3.5 border-r border-border-standard text-center">Thứ 5</th>
+                            <th class="p-3.5 border-r border-border-standard text-center">Thứ 6</th>
+                            <th class="p-3.5 text-center">Thứ 7</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border-standard">
+                        <!-- Ca Sáng (08:00 - 11:30) -->
+                        <tr class="hover:bg-slate-50/50">
+                            <td class="p-3.5 font-bold text-brand-deep border-r border-border-standard bg-slate-50 sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.08)]">
+                                <div>Ca Sáng</div>
+                                <div class="text-[10px] text-outline font-normal font-mono">08:00 - 11:30</div>
+                            </td>
+                            <td class="p-2 border-r border-border-standard text-center text-outline">--</td>
+                            <td class="p-2 border-r border-border-standard text-center">
+                                <div class="p-2 rounded-xl bg-primary-bg border border-border-brand text-left space-y-0.5">
+                                    <span class="text-[10px] font-bold text-brand-deep block truncate">ASP.NET Core MVC</span>
+                                    <span class="text-[9px] text-outline">Lab 402 • Lĩnh Nam</span>
+                                </div>
+                            </td>
+                            <td class="p-2 border-r border-border-standard text-center text-outline">--</td>
+                            <td class="p-2 border-r border-border-standard text-center">
+                                <div class="p-2 rounded-xl bg-primary-bg border border-border-brand text-left space-y-0.5">
+                                    <span class="text-[10px] font-bold text-brand-deep block truncate">ASP.NET Core MVC</span>
+                                    <span class="text-[9px] text-outline">Lab 402 • Lĩnh Nam</span>
+                                </div>
+                            </td>
+                            <td class="p-2 border-r border-border-standard text-center text-outline">--</td>
+                            <td class="p-2 text-center text-outline">--</td>
+                        </tr>
+
+                        <!-- Ca Chiều (13:30 - 17:00) -->
+                        <tr class="hover:bg-slate-50/50">
+                            <td class="p-3.5 font-bold text-brand-deep border-r border-border-standard bg-slate-50 sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.08)]">
+                                <div>Ca Chiều</div>
+                                <div class="text-[10px] text-outline font-normal font-mono">13:30 - 17:00</div>
+                            </td>
+                            <td class="p-2 border-r border-border-standard text-center text-outline">--</td>
+                            <td class="p-2 border-r border-border-standard text-center text-outline">--</td>
+                            <td class="p-2 border-r border-border-standard text-center">
+                                <div class="p-2 rounded-xl bg-amber-50 border border-amber-200 text-left space-y-0.5">
+                                    <span class="text-[10px] font-bold text-amber-900 block truncate">ReactJS & Tailwind</span>
+                                    <span class="text-[9px] text-amber-700">Lab 305 • Minh Khai</span>
+                                </div>
+                            </td>
+                            <td class="p-2 border-r border-border-standard text-center text-outline">--</td>
+                            <td class="p-2 border-r border-border-standard text-center">
+                                <div class="p-2 rounded-xl bg-amber-50 border border-amber-200 text-left space-y-0.5">
+                                    <span class="text-[10px] font-bold text-amber-900 block truncate">ReactJS & Tailwind</span>
+                                    <span class="text-[9px] text-amber-700">Lab 305 • Minh Khai</span>
+                                </div>
+                            </td>
+                            <td class="p-2 text-center text-outline">--</td>
+                        </tr>
+
+                        <!-- Ca Tối (18:00 - 21:00) -->
+                        <tr class="hover:bg-slate-50/50">
+                            <td class="p-3.5 font-bold text-brand-deep border-r border-border-standard bg-slate-50 sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.08)]">
+                                <div>Ca Tối</div>
+                                <div class="text-[10px] text-outline font-normal font-mono">18:00 - 21:00</div>
+                            </td>
+                            <td class="p-2 border-r border-border-standard text-center">
+                                <div class="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-left space-y-0.5">
+                                    <span class="text-[10px] font-bold text-emerald-900 block truncate">Python AI & Data</span>
+                                    <span class="text-[9px] text-emerald-700">Online Zoom Studio</span>
+                                </div>
+                            </td>
+                            <td class="p-2 border-r border-border-standard text-center text-outline">--</td>
+                            <td class="p-2 border-r border-border-standard text-center">
+                                <div class="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-left space-y-0.5">
+                                    <span class="text-[10px] font-bold text-emerald-900 block truncate">Python AI & Data</span>
+                                    <span class="text-[9px] text-emerald-700">Online Zoom Studio</span>
+                                </div>
+                            </td>
+                            <td class="p-2 border-r border-border-standard text-center text-outline">--</td>
+                            <td class="p-2 border-r border-border-standard text-center text-outline">--</td>
+                            <td class="p-2 text-center text-outline">--</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. TAB 4 PANE: BẢNG ĐIỂM & CHỨNG NHẬN -->
+    <div id="portal-pane-grades" class="portal-pane space-y-6 hidden">
+        <!-- GPA Overview Banner -->
+        <div class="bg-gradient-to-r from-brand-deep to-[#1976D2] rounded-3xl p-6 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="space-y-2 text-center md:text-left">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-xs font-bold text-amber-300">
+                    <span class="material-symbols-outlined text-[16px]">verified</span>
+                    <span>Chuẩn Đào Tạo Đại Học UNETI</span>
+                </div>
+                <h3 class="text-xl font-black">Bảng Điểm Tích Lũy Khóa Học Thực Chiến</h3>
+                <p class="text-xs text-sky-100 max-w-xl">
+                    Kết quả học tập được xác thực điện tử và liên thông trực tiếp với hệ sinh thái tuyển dụng doanh nghiệp đối tác.
+                </p>
+            </div>
+            <div class="flex items-center gap-4 shrink-0">
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 text-center border border-white/20 min-w-[110px]">
+                    <span class="text-xs text-slate-200 uppercase font-semibold block">Điểm TB (10)</span>
+                    <span class="text-2xl font-black text-amber-300 font-mono">@avgScore.ToString("0.0")</span>
+                </div>
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 text-center border border-white/20 min-w-[110px]">
+                    <span class="text-xs text-slate-200 uppercase font-semibold block">GPA Tín Chỉ</span>
+                    <span class="text-2xl font-black text-emerald-400 font-mono">@gpa4.ToString("0.0")</span>
+                </div>
+                <button type="button" onclick="openCertificateModal()" class="px-4 py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-black text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer">
+                    <span class="material-symbols-outlined text-[18px]">workspace_premium</span>
+                    <span>Tải Chứng Chỉ</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Transcript Table -->
+        <div class="bg-white rounded-3xl border border-border-standard shadow-xs overflow-hidden">
+            <div class="p-5 border-b border-border-standard flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-bold text-brand-deep">Chi Tiết Điểm Học Phần</h3>
+                    <p class="text-xs text-outline">Quy đổi chuẩn điểm chữ và điểm hệ 4 theo quy chế đào tạo UNETI</p>
+                </div>
+                <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
+                    Xếp loại: Giỏi (Xuất sắc)
+                </span>
+            </div>
+
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-xs text-left border-collapse min-w-[700px]">
+                    <thead class="bg-slate-50 text-brand-deep border-b border-border-standard font-bold text-[11px] uppercase tracking-wider">
+                        <tr>
+                            <th class="p-3.5 border-r border-border-standard">Mã Lớp / Học Phần</th>
+                            <th class="p-3.5 border-r border-border-standard">Giảng Viên</th>
+                            <th class="p-3.5 border-r border-border-standard text-center">Quá Trình (40%)</th>
+                            <th class="p-3.5 border-r border-border-standard text-center">Cuối Kỳ (60%)</th>
+                            <th class="p-3.5 border-r border-border-standard text-center">Tổng Kết (10)</th>
+                            <th class="p-3.5 border-r border-border-standard text-center">Hệ 4 (Chữ)</th>
+                            <th class="p-3.5 text-center">Trạng Thái</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border-standard">
+                        @if (!studentDangKys.Any())
+                        {
+                            <tr>
+                                <td colspan="7" class="p-8 text-center text-outline">Chưa có dữ liệu kết quả học tập trong CSDL.</td>
+                            </tr>
+                        }
+                        @foreach (var dk in studentDangKys)
+                        {
+                            var kq = dk.KetQuaHocTap;
+                            <tr class="hover:bg-slate-50/50">
+                                <td class="p-3.5 font-bold text-brand-deep border-r border-border-standard">
+                                    <div>@(dk.LopHoc?.TenLop ?? "Học phần")</div>
+                                    <span class="text-[10px] text-outline font-normal font-mono">Mã lớp: #LOP@(dk.MaLopHoc.ToString("D2"))</span>
+                                </td>
+                                <td class="p-3.5 border-r border-border-standard text-outline">@(dk.LopHoc?.TenGiangVien ?? "--")</td>
+                                <td class="p-3.5 border-r border-border-standard text-center font-mono font-semibold">@(kq != null ? kq.DiemChuyenCan.ToString("0.0") : "--")</td>
+                                <td class="p-3.5 border-r border-border-standard text-center font-mono font-semibold">@(kq != null ? kq.DiemCuoiKhoa.ToString("0.0") : "--")</td>
+                                <td class="p-3.5 border-r border-border-standard text-center font-mono font-bold text-brand-deep">@(kq != null ? kq.DiemTongKet.ToString("0.0") : "Đang học")</td>
+                                <td class="p-3.5 border-r border-border-standard text-center font-mono font-bold text-primary">@(kq != null ? $"{kq.DiemHe4:0.0} ({kq.DiemChu})" : "--")</td>
+                                <td class="p-3.5 text-center">
+                                    @if (kq != null)
+                                    {
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold @(kq.KetQua == "Đạt" ? "bg-emerald-100 text-emerald-800 border border-emerald-300" : "bg-rose-100 text-rose-800 border border-rose-300")">
+                                            @kq.KetQua (@kq.XepLoai)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                                            Đang diễn ra
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }</tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. TAB 5 PANE: THẺ SINH VIÊN & HỒ SƠ -->
+    <div id="portal-pane-profile" class="portal-pane space-y-6 hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <!-- Digital Student ID Card (Left Column) -->
+            <div class="lg:col-span-5 space-y-4">
+                <div class="bg-gradient-to-tr from-[#0D47A1] via-[#1565C0] to-[#1E88E5] text-white rounded-3xl p-6 shadow-xl relative overflow-hidden border border-white/20">
+                    <!-- Tech wave background decoration -->
+                    <div class="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-white/10 blur-xl pointer-events-none"></div>
+
+                    <!-- Card Header -->
+                    <div class="flex items-center justify-between pb-4 border-b border-white/20">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-10 h-10 rounded-xl bg-white text-brand-deep flex items-center justify-center font-bold shadow-xs">
+                                <span class="material-symbols-outlined text-[24px]">school</span>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-black tracking-wide uppercase">TRƯỜNG ĐH KT-KT CÔNG NGHIỆP</h4>
+                                <p class="text-[10px] text-sky-200">CỔNG HỌC VIÊN CHÍNH QUY - UNETI</p>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined text-amber-300 text-[26px]">contactless</span>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="pt-5 flex items-center gap-4">
+                        <div class="w-20 h-24 rounded-2xl bg-white/20 border-2 border-white/40 flex items-center justify-center font-black text-2xl text-white shadow-inner shrink-0 overflow-hidden">
+                            <span class="material-symbols-outlined text-[48px] text-white/80">person</span>
+                        </div>
+                        <div class="space-y-1">
+                            <span class="text-[10px] text-sky-200 uppercase font-semibold">Họ và tên học viên</span>
+                            <h3 class="text-base font-black text-white">@studentDisplayName</h3>
+                            <p class="text-xs font-mono text-amber-300 font-bold">Mã số: @studentIdDisplay</p>
+                            <p class="text-[11px] text-slate-200">Khoa CNTT • Lớp DHTI17A1HN</p>
+                        </div>
+                    </div>
+
+                    <!-- Card Footer: Barcode & Security Badge -->
+                    <div class="pt-5 mt-4 border-t border-white/20 flex items-center justify-between">
+                        <div class="font-mono text-[9px] tracking-[4px] text-sky-200">
+                            |||| ||| ||||| || ||||
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 text-[10px] font-bold border border-emerald-400/30">
+                            Thẻ Đang Hiệu Lực
+                        </span>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-sky-50 border border-sky-200 text-xs text-sky-900 space-y-1">
+                    <p class="font-bold flex items-center gap-1.5 text-brand-deep">
+                        <span class="material-symbols-outlined text-[16px] text-primary">badge</span>
+                        <span>Định danh học viên UNETI</span>
+                    </p>
+                    <p class="text-slate-600">Thẻ sinh viên số được sử dụng để điểm danh máy quét tại phòng Lab và ra vào các cơ sở của nhà trường.</p>
+                </div>
+            </div>
+
+            <!-- Profile Info Form (Right Column) -->
+            <div class="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-border-standard shadow-xs space-y-6">
+                <div class="border-b border-border-standard pb-4">
+                    <h3 class="text-base font-bold text-brand-deep">Thông Tin Cá Nhân Học Viên</h3>
+                    <p class="text-xs text-outline">Cập nhật thông tin liên lạc nhận thông báo lịch học và chứng chỉ tốt nghiệp</p>
+                </div>
+
+                <form onsubmit="saveStudentProfile(event)" class="space-y-4 text-xs">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <label class="font-semibold text-slate-700">Họ và tên</label>
+                            <input type="text" value="@studentDisplayName" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="font-semibold text-slate-700">Mã học viên (Cố định)</label>
+                            <input type="text" value="@studentIdDisplay" readonly class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-slate-100 font-mono text-outline cursor-not-allowed" />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <label class="font-semibold text-slate-700">Email nhận chứng chỉ</label>
+                            <input type="email" value="@(currentStudent?.Email ?? "tuan.tm@uneti.edu.vn")" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="font-semibold text-slate-700">Số điện thoại liên hệ</label>
+                            <input type="tel" value="@(currentStudent?.SoDienThoai ?? "0912 345 602")" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <label class="font-semibold text-slate-700">Chuyên ngành đào tạo</label>
+                            <input type="text" value="Công nghệ Thông tin (K17)" readonly class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-slate-100 text-outline cursor-not-allowed" />
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="font-semibold text-slate-700">Cơ sở học tập chính</label>
+                            <input type="text" value="Cơ sở Lĩnh Nam & Minh Khai, Hà Nội" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                        </div>
+                    </div>
+
+                    <div class="pt-3 flex justify-end">
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer">
+                            <span class="material-symbols-outlined text-[16px]">save</span>
+                            <span>Lưu thay đổi hồ sơ</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toggle to view general commercial sections -->
+    <div class="text-center pt-6 border-t border-border-standard">
+        <button type="button" onclick="togglePublicLanding()" class="px-5 py-2.5 rounded-2xl bg-white border border-border-standard hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all inline-flex items-center gap-2 shadow-xs cursor-pointer">
+            <span class="material-symbols-outlined text-[18px] text-primary">explore</span>
+            <span id="btnTogglePublicText">Xem thêm Giới thiệu Học viện & Toàn bộ Khóa học Tuyển sinh</span>
+        </button>
+    </div>
+</div>
+
+<!-- ================= B. TRANG CHỦ THƯƠNG MẠI UNETI ================= -->
+<div id="guestLandingSection" class="space-y-16 sm:space-y-24 pb-16">
+
+
+    <!-- ================= 1. HERO SECTION (THƯƠNG MẠI ĐỈNH CAO) ================= -->
+    <section class="relative bg-gradient-to-b from-[#08285c] via-[#0D47A1] to-[#1565C0] text-white pt-14 pb-24 sm:pt-20 sm:pb-32 overflow-hidden">
+        <!-- Ambient Decorative Glow Circles -->
+        <div class="absolute -top-32 -left-32 w-[34rem] h-[34rem] bg-sky-500/20 rounded-full blur-[100px] pointer-events-none"></div>
+        <div class="absolute top-1/3 -right-28 w-[32rem] h-[32rem] bg-indigo-500/25 rounded-full blur-[110px] pointer-events-none"></div>
+        <div class="absolute -bottom-20 left-1/3 w-[26rem] h-[26rem] bg-amber-400/10 rounded-full blur-[90px] pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+                <!-- Left: Hero Headline & Action -->
+                <div class="lg:col-span-7 space-y-7 text-center lg:text-left">
+                    <!-- Live Status Pill Badge -->
+                    <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold text-amber-300 shadow-sm">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
+                        </span>
+                        <span class="tracking-wide">Tuyển sinh Khóa Đào tạo Kỹ sư Thực chiến 2025</span>
+                    </div>
+
+                    <!-- Main Heading -->
+                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.12] text-white">
                         Kiến Tạo Tương Lai <br />
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-sky-300 to-indigo-200">
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-sky-200 to-indigo-100 drop-shadow-sm">
                             Công Nghệ Thực Chiến
                         </span>
                     </h1>
 
-                    <p class="text-sm sm:text-base lg:text-lg text-slate-200 max-w-2xl mx-auto lg:mx-0 font-normal leading-relaxed">
-                        Chương trình đào tạo nghề nghiệp và chứng chỉ quốc tế chất lượng cao tại <strong>UNETI EDUSPACE</strong>. Giảng viên chuyên gia doanh nghiệp, 80% thời lượng thực hành, cam kết giới thiệu việc làm ngay sau tốt nghiệp.
+                    <!-- Subtitle -->
+                    <p class="text-sm sm:text-base lg:text-lg text-slate-200/90 max-w-2xl mx-auto lg:mx-0 font-normal leading-relaxed">
+                        Chương trình đào tạo kỹ năng nghề nghiệp và chứng chỉ uy tín tại <strong class="text-white font-semibold">UNETI EDUSPACE</strong>. Giảng viên chuyên gia doanh nghiệp, 80% thời lượng thực hành Lab Cloud, cam kết bảo trợ việc làm sau tốt nghiệp.
                     </p>
 
-                    <!-- Quick Search Bar on Hero -->
-                    <form action="/CongHocVien/DangKy" method="get" class="max-w-xl mx-auto lg:mx-0">
-                        <div class="relative flex items-center bg-white rounded-2xl p-1.5 shadow-2xl border border-white/20">
-                            <span class="material-symbols-outlined text-outline pl-3 text-[22px]">search</span>
-                            <input type="text" name="search" placeholder="Bạn muốn học gì hôm nay? (ASP.NET, React, AI, Python...)"
-                                   class="w-full px-3 py-2.5 text-xs sm:text-sm text-brand-deep placeholder:text-outline bg-transparent focus:outline-none" />
-                            <button type="submit" class="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs sm:text-sm font-bold shadow-md transition-all shrink-0">
-                                Tìm khóa học
-                            </button>
-                        </div>
-                    </form>
-
-                    <!-- Action Buttons -->
-                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
+                    <!-- Action Buttons: Khám Phá Khóa Học & Liên Hệ -->
+                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-1">
+                        <!-- Primary Button: Khám Phá Khóa Học -->
                         <a href="/CongHocVien/DangKy"
-                           class="px-6 py-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-extrabold text-xs sm:text-sm shadow-lg shadow-amber-400/25 transition-all flex items-center gap-2 group">
-                            <span>Khám Phá Khóa Học Ngay</span>
+                           class="px-7 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-300 hover:from-amber-300 hover:to-amber-200 text-slate-900 font-extrabold text-xs sm:text-sm shadow-xl shadow-amber-400/25 hover:shadow-amber-400/35 transition-all flex items-center gap-2.5 group cursor-pointer transform hover:-translate-y-0.5">
+                            <span class="material-symbols-outlined text-[20px] text-slate-900">explore</span>
+                            <span>Khám Phá Khóa Học</span>
                             <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
                         </a>
-                        <a href="#tu-van-section"
-                           class="px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm border border-white/20 backdrop-blur-md transition-all flex items-center gap-2">
-                            <span class="material-symbols-outlined text-[18px]">support_agent</span>
-                            <span>Nhận Tư Vấn Lộ Trình</span>
+
+                        <!-- Secondary Button: Liên Hệ -->
+                        <a href="#lien-he"
+                           class="px-7 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm border border-white/25 backdrop-blur-md transition-all flex items-center gap-2.5 shadow-lg shadow-black/5 hover:border-white/40 transform hover:-translate-y-0.5 cursor-pointer">
+                            <span class="material-symbols-outlined text-[20px] text-sky-200">contact_support</span>
+                            <span>Liên Hệ Tư Vấn</span>
                         </a>
                     </div>
 
                     <!-- Trust Stats Badges -->
-                    <div class="pt-6 border-t border-white/10 grid grid-cols-3 gap-4 max-w-lg mx-auto lg:mx-0 text-left">
-                        <div>
-                            <div class="text-xl sm:text-2xl font-black text-amber-300 font-mono">15,000+</div>
-                            <div class="text-[11px] text-slate-300">Học viên tin chọn</div>
+                    <div class="pt-6 border-t border-white/15 grid grid-cols-3 gap-4 sm:gap-6 max-w-lg mx-auto lg:mx-0 text-left">
+                        <div class="space-y-0.5">
+                            <div class="text-2xl sm:text-3xl font-black text-amber-300 font-mono tracking-tight">15,000+</div>
+                            <div class="text-[11px] sm:text-xs text-slate-300 font-medium">Học viên tin chọn</div>
                         </div>
-                        <div>
-                            <div class="text-xl sm:text-2xl font-black text-sky-300 font-mono">98.2%</div>
-                            <div class="text-[11px] text-slate-300">Có việc làm đúng ngành</div>
+                        <div class="space-y-0.5">
+                            <div class="text-2xl sm:text-3xl font-black text-sky-300 font-mono tracking-tight">98.2%</div>
+                            <div class="text-[11px] sm:text-xs text-slate-300 font-medium">Việc làm đúng ngành</div>
                         </div>
-                        <div>
-                            <div class="text-xl sm:text-2xl font-black text-emerald-300 font-mono">100+</div>
-                            <div class="text-[11px] text-slate-300">Doanh nghiệp đối tác</div>
+                        <div class="space-y-0.5">
+                            <div class="text-2xl sm:text-3xl font-black text-emerald-300 font-mono tracking-tight">100+</div>
+                            <div class="text-[11px] sm:text-xs text-slate-300 font-medium">Đối tác công nghệ</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Right: Visual EdTech Showcase Card -->
-                <div class="lg:col-span-5 relative hidden lg:block">
-                    <div class="relative mx-auto max-w-sm rounded-3xl bg-white/10 backdrop-blur-xl border border-white/20 p-6 shadow-2xl space-y-5">
-                        <!-- Top floating badge -->
-                        <div class="flex items-center justify-between pb-4 border-b border-white/10">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-2xl bg-amber-400 text-slate-900 flex items-center justify-center font-bold">
-                                    <span class="material-symbols-outlined text-[22px]">workspace_premium</span>
+                <!-- Right: 3 Distinct Elevated Border Boxes -->
+                <div class="lg:col-span-5 relative hidden lg:block space-y-4">
+                    <!-- Ambient Glow Behind Cards -->
+                    <div class="absolute -inset-3 bg-gradient-to-b from-sky-400/15 via-indigo-500/15 to-amber-400/10 rounded-3xl blur-2xl pointer-events-none"></div>
+
+                    <!-- Border Box 1: Khóa Học Bán Chạy (.NET 10 & Cloud) -->
+                    <a href="/CongHocVien/DangKy" class="block relative rounded-2xl bg-white/[0.08] hover:bg-white/[0.15] backdrop-blur-xl border border-white/25 hover:border-amber-400/70 p-5 shadow-xl shadow-black/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 group">
+                        <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-white/10">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-400 text-slate-900 shadow-sm uppercase tracking-wide">
+                                <span class="material-symbols-outlined text-[13px]">local_fire_department</span>
+                                Bán chạy nhất
+                            </span>
+                            <span class="text-xs font-bold text-amber-300 flex items-center gap-1 font-mono">
+                                <span class="material-symbols-outlined text-[15px] text-amber-400">star</span>
+                                4.9 <span class="text-[10px] text-slate-300 font-normal font-sans">(180+ đánh giá)</span>
+                            </span>
+                        </div>
+                        <div class="space-y-1">
+                            <h4 class="text-sm font-black text-white group-hover:text-amber-300 transition-colors leading-snug">
+                                Chuyên Gia ASP.NET Core 10 & Kiến Trúc Microservices
+                            </h4>
+                            <p class="text-[11px] text-slate-300 flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[15px] text-sky-300">person</span>
+                                <span>Mentor: ThS. Hoàng Long (Senior Architect FPT)</span>
+                            </p>
+                        </div>
+                        <div class="flex items-center justify-between pt-3 mt-3 border-t border-white/10 text-xs">
+                            <span class="px-2 py-0.5 rounded bg-white/10 text-[10px] text-slate-200 font-medium">
+                                80% Thực hành Lab Cloud
+                            </span>
+                            <div class="flex items-baseline gap-1.5">
+                                <span class="text-[10px] text-slate-400 line-through">6.500.000 đ</span>
+                                <span class="text-sm font-black text-amber-300 font-mono">5.200.000 đ</span>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Border Box 2: Khóa Học Xu Hướng (AI & ReactJS) -->
+                    <a href="/CongHocVien/DangKy" class="block relative rounded-2xl bg-white/[0.08] hover:bg-white/[0.15] backdrop-blur-xl border border-white/25 hover:border-sky-400/70 p-5 shadow-xl shadow-black/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 group">
+                        <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-white/10">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-400 text-slate-900 shadow-sm uppercase tracking-wide">
+                                <span class="material-symbols-outlined text-[13px]">auto_awesome</span>
+                                Xu hướng 2025
+                            </span>
+                            <span class="text-xs font-bold text-sky-300 flex items-center gap-1 font-mono">
+                                <span class="material-symbols-outlined text-[15px] text-amber-400">star</span>
+                                5.0 <span class="text-[10px] text-slate-300 font-normal font-sans">(140+ đánh giá)</span>
+                            </span>
+                        </div>
+                        <div class="space-y-1">
+                            <h4 class="text-sm font-black text-white group-hover:text-sky-300 transition-colors leading-snug">
+                                Trí Tuệ Nhân Tạo GenAI, Python & ReactJS Modern UI
+                            </h4>
+                            <p class="text-[11px] text-slate-300 flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[15px] text-sky-300">person</span>
+                                <span>Mentor: ThS. Tùng Dương (AI Lead Viettel) & KS. Kiên</span>
+                            </p>
+                        </div>
+                        <div class="flex items-center justify-between pt-3 mt-3 border-t border-white/10 text-xs">
+                            <span class="px-2 py-0.5 rounded bg-white/10 text-[10px] text-slate-200 font-medium">
+                                Cấp Cloud GPU thực hành
+                            </span>
+                            <div class="flex items-baseline gap-1.5">
+                                <span class="text-[10px] text-slate-400 line-through">5.800.000 đ</span>
+                                <span class="text-sm font-black text-sky-300 font-mono">4.600.000 đ</span>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Border Box 3: Chứng Chỉ Nghề UNETI & Trạng Thái Tuyển Sinh -->
+                    <div class="relative rounded-2xl bg-gradient-to-r from-amber-500/15 via-white/[0.08] to-sky-500/15 hover:bg-white/[0.14] backdrop-blur-xl border border-amber-300/40 hover:border-amber-300 p-5 shadow-xl shadow-black/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 space-y-3">
+                        <div class="flex items-center justify-between pb-2.5 border-b border-white/10">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-xl bg-amber-400 text-slate-900 flex items-center justify-center font-bold shadow-md shadow-amber-400/25">
+                                    <span class="material-symbols-outlined text-[18px]">workspace_premium</span>
                                 </div>
                                 <div>
-                                    <h4 class="text-xs font-bold text-white">Chứng Chỉ UNETI</h4>
-                                    <p class="text-[10px] text-slate-300">Công nhận toàn quốc</p>
+                                    <h5 class="text-xs font-bold text-white tracking-wide">CHỨNG CHỈ NGHỀ UNETI</h5>
+                                    <p class="text-[10px] text-slate-300">Định danh QR & Công nhận toàn quốc</p>
                                 </div>
                             </div>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/30 text-emerald-300 border border-emerald-400/30">
-                                CHUẨN ĐẦU RA
+                            <span class="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-400/20 text-emerald-300 border border-emerald-400/40 tracking-wider uppercase">
+                                Chuẩn đầu ra
                             </span>
                         </div>
-
-                        <!-- Mini Demo Course Card -->
-                        <div class="bg-white rounded-2xl p-4 text-slate-900 space-y-3 shadow-lg">
-                            <div class="flex items-center justify-between">
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary-light text-primary uppercase">
-                                    Lập trình Web & Mobile
+                        <div class="flex items-center justify-between text-xs text-slate-200 bg-black/20 px-3.5 py-2.5 rounded-xl border border-white/10">
+                            <span class="flex items-center gap-2 text-[11px]">
+                                <span class="relative flex h-2 w-2">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
                                 </span>
-                                <span class="text-xs font-bold text-amber-500 flex items-center gap-0.5">
-                                    <span class="material-symbols-outlined text-[14px]">star</span> 4.9 (140+)
-                                </span>
-                            </div>
-                            <h5 class="text-sm font-bold text-brand-deep">Chuyên gia ASP.NET Core & Fullstack Cloud</h5>
-                            <p class="text-[11px] text-outline">Giảng viên: ThS. Hoàng Long (Tech Lead FPT)</p>
-                            <div class="flex items-center justify-between pt-2 border-t border-border-standard text-xs">
-                                <span class="text-[11px] text-outline">Khai giảng: <strong class="text-brand-deep">Tháng này</strong></span>
-                                <span class="font-mono font-black text-emerald-700">5.500.000 đ</span>
-                            </div>
-                        </div>
-
-                        <!-- Live Study Urgency Strip -->
-                        <div class="flex items-center justify-between text-xs text-slate-200 bg-white/10 px-4 py-2.5 rounded-xl border border-white/10">
-                            <span class="flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                                Đang mở @totalCourses lớp học phần
+                                <span>Đang tuyển <strong class="text-white font-bold">@totalCourses</strong> lớp học phần</span>
                             </span>
-                            <a href="/CongHocVien/DangKy" class="text-amber-300 hover:underline font-semibold text-[11px]">Xem tất cả →</a>
+                            <a href="/CongHocVien/DangKy" class="text-amber-300 hover:text-white font-bold text-xs flex items-center gap-1 transition-colors">
+                                <span>Khám phá</span>
+                                <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -148,104 +872,222 @@
         </div>
     </section>
 
-    <!-- ================= 2. PERSONALIZED STUDENT WIDGET (CHỈ HIỂN THỊ KHI ĐÃ ĐĂNG NHẬP) ================= -->
-    @if (isLoggedInStudent)
-    {
-        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 sm:-mt-14 relative z-20">
-            <div class="bg-white rounded-3xl p-6 sm:p-7 shadow-xl border border-border-standard">
-                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                    <!-- Left: Greeting -->
-                    <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-deep to-primary text-white font-black text-xl flex items-center justify-center shrink-0 shadow-md">
-                            @(string.IsNullOrWhiteSpace(currentStudent?.HoTen) ? "HV" : currentStudent.HoTen.Substring(0, 1).ToUpper())
+
+
+    <!-- ================= 3. ABOUT US & PRESTIGE STORY (GIỚI THIỆU UNETI EDUSPACE) ================= -->
+    <section id="gioi-thieu" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 scroll-mt-24">
+        <!-- Section Header -->
+        <div class="text-center max-w-3xl mx-auto space-y-3">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider">
+                <span class="material-symbols-outlined text-[16px]">verified</span>
+                <span>Về Chúng Tôi • UNETI EDUSPACE</span>
+            </div>
+            <h2 class="text-2xl sm:text-4xl font-black text-brand-deep tracking-tight leading-tight">
+                Bệ Phóng Sự Nghiệp Công Nghệ Số <br class="hidden sm:inline" />
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary via-indigo-600 to-sky-600">
+                    & Kỹ Năng Thực Chiến Đỉnh Cao
+                </span>
+            </h2>
+            <p class="text-xs sm:text-sm text-outline leading-relaxed font-normal">
+                Hơn một thập kỷ tiên phong đổi mới giáo dục thực hành, thu hẹp khoảng cách giữa giảng đường đại học và tiêu chuẩn tuyển dụng khắt khe của các tập đoàn công nghệ toàn cầu.
+            </p>
+        </div>
+
+        <!-- Main Narrative Showcase (2 Columns) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+            <!-- Left Column: Story & Philosophy -->
+            <div class="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-10 border border-border-standard shadow-xs space-y-6 flex flex-col justify-between">
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-[24px]">workspace_premium</span>
                         </div>
-                        <div class="space-y-1">
-                            <div class="flex items-center gap-2">
-                                <h3 class="text-base sm:text-lg font-bold text-brand-deep">
-                                    Chào mừng bạn quay lại, @currentStudent?.HoTen! 👋
-                                </h3>
-                                <span class="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary-light text-primary">
-                                    Học viên UNETI
-                                </span>
-                            </div>
-                            <p class="text-xs text-outline font-mono">
-                                Mã HV: <strong>#HV@(currentStudent?.MaHocVien.ToString("D3"))</strong> • Bạn đã đăng ký <strong>@myRegistrations.Count khóa học</strong>
+                        <div>
+                            <h3 class="text-lg font-bold text-brand-deep">Sứ Mệnh Kiến Tạo Thế Hệ Kỹ Sư Toàn Năng</h3>
+                            <p class="text-[11px] text-outline font-medium">Bảo trợ học thuật bởi Trường Đại học Kinh tế - Kỹ thuật Công nghiệp (UNETI)</p>
+                        </div>
+                    </div>
+
+                    <p class="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal text-justify">
+                        Được sáng lập với tôn chỉ <strong>"Học Thật - Dự Án Thật - Việc Làm Thật"</strong>, <strong>UNETI EDUSPACE</strong> không chỉ đơn thuần là nơi truyền đạt kiến thức lập trình, mà là một hệ sinh thái ươm mầm tài năng công nghệ toàn diện. Chúng tôi thấu hiểu rằng: trong kỷ nguyên AI bùng nổ, doanh nghiệp không còn tìm kiếm những coder thụ động, mà khát khao những kỹ sư có tư duy kiến trúc hệ thống, khả năng thích ứng linh hoạt và kỹ năng giải quyết bài toán thực tế.
+                    </p>
+
+                    <p class="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal text-justify">
+                        Mỗi học trình tại trung tâm được thiết kế độc quyền theo chuẩn <strong>80% thời lượng thực hành</strong> trên nền tảng Cloud hiện đại. Học viên được trực tiếp tham gia vào các dự án Production quy mô lớn, làm chủ trọn vẹn vòng đời phát triển phần mềm (SDLC), quy trình <strong>Agile/Scrum</strong> và văn hóa <strong>DevOps/CI-CD</strong> của các doanh nghiệp Top-tier.
+                    </p>
+                </div>
+
+                <!-- 3 Key Differentiators -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-border-standard">
+                    <div class="p-3 rounded-2xl bg-slate-50 border border-border-standard/80 space-y-1">
+                        <div class="flex items-center gap-1.5 text-primary text-xs font-bold">
+                            <span class="material-symbols-outlined text-[16px]">terminal</span>
+                            <span>100% Thực Chiến</span>
+                        </div>
+                        <p class="text-[11px] text-outline leading-snug">Học qua dự án thực tế, không lý thuyết suông.</p>
+                    </div>
+
+                    <div class="p-3 rounded-2xl bg-slate-50 border border-border-standard/80 space-y-1">
+                        <div class="flex items-center gap-1.5 text-emerald-600 text-xs font-bold">
+                            <span class="material-symbols-outlined text-[16px]">groups</span>
+                            <span>Mentor Cấp Cao</span>
+                        </div>
+                        <p class="text-[11px] text-outline leading-snug">Chuyên gia FPT, Viettel, VNPT, CMC kèm cặp 1-1.</p>
+                    </div>
+
+                    <div class="p-3 rounded-2xl bg-slate-50 border border-border-standard/80 space-y-1">
+                        <div class="flex items-center gap-1.5 text-amber-600 text-xs font-bold">
+                            <span class="material-symbols-outlined text-[16px]">handshake</span>
+                            <span>Cam Kết Đầu Ra</span>
+                        </div>
+                        <p class="text-[11px] text-outline leading-snug">Ký kết giới thiệu việc làm với hơn 100+ đối tác.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: 3-Stage Learning Ecosystem Cards -->
+            <div class="lg:col-span-5 bg-gradient-to-br from-brand-deep via-[#0d3b87] to-primary text-white rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col justify-between space-y-6">
+                <div>
+                    <span class="text-xs font-bold text-amber-300 uppercase tracking-wider block">Quy trình đào tạo chuẩn quốc tế</span>
+                    <h3 class="text-xl sm:text-2xl font-black mt-1">Lộ Trình Đột Phá 3 Giai Đoạn</h3>
+                    <p class="text-xs text-slate-200 mt-1 leading-relaxed">
+                        Từ người mới bắt đầu đến kỹ sư chuyên nghiệp tự tin gia nhập dự án doanh nghiệp.
+                    </p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex items-start gap-3.5 bg-white/10 p-3.5 rounded-2xl border border-white/15 backdrop-blur-sm">
+                        <div class="w-8 h-8 rounded-xl bg-amber-400 text-slate-900 font-extrabold flex items-center justify-center shrink-0 text-xs shadow-md">
+                            01
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">Nền Tảng Vững Chắc & Tư Duy Thuật Toán</h4>
+                            <p class="text-[11px] text-slate-300 mt-0.5 leading-snug">
+                                Làm chủ C#, Python, JavaScript, mô hình dữ liệu quan hệ SQL Server và tư duy hướng đối tượng OOP chuyên sâu.
                             </p>
                         </div>
                     </div>
 
-                    <!-- Right: Quick Learning Shortcut -->
-                    <div class="flex flex-wrap items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 border-border-standard">
-                        @if (activeCourse != null)
-                        {
-                            <div class="text-left md:text-right text-xs">
-                                <span class="text-outline text-[11px] block">Khóa học đang học:</span>
-                                <strong class="text-brand-deep truncate max-w-[220px] block">@(activeCourse.LopHoc?.TenLop)</strong>
-                                <span class="text-primary font-mono text-[11px] font-semibold">Tiến độ: @progressPercent% (@completedSessions/@totalSessions buổi)</span>
-                            </div>
-                        }
-                        <a href="/CongHocVien/TienTrinh"
-                           class="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-md transition-all flex items-center gap-2">
-                            <span class="material-symbols-outlined text-[18px]">play_circle</span>
-                            <span>Vào Không Gian Học Tập</span>
-                        </a>
+                    <div class="flex items-start gap-3.5 bg-white/10 p-3.5 rounded-2xl border border-white/15 backdrop-blur-sm">
+                        <div class="w-8 h-8 rounded-xl bg-sky-300 text-slate-900 font-extrabold flex items-center justify-center shrink-0 text-xs shadow-md">
+                            02
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">Thực Chiến Dự Án Enterprise & Công Nghệ Mới</h4>
+                            <p class="text-[11px] text-slate-300 mt-0.5 leading-snug">
+                                Xây dựng Web App ASP.NET Core MVC, ReactJS, Microservices, tích hợp AI API, bảo mật JWT và triển khai Cloud Azure/AWS.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3.5 bg-white/10 p-3.5 rounded-2xl border border-white/15 backdrop-blur-sm">
+                        <div class="w-8 h-8 rounded-xl bg-emerald-400 text-slate-900 font-extrabold flex items-center justify-center shrink-0 text-xs shadow-md">
+                            03
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">Bảo Vệ Capstone, Mock Interview & Tuyển Dụng</h4>
+                            <p class="text-[11px] text-slate-300 mt-0.5 leading-snug">
+                                Thẩm định trước hội đồng doanh nghiệp, tối ưu CV/Portfolio chuyên nghiệp và tham gia phỏng vấn Onboarding trực tiếp.
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                @if (nextSession != null)
-                {
-                    <div class="mt-4 pt-4 border-t border-border-standard flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs bg-amber-50/70 p-3.5 rounded-2xl border border-amber-200">
-                        <div class="flex items-center gap-2 text-amber-900">
-                            <span class="material-symbols-outlined text-[18px] text-amber-600">notifications_active</span>
-                            <span><strong>Buổi học sắp tới:</strong> @(nextSession.LopHoc?.TenLop) • @nextSession.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm") tại Phòng <strong>@nextSession.PhongHoc</strong></span>
-                        </div>
-                        <a href="/CongHocVien/TienTrinh" class="text-primary font-bold hover:underline shrink-0 text-xs">Xem chi tiết lịch →</a>
-                    </div>
-                }
+                <div class="pt-2 flex items-center justify-between text-xs text-slate-300 border-t border-white/15">
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[16px] text-amber-300">verified</span>
+                        <span>Chứng chỉ chuẩn UNETI</span>
+                    </span>
+                    <a href="/CongHocVien/DangKy" class="text-amber-300 hover:text-white font-bold transition-colors flex items-center gap-1">
+                        <span>Đăng ký ngay</span>
+                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                    </a>
+                </div>
             </div>
-        </section>
-    }
+        </div>
 
-    <!-- ================= 3. STAT HIGHLIGHTS (SỐ LIỆU BẢO CHỨNG) ================= -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- 4 Verified Stat Badges Grid -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <div class="bg-white rounded-3xl p-6 border border-border-standard shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-3">
-                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-primary flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[26px]">school</span>
+            <div class="bg-white rounded-3xl p-6 border border-border-standard shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-3 group">
+                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-primary flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <span class="material-symbols-outlined text-[26px]">history_edu</span>
                 </div>
                 <div>
                     <h3 class="text-2xl sm:text-3xl font-black text-brand-deep font-mono">10+ Năm</h3>
-                    <p class="text-xs text-outline mt-0.5">Kinh nghiệm đào tạo thực chiến tại UNETI</p>
+                    <p class="text-xs font-bold text-slate-700 mt-0.5">Uy Tín Đào Tạo</p>
+                    <p class="text-[11px] text-outline mt-0.5">Bề dày kinh nghiệm đào tạo kỹ năng thực chiến tại UNETI</p>
                 </div>
             </div>
 
-            <div class="bg-white rounded-3xl p-6 border border-border-standard shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-3">
-                <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[26px]">group</span>
+            <div class="bg-white rounded-3xl p-6 border border-border-standard shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-3 group">
+                <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <span class="material-symbols-outlined text-[26px]">groups</span>
                 </div>
                 <div>
                     <h3 class="text-2xl sm:text-3xl font-black text-brand-deep font-mono">@(Math.Max(15000, totalStudents * 150))+</h3>
-                    <p class="text-xs text-outline mt-0.5">Học viên đã tốt nghiệp & nhận chứng chỉ</p>
+                    <p class="text-xs font-bold text-slate-700 mt-0.5">Học Viên Tin Chọn</p>
+                    <p class="text-[11px] text-outline mt-0.5">Đã tốt nghiệp, nhận chứng chỉ và đang công tác trong ngành IT</p>
                 </div>
             </div>
 
-            <div class="bg-white rounded-3xl p-6 border border-border-standard shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-3">
-                <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <div class="bg-white rounded-3xl p-6 border border-border-standard shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-3 group">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
                     <span class="material-symbols-outlined text-[26px]">verified</span>
                 </div>
                 <div>
-                    <h3 class="text-2xl sm:text-3xl font-black text-emerald-700 font-mono">98.2%</h3>
-                    <p class="text-xs text-outline mt-0.5">Tỷ lệ học viên có việc làm đúng chuyên ngành</p>
+                    <h3 class="text-2xl sm:text-3xl font-black text-emerald-600 font-mono">98.2%</h3>
+                    <p class="text-xs font-bold text-slate-700 mt-0.5">Tỷ Lệ Việc Làm</p>
+                    <p class="text-[11px] text-outline mt-0.5">Học viên nhận offer việc làm đúng chuyên ngành trong vòng 90 ngày</p>
                 </div>
             </div>
 
-            <div class="bg-white rounded-3xl p-6 border border-border-standard shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-3">
-                <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
+            <div class="bg-white rounded-3xl p-6 border border-border-standard shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-3 group">
+                <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-105 transition-transform">
                     <span class="material-symbols-outlined text-[26px]">handshake</span>
                 </div>
                 <div>
                     <h3 class="text-2xl sm:text-3xl font-black text-brand-deep font-mono">100+</h3>
-                    <p class="text-xs text-outline mt-0.5">Doanh nghiệp công nghệ đối tác tuyển dụng</p>
+                    <p class="text-xs font-bold text-slate-700 mt-0.5">Đối Tác Tuyển Dụng</p>
+                    <p class="text-[11px] text-outline mt-0.5">Tập đoàn và doanh nghiệp công nghệ liên kết nhận ứng viên trực tiếp</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3 Golden Guarantees Bar -->
+        <div class="p-6 sm:p-8 rounded-3xl bg-slate-100/90 border border-border-standard grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="flex items-start gap-3.5">
+                <div class="w-10 h-10 rounded-2xl bg-white text-primary flex items-center justify-center shrink-0 shadow-xs">
+                    <span class="material-symbols-outlined text-[22px]">published_with_changes</span>
+                </div>
+                <div>
+                    <h4 class="text-xs sm:text-sm font-bold text-brand-deep">Học Lại Miễn Phí Trọn Đời</h4>
+                    <p class="text-[11px] text-outline mt-1 leading-relaxed">
+                        Học viên được hỗ trợ cập nhật công nghệ và tham gia học lại miễn phí khi chương trình có phiên bản nâng cấp mới.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-3.5">
+                <div class="w-10 h-10 rounded-2xl bg-white text-emerald-600 flex items-center justify-center shrink-0 shadow-xs">
+                    <span class="material-symbols-outlined text-[22px]">policy</span>
+                </div>
+                <div>
+                    <h4 class="text-xs sm:text-sm font-bold text-brand-deep">Cam Kết Hoàn 100% Học Phí</h4>
+                    <p class="text-[11px] text-outline mt-1 leading-relaxed">
+                        Chính sách bảo đảm chất lượng nghiêm ngặt: Hoàn trả 100% học phí nếu sau khóa học không đạt chuẩn đầu ra đã cam kết.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-3.5">
+                <div class="w-10 h-10 rounded-2xl bg-white text-amber-600 flex items-center justify-center shrink-0 shadow-xs">
+                    <span class="material-symbols-outlined text-[22px]">qr_code_2</span>
+                </div>
+                <div>
+                    <h4 class="text-xs sm:text-sm font-bold text-brand-deep">Chứng Chỉ Số Định Danh QR</h4>
+                    <p class="text-[11px] text-outline mt-1 leading-relaxed">
+                        Cấp chứng chỉ tốt nghiệp từ Hội đồng Đào tạo UNETI với mã QR tra cứu tính minh bạch công khai trên toàn hệ thống.
+                    </p>
                 </div>
             </div>
         </div>
@@ -306,7 +1148,7 @@
     </section>
 
     <!-- ================= 5. BEST-SELLER COURSES (KHÓA HỌC BÁN CHẠY & NỔI BẬT NHẤT) ================= -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+    <section id="kham-pha-khoa-hoc" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 scroll-mt-24">
         <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
                 <span class="text-xs font-bold text-amber-600 uppercase tracking-wider flex items-center gap-1">
@@ -567,50 +1409,23 @@
             </p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-white rounded-3xl p-6 border border-border-standard text-center space-y-4 shadow-xs hover:shadow-md transition-shadow">
-                <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-brand-deep to-primary text-white font-bold text-2xl flex items-center justify-center mx-auto shadow-md">
-                    HL
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 sm:gap-6">
+            @foreach (var gv in giangViens.Take(5))
+            {
+                string initials = !string.IsNullOrWhiteSpace(gv.HoTen)
+                    ? string.Concat(gv.HoTen.Split(' ', StringSplitOptions.RemoveEmptyEntries).TakeLast(2).Select(w => char.ToUpper(w[0])))
+                    : "GV";
+                <div class="bg-white rounded-3xl p-6 border border-border-standard text-center space-y-4 shadow-xs hover:shadow-md transition-shadow">
+                    <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-brand-deep to-primary text-white font-bold text-2xl flex items-center justify-center mx-auto shadow-md">
+                        @initials
+                    </div>
+                    <div>
+                        <h4 class="text-base font-bold text-brand-deep">@gv.HocVi @gv.HoTen</h4>
+                        <p class="text-xs text-primary font-semibold">@gv.ChuyenNganh</p>
+                        <p class="text-[11px] text-outline mt-1 font-mono">@gv.Email</p>
+                    </div>
                 </div>
-                <div>
-                    <h4 class="text-base font-bold text-brand-deep">ThS. Nguyễn Hoàng Long</h4>
-                    <p class="text-xs text-primary font-semibold">Chuyên gia Kiến trúc .NET Core & Cloud</p>
-                    <p class="text-[11px] text-outline mt-1 font-mono">Senior Architect tại FPT Software</p>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-3xl p-6 border border-border-standard text-center space-y-4 shadow-xs hover:shadow-md transition-shadow">
-                <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-purple-700 to-indigo-600 text-white font-bold text-2xl flex items-center justify-center mx-auto shadow-md">
-                    TD
-                </div>
-                <div>
-                    <h4 class="text-base font-bold text-brand-deep">ThS. Nguyễn Tùng Dương</h4>
-                    <p class="text-xs text-primary font-semibold">Chuyên gia Trí tuệ Nhân tạo & Data</p>
-                    <p class="text-[11px] text-outline mt-1 font-mono">AI Research Lead tại Viettel Telecom</p>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-3xl p-6 border border-border-standard text-center space-y-4 shadow-xs hover:shadow-md transition-shadow">
-                <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-700 text-white font-bold text-2xl flex items-center justify-center mx-auto shadow-md">
-                    DK
-                </div>
-                <div>
-                    <h4 class="text-base font-bold text-brand-deep">Kỹ sư Nguyễn Đình Kiên</h4>
-                    <p class="text-xs text-primary font-semibold">Chuyên gia Frontend React & UI/UX</p>
-                    <p class="text-[11px] text-outline mt-1 font-mono">Product Engineer tại VNG Corporation</p>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-3xl p-6 border border-border-standard text-center space-y-4 shadow-xs hover:shadow-md transition-shadow">
-                <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-rose-600 to-amber-600 text-white font-bold text-2xl flex items-center justify-center mx-auto shadow-md">
-                    VT
-                </div>
-                <div>
-                    <h4 class="text-base font-bold text-brand-deep">ThS. Vũ Đình Trường</h4>
-                    <p class="text-xs text-primary font-semibold">Chuyên gia Cơ sở dữ liệu & An toàn TT</p>
-                    <p class="text-[11px] text-outline mt-1 font-mono">Security Specialist tại VNPT IT</p>
-                </div>
-            </div>
+            }
         </div>
     </section>
 
@@ -713,7 +1528,7 @@
     </section>
 
     <!-- ================= 11. LEAD CONSULTATION FORM & FAQ ================= -->
-    <section id="tu-van-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="lien-he" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-24">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             <!-- Left: Consultation Form -->
             <div class="lg:col-span-6 bg-gradient-to-br from-brand-deep to-[#002f87] text-white rounded-3xl p-6 sm:p-10 shadow-xl space-y-6">
@@ -818,11 +1633,329 @@
 
 </div>
 
+<!-- ================= MODAL 1: CHỨNG CHỈ SỐ TỐT NGHIỆP UNETI (CERTIFICATE MODAL) ================= -->
+<div id="certificateModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border-4 border-amber-300 relative space-y-6 max-h-[90vh] overflow-y-auto">
+        <!-- Close button -->
+        <button type="button" onclick="closeCertificateModal()" class="absolute top-4 right-4 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+
+        <!-- Certificate Border & Header -->
+        <div class="text-center space-y-3 border-b-2 border-amber-200 pb-5">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-brand-deep to-primary text-white flex items-center justify-center shadow-lg shadow-primary/20">
+                <span class="material-symbols-outlined text-[36px]">school</span>
+            </div>
+            <div>
+                <h3 class="text-xs font-bold text-outline uppercase tracking-[3px]">TRƯỜNG ĐẠI HỌC KINH TẾ - KỸ THUẬT CÔNG NGHIỆP</h3>
+                <h2 class="text-xl sm:text-2xl font-black text-brand-deep mt-1">CHỨNG NHẬN HOÀN THÀNH KHÓA HỌC</h2>
+                <p class="text-xs text-amber-700 font-semibold tracking-wider uppercase mt-0.5">UNETI EDUSPACE DIGITAL CERTIFICATE</p>
+            </div>
+        </div>
+
+        <!-- Certificate Recipient & Content -->
+        <div class="text-center space-y-4 py-2">
+            <p class="text-xs text-slate-500 uppercase tracking-widest">Chứng nhận trao tặng cho học viên:</p>
+            <h1 class="text-2xl sm:text-3xl font-black text-brand-deep tracking-tight underline decoration-amber-400 decoration-2 underline-offset-8">
+                @studentDisplayName
+            </h1>
+            <p class="text-xs text-outline font-mono">Mã số học viên: <strong>@studentIdDisplay</strong> • Lớp: DHTI17A1HN</p>
+            
+            <p class="text-xs sm:text-sm text-slate-700 max-w-lg mx-auto leading-relaxed pt-2">
+                Đã hoàn thành xuất sắc chương trình đào tạo kỹ năng chuyên sâu:
+                <strong class="block text-brand-deep text-sm sm:text-base mt-1">Phát triển Phần mềm .NET 10 & Kiến trúc Cloud Enterprise</strong>
+            </p>
+            
+            <div class="inline-flex items-center gap-4 text-xs font-mono bg-amber-50 border border-amber-200 px-4 py-2 rounded-2xl">
+                <span>Điểm tổng kết: <strong class="text-emerald-700">@avgScore.ToString("0.0")/10</strong></span>
+                <span>•</span>
+                <span>Xếp loại: <strong class="text-emerald-700">Giỏi (Xuất sắc)</strong></span>
+            </div>
+        </div>
+
+        <!-- Seal & Signatures -->
+        <div class="pt-4 border-t border-border-standard flex items-center justify-between text-xs">
+            <div class="text-left space-y-1">
+                <div class="w-16 h-16 rounded-xl border border-border-standard p-1 bg-slate-50 flex items-center justify-center">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=UNETI-CERT-HV02-2026" alt="QR Verify" class="w-full h-full object-contain" />
+                </div>
+                <span class="text-[9px] text-outline font-mono block">Mã xác thực số: UNETI-CERT-8899</span>
+            </div>
+            
+            <div class="text-center space-y-1">
+                <span class="text-[10px] text-outline block">Hà Nội, ngày 28 tháng 10 năm 2026</span>
+                <span class="font-bold text-brand-deep text-xs block">HIỆU TRƯỞNG / TRƯỞNG TRUNG TÂM</span>
+                <div class="h-10 flex items-center justify-center italic text-primary font-serif text-sm">
+                    GS. TS. Ngô Thành Long
+                </div>
+                <span class="text-[10px] text-emerald-700 font-semibold block flex items-center justify-center gap-1">
+                    <span class="material-symbols-outlined text-[14px]">verified</span> Đã ký điện tử xác thực
+                </span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="pt-2 flex items-center justify-end gap-3">
+            <button type="button" onclick="closeCertificateModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer">
+                Đóng
+            </button>
+            <button type="button" onclick="showStudentToast('Chứng chỉ số PDF đã được tải xuống máy tính của bạn!', 'success'); closeCertificateModal();" class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-md transition-colors flex items-center gap-1.5 cursor-pointer">
+                <span class="material-symbols-outlined text-[16px]">download</span>
+                <span>Tải Chứng Chỉ (PDF Bản In)</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL 2: THANH TOÁN HỌC PHÍ VIETQR ================= -->
+<div id="vietQrModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-border-standard relative space-y-5">
+        <button type="button" onclick="closeVietQRModal()" class="absolute top-4 right-4 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+
+        <div class="flex items-center gap-3 pb-3 border-b border-border-standard">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <span class="material-symbols-outlined text-[24px]">qr_code_2</span>
+            </div>
+            <div>
+                <h3 class="text-sm font-bold text-brand-deep">Cổng Nộp Học Phí VietQR UNETI</h3>
+                <p class="text-xs text-outline">Xác nhận gạch nợ tự động trong 60 giây</p>
+            </div>
+        </div>
+
+        <!-- VietQR Box -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-border-standard text-center space-y-3">
+            <div class="w-48 h-48 mx-auto bg-white p-2 rounded-xl border border-border-standard shadow-xs flex items-center justify-center">
+                <img id="vietQrImg" src="https://api.vietqr.io/image/970422-1903686888-qrx68.jpg?amount=3200000&addInfo=DK05%20TRAN%20MINH%20TUAN" alt="VietQR" class="w-full h-full object-contain" />
+            </div>
+            <p class="text-xs text-outline font-medium">Mở ứng dụng Ngân hàng (MBBank, Vietcombank, Techcombank...) quét mã QR</p>
+        </div>
+
+        <!-- Bank Transfer Details -->
+        <div class="space-y-2 text-xs bg-sky-50/60 p-3.5 rounded-2xl border border-sky-100">
+            <div class="flex justify-between">
+                <span class="text-outline">Ngân hàng thụ hưởng:</span>
+                <strong class="text-brand-deep">MBBank (Quân Đội)</strong>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-outline">Số tài khoản:</span>
+                <strong class="text-brand-deep font-mono">1903 6868 88</strong>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-outline">Chủ tài khoản:</span>
+                <strong class="text-brand-deep">TRUONG DH KT-KT CONG NGHIEP</strong>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-outline">Số tiền:</span>
+                <strong class="text-rose-600 font-mono text-sm" id="qrAmountDisplay">3.200.000 đ</strong>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-outline">Nội dung chuyển khoản:</span>
+                <strong class="text-primary font-mono" id="qrNoteDisplay">DK05 TRAN MINH TUAN</strong>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="pt-2 flex items-center justify-end gap-3">
+            <button type="button" onclick="closeVietQRModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer">
+                Đóng
+            </button>
+            <button type="button" onclick="confirmPaymentSuccess()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition-colors flex items-center gap-1.5 cursor-pointer">
+                <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                <span>Tôi Đã Chuyển Khoản Xong</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ================= TOAST NOTIFICATION CONTAINER ================= -->
+<div id="studentToast" class="fixed bottom-6 right-6 z-50 hidden max-w-sm p-4 rounded-2xl shadow-xl border text-xs font-semibold flex items-center gap-2.5 transition-all transform translate-y-4">
+    <span id="toastIcon" class="material-symbols-outlined text-[20px]">info</span>
+    <span id="toastMessage">Thông báo</span>
+</div>
+
 @section Scripts {
 <script>
+    // ================= 1. TAB SWITCHER (5 TABS THEO ẢNH MẪU) =================
+    function switchPortalTab(tab) {
+        const tabs = ['courses', 'registrations', 'schedule', 'grades', 'profile'];
+        
+        tabs.forEach(t => {
+            const btn = document.getElementById('portal-tab-' + t);
+            const pane = document.getElementById('portal-pane-' + t);
+            if (btn && pane) {
+                if (t === tab) {
+                    btn.classList.add('bg-[#0284c7]', 'text-white', 'shadow-xs', 'active');
+                    btn.classList.remove('text-slate-700', 'hover:bg-slate-50');
+                    pane.classList.remove('hidden');
+                } else {
+                    btn.classList.remove('bg-[#0284c7]', 'text-white', 'shadow-xs', 'active');
+                    btn.classList.add('text-slate-700', 'hover:bg-slate-50');
+                    pane.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    // ================= 2. LIVE FILTER CHO KHÓA HỌC TAB 1 =================
+    function filterPortalCards() {
+        const searchVal = (document.getElementById('portalCourseSearch')?.value || '').toLowerCase().trim();
+        const programVal = document.getElementById('portalProgramFilter')?.value || '';
+        const seatVal = document.getElementById('portalSeatFilter')?.value || '';
+        
+        const cards = document.querySelectorAll('.portal-course-card');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const name = (card.getAttribute('data-name') || '').toLowerCase();
+            const lecturer = (card.getAttribute('data-lecturer') || '').toLowerCase();
+            const program = card.getAttribute('data-program') || '';
+            const seats = card.getAttribute('data-seats') || '';
+
+            const matchSearch = !searchVal || name.includes(searchVal) || lecturer.includes(searchVal);
+            const matchProgram = !programVal || program.toLowerCase().includes(programVal.toLowerCase());
+            const matchSeats = !seatVal || seats === seatVal;
+
+            if (matchSearch && matchProgram && matchSeats) {
+                card.classList.remove('hidden');
+                visibleCount++;
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+
+        const badge = document.getElementById('portalCourseCountBadge');
+        if (badge) {
+            badge.textContent = visibleCount + ' lớp mở';
+        }
+    }
+
+    // ================= 3. MODAL XEM CHỨNG CHỈ SỐ =================
+    function openCertificateModal() {
+        const modal = document.getElementById('certificateModal');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeCertificateModal() {
+        const modal = document.getElementById('certificateModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    // ================= 4. MODAL THANH TOÁN HỌC PHÍ VIETQR =================
+    function openVietQRModal(code, courseName, amount) {
+        const modal = document.getElementById('vietQrModal');
+        const amountDisplay = document.getElementById('qrAmountDisplay');
+        const noteDisplay = document.getElementById('qrNoteDisplay');
+        const qrImg = document.getElementById('vietQrImg');
+
+        if (amountDisplay) amountDisplay.textContent = Number(amount).toLocaleString('vi-VN') + ' đ';
+        if (noteDisplay) noteDisplay.textContent = code + ' TRAN MINH TUAN';
+        if (qrImg) {
+            qrImg.src = 'https://api.vietqr.io/image/970422-1903686888-qrx68.jpg?amount=' + amount + '&addInfo=' + encodeURIComponent(code + ' TRAN MINH TUAN');
+        }
+
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeVietQRModal() {
+        const modal = document.getElementById('vietQrModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function confirmPaymentSuccess() {
+        closeVietQRModal();
+        showStudentToast('Hệ thống đã ghi nhận thông tin chuyển khoản! Kế toán sẽ xác nhận sau 1-2 phút.', 'success');
+    }
+
+    // ================= 5. TOGGLE GIỮA CỔNG HỌC VIÊN & TRANG CHỦ CHUNG =================
+    function toggleStudentPortalDemo() {
+        const portal = document.getElementById('studentPortalSection');
+        const guest = document.getElementById('guestLandingSection');
+        const label = document.getElementById('topDemoToggleLabel');
+
+        if (portal && guest) {
+            const isPortalVisible = !portal.classList.contains('hidden');
+            if (isPortalVisible) {
+                portal.classList.add('hidden');
+                guest.classList.remove('hidden');
+                if (label) label.textContent = 'Xem thử Giao diện Sinh viên theo ảnh';
+                guest.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                portal.classList.remove('hidden');
+                guest.classList.add('hidden');
+                if (label) label.textContent = 'Quay lại Trang chủ Giới thiệu';
+                portal.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    }
+    // Gán ra window để navbar gọi được
+    window.toggleStudentPortalDemo = toggleStudentPortalDemo;
+
+    function togglePublicLanding() {
+        const guest = document.getElementById('guestLandingSection');
+        const btnText = document.getElementById('btnTogglePublicText');
+        if (guest) {
+            guest.classList.toggle('hidden');
+            const isHidden = guest.classList.contains('hidden');
+            if (btnText) {
+                btnText.textContent = isHidden ? "Xem thêm Giới thiệu Học viện & Toàn bộ Khóa học Tuyển sinh" : "Thu gọn phần Giới thiệu chung";
+            }
+            if (!isHidden) {
+                guest.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    }
+
+    // ================= 6. LƯU THAY ĐỔI HỒ SƠ =================
+    function saveStudentProfile(e) {
+        e.preventDefault();
+        showStudentToast('Cập nhật hồ sơ cá nhân học viên thành công!', 'success');
+    }
+
+    // ================= 7. TOAST NOTIFICATION HELPER =================
+    function showStudentToast(message, type = 'info') {
+        const toast = document.getElementById('studentToast');
+        const toastMsg = document.getElementById('toastMessage');
+        const toastIcon = document.getElementById('toastIcon');
+
+        if (!toast || !toastMsg) return;
+
+        toastMsg.textContent = message;
+        toast.className = 'fixed bottom-6 right-6 z-50 max-w-sm p-4 rounded-2xl shadow-xl border text-xs font-semibold flex items-center gap-2.5 transition-all transform translate-y-0';
+
+        if (type === 'success') {
+            toast.classList.add('bg-emerald-50', 'text-emerald-800', 'border-emerald-200');
+            if (toastIcon) {
+                toastIcon.className = 'material-symbols-outlined text-[20px] text-emerald-600';
+                toastIcon.textContent = 'check_circle';
+            }
+        } else if (type === 'error') {
+            toast.classList.add('bg-rose-50', 'text-rose-800', 'border-rose-200');
+            if (toastIcon) {
+                toastIcon.className = 'material-symbols-outlined text-[20px] text-rose-600';
+                toastIcon.textContent = 'error';
+            }
+        } else {
+            toast.classList.add('bg-sky-50', 'text-sky-800', 'border-sky-200');
+            if (toastIcon) {
+                toastIcon.className = 'material-symbols-outlined text-[20px] text-primary';
+                toastIcon.textContent = 'info';
+            }
+        }
+
+        toast.classList.remove('hidden');
+
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 3500);
+    }
+
+    // ================= 8. FORM TƯ VẤN (GUEST SECTION) =================
     async function submitTuVan(e) {
         e.preventDefault();
         const form = document.getElementById('tuvanForm');
+        if (!form) return;
         const formData = new FormData(form);
 
         try {

@@ -1,164 +1,21 @@
+@* ========================================================
+   Họ và tên: Nguyễn Đức Linh
+   Mã sinh viên: 23103100042
+   Phụ trách: Module 3 - Cập nhật Học viên (Mục 7.1)
+   ======================================================== *@
 @model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.HocVien
+
 @{
-    ViewData["Title"] = $"Chỉnh Sửa Học Viên: {Model.HoTen}";
+    ViewData["Title"] = "Cập nhật Học viên (Module 3 - Skeleton)";
 }
 
-<!-- Page Hero -->
-<div class="page-hero">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+<div class="container py-4">
+    <div class="card border-0 shadow-sm rounded-4 p-4">
+        <span class="badge bg-primary-subtle text-primary mb-2" style="width: fit-content;">Module 3 • Nguyễn Đức Linh (23103100042)</span>
+        <h3 class="fw-bold mb-2">Cập nhật thông tin Học viên (Skeleton)</h3>
+        <p class="text-muted">TODO: Xây dựng biểu mẫu chỉnh sửa thông tin Học viên theo Mục 7.1 tài liệu đặc tả.</p>
         <div>
-            <div class="d-flex align-items-center gap-2 mb-2">
-                <span class="hero-badge"><i class="bi bi-pencil-square"></i> Cập Nhật Hồ Sơ</span>
-                <span class="small" style="color: #bae6fd;">Mã Học Viên: #@Model.MaHocVien</span>
-            </div>
-            <h1 class="hero-title">Chỉnh Sửa: @Model.HoTen</h1>
-            <p class="hero-subtitle">
-                Cập nhật thông tin lý lịch cá nhân và trạng thái học viên trong hệ thống trung tâm đào tạo.
-            </p>
-        </div>
-        <div class="d-flex gap-2">
-            <a asp-action="Details" asp-route-id="@Model.MaHocVien" class="btn btn-sm px-3 py-2 rounded-pill fw-semibold text-white" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); font-size: 0.85rem;">
-                <i class="bi bi-eye me-1"></i> Xem Chi Tiết
-            </a>
-            <a asp-action="Index" class="btn btn-sm px-3 py-2 rounded-pill fw-semibold text-white" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); font-size: 0.85rem;">
-                <i class="bi bi-arrow-left me-1"></i> Danh Sách
-            </a>
+            <a asp-action="Index" class="btn btn-outline-secondary">Quay lại danh sách</a>
         </div>
     </div>
 </div>
-
-<div class="row justify-content-center">
-    <div class="col-lg-10">
-        <div class="content-card p-4 p-md-5">
-            <form asp-action="Edit" asp-route-id="@Model.MaHocVien" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" asp-for="MaHocVien" />
-                <input type="hidden" asp-for="MaTaiKhoan" />
-                <input type="hidden" asp-for="NgayTao" />
-
-                <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3" role="alert"></div>
-
-                @if (Model.TaiKhoan != null && !string.IsNullOrEmpty(Model.TaiKhoan.TenDangNhap))
-                {
-                    <div class="alert alert-info py-2 px-3 rounded-3 d-flex align-items-center mb-4 border-info border-opacity-25" style="background: #e0f2fe; color: #0369a1;">
-                        <i class="bi bi-person-badge-fill fs-5 me-2"></i>
-                        <div class="small">
-                            Học viên này đang liên kết với tài khoản hệ thống: <strong>@Model.TaiKhoan.TenDangNhap</strong> (Mã TK: #@Model.MaTaiKhoan)
-                        </div>
-                    </div>
-                }
-
-                <h5 class="fw-bold text-dark mb-4 pb-2 border-bottom d-flex align-items-center" style="font-family: var(--font-serif);">
-                    <i class="bi bi-person-vcard text-primary me-2"></i> Thông Tin Lý Lịch Học Viên
-                </h5>
-
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label asp-for="HoTen" class="form-label fw-semibold small text-muted">
-                            Họ và tên <span class="text-danger">*</span>
-                        </label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-person"></i></span>
-                            <input asp-for="HoTen" class="form-control border-start-0" />
-                        </div>
-                        <span asp-validation-for="HoTen" class="text-danger small"></span>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label asp-for="Email" class="form-label fw-semibold small text-muted">
-                            Địa chỉ Email <span class="text-danger">*</span>
-                        </label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
-                            <input asp-for="Email" class="form-control border-start-0" />
-                        </div>
-                        <span asp-validation-for="Email" class="text-danger small"></span>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label asp-for="SoDienThoai" class="form-label fw-semibold small text-muted">Số điện thoại</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-telephone"></i></span>
-                            <input asp-for="SoDienThoai" class="form-control border-start-0" />
-                        </div>
-                        <span asp-validation-for="SoDienThoai" class="text-danger small"></span>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label asp-for="NgaySinh" class="form-label fw-semibold small text-muted">
-                            Ngày sinh <span class="text-danger">* (Yêu cầu &ge; 6 tuổi)</span>
-                        </label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-calendar-date"></i></span>
-                            <input asp-for="NgaySinh" type="date" class="form-control border-start-0" />
-                        </div>
-                        <span asp-validation-for="NgaySinh" class="text-danger small"></span>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label asp-for="GioiTinh" class="form-label fw-semibold small text-muted">Giới tính</label>
-                        <select asp-for="GioiTinh" class="form-select">
-                            <option value="">-- Chọn giới tính --</option>
-                            <option value="Nam">Nam</option>
-                            <option value="Nữ">Nữ</option>
-                            <option value="Khác">Khác</option>
-                        </select>
-                        <span asp-validation-for="GioiTinh" class="text-danger small"></span>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label asp-for="TrinhDoHocVan" class="form-label fw-semibold small text-muted">Trình độ học vấn</label>
-                        <select asp-for="TrinhDoHocVan" class="form-select">
-                            <option value="Đại học">Đại học</option>
-                            <option value="Cao đẳng">Cao đẳng</option>
-                            <option value="Trung cấp">Trung cấp</option>
-                            <option value="THPT">THPT</option>
-                            <option value="Khác">Khác</option>
-                        </select>
-                        <span asp-validation-for="TrinhDoHocVan" class="text-danger small"></span>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label asp-for="NgheNghiep" class="form-label fw-semibold small text-muted">Nghề nghiệp</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-briefcase"></i></span>
-                            <input asp-for="NgheNghiep" class="form-control border-start-0" />
-                        </div>
-                        <span asp-validation-for="NgheNghiep" class="text-danger small"></span>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label asp-for="DiaChi" class="form-label fw-semibold small text-muted">Địa chỉ liên hệ</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-geo-alt"></i></span>
-                            <input asp-for="DiaChi" class="form-control border-start-0" />
-                        </div>
-                        <span asp-validation-for="DiaChi" class="text-danger small"></span>
-                    </div>
-                </div>
-
-                <div class="p-3 bg-light rounded-3 border mb-4">
-                    <div class="form-check form-switch mb-0">
-                        <input class="form-check-input" type="checkbox" asp-for="TrangThai" id="trangThaiSwitch" />
-                        <label class="form-check-label fw-semibold ms-2" for="trangThaiSwitch">
-                            Trạng thái hồ sơ: <strong>Đang theo học</strong> (Bỏ chọn nếu muốn Tạm khóa học viên)
-                        </label>
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-end gap-2 pt-2">
-                    <a asp-action="Index" class="btn btn-light rounded-pill px-4 border">
-                        Hủy bỏ
-                    </a>
-                    <button type="submit" class="btn text-white rounded-pill px-4 fw-semibold" style="background: var(--primary-rose);">
-                        <i class="bi bi-save-fill me-1"></i> Cập Nhật Hồ Sơ
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}

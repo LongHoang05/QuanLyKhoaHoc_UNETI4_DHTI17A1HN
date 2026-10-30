@@ -22,6 +22,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
         public async Task<IActionResult> Dashboard(int page = 1, string? status = "all", string? search = "")
         {
+            var vaiTro = HttpContext.Session.GetString("VaiTro");
+            if (string.Equals(vaiTro, "GiangVien", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction("Index", "GiangVien");
+            }
+            if (string.Equals(vaiTro, "HocVien", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction("TienTrinh", "CongHocVien");
+            }
+
             int pageSize = 5;
             status = string.IsNullOrWhiteSpace(status) ? "all" : status.Trim();
             search = string.IsNullOrWhiteSpace(search) ? "" : search.Trim();
@@ -119,6 +129,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
         public async Task<IActionResult> Index()
         {
+            var vaiTro = HttpContext.Session.GetString("VaiTro");
+            if (string.Equals(vaiTro, "GiangVien", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction("Index", "GiangVien");
+            }
+            if (string.Equals(vaiTro, "HocVien", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction("TienTrinh", "CongHocVien");
+            }
+
             // 1. Số lớp học theo chương trình đào tạo
             ViewBag.LopTheoCTDT = await _context.LopHocs
                 .Where(l => l.ChuongTrinhDaoTao != null)

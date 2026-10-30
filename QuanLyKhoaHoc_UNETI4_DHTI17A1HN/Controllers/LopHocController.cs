@@ -1,4 +1,4 @@
-// ========================================================
+﻿// ========================================================
 // Họ và tên: Nguyễn Đình Kiên
 // Mã sinh viên: 23103100020
 // Phụ trách: Module 2 - Quản lý lớp học, Tìm kiếm, Lọc, Sắp xếp và Phân trang
@@ -37,6 +37,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             string choTrongStatus = "",
             string sortBy = "")
         {
+            var vaiTro = HttpContext.Session.GetString("VaiTro");
+            if (string.Equals(vaiTro, "HocVien", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction("DangKy", "CongHocVien");
+            }
             int pageSize = 6;
             var query = _context.LopHocs
                 .Include(l => l.ChuongTrinhDaoTao)
@@ -179,6 +184,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             ViewBag.SiSoMap = siSoMap;
             ViewBag.BuoiHocMap = buoiHocMap;
             ViewBag.ChuongTrinhList = await _context.ChuongTrinhDaoTaos.OrderBy(c => c.TenChuongTrinh).ToListAsync();
+            ViewBag.GiangVienList = await _context.GiangViens.Where(g => g.TrangThai).OrderBy(g => g.HoTen).ToListAsync();
 
             // 3 thẻ KPI
             ViewBag.TongSoLop = await _context.LopHocs.CountAsync();

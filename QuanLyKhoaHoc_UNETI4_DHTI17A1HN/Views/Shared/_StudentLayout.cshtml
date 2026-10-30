@@ -1,4 +1,4 @@
-@using Microsoft.AspNetCore.Http
+﻿@using Microsoft.AspNetCore.Http
 @inject IHttpContextAccessor HttpContextAccessor
 @{
     var session = HttpContextAccessor.HttpContext?.Session;
@@ -8,7 +8,9 @@
     int? maTaiKhoan = session?.GetInt32("MaTaiKhoan");
     int? maHocVien = session?.GetInt32("MaHocVien");
     bool isLoggedIn = maTaiKhoan.HasValue;
-    bool isStaffOrAdmin = userVaiTro == "Admin" || userVaiTro == "GiaoVu" || userVaiTro == "Giáo vụ";
+    bool isStaffOrAdmin = string.Equals(userVaiTro, "Admin", StringComparison.OrdinalIgnoreCase) || string.Equals(userVaiTro, "GiaoVu", StringComparison.OrdinalIgnoreCase) || string.Equals(userVaiTro, "Giáo vụ", StringComparison.OrdinalIgnoreCase);
+    bool isGiangVien = string.Equals(userVaiTro, "GiangVien", StringComparison.OrdinalIgnoreCase) || string.Equals(userVaiTro, "Giảng viên", StringComparison.OrdinalIgnoreCase);
+    bool isHocVien = string.Equals(userVaiTro, "HocVien", StringComparison.OrdinalIgnoreCase) || string.Equals(userVaiTro, "Học viên", StringComparison.OrdinalIgnoreCase);
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -20,7 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         @@layer base {
-            html, body { margin: 0; padding: 0; font-family: 'Be Vietnam Pro', 'Inter', sans-serif; }
+            html, body { margin: 0; padding: 0; font-family: 'Be Vietnam Pro', 'Inter', sans-serif; scroll-behavior: smooth; }
             body { background-color: #F8FAFC; color: #0F172A; }
         }
         .custom-scrollbar::-webkit-scrollbar {
@@ -79,7 +81,7 @@
     <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-border-standard shadow-xs transition-all">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
             <!-- Brand Logo -->
-            <a href="/CongHocVien/DangKy" class="flex items-center gap-3 shrink-0 group">
+            <a href="/?storefront=true" class="flex items-center gap-3 shrink-0 group">
                 <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-deep to-primary text-white flex items-center justify-center font-bold text-2xl shadow-md shadow-primary/20 group-hover:scale-105 transition-transform">
                     <span class="material-symbols-outlined text-[26px]">school</span>
                 </div>
@@ -92,30 +94,29 @@
                 </div>
             </a>
 
-            <!-- Central Search Bar (Marketplace Search) -->
-            <form action="/CongHocVien/DangKy" method="get" class="hidden md:flex items-center flex-1 max-w-lg mx-4">
-                <div class="relative w-full">
-                    <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[20px] pointer-events-none">search</span>
-                    <input type="text" name="search" value="@(Context.Request.Query["search"])" placeholder="Bạn muốn học gì hôm nay? (VD: ASP.NET Core, React, Python...)"
-                           class="w-full pl-10 pr-24 py-2.5 text-xs sm:text-sm rounded-full border border-border-standard bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-brand-deep placeholder:text-outline" />
-                    <button type="submit" class="absolute right-1.5 top-1/2 -translate-y-1/2 bg-primary hover:bg-primary-hover text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow-xs transition-colors">
-                        Tìm kiếm
-                    </button>
-                </div>
-            </form>
+            <!-- Navigation Links (Role-aware) -->
+            <nav class="hidden md:flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-bold text-brand-deep">
+                <a href="/?storefront=true#gioi-thieu" class="px-3.5 py-2 rounded-xl hover:bg-primary-light hover:text-primary transition-colors flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[19px] text-primary">info</span>
+                    <span>Giới thiệu</span>
+                </a>
+                <a href="/?storefront=true#kham-pha-khoa-hoc" class="px-3.5 py-2 rounded-xl hover:bg-primary-light hover:text-primary transition-colors flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[19px] text-primary">explore</span>
+                    <span>Khám phá khóa học</span>
+                </a>
+                <a href="/?storefront=true#lien-he" class="px-3.5 py-2 rounded-xl hover:bg-amber-50 text-slate-700 hover:text-amber-700 transition-colors flex items-center gap-1.5 cursor-pointer">
+                    <span class="material-symbols-outlined text-[19px] text-amber-500">support_agent</span>
+                    <span>Liên hệ</span>
+                </a>
+            </nav>
 
             <!-- Navigation Links & Account Area -->
             <div class="flex items-center gap-2 sm:gap-4 shrink-0">
-                <nav class="hidden lg:flex items-center gap-1 text-xs font-bold text-brand-deep">
-                    <a href="/CongHocVien/DangKy" class="px-3 py-2 rounded-xl hover:bg-primary-light hover:text-primary transition-colors flex items-center gap-1">
-                        <span class="material-symbols-outlined text-[18px]">explore</span>
-                        <span>Khám phá khóa học</span>
-                    </a>
-                    <a href="/CongHocVien/TienTrinh" class="px-3 py-2 rounded-xl hover:bg-primary-light hover:text-primary transition-colors flex items-center gap-1">
-                        <span class="material-symbols-outlined text-[18px]">menu_book</span>
-                        <span>Khóa học của tôi</span>
-                    </a>
-                </nav>
+                <!-- Mobile Contact button -->
+                <button type="button" onclick="openContactSupportModal()" class="md:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100 flex items-center gap-1 text-xs font-semibold" title="Liên hệ">
+                    <span class="material-symbols-outlined text-[20px] text-amber-500">support_agent</span>
+                    <span>Liên hệ</span>
+                </button>
 
                 <div class="h-6 w-px bg-border-standard hidden sm:block"></div>
 
@@ -125,7 +126,7 @@
                     <div class="relative" id="user-menu-wrapper">
                         <button type="button" onclick="toggleUserDropdown()" class="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-2 rounded-2xl hover:bg-slate-100 transition-colors cursor-pointer border border-border-standard">
                             <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-brand-deep to-primary text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
-                                @(string.IsNullOrWhiteSpace(userHoTen) ? "HV" : userHoTen.Substring(0, 1).ToUpper())
+                                @(string.IsNullOrWhiteSpace(userHoTen) ? "U" : userHoTen.Substring(0, 1).ToUpper())
                             </div>
                             <div class="hidden sm:flex flex-col text-left">
                                 <span class="text-xs font-bold text-brand-deep leading-tight truncate max-w-[130px]">@userHoTen</span>
@@ -145,20 +146,53 @@
                             </div>
 
                             <div class="py-1 text-xs text-slate-700">
-                                <a href="/CongHocVien/TienTrinh" class="flex items-center gap-2.5 px-4 py-2 hover:bg-primary-light hover:text-primary transition-colors">
-                                    <span class="material-symbols-outlined text-[18px]">school</span>
-                                    <span>Khóa học & Bảng điểm của tôi</span>
-                                </a>
-                                <a href="/CongHocVien/HoSo" class="flex items-center gap-2.5 px-4 py-2 hover:bg-primary-light hover:text-primary transition-colors">
-                                    <span class="material-symbols-outlined text-[18px]">person</span>
-                                    <span>Hồ sơ cá nhân & Đổi mật khẩu</span>
-                                </a>
+                                @if (isHocVien)
+                                {
+                                    <a href="/CongHocVien/TienTrinh?tab=dangky" class="flex items-center gap-2.5 px-4 py-2 hover:bg-primary-light hover:text-primary transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+                                        <span>Đơn đăng ký & Học phí</span>
+                                    </a>
+                                    <a href="/CongHocVien/TienTrinh?tab=tkb" class="flex items-center gap-2.5 px-4 py-2 hover:bg-primary-light hover:text-primary transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">calendar_month</span>
+                                        <span>Thời khóa biểu tuần</span>
+                                    </a>
+                                    <a href="/CongHocVien/TienTrinh?tab=ketqua" class="flex items-center gap-2.5 px-4 py-2 hover:bg-primary-light hover:text-primary transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">school</span>
+                                        <span>Bảng điểm & Chứng nhận</span>
+                                    </a>
+                                    <a href="/CongHocVien/TienTrinh?tab=hoso" class="flex items-center gap-2.5 px-4 py-2 hover:bg-primary-light hover:text-primary transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">badge</span>
+                                        <span>Thẻ sinh viên & Hồ sơ</span>
+                                    </a>
+                                }
                                 @if (isStaffOrAdmin)
                                 {
-                                    <div class="border-t border-border-standard my-1"></div>
-                                    <a href="/Home/Index" class="flex items-center gap-2.5 px-4 py-2 text-primary font-bold hover:bg-primary-light transition-colors">
+                                    <a href="/ThongKe/Dashboard" class="flex items-center gap-2.5 px-4 py-2 text-primary font-bold hover:bg-primary-light transition-colors">
                                         <span class="material-symbols-outlined text-[18px]">admin_panel_settings</span>
-                                        <span>Trang Quản trị Hệ thống (Admin)</span>
+                                        <span>Trang Quản trị Hệ thống</span>
+                                    </a>
+                                    <a href="/LopHoc/Index" class="flex items-center gap-2.5 px-4 py-2 hover:bg-primary-light hover:text-primary transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">meeting_room</span>
+                                        <span>Quản lý Lớp học</span>
+                                    </a>
+                                    <a href="/DangKyHoc/Index" class="flex items-center gap-2.5 px-4 py-2 hover:bg-primary-light hover:text-primary transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">how_to_reg</span>
+                                        <span>Xét duyệt & Học phí</span>
+                                    </a>
+                                }
+                                @if (isGiangVien)
+                                {
+                                    <a href="/GiangVien/Index" class="flex items-center gap-2.5 px-4 py-2 text-primary font-bold hover:bg-primary-light transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">dashboard_customize</span>
+                                        <span>Bàn làm việc Giảng viên</span>
+                                    </a>
+                                    <a href="/GiangVien/LichDay" class="flex items-center gap-2.5 px-4 py-2 hover:bg-primary-light hover:text-primary transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">calendar_month</span>
+                                        <span>Lịch giảng dạy</span>
+                                    </a>
+                                    <a href="/GiangVien/ChamDiem" class="flex items-center gap-2.5 px-4 py-2 hover:bg-primary-light hover:text-primary transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">fact_check</span>
+                                        <span>Chấm điểm học viên</span>
                                     </a>
                                 }
                             </div>
@@ -178,7 +212,7 @@
                         <a href="/TaiKhoan/Login" class="text-xs font-bold text-brand-deep hover:text-primary px-3 py-2 rounded-xl hover:bg-slate-100 transition-colors">
                             Đăng nhập
                         </a>
-                        <a href="/TaiKhoan/Login" class="text-xs font-bold text-white bg-primary hover:bg-primary-hover px-4 py-2 rounded-xl shadow-xs hover:shadow transition-all">
+                        <a href="/TaiKhoan/DangKy" class="text-xs font-bold text-white bg-primary hover:bg-primary-hover px-4 py-2 rounded-xl shadow-xs hover:shadow transition-all">
                             Đăng ký tài khoản
                         </a>
                     </div>
@@ -221,11 +255,11 @@
                 <div class="space-y-3">
                     <h4 class="text-xs font-bold uppercase tracking-wider text-white">Chương Trình Đào Tạo</h4>
                     <ul class="space-y-2 text-xs text-slate-300">
-                        <li><a href="/CongHocVien/DangKy" class="hover:text-white transition-colors">Lập trình Web ASP.NET Core</a></li>
-                        <li><a href="/CongHocVien/DangKy" class="hover:text-white transition-colors">Lập trình ReactJS & Frontend</a></li>
-                        <li><a href="/CongHocVien/DangKy" class="hover:text-white transition-colors">Khoa học Dữ liệu với Python</a></li>
-                        <li><a href="/CongHocVien/DangKy" class="hover:text-white transition-colors">Tiếng Anh Giao Tiếp Chuẩn Quốc Tế</a></li>
-                        <li><a href="/CongHocVien/DangKy" class="hover:text-white transition-colors">Lập trình Mobile với Flutter</a></li>
+                        <li><a href="/?storefront=true" class="hover:text-white transition-colors">Lập trình Web ASP.NET Core</a></li>
+                        <li><a href="/?storefront=true" class="hover:text-white transition-colors">Lập trình ReactJS & Frontend</a></li>
+                        <li><a href="/?storefront=true" class="hover:text-white transition-colors">Khoa học Dữ liệu với Python</a></li>
+                        <li><a href="/?storefront=true" class="hover:text-white transition-colors">Tiếng Anh Giao Tiếp Chuẩn Quốc Tế</a></li>
+                        <li><a href="/?storefront=true" class="hover:text-white transition-colors">Lập trình Mobile với Flutter</a></li>
                     </ul>
                 </div>
 
@@ -233,11 +267,9 @@
                 <div class="space-y-3">
                     <h4 class="text-xs font-bold uppercase tracking-wider text-white">Cổng Học Viên</h4>
                     <ul class="space-y-2 text-xs text-slate-300">
-                        <li><a href="/CongHocVien/DangKy" class="hover:text-white transition-colors">Danh sách lớp mở tuyển sinh</a></li>
-                        <li><a href="/CongHocVien/TienTrinh" class="hover:text-white transition-colors">Tra cứu lịch học & điểm số</a></li>
-                        <li><a href="/CongHocVien/HoSo" class="hover:text-white transition-colors">Cập nhật hồ sơ học viên</a></li>
+                        <li><a href="/?storefront=true" class="hover:text-white transition-colors">Danh sách lớp mở tuyển sinh</a></li>
                         <li><a href="/TaiKhoan/Login" class="hover:text-white transition-colors">Đăng nhập cổng học vụ</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Chính sách bảo lưu & học phí</a></li>
+                        <li><a href="/TaiKhoan/DangKy" class="hover:text-white transition-colors">Đăng ký tài khoản mới</a></li>
                     </ul>
                 </div>
 
@@ -269,16 +301,96 @@
                     © 2026 UNETI EDUSPACE. Đề tài 16: Quản lý Đăng ký Khóa học & Học viên.
                 </div>
                 <div>
-                    Thực hiện bởi: <strong class="text-white">Nguyễn Tùng Dương (23103100003)</strong> - Module 5 (DHTI17A1HN).
+                    Thực hiện bởi: <strong class="text-white">Nhóm 5</strong> - Khoa CNTT (DHTI17A1HN).
                 </div>
             </div>
         </div>
     </footer>
 
+    <!-- Contact & Support Modal -->
+    <div id="contactSupportModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-border-standard relative space-y-5 animate-in fade-in duration-200">
+            <button type="button" onclick="closeContactSupportModal()" class="absolute top-4 right-4 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+
+            <div class="flex items-center gap-3 border-b border-border-standard pb-4">
+                <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-[28px]">support_agent</span>
+                </div>
+                <div>
+                    <h3 class="text-base sm:text-lg font-black text-brand-deep">Trung Tâm Hỗ Trợ Học Viên UNETI</h3>
+                    <p class="text-xs text-outline">Giải đáp học vụ, lịch học, học phí & tư vấn tuyển sinh 24/7</p>
+                </div>
+            </div>
+
+            <!-- Hotline & Channels -->
+            <div class="space-y-3">
+                <div class="p-3.5 rounded-2xl bg-primary-light border border-primary/20 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary text-[24px]">call</span>
+                        <div>
+                            <span class="text-[11px] text-outline font-semibold block">Tổng đài tư vấn tuyển sinh & học phí</span>
+                            <a href="tel:19006868" class="text-base font-black text-primary hover:underline">1900 6868</a>
+                            <span class="text-[10px] text-slate-500 block">(Bấm phím 1: Học vụ • Phím 2: Học phí)</span>
+                        </div>
+                    </div>
+                    <a href="tel:19006868" class="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-xs transition-colors">
+                        Gọi ngay
+                    </a>
+                </div>
+
+                <div class="p-3.5 rounded-2xl bg-slate-50 border border-border-standard flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-emerald-600 text-[24px]">mark_email_read</span>
+                        <div>
+                            <span class="text-[11px] text-outline font-semibold block">Hòm thư tiếp nhận yêu cầu</span>
+                            <span class="text-xs font-bold text-brand-deep">tuyensinh@uneti.edu.vn</span>
+                        </div>
+                    </div>
+                    <a href="mailto:tuyensinh@uneti.edu.vn" class="px-3 py-1.5 rounded-xl border border-border-standard bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700">
+                        Gửi Email
+                    </a>
+                </div>
+
+                <div class="p-3.5 rounded-2xl bg-slate-50 border border-border-standard space-y-1.5 text-xs text-slate-700">
+                    <div class="flex items-start gap-2">
+                        <span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">location_on</span>
+                        <div>
+                            <strong class="text-brand-deep">Cơ sở Hà Nội:</strong> 218 Lĩnh Nam, Hoàng Mai & 456 Minh Khai, Hai Bà Trưng.
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">location_on</span>
+                        <div>
+                            <strong class="text-brand-deep">Cơ sở Nam Định:</strong> 353 Trần Hưng Đạo, TP. Nam Định.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2 flex justify-end gap-2">
+                <button type="button" onclick="closeContactSupportModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold cursor-pointer transition-colors">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Global Toast Notification Container -->
     <div id="global-toast-container" class="fixed top-5 right-5 z-[100] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
 
     <script>
+        function openContactSupportModal() {
+            const modal = document.getElementById('contactSupportModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeContactSupportModal() {
+            const modal = document.getElementById('contactSupportModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
         function toggleUserDropdown() {
             const dropdown = document.getElementById('user-dropdown');
             dropdown.classList.toggle('hidden');

@@ -1,4 +1,4 @@
-@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc>
+﻿@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc>
 @{
     // Họ và tên: Nguyễn Hoàng Long
     // Mã sinh viên: 23103100046
@@ -10,7 +10,7 @@
 }
 
 <!-- Table Container -->
-<div class="bg-surface-white rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] overflow-hidden">
+<div class="bg-surface-white rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse" id="dangky-table">
             <thead>
@@ -47,7 +47,7 @@
                         <tr class="hover:bg-surface-container-lowest/60 transition-colors">
                             <td class="py-3.5 px-4 text-center text-outline font-mono text-[11px]">@(idx++)</td>
                             <td class="py-3.5 px-4 font-mono font-semibold text-primary">
-                                #DK@item.MaDangKy.ToString("D3")
+                                #DK@(item.MaDangKy.ToString("D3"))
                             </td>
                             <td class="py-3.5 px-4">
                                 <div class="flex items-center gap-3">

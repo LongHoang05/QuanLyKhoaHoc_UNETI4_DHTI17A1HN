@@ -25,14 +25,17 @@
             theme: {
                 extend: {
                     colors: {
-                        "brand-deep": "#001656",
-                        "primary": "#0052cc",
-                        "primary-container": "#0068ff",
+                        "brand-deep": "#0D47A1",
+                        "primary": "#2196F3",
+                        "primary-dark": "#1976D2",
+                        "primary-container": "#1E88E5",
+                        "primary-light": "#90CAF9",
+                        "surface-container-low": "#E3F2FD",
                         "canvas-base": "#F8FAFC",
                         "surface-white": "#FFFFFF",
                         "border-standard": "#E2E8F0",
-                        "border-subtle": "#F1F5F9",
-                        "outline": "#727687",
+                        "border-subtle": "#E3F2FD",
+                        "outline": "#64748B",
                         "danger-crimson": "#EF4444"
                     },
                     fontFamily: {
@@ -43,7 +46,7 @@
         };
     </script>
 </head>
-<body class="bg-gradient-to-br from-[#001656] via-[#002d80] to-[#0052cc] min-h-screen flex items-center justify-center p-4 font-sans antialiased">
+<body class="bg-gradient-to-br from-[#0D47A1] via-[#1565C0] to-[#2196F3] min-h-screen flex items-center justify-center p-4 font-sans antialiased">
     <div class="w-full max-w-md">
         <!-- Main Login Card -->
         <div class="bg-surface-white rounded-3xl shadow-2xl p-8 border border-white/20 backdrop-blur-sm">
@@ -114,7 +117,7 @@
                 </div>
 
                 <div class="pt-2">
-                    <button type="submit" class="w-full bg-primary hover:bg-[#0047b3] text-surface-white font-bold text-sm py-3 rounded-xl shadow-md shadow-primary/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98">
+                    <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-surface-white font-bold text-sm py-3 rounded-xl shadow-md shadow-primary/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98">
                         <span>Đăng nhập hệ thống</span>
                         <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
                     </button>
@@ -125,19 +128,19 @@
             <div class="mt-6 pt-5 border-t border-border-subtle">
                 <span class="block text-[11px] font-bold text-outline uppercase tracking-wider text-center mb-3">Đăng nhập nhanh theo vai trò (Kiểm thử)</span>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    <button type="button" onclick="quickFill('admin', 'admin123')" class="px-2 py-2 rounded-xl border border-border-standard hover:border-primary hover:bg-blue-50/50 text-center text-xs font-semibold text-brand-deep transition-all flex flex-col items-center gap-1 group cursor-pointer">
+                    <button type="button" onclick="quickFill('admin', 'admin123')" class="px-2 py-2 rounded-xl border border-border-standard hover:border-primary hover:bg-surface-container-low text-center text-xs font-semibold text-brand-deep transition-all flex flex-col items-center gap-1 group cursor-pointer">
                         <span class="material-symbols-outlined text-primary text-[20px] group-hover:scale-110 transition-transform">admin_panel_settings</span>
                         <span>Admin</span>
                     </button>
-                    <button type="button" onclick="quickFill('giaovu', 'giaovu123')" class="px-2 py-2 rounded-xl border border-border-standard hover:border-primary hover:bg-blue-50/50 text-center text-xs font-semibold text-brand-deep transition-all flex flex-col items-center gap-1 group cursor-pointer">
+                    <button type="button" onclick="quickFill('giaovu', 'giaovu123')" class="px-2 py-2 rounded-xl border border-border-standard hover:border-primary hover:bg-surface-container-low text-center text-xs font-semibold text-brand-deep transition-all flex flex-col items-center gap-1 group cursor-pointer">
                         <span class="material-symbols-outlined text-primary text-[20px] group-hover:scale-110 transition-transform">badge</span>
                         <span>Giáo vụ</span>
                     </button>
-                    <button type="button" onclick="quickFill('giangvien', '123456')" class="px-2 py-2 rounded-xl border border-border-standard hover:border-primary hover:bg-blue-50/50 text-center text-xs font-semibold text-brand-deep transition-all flex flex-col items-center gap-1 group cursor-pointer">
+                    <button type="button" onclick="quickFill('giangvien', '123456')" class="px-2 py-2 rounded-xl border border-border-standard hover:border-primary hover:bg-surface-container-low text-center text-xs font-semibold text-brand-deep transition-all flex flex-col items-center gap-1 group cursor-pointer">
                         <span class="material-symbols-outlined text-primary text-[20px] group-hover:scale-110 transition-transform">co_present</span>
                         <span>Giảng viên</span>
                     </button>
-                    <button type="button" onclick="quickFill('hocvien', 'hocvien123')" class="px-2 py-2 rounded-xl border border-border-standard hover:border-primary hover:bg-blue-50/50 text-center text-xs font-semibold text-brand-deep transition-all flex flex-col items-center gap-1 group cursor-pointer">
+                    <button type="button" onclick="quickFill('hocvien', 'hocvien123')" class="px-2 py-2 rounded-xl border border-border-standard hover:border-primary hover:bg-surface-container-low text-center text-xs font-semibold text-brand-deep transition-all flex flex-col items-center gap-1 group cursor-pointer">
                         <span class="material-symbols-outlined text-primary text-[20px] group-hover:scale-110 transition-transform">school</span>
                         <span>Học viên</span>
                     </button>

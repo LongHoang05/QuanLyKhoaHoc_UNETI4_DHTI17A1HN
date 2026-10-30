@@ -34,11 +34,11 @@
         </div>
 
         <div class="flex items-center gap-2.5">
-            <a href="/HocVien/Index" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-surface-container-low text-brand-deep font-label-md text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-xs cursor-pointer">
+            <a href="/HocVien/Index" class="hidden">
                 <span class="material-symbols-outlined text-[18px] text-primary">badge</span>
                 <span>Hồ sơ Học viên (M3)</span>
             </a>
-            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-[#0047b3] text-surface-white font-label-md text-xs px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
+            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-surface-white font-label-md text-xs px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">person_add</span>
                 <span>Thêm tài khoản</span>
             </button>
@@ -47,7 +47,7 @@
 
     <!-- 3 Stat Cards (Top KPI) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Tổng tài khoản</span>
                 <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
@@ -60,7 +60,7 @@
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Đang hoạt động</span>
                 <div class="w-9 h-9 rounded-xl bg-success-emerald/10 flex items-center justify-center text-success-emerald">
@@ -73,7 +73,7 @@
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md">Tài khoản bị khóa</span>
                 <div class="w-9 h-9 rounded-xl bg-rose-50 flex items-center justify-center text-danger-crimson">
@@ -101,6 +101,7 @@
                     <option value="">Tất cả vai trò</option>
                     <option value="Admin" selected="@(Model.VaiTro == "Admin")">Quản trị viên (Admin)</option>
                     <option value="GiaoVu" selected="@(Model.VaiTro == "GiaoVu")">Giáo vụ đào tạo</option>
+                    <option value="GiangVien" selected="@(Model.VaiTro == "GiangVien")">Giảng viên</option>
                     <option value="HocVien" selected="@(Model.VaiTro == "HocVien")">Học viên sinh viên</option>
                 </select>
                 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
@@ -302,7 +303,7 @@
 
         <div class="pt-4 border-t border-border-standard flex items-center justify-end gap-3">
             <button type="button" onclick="closeDrawer()" class="px-4 py-2.5 font-semibold rounded-xl border border-border-standard text-outline hover:text-brand-deep cursor-pointer">Hủy bỏ</button>
-            <button type="submit" class="px-5 py-2.5 font-semibold rounded-xl bg-primary text-surface-white hover:bg-[#0047b3] shadow-md shadow-primary/20 flex items-center gap-1.5 cursor-pointer">
+            <button type="submit" class="px-5 py-2.5 font-semibold rounded-xl bg-primary text-surface-white hover:bg-primary-dark shadow-md shadow-primary/20 flex items-center gap-1.5 cursor-pointer">
                 <span class="material-symbols-outlined text-[16px]">save</span>
                 <span>Lưu tài khoản</span>
             </button>
@@ -332,7 +333,7 @@
             <p class="text-[11px] text-outline">Mặc định: <code>123456</code>. Người dùng sẽ được yêu cầu đổi mật khẩu ở lần đăng nhập tiếp theo.</p>
             <div class="pt-2 flex justify-end gap-2">
                 <button type="button" onclick="closeResetPwModal()" class="px-3.5 py-2 rounded-xl border border-border-standard text-outline hover:text-brand-deep cursor-pointer">Hủy</button>
-                <button type="submit" class="px-4 py-2 rounded-xl bg-primary text-white font-bold hover:bg-[#0047b3] cursor-pointer">Cập nhật mật khẩu</button>
+                <button type="submit" class="px-4 py-2 rounded-xl bg-primary text-white font-bold hover:bg-primary-dark cursor-pointer">Cập nhật mật khẩu</button>
             </div>
         </form>
     </div>

@@ -1,4 +1,4 @@
-// ========================================================
+﻿// ========================================================
 // Họ và tên: Nguyễn Tùng Dương
 // Mã sinh viên: 23103100003
 // Phụ trách: Module 5 - Lịch học, Kết quả học tập, Dashboard và Thống kê
@@ -22,6 +22,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
         public async Task<IActionResult> Index(int? maLop, string? phong, string? trangThai, string? search, int page = 1)
         {
+            var vaiTro = HttpContext.Session.GetString("VaiTro");
+            if (string.Equals(vaiTro, "HocVien", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction("TienTrinh", "CongHocVien", new { tab = "tkb" });
+            }
             int pageSize = 8;
             var query = _context.BuoiHocs
                 .Include(b => b.LopHoc)
@@ -134,7 +139,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 ModelState.AddModelError("", "Lớp này chưa có học viên nào được duyệt hoặc đóng học phí, không được xếp lịch.");
             }
 
-            // 2. Validate thời gian hợp lệ
+            // 2. Validate thời gian hợp lệ (Mục 9.2)
+            if (buoiHoc.ThoiGianBatDau < DateTime.Now)
+            {
+                ModelState.AddModelError("ThoiGianBatDau", "Thời gian học không được nằm trong quá khứ tại thời điểm xếp lịch.");
+            }
             if (buoiHoc.ThoiGianKetThuc <= buoiHoc.ThoiGianBatDau)
             {
                 ModelState.AddModelError("ThoiGianKetThuc", "Thời gian kết thúc phải sau thời gian bắt đầu.");

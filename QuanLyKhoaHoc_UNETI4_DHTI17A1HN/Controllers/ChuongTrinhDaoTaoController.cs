@@ -25,6 +25,17 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
         public async Task<IActionResult> Index(int page = 1, string search = "", string trangThai = "")
         {
+            var vaiTro = HttpContext.Session.GetString("VaiTro");
+            if (string.Equals(vaiTro, "GiangVien", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Error"] = "Giảng viên không có quyền quản lý Chương trình đào tạo.";
+                return RedirectToAction("Index", "GiangVien");
+            }
+            if (string.Equals(vaiTro, "HocVien", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction("DangKy", "CongHocVien");
+            }
+
             int pageSize = 8;
             var query = _context.ChuongTrinhDaoTaos.AsQueryable();
 

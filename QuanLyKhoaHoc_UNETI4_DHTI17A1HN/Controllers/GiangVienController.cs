@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services;
@@ -29,9 +29,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             int? maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
 
             var gv = await _giangVienService.GetCurrentGiangVienAsync(maGiangVien, maTaiKhoan);
-            if (gv != null && !maGiangVien.HasValue)
+            if (gv != null)
             {
-                HttpContext.Session.SetInt32("MaGiangVien", gv.MaGiangVien);
+                if (!maGiangVien.HasValue)
+                {
+                    HttpContext.Session.SetInt32("MaGiangVien", gv.MaGiangVien);
+                }
+                HttpContext.Session.SetString("HoTen", gv.HoTen);
             }
             return gv;
         }
@@ -165,13 +169,38 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         // ========================================================
         // 5. QUẢN LÝ GIẢNG VIÊN (Dành cho Admin & Giáo vụ)
         // ========================================================
-        public async Task<IActionResult> QuanLy(string? search, string? hocVi)
+        public async Task<IActionResult> QuanLy(string? search, string? hocVi, int page = 1)
         {
+            var vaiTro = HttpContext.Session.GetString("VaiTro");
+            if (string.Equals(vaiTro, "GiangVien", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Error"] = "Giảng viên không có quyền quản lý danh sách Giảng viên của trung tâm.";
+                return RedirectToAction(nameof(Index));
+            }
+            if (string.Equals(vaiTro, "HocVien", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             var list = await _giangVienService.GetDanhSachGiangVienAsync(search, hocVi);
+
+            int pageSize = 6;
+            int totalItems = list.Count;
+            int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            if (totalPages < 1) totalPages = 1;
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+
+            var pagedList = list.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
             ViewBag.Search = search;
             ViewBag.HocVi = hocVi;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalItems = totalItems;
+            ViewBag.PageSize = pageSize;
 
-            return View(list);
+            return View(pagedList);
         }
 
         // --- AJAX CRUD CHO QUẢN LÝ GIẢNG VIÊN QUA SERVICE ---
@@ -190,7 +219,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                     hoTen = gv.HoTen,
                     email = gv.Email,
                     soDienThoai = gv.SoDienThoai ?? "",
-                    hocVi = gv.HocVi ?? "ThS.",
+                    hocVi = gv.HocVi ?? "",
                     chuyenNganh = gv.ChuyenNganh ?? "",
                     gioiThieu = gv.GioiThieu ?? "",
                     trangThai = gv.TrangThai,
