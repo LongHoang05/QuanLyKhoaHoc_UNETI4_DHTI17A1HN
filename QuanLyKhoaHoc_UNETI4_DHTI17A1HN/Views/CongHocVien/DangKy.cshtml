@@ -422,35 +422,23 @@
                     }
                 </div>
 
-                <!-- Pagination -->
-                @if (totalPages > 1)
-                {
-                    <div class="pt-8 flex items-center justify-center gap-2">
-                        @if (currentPage > 1)
-                        {
-                            <a href="@Url.Action("DangKy", new { page = currentPage - 1, search = search, maChuongTrinh = selectedMaCT, trinhDo = selectedTrinhDo, mucGia = selectedMucGia, sapXep = selectedSapXep })"
-                               class="px-3.5 py-2 rounded-xl border border-border-standard bg-white text-xs font-semibold text-brand-deep hover:bg-slate-50">
-                                Trước
-                            </a>
+                <!-- Clean Reusable Pagination Component -->
+                <div class="mt-8 rounded-2xl border border-border-standard overflow-hidden shadow-xs">
+                    @await Html.PartialAsync("_Pagination", new QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels.PaginationModel {
+                        CurrentPage = currentPage,
+                        TotalPages = totalPages,
+                        TotalItems = totalItems,
+                        ItemLabel = "khóa học",
+                        BaseUrl = "/CongHocVien/DangKy",
+                        RouteParams = new Dictionary<string, string?> {
+                            { "search", search },
+                            { "maChuongTrinh", selectedMaCT?.ToString() },
+                            { "trinhDo", selectedTrinhDo },
+                            { "mucGia", selectedMucGia },
+                            { "sapXep", selectedSapXep }
                         }
-
-                        @for (int p = 1; p <= totalPages; p++)
-                        {
-                            <a href="@Url.Action("DangKy", new { page = p, search = search, maChuongTrinh = selectedMaCT, trinhDo = selectedTrinhDo, mucGia = selectedMucGia, sapXep = selectedSapXep })"
-                               class="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold font-mono transition-colors @(p == currentPage ? "bg-primary text-white shadow-xs" : "bg-white border border-border-standard text-slate-700 hover:bg-slate-50")">
-                                @p
-                            </a>
-                        }
-
-                        @if (currentPage < totalPages)
-                        {
-                            <a href="@Url.Action("DangKy", new { page = currentPage + 1, search = search, maChuongTrinh = selectedMaCT, trinhDo = selectedTrinhDo, mucGia = selectedMucGia, sapXep = selectedSapXep })"
-                               class="px-3.5 py-2 rounded-xl border border-border-standard bg-white text-xs font-semibold text-brand-deep hover:bg-slate-50">
-                                Tiếp theo
-                            </a>
-                        }
-                    </div>
-                }
+                    })
+                </div>
             }
         </main>
     </div>

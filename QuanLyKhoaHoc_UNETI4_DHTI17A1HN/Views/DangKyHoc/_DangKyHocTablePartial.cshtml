@@ -155,49 +155,13 @@
     </div>
 
     <!-- Pagination & Summary -->
-    <div class="px-5 py-4 border-t border-border-standard flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-outline">
-        <div>
-            Hiển thị <span class="font-bold text-brand-deep">@Model.Count()</span> trên tổng số <span class="font-bold text-brand-deep">@totalItems</span> đơn đăng ký
-        </div>
-
-        @if (totalPages > 1)
-        {
-            <div class="flex items-center gap-1">
-                <!-- Nút Đầu -->
-                <button type="button" onclick="changePage(1)" @(currentPage == 1 ? "disabled" : "") class="p-1.5 rounded-lg border border-border-standard hover:bg-surface-container-low disabled:opacity-40 disabled:cursor-not-allowed">
-                    <span class="material-symbols-outlined text-[16px]">first_page</span>
-                </button>
-                <!-- Nút Trước -->
-                <button type="button" onclick="changePage(@(currentPage - 1))" @(currentPage == 1 ? "disabled" : "") class="p-1.5 rounded-lg border border-border-standard hover:bg-surface-container-low disabled:opacity-40 disabled:cursor-not-allowed">
-                    <span class="material-symbols-outlined text-[16px]">chevron_left</span>
-                </button>
-
-                <!-- Số trang (trước, hiện tại, sau) -->
-                @{
-                    int startP = Math.Max(1, currentPage - 1);
-                    int endP = Math.Min(totalPages, currentPage + 1);
-                    for (int p = startP; p <= endP; p++)
-                    {
-                        if (p == currentPage)
-                        {
-                            <span class="w-8 h-8 rounded-lg bg-primary text-surface-white font-bold flex items-center justify-center font-mono">@p</span>
-                        }
-                        else
-                        {
-                            <button type="button" onclick="changePage(@p)" class="w-8 h-8 rounded-lg border border-border-standard hover:bg-surface-container-low text-brand-deep font-mono">@p</button>
-                        }
-                    }
-                }
-
-                <!-- Nút Sau -->
-                <button type="button" onclick="changePage(@(currentPage + 1))" @(currentPage == totalPages ? "disabled" : "") class="p-1.5 rounded-lg border border-border-standard hover:bg-surface-container-low disabled:opacity-40 disabled:cursor-not-allowed">
-                    <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-                </button>
-                <!-- Nút Cuối -->
-                <button type="button" onclick="changePage(@totalPages)" @(currentPage == totalPages ? "disabled" : "") class="p-1.5 rounded-lg border border-border-standard hover:bg-surface-container-low disabled:opacity-40 disabled:cursor-not-allowed">
-                    <span class="material-symbols-outlined text-[16px]">last_page</span>
-                </button>
-            </div>
-        }
-    </div>
+    <!-- Clean Reusable Pagination Component -->
+    @await Html.PartialAsync("_Pagination", new QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels.PaginationModel {
+        CurrentPage = currentPage,
+        TotalPages = totalPages,
+        TotalItems = totalItems,
+        PageSize = pageSize,
+        ItemLabel = "đơn đăng ký",
+        ButtonJsFunction = "changePage"
+    })
 </div>

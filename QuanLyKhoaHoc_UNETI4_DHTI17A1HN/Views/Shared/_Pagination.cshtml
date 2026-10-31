@@ -1,0 +1,133 @@
+@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels.PaginationModel
+@{
+    if (Model == null || Model.TotalPages <= 0) return;
+
+    int cur = Math.Max(1, Math.Min(Model.CurrentPage, Model.TotalPages));
+    int total = Model.TotalPages;
+    int totalItems = Model.TotalItems;
+
+    // Smart window: show first, last, and cur-1, cur, cur+1
+    var pages = new List<int>();
+    for (int p = 1; p <= total; p++)
+    {
+        if (p == 1 || p == total || (p >= cur - 1 && p <= cur + 1))
+        {
+            pages.Add(p);
+        }
+    }
+}
+
+<div class="px-5 py-4 border-t border-border-standard flex flex-col sm:flex-row items-center justify-between gap-3 bg-surface-white rounded-b-2xl">
+    <div class="text-xs text-outline">
+        @if (totalItems > 0)
+        {
+            <span>Hiển thị <strong class="text-brand-deep font-semibold">@Model.StartItem</strong> - <strong class="text-brand-deep font-semibold">@Model.EndItem</strong> trên tổng số <strong class="text-brand-deep font-semibold">@totalItems</strong> @Model.ItemLabel</span>
+        }
+        else
+        {
+            <span>Trang <strong class="text-brand-deep font-semibold">@cur</strong> / <strong class="text-brand-deep font-semibold">@total</strong></span>
+        }
+    </div>
+
+    @if (total > 1)
+    {
+        <div class="flex items-center gap-1.5 text-xs font-semibold">
+            @* First & Prev *@
+            @{
+                bool canPrev = cur > 1;
+            }
+            @if (!string.IsNullOrEmpty(Model.ButtonJsFunction))
+            {
+                <button type="button" onclick="@(Model.ButtonJsFunction)(1)" @(!canPrev ? "disabled" : "")
+                        class="p-1.5 rounded-lg border border-border-standard hover:bg-surface-container-low text-outline hover:text-brand-deep transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer" title="Trang đầu">
+                    <span class="material-symbols-outlined text-[16px] block">first_page</span>
+                </button>
+                <button type="button" onclick="@(Model.ButtonJsFunction)(@(cur - 1))" @(!canPrev ? "disabled" : "")
+                        class="p-1.5 rounded-lg border border-border-standard hover:bg-surface-container-low text-outline hover:text-brand-deep transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer" title="Trang trước">
+                    <span class="material-symbols-outlined text-[16px] block">chevron_left</span>
+                </button>
+            }
+            else
+            {
+                string firstUrl = Model.BuildUrl(1);
+                string firstClick = !string.IsNullOrEmpty(Model.AjaxFunction) ? $"event.preventDefault(); {Model.AjaxFunction}('{firstUrl}');" : "";
+                <a href="@firstUrl" onclick="@firstClick"
+                   class="p-1.5 rounded-lg border border-border-standard hover:bg-surface-container-low text-outline hover:text-brand-deep transition-colors cursor-pointer @(!canPrev ? "opacity-40 pointer-events-none" : "")" title="Trang đầu">
+                    <span class="material-symbols-outlined text-[16px] block">first_page</span>
+                </a>
+
+                string prevUrl = Model.BuildUrl(cur - 1);
+                string prevClick = !string.IsNullOrEmpty(Model.AjaxFunction) ? $"event.preventDefault(); {Model.AjaxFunction}('{prevUrl}');" : "";
+                <a href="@prevUrl" onclick="@prevClick"
+                   class="p-1.5 rounded-lg border border-border-standard hover:bg-surface-container-low text-outline hover:text-brand-deep transition-colors cursor-pointer @(!canPrev ? "opacity-40 pointer-events-none" : "")" title="Trang trước">
+                    <span class="material-symbols-outlined text-[16px] block">chevron_left</span>
+                </a>
+            }
+
+            @* Page numbers with ellipsis *@
+            @{
+                int prevPageNum = 0;
+            }
+            @foreach (var p in pages)
+            {
+                if (prevPageNum > 0 && p - prevPageNum > 1)
+                {
+                    <span class="px-1 text-outline font-mono">...</span>
+                }
+                prevPageNum = p;
+
+                if (p == cur)
+                {
+                    <span class="w-8 h-8 rounded-lg bg-primary text-white font-bold font-mono flex items-center justify-center shadow-xs">@p</span>
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(Model.ButtonJsFunction))
+                    {
+                        <button type="button" onclick="@(Model.ButtonJsFunction)(@p)"
+                                class="w-8 h-8 rounded-lg border border-border-standard hover:bg-surface-container-low text-brand-deep font-mono flex items-center justify-center transition-colors cursor-pointer">@p</button>
+                    }
+                    else
+                    {
+                        string pUrl = Model.BuildUrl(p);
+                        string pClick = !string.IsNullOrEmpty(Model.AjaxFunction) ? $"event.preventDefault(); {Model.AjaxFunction}('{pUrl}');" : "";
+                        <a href="@pUrl" onclick="@pClick"
+                           class="w-8 h-8 rounded-lg border border-border-standard hover:bg-surface-container-low text-brand-deep font-mono flex items-center justify-center transition-colors cursor-pointer">@p</a>
+                    }
+                }
+            }
+
+            @* Next & Last *@
+            @{
+                bool canNext = cur < total;
+            }
+            @if (!string.IsNullOrEmpty(Model.ButtonJsFunction))
+            {
+                <button type="button" onclick="@(Model.ButtonJsFunction)(@(cur + 1))" @(!canNext ? "disabled" : "")
+                        class="p-1.5 rounded-lg border border-border-standard hover:bg-surface-container-low text-outline hover:text-brand-deep transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer" title="Trang sau">
+                    <span class="material-symbols-outlined text-[16px] block">chevron_right</span>
+                </button>
+                <button type="button" onclick="@(Model.ButtonJsFunction)(@total)" @(!canNext ? "disabled" : "")
+                        class="p-1.5 rounded-lg border border-border-standard hover:bg-surface-container-low text-outline hover:text-brand-deep transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer" title="Trang cuối">
+                    <span class="material-symbols-outlined text-[16px] block">last_page</span>
+                </button>
+            }
+            else
+            {
+                string nextUrl = Model.BuildUrl(cur + 1);
+                string nextClick = !string.IsNullOrEmpty(Model.AjaxFunction) ? $"event.preventDefault(); {Model.AjaxFunction}('{nextUrl}');" : "";
+                <a href="@nextUrl" onclick="@nextClick"
+                   class="p-1.5 rounded-lg border border-border-standard hover:bg-surface-container-low text-outline hover:text-brand-deep transition-colors cursor-pointer @(!canNext ? "opacity-40 pointer-events-none" : "")" title="Trang sau">
+                    <span class="material-symbols-outlined text-[16px] block">chevron_right</span>
+                </a>
+
+                string lastUrl = Model.BuildUrl(total);
+                string lastClick = !string.IsNullOrEmpty(Model.AjaxFunction) ? $"event.preventDefault(); {Model.AjaxFunction}('{lastUrl}');" : "";
+                <a href="@lastUrl" onclick="@lastClick"
+                   class="p-1.5 rounded-lg border border-border-standard hover:bg-surface-container-low text-outline hover:text-brand-deep transition-colors cursor-pointer @(!canNext ? "opacity-40 pointer-events-none" : "")" title="Trang cuối">
+                    <span class="material-symbols-outlined text-[16px] block">last_page</span>
+                </a>
+            }
+        </div>
+    }
+</div>

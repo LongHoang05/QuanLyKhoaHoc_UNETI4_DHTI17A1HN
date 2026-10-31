@@ -413,54 +413,19 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
             </table>
         </div>
 
-        <!-- Pagination Footer -->
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-border-subtle font-body-sm text-body-sm text-outline">
-            <span class="tabular-nums">
-                Trang <strong class="text-brand-deep font-semibold">@Model.CurrentPage</strong> / <strong class="text-brand-deep font-semibold">@Model.TotalPages</strong>
-            </span>
-            <div class="inline-flex items-center gap-1">
-                @if (Model.CurrentPage > 1)
-                {
-                    <a href="/ThongKe/Dashboard?page=@(Model.CurrentPage - 1)&status=@Model.SelectedStatus&search=@Model.Search" onclick="event.preventDefault(); loadDashboardPage(this.href)" class="px-2.5 py-1 rounded-lg border border-border-standard text-brand-deep hover:bg-canvas-base transition-colors font-label-md text-label-md cursor-pointer">
-                        Trước
-                    </a>
-                }
-                else
-                {
-                    <span class="px-2.5 py-1 rounded-lg border border-border-standard text-outline/40 font-label-md text-label-md cursor-not-allowed">
-                        Trước
-                    </span>
-                }
-
-                @for (int p = Model.CurrentPage - 1; p <= Model.CurrentPage + 1; p++)
-                {
-                    if (p >= 1 && p <= Model.TotalPages)
-                    {
-                        if (p == Model.CurrentPage)
-                        {
-                            <span class="w-8 h-8 rounded-lg bg-primary-container text-surface-white font-label-md text-label-md font-bold flex items-center justify-center font-mono">@p</span>
-                        }
-                        else
-                        {
-                            <a href="/ThongKe/Dashboard?page=@p&status=@Model.SelectedStatus&search=@Model.Search" onclick="event.preventDefault(); loadDashboardPage(this.href)" class="w-8 h-8 rounded-lg border border-border-standard text-brand-deep hover:bg-canvas-base transition-colors font-label-md text-label-md flex items-center justify-center font-mono cursor-pointer">@p</a>
-                        }
-                    }
-                }
-
-                @if (Model.CurrentPage < Model.TotalPages)
-                {
-                    <a href="/ThongKe/Dashboard?page=@(Model.CurrentPage + 1)&status=@Model.SelectedStatus&search=@Model.Search" onclick="event.preventDefault(); loadDashboardPage(this.href)" class="px-2.5 py-1 rounded-lg border border-border-standard text-brand-deep hover:bg-canvas-base transition-colors font-label-md text-label-md cursor-pointer">
-                        Sau
-                    </a>
-                }
-                else
-                {
-                    <span class="px-2.5 py-1 rounded-lg border border-border-standard text-outline/40 font-label-md text-label-md cursor-not-allowed">
-                        Sau
-                    </span>
-                }
-            </div>
-        </div>
+        <!-- Clean Reusable Pagination Component -->
+        @await Html.PartialAsync("_Pagination", new QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels.PaginationModel {
+            CurrentPage = Model.CurrentPage,
+            TotalPages = Model.TotalPages,
+            TotalItems = Model.TongSoDangKy,
+            ItemLabel = "đơn đăng ký",
+            BaseUrl = "/ThongKe/Dashboard",
+            AjaxFunction = "loadDashboardPage",
+            RouteParams = new Dictionary<string, string?> {
+                { "status", Model.SelectedStatus },
+                { "search", Model.Search }
+            }
+        })
     </section>
 </div>
 

@@ -343,40 +343,21 @@ Nội dung thực hiện: Module 5 - Quản lý Kết quả học tập CRUD chu
             </table>
         </div>
 
-        <!-- Pagination Toolbar -->
-        <div class="p-4 px-6 border-t border-border-subtle bg-surface-white flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="font-body-sm text-body-sm text-outline">
-                Hiển thị <span class="font-semibold text-brand-deep tabular-nums">@startRecord-@endRecord</span> trên <span class="font-semibold text-brand-deep tabular-nums">@totalRecords</span> kết quả
-            </div>
-            <div class="flex items-center gap-1.5">
-                <a href="/KetQuaHocTap/Index?page=@(currentPage - 1)&maLop=@selectedMaLop&ketQua=@selectedKetQua&search=@search&sortBy=@sortBy" 
-                   onclick="event.preventDefault(); loadKetQuaPage(this.href)"
-                   class="p-1.5 rounded-lg border border-border-standard text-outline hover:bg-surface-container-low transition-colors cursor-pointer @(currentPage <= 1 ? "opacity-40 pointer-events-none" : "")">
-                    <span class="material-symbols-outlined text-[18px]">chevron_left</span>
-                </a>
-                @for (int p = 1; p <= totalPages; p++)
-                {
-                    if (p == currentPage)
-                    {
-                        <span class="w-8 h-8 rounded-lg bg-primary text-surface-white font-label-md text-label-md font-bold flex items-center justify-center">@p</span>
-                    }
-                    else if (p <= 3 || p == totalPages || Math.Abs(p - currentPage) <= 1)
-                    {
-                        <a href="/KetQuaHocTap/Index?page=@p&maLop=@selectedMaLop&ketQua=@selectedKetQua&search=@search&sortBy=@sortBy" 
-                           onclick="event.preventDefault(); loadKetQuaPage(this.href)"
-                           class="w-8 h-8 rounded-lg border border-border-standard text-brand-deep hover:bg-surface-container-low font-label-md text-label-md flex items-center justify-center transition-colors cursor-pointer">@p</a>
-                    }
-                    else if (p == 4 && totalPages > 5)
-                    {
-                        <span class="px-1 text-outline font-body-sm">...</span>
-                    }
-                }
-                <a href="/KetQuaHocTap/Index?page=@(currentPage + 1)&maLop=@selectedMaLop&ketQua=@selectedKetQua&search=@search&sortBy=@sortBy" 
-                   onclick="event.preventDefault(); loadKetQuaPage(this.href)"
-                   class="p-1.5 rounded-lg border border-border-standard text-outline hover:bg-surface-container-low transition-colors cursor-pointer @(currentPage >= totalPages ? "opacity-40 pointer-events-none" : "")">
-                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-                </a>
-            </div>
+        <!-- Clean Reusable Pagination Component -->
+        @await Html.PartialAsync("_Pagination", new QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels.PaginationModel {
+            CurrentPage = currentPage,
+            TotalPages = totalPages,
+            TotalItems = totalRecords,
+            ItemLabel = "kết quả",
+            BaseUrl = "/KetQuaHocTap/Index",
+            AjaxFunction = "loadKetQuaPage",
+            RouteParams = new Dictionary<string, string?> {
+                { "maLop", selectedMaLop?.ToString() },
+                { "ketQua", selectedKetQua },
+                { "search", search },
+                { "sortBy", sortBy }
+            }
+        })
         </div>
     </div>
 </div>

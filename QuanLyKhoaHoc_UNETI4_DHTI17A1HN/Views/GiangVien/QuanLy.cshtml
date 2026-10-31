@@ -248,50 +248,18 @@
                 </tbody>
             </table>
         </div>
-        <!-- Pagination Footer -->
-        @{
-            int currentPage = ViewBag.CurrentPage ?? 1;
-            int totalPages = ViewBag.TotalPages ?? 1;
-            int totalItems = ViewBag.TotalItems ?? 0;
-            string searchVal = ViewBag.Search ?? "";
-            string hocViVal = ViewBag.HocVi ?? "";
-        }
-        <div class="px-5 py-4 border-t border-border-standard flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-outline">
-            <div>
-                Hiển thị <span class="font-bold text-brand-deep">@(Model?.Count() ?? 0)</span> trên tổng số <span class="font-bold text-brand-deep">@totalItems</span> giảng viên
-            </div>
-
-            <div class="flex items-center gap-1">
-                <a href="/GiangVien/QuanLy?search=@searchVal&hocVi=@hocViVal&page=1" class="p-1.5 rounded-lg border border-border-standard hover:bg-surface-container-low @(currentPage == 1 ? "opacity-40 pointer-events-none" : "")" title="Trang đầu">
-                    <span class="material-symbols-outlined text-[16px] block">first_page</span>
-                </a>
-                <a href="/GiangVien/QuanLy?search=@searchVal&hocVi=@hocViVal&page=@(currentPage - 1)" class="p-1.5 rounded-lg border border-border-standard hover:bg-surface-container-low @(currentPage == 1 ? "opacity-40 pointer-events-none" : "")" title="Trang trước">
-                    <span class="material-symbols-outlined text-[16px] block">chevron_left</span>
-                </a>
-
-                @{
-                    int startP = Math.Max(1, currentPage - 1);
-                    int endP = Math.Min(totalPages, currentPage + 1);
-                    for (int p = startP; p <= endP; p++)
-                    {
-                        if (p == currentPage)
-                        {
-                            <span class="w-8 h-8 rounded-lg bg-primary text-white font-bold flex items-center justify-center font-mono">@p</span>
-                        }
-                        else
-                        {
-                            <a href="/GiangVien/QuanLy?search=@searchVal&hocVi=@hocViVal&page=@p" class="w-8 h-8 rounded-lg border border-border-standard hover:bg-surface-container-low text-brand-deep font-mono flex items-center justify-center">@p</a>
-                        }
-                    }
-                }
-
-                <a href="/GiangVien/QuanLy?search=@searchVal&hocVi=@hocViVal&page=@(currentPage + 1)" class="p-1.5 rounded-lg border border-border-standard hover:bg-surface-container-low @(currentPage >= totalPages ? "opacity-40 pointer-events-none" : "")" title="Trang sau">
-                    <span class="material-symbols-outlined text-[16px] block">chevron_right</span>
-                </a>
-                <a href="/GiangVien/QuanLy?search=@searchVal&hocVi=@hocViVal&page=@totalPages" class="p-1.5 rounded-lg border border-border-standard hover:bg-surface-container-low @(currentPage >= totalPages ? "opacity-40 pointer-events-none" : "")" title="Trang cuối">
-                    <span class="material-symbols-outlined text-[16px] block">last_page</span>
-                </a>
-            </div>
+        <!-- Clean Reusable Pagination Component -->
+        @await Html.PartialAsync("_Pagination", new QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels.PaginationModel {
+            CurrentPage = (int)(ViewBag.CurrentPage ?? 1),
+            TotalPages = (int)(ViewBag.TotalPages ?? 1),
+            TotalItems = (int)(ViewBag.TotalItems ?? 0),
+            ItemLabel = "giảng viên",
+            BaseUrl = "/GiangVien/QuanLy",
+            RouteParams = new Dictionary<string, string?> {
+                { "search", (string)(ViewBag.Search ?? "") },
+                { "hocVi", (string)(ViewBag.HocVi ?? "") }
+            }
+        })
         </div>
     </div>
 </div>
