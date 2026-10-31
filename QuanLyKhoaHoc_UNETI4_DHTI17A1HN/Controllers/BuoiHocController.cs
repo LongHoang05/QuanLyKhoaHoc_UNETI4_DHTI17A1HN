@@ -117,10 +117,10 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             return View(buoiHocs);
         }
 
+        [HttpGet]
         public IActionResult Create()
         {
-            ViewBag.LopHocList = _context.LopHocs.ToList();
-            return View();
+            return RedirectToAction("Index", new { create = "true" });
         }
 
         [HttpPost]

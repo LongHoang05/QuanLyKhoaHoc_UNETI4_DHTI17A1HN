@@ -1,4 +1,4 @@
-@*
+﻿@*
 Họ và tên: Nguyễn Tùng Dương
 Mã sinh viên: 23103100003
 Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biểu dạng tuần kết hợp CRUD chuẩn Prep.vn
@@ -1066,4 +1066,15 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         downloadLink.click();
         document.body.removeChild(downloadLink);
     }
+// Tự động mở ngăn kéo Xếp lịch học nếu URL có tham số create=true
+    (function checkUrlForCreate() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('create') === 'true' || urlParams.get('action') === 'create') {
+            setTimeout(() => {
+                openDrawer('create');
+                const cleanUrl = window.location.pathname + window.location.search.replace(/[?&]create=true/, '').replace(/[?&]action=create/, '');
+                window.history.replaceState({}, document.title, cleanUrl || window.location.pathname);
+            }, 150);
+        }
+    })();
 </script>
