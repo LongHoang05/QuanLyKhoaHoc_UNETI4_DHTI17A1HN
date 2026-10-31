@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 
@@ -6,7 +7,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
     // ========================================================
     // Họ và tên: Nguyễn Đức Linh
     // Mã sinh viên: 23103100042
-    // Phụ trách: Module 3 - Quản lý học viên, Hồ sơ cá nhân và Đăng ký học (Repository Skeleton)
+    // Phụ trách: Module 3 - Quản lý học viên, Hồ sơ cá nhân và Đăng ký học
     // ========================================================
     public class HocVienRepository : IHocVienRepository
     {
@@ -17,134 +18,236 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             _context = context;
         }
 
-        #region 1. Nghiệp vụ Thực thể Học Viên (Entity HocVien - Mục 7.1)
-        public async Task<List<HocVien>> GetAllAsync()
-        {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]: Lấy toàn bộ học viên kèm TaiKhoan và DangKyHocs
-            return await Task.FromResult(new List<HocVien>());
-        }
-
+        #region 1. Nghiệp vụ Thực thể Học Viên (Entity HocVien)
         public List<HocVien> GetAll()
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]: Lấy danh sách học viên đồng bộ
-            return new List<HocVien>();
+            return _context.HocViens
+                .Include(h => h.TaiKhoan)
+                .Include(h => h.DangKyHocs)
+                    .ThenInclude(d => d.LopHoc)
+                .OrderByDescending(h => h.NgayTao)
+                .ToList();
+        }
+
+        public async Task<List<HocVien>> GetAllAsync()
+        {
+            return await _context.HocViens
+                .Include(h => h.TaiKhoan)
+                .Include(h => h.DangKyHocs)
+                    .ThenInclude(d => d.LopHoc)
+                .OrderByDescending(h => h.NgayTao)
+                .ToListAsync();
         }
 
         public async Task<HocVien?> GetByIdAsync(int? id)
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]: Lấy 1 học viên theo MaHocVien
-            return await Task.FromResult<HocVien?>(null);
+            if (id == null) return null;
+            return await _context.HocViens.FindAsync(id.Value);
         }
 
         public async Task<HocVien?> GetByIdWithDetailsAsync(int? id)
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]: Lấy học viên kèm chi tiết TaiKhoan và DangKyHocs
-            return await Task.FromResult<HocVien?>(null);
+            if (id == null) return null;
+            return await _context.HocViens
+                .Include(h => h.TaiKhoan)
+                .Include(h => h.DangKyHocs)
+                    .ThenInclude(d => d.LopHoc)
+                        .ThenInclude(l => l!.ChuongTrinhDaoTao)
+                .FirstOrDefaultAsync(h => h.MaHocVien == id.Value);
         }
 
         public async Task<HocVien?> GetByMaTaiKhoanAsync(int maTaiKhoan)
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]: Lấy học viên theo MaTaiKhoan
-            return await Task.FromResult<HocVien?>(null);
+            return await _context.HocViens
+                .Include(h => h.TaiKhoan)
+                .FirstOrDefaultAsync(h => h.MaTaiKhoan == maTaiKhoan);
         }
 
         public async Task AddAsync(HocVien hocVien)
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]: Thêm mới học viên vào _context.HocViens
-            await Task.CompletedTask;
+            await _context.HocViens.AddAsync(hocVien);
+            await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(HocVien hocVien)
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]: Cập nhật học viên trong _context.HocViens
-            await Task.CompletedTask;
+            _context.HocViens.Update(hocVien);
+            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(int id)
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]: Xóa học viên theo MaHocVien
-            await Task.CompletedTask;
+            var hocVien = await _context.HocViens.FindAsync(id);
+            if (hocVien != null)
+            {
+                _context.HocViens.Remove(hocVien);
+                await _context.SaveChangesAsync();
+            }
         }
 
         public bool Exists(int id)
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]: Kiểm tra tồn tại học viên theo ID
-            return false;
+            return (_context.HocViens?.Any(e => e.MaHocVien == id)).GetValueOrDefault();
         }
 
         public async Task<bool> ExistsEmailAsync(string email, int? excludeId = null)
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]: Kiểm tra trùng Email học viên
-            return await Task.FromResult(false);
+            var cleanEmail = email.Trim().ToLower();
+            var query = _context.HocViens.AsQueryable();
+
+            if (excludeId.HasValue)
+            {
+                query = query.Where(h => h.MaHocVien != excludeId.Value);
+            }
+
+            return await query.AnyAsync(h => h.Email.ToLower() == cleanEmail);
         }
 
         public async Task<bool> CoDangKyHocAsync(int maHocVien)
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]: Kiểm tra học viên đã có lịch sử đăng ký lớp học chưa
-            return await Task.FromResult(false);
+            return await _context.DangKyHocs.AnyAsync(d => d.MaHocVien == maHocVien);
         }
 
         public async Task SaveAsync()
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]: Lưu thay đổi xuống CSDL
-            await Task.CompletedTask;
+            await _context.SaveChangesAsync();
         }
 
+        // Tìm kiếm và Lọc học viên LINQ đa năng: Từ khóa + Trạng thái + Lọc theo Lớp Học
         public async Task<List<HocVien>> SearchHocVienAsync(string? keyword, bool? trangThai = null, int? maLopHoc = null)
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]: Tìm kiếm và lọc học viên theo từ khóa, trạng thái, lớp học
-            return await Task.FromResult(new List<HocVien>());
+            var query = _context.HocViens
+                .Include(h => h.TaiKhoan)
+                .Include(h => h.DangKyHocs)
+                    .ThenInclude(d => d.LopHoc)
+                .AsQueryable();
+
+            // 1. Lọc theo từ khóa tìm kiếm
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                keyword = keyword.Trim().ToLower();
+                query = query.Where(h =>
+                    h.HoTen.ToLower().Contains(keyword) ||
+                    (h.SoDienThoai != null && h.SoDienThoai.Contains(keyword)) ||
+                    (h.DiaChi != null && h.DiaChi.ToLower().Contains(keyword)) ||
+                    (h.TaiKhoan != null && h.TaiKhoan.TenDangNhap.ToLower().Contains(keyword)) ||
+                    EF.Functions.Like(h.Email, $"{keyword}%") ||
+                    EF.Functions.Like(h.Email, $"%{keyword}%@%"));
+            }
+
+            // 2. Lọc theo trạng thái hoạt động (true: Đang hoạt động, false: Đang bị khóa)
+            if (trangThai.HasValue)
+            {
+                query = query.Where(h => h.TrangThai == trangThai.Value);
+            }
+
+            // 3. ĐẶC BIỆT: Lọc theo lớp học học viên đang đăng ký
+            if (maLopHoc.HasValue && maLopHoc.Value > 0)
+            {
+                query = query.Where(h => h.DangKyHocs.Any(d => d.MaLopHoc == maLopHoc.Value));
+            }
+
+            return await query.OrderByDescending(h => h.NgayTao).ToListAsync();
         }
 
         public async Task<(IEnumerable<HocVien> Items, int TotalCount)> GetPagedAsync(
             string? keyword, bool? trangThai, int pageIndex, int pageSize)
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]: Phân trang danh sách học viên
-            return await Task.FromResult((Enumerable.Empty<HocVien>(), 0));
+            var query = _context.HocViens
+                .Include(h => h.DangKyHocs)
+                .Include(h => h.TaiKhoan)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                var kw = keyword.Trim().ToLower();
+                query = query.Where(h =>
+                    h.HoTen.ToLower().Contains(kw) ||
+                    h.Email.ToLower().Contains(kw) ||
+                    (h.SoDienThoai != null && h.SoDienThoai.Contains(kw)) ||
+                    (h.DiaChi != null && h.DiaChi.ToLower().Contains(kw)));
+            }
+
+            if (trangThai.HasValue)
+            {
+                query = query.Where(h => h.TrangThai == trangThai.Value);
+            }
+
+            query = query.OrderByDescending(h => h.NgayTao);
+            int totalCount = await query.CountAsync();
+
+            var items = await query
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return (items, totalCount);
         }
         #endregion
 
-        #region 2. Nghiệp vụ Thực thể Tài Khoản & Lớp Học (Bổ trợ Module 3)
+        #region 2. Nghiệp vụ Thực thể Tài Khoản (Entity TaiKhoan) & Lớp Học
         public async Task<List<TaiKhoan>> GetAllTaiKhoanAsync()
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]
-            return await Task.FromResult(new List<TaiKhoan>());
+            return await _context.TaiKhoans
+                .OrderByDescending(t => t.NgayTao)
+                .ToListAsync();
         }
 
         public async Task<List<TaiKhoan>> SearchTaiKhoanAsync(string? keyword, string? vaiTro = null, bool? trangThai = null)
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]
-            return await Task.FromResult(new List<TaiKhoan>());
+            var query = _context.TaiKhoans.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                keyword = keyword.Trim().ToLower();
+                query = query.Where(t =>
+                    t.TenDangNhap.ToLower().Contains(keyword) ||
+                    t.HoTen.ToLower().Contains(keyword) ||
+                    t.Email.ToLower().Contains(keyword));
+            }
+
+            if (!string.IsNullOrWhiteSpace(vaiTro))
+            {
+                query = query.Where(t => t.VaiTro == vaiTro);
+            }
+
+            if (trangThai.HasValue)
+            {
+                query = query.Where(t => t.TrangThai == trangThai.Value);
+            }
+
+            return await query.OrderByDescending(t => t.NgayTao).ToListAsync();
         }
 
         public async Task<TaiKhoan?> GetTaiKhoanByIdAsync(int id)
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]
-            return await Task.FromResult<TaiKhoan?>(null);
+            return await _context.TaiKhoans.FindAsync(id);
         }
 
         public async Task<bool> ExistsUsernameAsync(string username)
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]
-            return await Task.FromResult(false);
+            var cleanUsername = username.Trim().ToLower();
+            return await _context.TaiKhoans.AnyAsync(t => t.TenDangNhap.ToLower() == cleanUsername);
         }
 
         public async Task AddTaiKhoanAsync(TaiKhoan taiKhoan)
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]
-            await Task.CompletedTask;
+            await _context.TaiKhoans.AddAsync(taiKhoan);
+            await _context.SaveChangesAsync();
         }
 
         public async Task UpdateTaiKhoanAsync(TaiKhoan taiKhoan)
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]
-            await Task.CompletedTask;
+            _context.TaiKhoans.Update(taiKhoan);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<List<LopHoc>> GetAllLopHocAsync()
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]
-            return await Task.FromResult(new List<LopHoc>());
+            return await _context.LopHocs
+                .OrderBy(l => l.TenLop)
+                .ToListAsync();
         }
         #endregion
     }
