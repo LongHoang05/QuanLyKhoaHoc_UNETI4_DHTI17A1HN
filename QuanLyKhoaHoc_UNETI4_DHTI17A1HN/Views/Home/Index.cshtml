@@ -1,9 +1,10 @@
 ﻿@{
-    // Họ và tên: Nhóm 5 (Vũ Đình Trường - Nguyễn Đình Kiên - Nguyễn Đức Linh - Nguyễn Hoàng Long - Nguyễn Tùng Dương)
+    // Họ và tên: Nhóm 4 (Vũ Đình Trường - Nguyễn Đình Kiên - Nguyễn Đức Linh - Nguyễn Hoàng Long - Nguyễn Tùng Dương)
+    // Đề tài 36: Xây dựng hệ thống quản lý đăng ký khóa học và học viên trung tâm đào tạo
     // Lớp: DHTI17A1HN - Đại học Kinh tế - Kỹ thuật Công nghiệp (UNETI)
     // Nội dung thực hiện: Trang chủ Nền tảng Thương mại Giáo dục UNETI EDUSPACE (EdTech Commercial Homepage)
     Layout = "_StudentLayout";
-    ViewData["Title"] = "UNETI EDUSPACE - Học Viện Đào Tạo & Kỹ Năng Thực Chiến Chuẩn Doanh Nghiệp";
+    ViewData["Title"] = "Hệ Thống Quản Lý Đăng Ký Khóa Học Và Học Viên - Trung Tâm Đào Tạo UNETI (Đề Tài 36 - Nhóm 4)";
 
     var chuongTrinhs = ViewBag.ChuongTrinhs as List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.ChuongTrinhDaoTao> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.ChuongTrinhDaoTao>();
     var openClassCounts = ViewBag.OpenClassCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
@@ -754,16 +755,16 @@
                     <!-- Trust Stats Badges -->
                     <div class="pt-6 border-t border-white/15 grid grid-cols-3 gap-4 sm:gap-6 max-w-lg mx-auto lg:mx-0 text-left">
                         <div class="space-y-0.5">
-                            <div class="text-2xl sm:text-3xl font-black text-amber-300 font-mono tracking-tight">15,000+</div>
-                            <div class="text-[11px] sm:text-xs text-slate-300 font-medium">Học viên tin chọn</div>
+                            <div class="text-2xl sm:text-3xl font-black text-amber-300 font-mono tracking-tight">@totalStudents+</div>
+                            <div class="text-[11px] sm:text-xs text-slate-300 font-medium">Học viên tham gia</div>
                         </div>
                         <div class="space-y-0.5">
-                            <div class="text-2xl sm:text-3xl font-black text-sky-300 font-mono tracking-tight">98.2%</div>
-                            <div class="text-[11px] sm:text-xs text-slate-300 font-medium">Việc làm đúng ngành</div>
+                            <div class="text-2xl sm:text-3xl font-black text-sky-300 font-mono tracking-tight">@totalCourses</div>
+                            <div class="text-[11px] sm:text-xs text-slate-300 font-medium">Chương trình đào tạo</div>
                         </div>
                         <div class="space-y-0.5">
-                            <div class="text-2xl sm:text-3xl font-black text-emerald-300 font-mono tracking-tight">100+</div>
-                            <div class="text-[11px] sm:text-xs text-slate-300 font-medium">Đối tác công nghệ</div>
+                            <div class="text-2xl sm:text-3xl font-black text-emerald-300 font-mono tracking-tight">@totalRegistrations+</div>
+                            <div class="text-[11px] sm:text-xs text-slate-300 font-medium">Lượt đăng ký lớp</div>
                         </div>
                     </div>
                 </div>
@@ -791,7 +792,7 @@
                             </h4>
                             <p class="text-[11px] text-slate-300 flex items-center gap-1.5">
                                 <span class="material-symbols-outlined text-[15px] text-sky-300">person</span>
-                                <span>Mentor: ThS. Hoàng Long (Senior Architect FPT)</span>
+                                <span>Giảng viên: ThS. Nguyễn Hoàng Long (Khoa CNTT - UNETI)</span>
                             </p>
                         </div>
                         <div class="flex items-center justify-between pt-3 mt-3 border-t border-white/10 text-xs">
@@ -823,7 +824,7 @@
                             </h4>
                             <p class="text-[11px] text-slate-300 flex items-center gap-1.5">
                                 <span class="material-symbols-outlined text-[15px] text-sky-300">person</span>
-                                <span>Mentor: ThS. Tùng Dương (AI Lead Viettel) & KS. Kiên</span>
+                                <span>Giảng viên: ThS. Nguyễn Tùng Dương & KS. Nguyễn Đình Kiên (UNETI)</span>
                             </p>
                         </div>
                         <div class="flex items-center justify-between pt-3 mt-3 border-t border-white/10 text-xs">
@@ -930,17 +931,17 @@
                     <div class="p-3 rounded-2xl bg-slate-50 border border-border-standard/80 space-y-1">
                         <div class="flex items-center gap-1.5 text-emerald-600 text-xs font-bold">
                             <span class="material-symbols-outlined text-[16px]">groups</span>
-                            <span>Mentor Cấp Cao</span>
+                            <span>Giảng Viên Chất Lượng</span>
                         </div>
-                        <p class="text-[11px] text-outline leading-snug">Chuyên gia FPT, Viettel, VNPT, CMC kèm cặp 1-1.</p>
+                        <p class="text-[11px] text-outline leading-snug">Giảng viên Khoa CNTT - UNETI giàu kinh nghiệm thực tế hướng dẫn tận tình.</p>
                     </div>
 
                     <div class="p-3 rounded-2xl bg-slate-50 border border-border-standard/80 space-y-1">
                         <div class="flex items-center gap-1.5 text-amber-600 text-xs font-bold">
                             <span class="material-symbols-outlined text-[16px]">handshake</span>
-                            <span>Cam Kết Đầu Ra</span>
+                            <span>Chứng Nhận UNETI</span>
                         </div>
-                        <p class="text-[11px] text-outline leading-snug">Ký kết giới thiệu việc làm với hơn 100+ đối tác.</p>
+                        <p class="text-[11px] text-outline leading-snug">Cấp chứng nhận hoàn thành khóa học và ghi nhận kết quả học tập chính quy.</p>
                     </div>
                 </div>
             </div>
@@ -1013,9 +1014,9 @@
                     <span class="material-symbols-outlined text-[26px]">history_edu</span>
                 </div>
                 <div>
-                    <h3 class="text-2xl sm:text-3xl font-black text-brand-deep font-mono">10+ Năm</h3>
-                    <p class="text-xs font-bold text-slate-700 mt-0.5">Uy Tín Đào Tạo</p>
-                    <p class="text-[11px] text-outline mt-0.5">Bề dày kinh nghiệm đào tạo kỹ năng thực chiến tại UNETI</p>
+                    <h3 class="text-2xl sm:text-3xl font-black text-brand-deep font-mono">@totalCourses</h3>
+                    <p class="text-xs font-bold text-slate-700 mt-0.5">Chương Trình Đào Tạo</p>
+                    <p class="text-[11px] text-outline mt-0.5">Khóa học chuyên sâu được thiết kế bài bản theo chuẩn đào tạo UNETI</p>
                 </div>
             </div>
 
@@ -1024,9 +1025,9 @@
                     <span class="material-symbols-outlined text-[26px]">groups</span>
                 </div>
                 <div>
-                    <h3 class="text-2xl sm:text-3xl font-black text-brand-deep font-mono">@(Math.Max(15000, totalStudents * 150))+</h3>
-                    <p class="text-xs font-bold text-slate-700 mt-0.5">Học Viên Tin Chọn</p>
-                    <p class="text-[11px] text-outline mt-0.5">Đã tốt nghiệp, nhận chứng chỉ và đang công tác trong ngành IT</p>
+                    <h3 class="text-2xl sm:text-3xl font-black text-brand-deep font-mono">@totalStudents</h3>
+                    <p class="text-xs font-bold text-slate-700 mt-0.5">Học Viên Tham Gia</p>
+                    <p class="text-[11px] text-outline mt-0.5">Sinh viên và học viên đăng ký theo học các lớp kỹ năng thực hành</p>
                 </div>
             </div>
 
@@ -1035,9 +1036,9 @@
                     <span class="material-symbols-outlined text-[26px]">verified</span>
                 </div>
                 <div>
-                    <h3 class="text-2xl sm:text-3xl font-black text-emerald-600 font-mono">98.2%</h3>
-                    <p class="text-xs font-bold text-slate-700 mt-0.5">Tỷ Lệ Việc Làm</p>
-                    <p class="text-[11px] text-outline mt-0.5">Học viên nhận offer việc làm đúng chuyên ngành trong vòng 90 ngày</p>
+                    <h3 class="text-2xl sm:text-3xl font-black text-emerald-600 font-mono">@(openClassCounts.Values.Sum())</h3>
+                    <p class="text-xs font-bold text-slate-700 mt-0.5">Lớp Đang Tuyển Sinh</p>
+                    <p class="text-[11px] text-outline mt-0.5">Lớp học phần mở nhận học viên với lịch học linh hoạt</p>
                 </div>
             </div>
 
@@ -1046,9 +1047,9 @@
                     <span class="material-symbols-outlined text-[26px]">handshake</span>
                 </div>
                 <div>
-                    <h3 class="text-2xl sm:text-3xl font-black text-brand-deep font-mono">100+</h3>
-                    <p class="text-xs font-bold text-slate-700 mt-0.5">Đối Tác Tuyển Dụng</p>
-                    <p class="text-[11px] text-outline mt-0.5">Tập đoàn và doanh nghiệp công nghệ liên kết nhận ứng viên trực tiếp</p>
+                    <h3 class="text-2xl sm:text-3xl font-black text-brand-deep font-mono">@totalRegistrations</h3>
+                    <p class="text-xs font-bold text-slate-700 mt-0.5">Lượt Đăng Ký Học</p>
+                    <p class="text-[11px] text-outline mt-0.5">Hồ sơ đã được tiếp nhận, xét duyệt và sắp xếp lớp học</p>
                 </div>
             </div>
         </div>
@@ -1060,9 +1061,9 @@
                     <span class="material-symbols-outlined text-[22px]">published_with_changes</span>
                 </div>
                 <div>
-                    <h4 class="text-xs sm:text-sm font-bold text-brand-deep">Học Lại Miễn Phí Trọn Đời</h4>
+                    <h4 class="text-xs sm:text-sm font-bold text-brand-deep">Thực Hành Lab Hiện Đại</h4>
                     <p class="text-[11px] text-outline mt-1 leading-relaxed">
-                        Học viên được hỗ trợ cập nhật công nghệ và tham gia học lại miễn phí khi chương trình có phiên bản nâng cấp mới.
+                        Học viên được thực hành tại hệ thống phòng máy tính UNETI cấu hình cao và tài nguyên học liệu trực tuyến.
                     </p>
                 </div>
             </div>
@@ -1371,7 +1372,7 @@
                 </div>
                 <h3 class="text-base font-bold text-brand-deep">Giảng Viên Chuyên Gia</h3>
                 <p class="text-xs text-outline leading-relaxed">
-                    100% giảng viên là các Tech Lead, Solution Architect đang trực tiếp làm việc tại các tập đoàn lớn (FPT, Viettel, VNPT, CMC).
+                    Đội ngũ giảng viên Khoa Công nghệ Thông tin - UNETI có trình độ Thạc sĩ, Kỹ sư với phương pháp giảng dạy hiện đại, thực tiễn.
                 </p>
             </div>
 
@@ -1448,7 +1449,7 @@
                         }
                     </div>
                     <p class="text-xs text-slate-700 italic leading-relaxed">
-                        "Khóa học ASP.NET Core thực chiến tại trung tâm đã giúp mình từ một người bỡ ngỡ trở nên tự tin xây dựng trọn vẹn dự án MVC và RESTful API. Mình đã pass vòng phỏng vấn Fresher tại FPT Software ngay khi vừa kết thúc khóa học."
+                        "Khóa học ASP.NET Core thực chiến tại trung tâm giúp mình hoàn thành tốt các bài tập lớn môn học, nắm vững kiến thức lập trình Web MVC và Entity Framework Core."
                     </p>
                 </div>
                 <div class="pt-4 border-t border-border-standard flex items-center gap-3">
@@ -1457,7 +1458,7 @@
                     </div>
                     <div>
                         <h4 class="text-xs font-bold text-brand-deep">Vũ Thị Anh</h4>
-                        <p class="text-[10px] text-outline">Software Engineer tại FPT Software</p>
+                        <p class="text-[10px] text-outline">Sinh viên lớp ĐHTI17A1HN - UNETI</p>
                     </div>
                 </div>
             </div>
@@ -1471,7 +1472,7 @@
                         }
                     </div>
                     <p class="text-xs text-slate-700 italic leading-relaxed">
-                        "Thầy cô hướng dẫn vô cùng tận tình, từng bài thực hành đều gắn với tình huống dự án thực tế. Mình đặc biệt ấn tượng với quy trình kiểm thử và deploy cloud mà trung tâm hướng dẫn."
+                        "Thầy cô hướng dẫn vô cùng tận tình, hệ thống quản lý đăng ký khóa học và xem lịch học, điểm số rất rõ ràng, thuận tiện cho sinh viên theo dõi tiến độ."
                     </p>
                 </div>
                 <div class="pt-4 border-t border-border-standard flex items-center gap-3">
@@ -1480,7 +1481,7 @@
                     </div>
                     <div>
                         <h4 class="text-xs font-bold text-brand-deep">Trần Văn Mạnh</h4>
-                        <p class="text-[10px] text-outline">Backend Developer tại VNPT IT</p>
+                        <p class="text-[10px] text-outline">Sinh viên lớp ĐHTI17A2HN - UNETI</p>
                     </div>
                 </div>
             </div>
@@ -1494,7 +1495,7 @@
                         }
                     </div>
                     <p class="text-xs text-slate-700 italic leading-relaxed">
-                        "Là sinh viên trái ngành, ban đầu mình rất lo lắng. Nhưng lộ trình học từng bước từ cơ bản đến nâng cao cùng hệ thống tài liệu chuẩn chỉ đã giúp mình vững vàng và tìm được công việc đúng đam mê."
+                        "Các kiến thức thực hành trên phòng máy Lab của trường giúp mình trang bị nền tảng vững vàng trước kỳ thực tập tốt nghiệp."
                     </p>
                 </div>
                 <div class="pt-4 border-t border-border-standard flex items-center gap-3">
@@ -1503,27 +1504,41 @@
                     </div>
                     <div>
                         <h4 class="text-xs font-bold text-brand-deep">Lê Thu Hà</h4>
-                        <p class="text-[10px] text-outline">Data Analyst tại Shopee Vietnam</p>
+                        <p class="text-[10px] text-outline">Cựu sinh viên Khóa 14 - UNETI</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ================= 10. INDUSTRY PARTNERS (ĐỐI TÁC DOANH NGHIỆP) ================= -->
+    <!-- ================= 10. CAMPUS COLLABORATION (CÁC ĐƠN VỊ & KHOA PHỐI HỢP TẠI UNETI) ================= -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div class="text-center">
-            <span class="text-xs font-bold text-outline uppercase tracking-wider">Mạng lưới kết nối việc làm</span>
-            <p class="text-xs text-slate-500 mt-1">Được đồng hành và hỗ trợ tuyển dụng bởi các doanh nghiệp công nghệ hàng đầu</p>
+            <span class="text-xs font-bold text-primary uppercase tracking-wider">Đơn vị & Khoa đào tạo phối hợp</span>
+            <p class="text-xs text-slate-500 mt-1">Đồng hành trong công tác tổ chức, giảng dạy và thực hành tại Đại học Kinh tế - Kỹ thuật Công nghiệp</p>
         </div>
 
-        <div class="bg-white rounded-3xl p-8 border border-border-standard shadow-xs flex flex-wrap items-center justify-around gap-8 opacity-80 grayscale hover:grayscale-0 transition-all">
-            <span class="font-black text-xl sm:text-2xl text-slate-700 tracking-tight">FPT TELECOM</span>
-            <span class="font-black text-xl sm:text-2xl text-slate-700 tracking-tight">VIETTEL SOLUTIONS</span>
-            <span class="font-black text-xl sm:text-2xl text-slate-700 tracking-tight">VNPT IT</span>
-            <span class="font-black text-xl sm:text-2xl text-slate-700 tracking-tight">CMC GLOBAL</span>
-            <span class="font-black text-xl sm:text-2xl text-slate-700 tracking-tight">SAMSUNG R&D</span>
-            <span class="font-black text-xl sm:text-2xl text-slate-700 tracking-tight">TOPCV</span>
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-border-standard shadow-xs flex flex-wrap items-center justify-around gap-6 text-slate-700">
+            <div class="flex items-center gap-2 font-bold text-xs sm:text-sm">
+                <span class="material-symbols-outlined text-primary text-[20px]">laptop_chromebook</span>
+                <span>KHOA CÔNG NGHỆ THÔNG TIN</span>
+            </div>
+            <div class="flex items-center gap-2 font-bold text-xs sm:text-sm">
+                <span class="material-symbols-outlined text-emerald-600 text-[20px]">hub</span>
+                <span>TRUNG TÂM TIN HỌC & ĐÀO TẠO</span>
+            </div>
+            <div class="flex items-center gap-2 font-bold text-xs sm:text-sm">
+                <span class="material-symbols-outlined text-amber-600 text-[20px]">domain</span>
+                <span>PHÒNG ĐÀO TẠO UNETI</span>
+            </div>
+            <div class="flex items-center gap-2 font-bold text-xs sm:text-sm">
+                <span class="material-symbols-outlined text-rose-600 text-[20px]">diversity_3</span>
+                <span>ĐOÀN THANH NIÊN - HỘI SINH VIÊN</span>
+            </div>
+            <div class="flex items-center gap-2 font-bold text-xs sm:text-sm">
+                <span class="material-symbols-outlined text-sky-600 text-[20px]">biotech</span>
+                <span>PHÒNG THÍ NGHIỆM & THỰC HÀNH LAB</span>
+            </div>
         </div>
     </section>
 

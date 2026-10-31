@@ -1,10 +1,10 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
 {
     /// <summary>
-    /// DbContext chính của ứng dụng - Kiến trúc CSDL 7 thực thể cốt lõi chuẩn Đề tài 16 BTL UNETI
+    /// DbContext chính của ứng dụng - Kiến trúc CSDL 7 thực thể cốt lõi chuẩn Đề tài 36 BTL UNETI
     /// ChuongTrinhDaoTao (1) -> (n) LopHoc (1) -> (n) DangKyHoc -> KetQuaHocTap
     /// </summary>
     public class ApplicationDbContext : DbContext
@@ -115,7 +115,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                 .HasForeignKey(b => b.MaGiangVien)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // ===== Dữ liệu mẫu khởi tạo (Seed Data chuẩn Đề tài 16) =====
+            // ===== Dữ liệu mẫu khởi tạo (Seed Data chuẩn Đề tài 36) =====
             modelBuilder.Entity<TaiKhoan>().HasData(
                 new TaiKhoan
                 {
