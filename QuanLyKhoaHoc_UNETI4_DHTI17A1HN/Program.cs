@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services;
@@ -133,6 +133,12 @@ app.UseRouting();
 app.UseSession();
 
 app.UseAuthorization();
+
+// Route thân thiện cho Khám phá khóa học
+app.MapControllerRoute(
+    name: "khampha",
+    pattern: "KhamPha",
+    defaults: new { controller = "CongHocVien", action = "DangKy" });
 
 // Route mặc định
 app.MapControllerRoute(

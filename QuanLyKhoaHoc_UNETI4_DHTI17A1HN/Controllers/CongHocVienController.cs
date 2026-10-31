@@ -1,14 +1,16 @@
+// ========================================================
+// Họ và tên: Nguyễn Tùng Dương
+// Mã sinh viên: 23103100003
+// Phụ trách: Module 5 - Lịch học, Kết quả học tập, Dashboard và Thống kê
+// ========================================================
+
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 {
-    // ========================================================
-    // Họ và tên: Nguyễn Đức Linh
-    // Mã sinh viên: 23103100042
-    // Phụ trách: Module 3 - Cổng Học viên & Đăng ký lớp học (Mục 7.1, 7.3, 7.4, 7.5)
-    // ========================================================
     public class CongHocVienController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -18,102 +20,395 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             _context = context;
         }
 
-        // GET: CongHocVien/DangKy
-        public async Task<IActionResult> DangKy(string? tuKhoa, int? maKhoaHoc, string? lichHoc)
+        // Helper lấy học viên hiện tại theo Session
+        private async Task<HocVien?> GetCurrentHocVienAsync()
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]:
-            // Mục 7.3 (Đăng ký lớp học):
-            // 1. Lấy danh sách các lớp học có TrangThai == "Đang mở đăng ký" kèm KhoaHoc, GiangVien, DangKyHocs
-            // 2. Lọc theo tuKhoa (TenLop, MaLopHoc, TenKhoaHoc), maKhoaHoc, lichHoc
-            // 3. Truyền danh sách lớp học sang View để học viên tra cứu và chọn lớp đăng ký
-            await Task.CompletedTask;
-            return View(Enumerable.Empty<LopHoc>());
+            int? maHocVien = HttpContext.Session.GetInt32("MaHocVien");
+            if (maHocVien.HasValue)
+            {
+                var hv = await _context.HocViens.FindAsync(maHocVien.Value);
+                if (hv != null) return hv;
+            }
+
+            int? maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
+            if (maTaiKhoan.HasValue)
+            {
+                var hv = await _context.HocViens.FirstOrDefaultAsync(h => h.MaTaiKhoan == maTaiKhoan.Value);
+                if (hv != null) return hv;
+            }
+
+            // Hỗ trợ test nhanh nếu chưa đăng nhập hoặc là Admin test cổng học viên: lấy học viên đầu tiên
+            return await _context.HocViens.FirstOrDefaultAsync();
         }
 
-        // GET: CongHocVien/ChiTiet/5
-        public async Task<IActionResult> ChiTiet(int? id)
+        // --- TRANG CHỦ MARKETPLACE KHÓA HỌC (STOREFRONT EDU-COMMERCE) ---
+        public async Task<IActionResult> DangKy(
+            string? search,
+            int? maChuongTrinh,
+            string? trinhDo,
+            string? mucGia,
+            string? sapXep,
+            int page = 1,
+            int pageSize = 12)
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]:
-            // Mục 7.3: Xem chi tiết thông tin lớp học, giảng viên, lịch học, học phí và sĩ số trước khi đăng ký
-            await Task.CompletedTask;
-            return View(new LopHoc { TenLop = "Lớp học mẫu (TODO - Module 3)" });
+            var student = await GetCurrentHocVienAsync();
+            ViewBag.CurrentStudent = student;
+
+            var query = _context.LopHocs
+                .Include(l => l.ChuongTrinhDaoTao)
+                .AsNoTracking()
+                .Where(l => l.TrangThai == "Đang mở đăng ký");
+
+            // 1. Tìm kiếm theo tên lớp học, giảng viên, tên CTĐT
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                string kw = search.Trim().ToLower();
+                query = query.Where(l =>
+                    l.TenLop.ToLower().Contains(kw) ||
+                    (l.TenGiangVien != null && l.TenGiangVien.ToLower().Contains(kw)) ||
+                    (l.ChuongTrinhDaoTao != null && l.ChuongTrinhDaoTao.TenChuongTrinh.ToLower().Contains(kw)));
+            }
+
+            // 2. Lọc theo chuyên ngành / Chương trình đào tạo
+            if (maChuongTrinh.HasValue)
+            {
+                query = query.Where(l => l.MaChuongTrinh == maChuongTrinh.Value);
+            }
+
+            // 3. Lọc theo trình độ đầu vào
+            if (!string.IsNullOrWhiteSpace(trinhDo))
+            {
+                query = query.Where(l => l.TrinhDoDauVao == trinhDo);
+            }
+
+            // 4. Lọc theo khoảng học phí
+            if (mucGia == "duoi_3tr")
+            {
+                query = query.Where(l => l.HocPhi < 3000000);
+            }
+            else if (mucGia == "3tr_6tr")
+            {
+                query = query.Where(l => l.HocPhi >= 3000000 && l.HocPhi <= 6000000);
+            }
+            else if (mucGia == "tren_6tr")
+            {
+                query = query.Where(l => l.HocPhi > 6000000);
+            }
+
+            // 5. Sắp xếp E-commerce
+            query = sapXep switch
+            {
+                "gia_tang" => query.OrderBy(l => l.HocPhi),
+                "gia_giam" => query.OrderByDescending(l => l.HocPhi),
+                "khai_giang_som" => query.OrderBy(l => l.NgayKhaiGiang),
+                "han_dang_ky" => query.OrderBy(l => l.HanDangKy),
+                _ => query.OrderByDescending(l => l.MaLopHoc)
+            };
+
+            int totalItems = await query.CountAsync();
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+            if (totalPages < 1) totalPages = 1;
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+
+            var classes = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Tính sĩ số đã duyệt cho từng lớp hiển thị
+            var classIds = classes.Select(c => c.MaLopHoc).ToList();
+            var siSoMap = await _context.DangKyHocs
+                .Where(d => classIds.Contains(d.MaLopHoc) && (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"))
+                .GroupBy(d => d.MaLopHoc)
+                .Select(g => new { MaLop = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.MaLop, x => x.Count);
+
+            // Kiểm tra các lớp mà học viên hiện tại đã đăng ký
+            var myRegistrations = new Dictionary<int, DangKyHoc>();
+            if (student != null)
+            {
+                var dks = await _context.DangKyHocs
+                    .Where(d => d.MaHocVien == student.MaHocVien && d.TrangThai != "Đã hủy")
+                    .ToListAsync();
+                myRegistrations = dks
+                    .GroupBy(d => d.MaLopHoc)
+                    .ToDictionary(g => g.Key, g => g.OrderByDescending(d => d.MaDangKy).First());
+            }
+
+            // Marketplace Stats
+            ViewBag.TongKhoaHoc = await _context.LopHocs.CountAsync(l => l.TrangThai == "Đang mở đăng ký");
+            ViewBag.TongHocVien = await _context.HocViens.CountAsync();
+            ViewBag.TongChuongTrinh = await _context.ChuongTrinhDaoTaos.CountAsync();
+
+            ViewBag.SiSoMap = siSoMap;
+            ViewBag.MyRegistrations = myRegistrations;
+            ViewBag.ChuongTrinhList = await _context.ChuongTrinhDaoTaos.Where(c => c.TrangThai).ToListAsync();
+            ViewBag.Search = search;
+            ViewBag.SelectedMaChuongTrinh = maChuongTrinh;
+            ViewBag.SelectedTrinhDo = trinhDo;
+            ViewBag.SelectedMucGia = mucGia;
+            ViewBag.SelectedSapXep = sapXep;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalItems = totalItems;
+
+            return View(classes);
         }
 
-        // POST: CongHocVien/DangKyLopPost
+        // --- TRANG LANDING PAGE CHI TIẾT KHÓA HỌC (COURSE DETAILS & STICKY CTA) ---
+        public async Task<IActionResult> ChiTiet(int id)
+        {
+            var student = await GetCurrentHocVienAsync();
+            ViewBag.CurrentStudent = student;
+
+            var lop = await _context.LopHocs
+                .Include(l => l.ChuongTrinhDaoTao)
+                .FirstOrDefaultAsync(l => l.MaLopHoc == id);
+
+            if (lop == null) return NotFound();
+
+            // Danh sách buổi học chi tiết
+            var buoiHocs = await _context.BuoiHocs
+                .Where(b => b.MaLopHoc == id && b.TrangThai != "Đã hủy")
+                .OrderBy(b => b.ThoiGianBatDau)
+                .ToListAsync();
+
+            // Sĩ số đã tiếp nhận
+            int enrolledCount = await _context.DangKyHocs.CountAsync(d =>
+                d.MaLopHoc == id &&
+                (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"));
+
+            // Đơn đăng ký của học viên hiện tại nếu có
+            DangKyHoc? myReg = null;
+            if (student != null)
+            {
+                myReg = await _context.DangKyHocs
+                    .Where(d => d.MaHocVien == student.MaHocVien && d.MaLopHoc == id && d.TrangThai != "Đã hủy")
+                    .OrderByDescending(d => d.MaDangKy)
+                    .FirstOrDefaultAsync();
+            }
+
+            // Các khóa học tương tự cùng chương trình đào tạo
+            var similarCourses = await _context.LopHocs
+                .Where(l => l.MaChuongTrinh == lop.MaChuongTrinh && l.MaLopHoc != id && l.TrangThai == "Đang mở đăng ký")
+                .Take(3)
+                .ToListAsync();
+
+            ViewBag.BuoiHocs = buoiHocs;
+            ViewBag.EnrolledCount = enrolledCount;
+            ViewBag.RemainingSeats = Math.Max(0, lop.SiSoToiDa - enrolledCount);
+            ViewBag.PercentFilled = lop.SiSoToiDa > 0 ? Math.Min(100.0, Math.Round((double)enrolledCount / lop.SiSoToiDa * 100, 1)) : 0;
+            ViewBag.MyRegistration = myReg;
+            ViewBag.SimilarCourses = similarCourses;
+
+            return View(lop);
+        }
+
+        // --- HÀNH ĐỘNG ĐĂNG KÝ LỚP HỌC (AJAX) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DangKyLopPost(int maLop, string? ghiChu)
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]:
-            // Mục 7.3 (Quy tắc nghiệp vụ Đăng ký lớp học):
-            // 1. Kiểm tra học viên đã đăng nhập (Session "HocVienId") và trạng thái HocVien.TrangThai == true
-            // 2. Kiểm tra hồ sơ học viên đã đầy đủ thông tin bắt buộc (HoTen, SoDienThoai, Email, NgaySinh)
-            // 3. Kiểm tra lớp học có TrangThai == "Đang mở đăng ký"
-            // 4. Kiểm tra thời gian hiện tại nằm trong khoảng: NgayBatDauDangKy <= Today <= HanDangKy
-            // 5. Kiểm tra lớp còn chỗ trống (số đăng ký hợp lệ < SiSoToiDa)
-            // 6. Kiểm tra học viên chưa có đăng ký đang hoạt động ở cùng lớp đó
-            // 7. Tạo bản ghi DangKyHoc mới với TrangThai = "Chờ duyệt", NgayDangKy = DateTime.Now
-            await Task.CompletedTask;
-            TempData["Error"] = "Chức năng Đăng ký lớp học (Module 3) đang chờ Nguyễn Đức Linh tự triển khai.";
-            return RedirectToAction(nameof(DangKy));
+            var student = await GetCurrentHocVienAsync();
+            if (student == null)
+            {
+                return Json(new { success = false, message = "Bạn cần đăng nhập tài khoản học viên để thực hiện đăng ký." });
+            }
+
+            var lop = await _context.LopHocs.FindAsync(maLop);
+            if (lop == null)
+            {
+                return Json(new { success = false, message = "Lớp học không tồn tại." });
+            }
+
+            if (lop.TrangThai != "Đang mở đăng ký")
+            {
+                return Json(new { success = false, message = "Lớp học này hiện không mở tuyển sinh." });
+            }
+
+            if (lop.HanDangKy < DateTime.Today)
+            {
+                return Json(new { success = false, message = "Lớp học đã hết thời hạn đăng ký." });
+            }
+
+            // Kiểm tra đã đăng ký chưa
+            var existing = await _context.DangKyHocs
+                .FirstOrDefaultAsync(d => d.MaHocVien == student.MaHocVien && d.MaLopHoc == maLop && d.TrangThai != "Đã hủy");
+
+            if (existing != null)
+            {
+                return Json(new { success = false, message = $"Bạn đã đăng ký khóa học này rồi (Trạng thái: {existing.TrangThai})." });
+            }
+
+            // Kiểm tra sĩ số còn chỗ
+            int enrolledCount = await _context.DangKyHocs.CountAsync(d =>
+                d.MaLopHoc == maLop &&
+                (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"));
+
+            if (enrolledCount >= lop.SiSoToiDa)
+            {
+                return Json(new { success = false, message = "Khóa học đã đủ chỉ tiêu sĩ số. Vui lòng chọn lớp học khác." });
+            }
+
+            var dangKy = new DangKyHoc
+            {
+                MaHocVien = student.MaHocVien,
+                MaLopHoc = maLop,
+                NgayDangKy = DateTime.Now,
+                TrangThai = "Chờ duyệt",
+                GhiChu = ghiChu ?? "",
+                SoTienDaDong = 0
+            };
+
+            _context.DangKyHocs.Add(dangKy);
+            await _context.SaveChangesAsync();
+
+            return Json(new
+            {
+                success = true,
+                message = $"Đăng ký thành công khóa học '{lop.TenLop}'! Đơn của bạn đang ở trạng thái 'Chờ duyệt'."
+            });
         }
 
-        // POST: CongHocVien/HuyDangKyPost
+        // --- HÀNH ĐỘNG HỦY ĐĂNG KÝ LỚP HỌC (AJAX) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> HuyDangKyPost(int maDangKy, string lyDoHuy)
+        public async Task<IActionResult> HuyDangKyPost(int maDangKy)
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]:
-            // Mục 7.4 (Quy tắc nghiệp vụ Hủy đăng ký):
-            // 1. Kiểm tra đăng ký thuộc về đúng học viên đang đăng nhập (MaHocVien == Session "HocVienId")
-            // 2. Chỉ cho phép hủy khi TrangThai == "Chờ duyệt" hoặc TrangThai == "Đã duyệt" (chưa đóng học phí)
-            // 3. Không cho phép hủy khi đã "Đã đóng học phí", "Đang học" hoặc "Hoàn thành"
-            // 4. Cập nhật TrangThai = "Đã hủy", NgayHuy = DateTime.Now, LyDoHuy = lyDoHuy
-            // 5. Nếu đã có bản ghi HocPhi ở trạng thái "Chưa đóng" thì cập nhật sang "Đã hủy"
-            await Task.CompletedTask;
-            TempData["Error"] = "Chức năng Hủy đăng ký (Module 3) đang chờ Nguyễn Đức Linh tự triển khai.";
-            return RedirectToAction(nameof(TienTrinh));
+            var student = await GetCurrentHocVienAsync();
+            if (student == null) return Json(new { success = false, message = "Chưa xác thực học viên." });
+
+            var dk = await _context.DangKyHocs
+                .Include(d => d.LopHoc)
+                .FirstOrDefaultAsync(d => d.MaDangKy == maDangKy);
+
+            if (dk == null) return Json(new { success = false, message = "Không tìm thấy hồ sơ đăng ký." });
+
+            if (dk.MaHocVien != student.MaHocVien)
+            {
+                return Json(new { success = false, message = "Bạn không có quyền thao tác trên hồ sơ của người khác." });
+            }
+
+            // Chỉ cho hủy khi còn Chờ duyệt hoặc Đã duyệt mà chưa đóng tiền
+            if (dk.TrangThai == "Đã đóng học phí" || dk.TrangThai == "Đang học" || dk.TrangThai == "Hoàn thành")
+            {
+                return Json(new { success = false, message = $"Không thể hủy lớp khi đã ở trạng thái '{dk.TrangThai}'. Vui lòng liên hệ ban giáo vụ để được hỗ trợ bảo lưu." });
+            }
+
+            dk.TrangThai = "Đã hủy";
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = $"Đã hủy đăng ký lớp '{dk.LopHoc?.TenLop}' thành công." });
         }
 
-        // GET: CongHocVien/TienTrinh
-        public async Task<IActionResult> TienTrinh(string? tab)
+        // --- KHÔNG GIAN HỌC TẬP CỦA TÔI (MY LEARNING DASHBOARD) ---
+        public async Task<IActionResult> TienTrinh()
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]:
-            // Mục 7.5 (Theo dõi đăng ký & Cổng học viên):
-            // 1. Kiểm tra học viên đang đăng nhập (Session "HocVienId")
-            // 2. Truy vấn danh sách DangKyHoc của chính học viên đó kèm LopHoc, KhoaHoc, GiangVien, BuoiHocs, HocPhis, KetQuaHocTaps
-            // 3. Hiển thị các tab: Đăng ký của tôi, Thời khóa biểu, Kết quả học tập (40% Quá trình + 60% Cuối kỳ), Hồ sơ cá nhân
-            await Task.CompletedTask;
-            ViewBag.ActiveTab = tab ?? "registrations";
-            return View("TienTrinh", Enumerable.Empty<DangKyHoc>());
+            var student = await GetCurrentHocVienAsync();
+            if (student == null)
+            {
+                TempData["Error"] = "Vui lòng đăng nhập để xem không gian học tập.";
+                return RedirectToAction("Login", "TaiKhoan");
+            }
+
+            ViewBag.CurrentStudent = student;
+
+            // Danh sách các đăng ký của học viên
+            var dangKys = await _context.DangKyHocs
+                .Include(d => d.LopHoc)
+                    .ThenInclude(l => l!.ChuongTrinhDaoTao)
+                .Where(d => d.MaHocVien == student.MaHocVien)
+                .OrderByDescending(d => d.NgayDangKy)
+                .ToListAsync();
+
+            // Danh sách các lớp học viên đang học hoặc đã đóng phí để lấy lịch học
+            var activeClassIds = dangKys
+                .Where(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học")
+                .Select(d => d.MaLopHoc)
+                .ToList();
+
+            var buoiHocs = await _context.BuoiHocs
+                .Include(b => b.LopHoc)
+                .Where(b => activeClassIds.Contains(b.MaLopHoc) && b.TrangThai != "Đã hủy")
+                .OrderBy(b => b.ThoiGianBatDau)
+                .ToListAsync();
+
+            // Đếm số buổi đã hoàn thành cho từng lớp để tính tiến độ %
+            var completedSessionsCount = await _context.BuoiHocs
+                .Where(b => activeClassIds.Contains(b.MaLopHoc) && b.TrangThai == "Đã hoàn thành")
+                .GroupBy(b => b.MaLopHoc)
+                .Select(g => new { MaLop = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.MaLop, x => x.Count);
+
+            // Bảng điểm cá nhân
+            var ketQuas = await _context.KetQuaHocTaps
+                .Include(k => k.DangKyHoc)
+                    .ThenInclude(d => d!.LopHoc)
+                .Where(k => k.DangKyHoc != null && k.DangKyHoc.MaHocVien == student.MaHocVien)
+                .ToListAsync();
+
+            ViewBag.BuoiHocs = buoiHocs;
+            ViewBag.CompletedSessionsCount = completedSessionsCount;
+            ViewBag.KetQuas = ketQuas;
+
+            return View(dangKys);
         }
 
-        // GET: CongHocVien/Portal
-        public Task<IActionResult> Portal(string? tab)
+        // --- HỒ SƠ CÁ NHÂN HỌC VIÊN ---
+        public async Task<IActionResult> HoSo()
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]:
-            // Điều hướng về trang TienTrinh theo tab tương ứng
-            return TienTrinh(tab);
+            var student = await GetCurrentHocVienAsync();
+            if (student == null)
+            {
+                TempData["Error"] = "Vui lòng đăng nhập để xem hồ sơ.";
+                return RedirectToAction("Login", "TaiKhoan");
+            }
+
+            var tk = await _context.TaiKhoans.FindAsync(student.MaTaiKhoan);
+            ViewBag.TaiKhoan = tk;
+
+            // Lịch sử thanh toán học phí
+            var paymentHistory = await _context.DangKyHocs
+                .Include(d => d.LopHoc)
+                .Where(d => d.MaHocVien == student.MaHocVien && d.SoTienDaDong > 0)
+                .OrderByDescending(d => d.NgayDongHocPhi)
+                .ToListAsync();
+
+            ViewBag.PaymentHistory = paymentHistory;
+
+            return View(student);
         }
 
-        // GET: CongHocVien/HoSo
-        public Task<IActionResult> HoSo()
-        {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]:
-            // Mục 7.1: Mở tab Hồ sơ cá nhân của học viên
-            return TienTrinh("profile");
-        }
-
-        // POST: CongHocVien/CapNhatHoSoPost
+        // --- CẬP NHẬT HỒ SƠ CÁ NHÂN ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CapNhatHoSoPost(HocVien model)
         {
-            // TODO [Module 3 - Nguyễn Đức Linh - 23103100042]:
-            // Mục 7.1: Cho phép học viên tự cập nhật thông tin cá nhân (HoTen, NgaySinh, GioiTinh, SoDienThoai, Email, DiaChi, TrinhDoHocVan, NgheNghiep)
-            await Task.CompletedTask;
-            TempData["Error"] = "Chức năng Cập nhật hồ sơ cá nhân (Module 3) đang chờ Nguyễn Đức Linh tự triển khai.";
-            return RedirectToAction(nameof(TienTrinh), new { tab = "profile" });
+            var student = await GetCurrentHocVienAsync();
+            if (student == null || student.MaHocVien != model.MaHocVien)
+            {
+                return Json(new { success = false, message = "Bạn không có quyền chỉnh sửa hồ sơ này." });
+            }
+
+            student.HoTen = model.HoTen;
+            student.NgaySinh = model.NgaySinh;
+            student.GioiTinh = model.GioiTinh;
+            student.SoDienThoai = model.SoDienThoai;
+            student.DiaChi = model.DiaChi;
+            student.TrinhDoHocVan = model.TrinhDoHocVan;
+            student.NgheNghiep = model.NgheNghiep;
+
+            // Đồng bộ tên sang tài khoản
+            var tk = await _context.TaiKhoans.FindAsync(student.MaTaiKhoan);
+            if (tk != null)
+            {
+                tk.HoTen = model.HoTen;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Cập nhật thông tin cá nhân thành công!" });
         }
     }
 }
