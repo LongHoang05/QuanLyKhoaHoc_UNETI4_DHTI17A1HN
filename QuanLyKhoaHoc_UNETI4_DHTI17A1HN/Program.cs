@@ -28,32 +28,36 @@ builder.Services.AddSession(options =>
 builder.Services.AddHttpContextAccessor();
 
 // ========================================================
-// 3. Đăng ký Dependency Injection (DI) - Module 1 (Vũ Đình Trường - 23103100026)
+// 3. Đăng ký Dependency Injection (Repository & Service cho cả 5 Thành viên Nhóm 4)
 // ========================================================
+// Module 1 - Vũ Đình Trường (23103100026): Tài khoản, Đăng nhập, Phân quyền & Chương trình đào tạo
 builder.Services.AddScoped<ITaiKhoanRepository, TaiKhoanRepository>();
 builder.Services.AddScoped<IChuongTrinhDaoTaoRepository, ChuongTrinhDaoTaoRepository>();
-
 builder.Services.AddScoped<ITaiKhoanService, TaiKhoanService>();
 builder.Services.AddScoped<IChuongTrinhDaoTaoService, ChuongTrinhDaoTaoService>();
 
-
-// Đăng ký dịch vụ Controllers with Views
-builder.Services.AddControllersWithViews();
-
-// ========================================================
-// 3. Đăng ký Dependency Injection (Repository & Service)
-// ========================================================
-// Module 2 - Nguyễn Đình Kiên (23103100020)
+// Module 2 - Nguyễn Đình Kiên (23103100020): Quản lý lớp học, Tìm kiếm, Lọc, Sắp xếp và Phân trang
 builder.Services.AddScoped<ILopHocRepository, LopHocRepository>();
 builder.Services.AddScoped<ILopHocService, LopHocService>();
 
-// Module 3 - Nguyễn Đức Linh (23103100042)
+// Module 3 - Nguyễn Đức Linh (23103100042): Quản lý học viên, Hồ sơ cá nhân và Cổng học viên
 builder.Services.AddScoped<IHocVienRepository, HocVienRepository>();
 builder.Services.AddScoped<IHocVienService, HocVienService>();
+
+// Module 4 - Nguyễn Hoàng Long (23103100046): Đăng ký khóa học, Quản lý hồ sơ & Thu học phí
+builder.Services.AddScoped<IDangKyHocRepository, DangKyHocRepository>();
+
+// Module 5 - Nguyễn Tùng Dương (23103100003): Lịch học, Điểm danh, Kết quả học tập & Dashboard Thống kê
+builder.Services.AddScoped<IBuoiHocRepository, BuoiHocRepository>();
+builder.Services.AddScoped<IKetQuaHocTapRepository, KetQuaHocTapRepository>();
+builder.Services.AddScoped<IThongKeRepository, ThongKeRepository>();
 
 // Module Giảng viên (Portal & Quản lý) - Bổ sung theo yêu cầu giảng viên hướng dẫn
 builder.Services.AddScoped<IGiangVienRepository, GiangVienRepository>();
 builder.Services.AddScoped<IGiangVienService, GiangVienService>();
+
+// Đăng ký dịch vụ Controllers with Views
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 

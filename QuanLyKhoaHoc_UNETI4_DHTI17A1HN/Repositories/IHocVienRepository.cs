@@ -1,12 +1,14 @@
+// ========================================================
+// Họ và tên: Nguyễn Đức Linh
+// Mã sinh viên: 23103100042
+// Phụ trách: Module 3 - Quản lý học viên, Hồ sơ cá nhân và Đăng ký học
+// Bài tập thực hành: Repository Pattern - UNETI
+// ========================================================
+
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
 {
-    // ========================================================
-    // Họ và tên: Nguyễn Đức Linh
-    // Mã sinh viên: 23103100042
-    // Phụ trách: Module 3 - Quản lý học viên, Hồ sơ cá nhân và Đăng ký học
-    // ========================================================
     public interface IHocVienRepository
     {
         #region 1. Nghiệp vụ Thực thể Học Viên (Entity HocVien)
@@ -40,6 +42,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         // Phân trang LINQ Skip/Take
         Task<(IEnumerable<HocVien> Items, int TotalCount)> GetPagedAsync(
             string? keyword, bool? trangThai, int pageIndex, int pageSize);
+
+        Task<int> CountTotalStudentsAsync();
         #endregion
 
         #region 2. Nghiệp vụ Thực thể Tài Khoản (Entity TaiKhoan) & Lớp Học

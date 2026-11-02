@@ -2,28 +2,40 @@
 // Họ và tên: Nhóm 4 (Vũ Đình Trường - Nguyễn Đình Kiên - Nguyễn Đức Linh - Nguyễn Hoàng Long - Nguyễn Tùng Dương)
 // Lớp: DHTI17A1HN - Đại học Kinh tế - Kỹ thuật Công nghiệp (UNETI)
 // Nội dung thực hiện: Trang chủ Nền tảng Thương mại Giáo dục UNETI EDUSPACE (EdTech Commercial Homepage)
+// Áp dụng: Repository Pattern theo hướng dẫn UNETI
+// Controller không truy vấn trực tiếp DbContext / LINQ
 // ========================================================
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IChuongTrinhDaoTaoRepository _ctdtRepo;
+        private readonly ILopHocRepository _lopHocRepo;
+        private readonly IDangKyHocRepository _dangKyHocRepo;
+        private readonly IGiangVienRepository _giangVienRepo;
+        private readonly IHocVienRepository _hocVienRepo;
+        private readonly IBuoiHocRepository _buoiHocRepo;
 
-        public HomeController(ApplicationDbContext context)
+        public HomeController(
+            IChuongTrinhDaoTaoRepository ctdtRepo,
+            ILopHocRepository lopHocRepo,
+            IDangKyHocRepository dangKyHocRepo,
+            IGiangVienRepository giangVienRepo,
+            IHocVienRepository hocVienRepo,
+            IBuoiHocRepository buoiHocRepo)
         {
-            _context = context;
+            _ctdtRepo = ctdtRepo;
+            _lopHocRepo = lopHocRepo;
+            _dangKyHocRepo = dangKyHocRepo;
+            _giangVienRepo = giangVienRepo;
+            _hocVienRepo = hocVienRepo;
+            _buoiHocRepo = buoiHocRepo;
         }
 
         // --- TRANG CHỦ NỀN TẢNG THƯƠNG MẠI GIÁO DỤC (EDTECH STOREFRONT HOME) ---
@@ -40,83 +52,46 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
 
             // 1. Danh sách chương trình đào tạo & đếm số lớp đang mở
-            var chuongTrinhs = await _context.ChuongTrinhDaoTaos
-                .AsNoTracking()
-                .Where(c => c.TrangThai)
-                .ToListAsync();
-
-            var openClassCounts = await _context.LopHocs
-                .Where(l => l.TrangThai == "Đang mở đăng ký")
-                .GroupBy(l => l.MaChuongTrinh)
-                .Select(g => new { MaChuongTrinh = g.Key, Count = g.Count() })
-                .ToDictionaryAsync(x => x.MaChuongTrinh, x => x.Count);
+            var allCtdt = await _ctdtRepo.GetAllAsync();
+            var chuongTrinhs = allCtdt.Where(c => c.TrangThai).ToList();
+            var openClassCounts = await _lopHocRepo.GetOpenClassCountsByProgramAsync();
 
             ViewBag.ChuongTrinhs = chuongTrinhs;
             ViewBag.OpenClassCounts = openClassCounts;
 
             // 2. Các khóa học nổi bật / Bán chạy nhất (Top 6 lớp)
-            var hotCourses = await _context.LopHocs
-                .Include(l => l.ChuongTrinhDaoTao)
-                .Include(l => l.GiangVien)
-                .AsNoTracking()
-                .Where(l => l.TrangThai == "Đang mở đăng ký")
-                .OrderByDescending(l => l.MaLopHoc)
-                .Take(6)
-                .ToListAsync();
+            var hotCourses = (await _lopHocRepo.GetHotCoursesAsync(6)).ToList();
 
             // 3. Các khóa học sắp khai giảng (Top 4 lớp)
-            var upcomingCourses = await _context.LopHocs
-                .Include(l => l.ChuongTrinhDaoTao)
-                .Include(l => l.GiangVien)
-                .AsNoTracking()
-                .Where(l => l.TrangThai == "Đang mở đăng ký" && l.NgayKhaiGiang >= DateTime.Today)
-                .OrderBy(l => l.NgayKhaiGiang)
-                .Take(4)
-                .ToListAsync();
+            var upcomingCourses = (await _lopHocRepo.GetUpcomingCoursesAsync(4)).ToList();
 
             // Sĩ số đã duyệt cho từng lớp hiển thị
             var allCourseIds = hotCourses.Select(c => c.MaLopHoc).Union(upcomingCourses.Select(c => c.MaLopHoc)).Distinct().ToList();
-            var siSoMap = await _context.DangKyHocs
-                .Where(d => allCourseIds.Contains(d.MaLopHoc) && (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"))
-                .GroupBy(d => d.MaLopHoc)
-                .Select(g => new { MaLop = g.Key, Count = g.Count() })
-                .ToDictionaryAsync(x => x.MaLop, x => x.Count);
+            var siSoMap = await _dangKyHocRepo.GetSiSoDaDangKyMapAsync(allCourseIds);
 
             ViewBag.HotCourses = hotCourses;
             ViewBag.UpcomingCourses = upcomingCourses;
             ViewBag.SiSoMap = siSoMap;
 
             // Lấy tất cả lớp học đang mở đăng ký cho tab Khóa học mở đăng ký
-            var allOpenClasses = await _context.LopHocs
-                .Include(l => l.ChuongTrinhDaoTao)
-                .Include(l => l.GiangVien)
-                .AsNoTracking()
-                .Where(l => l.TrangThai == "Đang mở đăng ký")
-                .OrderBy(l => l.MaLopHoc)
-                .ToListAsync();
+            var allLops = await _lopHocRepo.GetAllAsync();
+            var allOpenClasses = allLops.Where(l => l.TrangThai == "Đang mở đăng ký").OrderBy(l => l.MaLopHoc).ToList();
             ViewBag.AllOpenClasses = allOpenClasses;
 
             // Sĩ số cho tất cả các lớp đang mở
             var openIds = allOpenClasses.Select(c => c.MaLopHoc).ToList();
-            var allSiSoMap = await _context.DangKyHocs
-                .Where(d => openIds.Contains(d.MaLopHoc) && (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"))
-                .GroupBy(d => d.MaLopHoc)
-                .Select(g => new { MaLop = g.Key, Count = g.Count() })
-                .ToDictionaryAsync(x => x.MaLop, x => x.Count);
+            var allSiSoMap = await _dangKyHocRepo.GetSiSoDaDangKyMapAsync(openIds);
             ViewBag.AllSiSoMap = allSiSoMap;
 
             // Danh sách giảng viên thực tế từ CSDL
-            var giangViens = await _context.GiangViens
-                .AsNoTracking()
-                .Where(g => g.TrangThai)
-                .OrderBy(g => g.MaGiangVien)
-                .ToListAsync();
+            var allTeachers = await _giangVienRepo.GetAllAsync();
+            var giangViens = allTeachers.Where(g => g.TrangThai).OrderBy(g => g.MaGiangVien).ToList();
             ViewBag.GiangViens = giangViens;
 
             // 4. Thống kê số liệu thực tế của trung tâm
-            ViewBag.TotalCourses = await _context.LopHocs.CountAsync();
-            ViewBag.TotalStudents = await _context.HocViens.CountAsync();
-            ViewBag.TotalRegistrations = await _context.DangKyHocs.CountAsync(d => d.TrangThai != "Đã hủy");
+            ViewBag.TotalCourses = await _lopHocRepo.CountTotalClassesAsync();
+            ViewBag.TotalStudents = await _hocVienRepo.CountTotalStudentsAsync();
+            ViewBag.TotalRegistrations = await _dangKyHocRepo.GetTotalCountExcludingCancelledAsync();
 
             // 5. Kiểm tra học viên đang đăng nhập (Personalized Learning Widget)
             int? maHocVien = HttpContext.Session.GetInt32("MaHocVien");
@@ -124,11 +99,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             HocVien? student = null;
             if (vaiTro == "HocVien" && maHocVien.HasValue)
             {
-                student = await _context.HocViens.FindAsync(maHocVien.Value);
+                student = await _hocVienRepo.GetByIdAsync(maHocVien.Value);
             }
             else if (vaiTro == "HocVien" && maTaiKhoan.HasValue)
             {
-                student = await _context.HocViens.FirstOrDefaultAsync(h => h.MaTaiKhoan == maTaiKhoan.Value);
+                student = await _hocVienRepo.GetByMaTaiKhoanAsync(maTaiKhoan.Value);
             }
 
             ViewBag.CurrentStudent = (object?)student;
@@ -140,13 +115,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             if (student != null)
             {
-                var dks = await _context.DangKyHocs
-                    .Include(d => d.LopHoc)
-                        .ThenInclude(l => l!.ChuongTrinhDaoTao)
-                    .Include(d => d.KetQuaHocTap)
-                    .Where(d => d.MaHocVien == student.MaHocVien && d.TrangThai != "Đã hủy")
-                    .OrderByDescending(d => d.NgayDangKy)
-                    .ToListAsync();
+                var allDks = await _dangKyHocRepo.GetByHocVienIdAsync(student.MaHocVien);
+                var dks = allDks.Where(d => d.TrangThai != "Đã hủy").ToList();
 
                 myRegistrations = dks.GroupBy(d => d.MaLopHoc)
                     .ToDictionary(g => g.Key, g => g.OrderByDescending(d => d.MaDangKy).First());
@@ -156,23 +126,18 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
                 if (activeCourse != null)
                 {
-                    nextSession = await _context.BuoiHocs
-                        .Where(b => b.MaLopHoc == activeCourse.MaLopHoc && b.ThoiGianBatDau >= DateTime.Now && b.TrangThai != "Đã hủy")
-                        .OrderBy(b => b.ThoiGianBatDau)
-                        .FirstOrDefaultAsync();
-
+                    nextSession = await _buoiHocRepo.GetNextBuoiHocForLopAsync(activeCourse.MaLopHoc);
                     totalSessions = activeCourse.LopHoc?.SoBuoiHoc ?? 1;
-                    completedSessions = await _context.BuoiHocs
-                        .CountAsync(b => b.MaLopHoc == activeCourse.MaLopHoc && b.TrangThai == "Đã hoàn thành");
+                    completedSessions = await _buoiHocRepo.CountCompletedSessionsForLopAsync(activeCourse.MaLopHoc);
                 }
 
                 // Lịch học / Thời khóa biểu cho các lớp sinh viên tham gia
                 var enrolledClassIds = dks.Select(d => d.MaLopHoc).Distinct().ToList();
-                var studentBuoiHocs = await _context.BuoiHocs
-                    .Include(b => b.LopHoc)
-                    .Where(b => enrolledClassIds.Contains(b.MaLopHoc) && b.TrangThai != "Đã hủy")
+                var allStudentSessions = await _buoiHocRepo.GetBuoiHocsByLopIdsAsync(enrolledClassIds);
+                var studentBuoiHocs = allStudentSessions
+                    .Where(b => b.TrangThai != "Đã hủy")
                     .OrderBy(b => b.ThoiGianBatDau)
-                    .ToListAsync();
+                    .ToList();
 
                 // Bảng điểm & Kết quả học tập thực tế từ CSDL
                 var studentKetQuas = dks

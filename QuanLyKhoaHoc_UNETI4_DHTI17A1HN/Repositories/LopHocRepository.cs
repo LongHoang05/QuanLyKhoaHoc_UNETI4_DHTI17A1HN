@@ -2,6 +2,7 @@
 // Họ và tên: Nguyễn Đình Kiên
 // Mã sinh viên: 23103100020
 // Phụ trách: Module 2 - Quản lý lớp học, Tìm kiếm, Lọc, Sắp xếp và Phân trang
+// Bài tập thực hành: Repository Pattern - UNETI
 // ========================================================
 
 using Microsoft.EntityFrameworkCore;
@@ -71,6 +72,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             return await _context.LopHocs.AnyAsync(l => l.MaLopHoc == id);
         }
 
+        public async Task SaveAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<bool> HasRegistrationsAsync(int id)
         {
             return await _context.DangKyHocs.AnyAsync(d => d.MaLopHoc == id);
@@ -79,12 +85,15 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         public async Task<int> CountEnrolledAsync(int id)
         {
             return await _context.DangKyHocs
-                .Where(d => d.MaLopHoc == id &&
-                           (d.TrangThai == "Đã duyệt" ||
-                            d.TrangThai == "Đã đóng học phí" ||
-                            d.TrangThai == "Đang học" ||
-                            d.TrangThai == "Hoàn thành"))
-                .CountAsync();
+                .CountAsync(d => d.MaLopHoc == id &&
+                    (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"));
+        }
+
+        public async Task<bool> ExistsTenLopAsync(string tenLop, int? excludeId = null)
+        {
+            var clean = tenLop.Trim().ToLower();
+            return await _context.LopHocs.AnyAsync(l =>
+                l.TenLop.ToLower() == clean && (!excludeId.HasValue || l.MaLopHoc != excludeId.Value));
         }
 
         public async Task<IEnumerable<ChuongTrinhDaoTao>> GetChuongTrinhListAsync()
@@ -128,11 +137,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             // 1. TÌM KIẾM BẰNG LINQ (Tên lớp, Tên CTĐT, Tên GV)
             if (!string.IsNullOrWhiteSpace(keyword))
             {
-                var kw = keyword.Trim();
+                var kw = keyword.Trim().ToLower();
                 query = query.Where(l =>
-                    l.TenLop.Contains(kw) ||
-                    (l.ChuongTrinhDaoTao != null && l.ChuongTrinhDaoTao.TenChuongTrinh.Contains(kw)) ||
-                    (l.TenGiangVien != null && l.TenGiangVien.Contains(kw)));
+                    l.TenLop.ToLower().Contains(kw) ||
+                    (l.ChuongTrinhDaoTao != null && l.ChuongTrinhDaoTao.TenChuongTrinh.ToLower().Contains(kw)) ||
+                    (l.TenGiangVien != null && l.TenGiangVien.ToLower().Contains(kw)));
             }
 
             // 2. LỌC ĐA ĐIỀU KIỆN
@@ -161,68 +170,72 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             }
 
             // 2.5. Lọc theo Khoảng học phí
-            if (minHocPhi.HasValue)
+            if (minHocPhi.HasValue && minHocPhi.Value >= 0)
             {
                 query = query.Where(l => l.HocPhi >= minHocPhi.Value);
             }
-            if (maxHocPhi.HasValue)
+            if (maxHocPhi.HasValue && maxHocPhi.Value > 0)
             {
                 query = query.Where(l => l.HocPhi <= maxHocPhi.Value);
             }
 
-            // 2.6. Lọc theo Hạn đăng ký (Còn hạn / Hết hạn)
+            // 2.6. Lọc theo Hạn đăng ký
             var today = DateTime.Today;
             if (filterHanDangKy == "con_han")
             {
-                query = query.Where(l => l.HanDangKy >= today);
+                query = query.Where(l => l.HanDangKy >= today && l.NgayBatDauDangKy <= DateTime.Now);
             }
             else if (filterHanDangKy == "het_han")
             {
                 query = query.Where(l => l.HanDangKy < today);
             }
 
-            // 2.7. Lọc theo Còn chỗ / Hết chỗ
+            // 2.7. Lọc theo Tình trạng chỗ
             if (filterConCho == "con_cho")
             {
                 query = query.Where(l => l.DangKyHocs.Count(d =>
-                    d.TrangThai == "Đã duyệt" ||
-                    d.TrangThai == "Đã đóng học phí" ||
-                    d.TrangThai == "Đang học" ||
-                    d.TrangThai == "Hoàn thành") < l.SiSoToiDa);
+                    d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học") < l.SiSoToiDa);
             }
             else if (filterConCho == "het_cho")
             {
                 query = query.Where(l => l.DangKyHocs.Count(d =>
-                    d.TrangThai == "Đã duyệt" ||
-                    d.TrangThai == "Đã đóng học phí" ||
-                    d.TrangThai == "Đang học" ||
-                    d.TrangThai == "Hoàn thành") >= l.SiSoToiDa);
+                    d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học") >= l.SiSoToiDa);
             }
 
             // 3. SẮP XẾP LINQ
-            query = sortBy switch
+            switch (sortBy)
             {
-                "ten_asc" => query.OrderBy(l => l.TenLop),
-                "ten_desc" => query.OrderByDescending(l => l.TenLop),
-                "hocphi_asc" => query.OrderBy(l => l.HocPhi),
-                "hocphi_desc" => query.OrderByDescending(l => l.HocPhi),
-                "handk_asc" => query.OrderBy(l => l.HanDangKy),
-                "handk_desc" => query.OrderByDescending(l => l.HanDangKy),
-                "khaigiang_asc" => query.OrderBy(l => l.NgayKhaiGiang),
-                "khaigiang_desc" => query.OrderByDescending(l => l.NgayKhaiGiang),
-                "ngaytao_asc" => query.OrderBy(l => l.NgayTao),
-                _ => query.OrderByDescending(l => l.NgayTao)
-            };
+                case "ten_asc":
+                    query = query.OrderBy(l => l.TenLop);
+                    break;
+                case "ten_desc":
+                    query = query.OrderByDescending(l => l.TenLop);
+                    break;
+                case "hocphi_asc":
+                    query = query.OrderBy(l => l.HocPhi);
+                    break;
+                case "hocphi_desc":
+                    query = query.OrderByDescending(l => l.HocPhi);
+                    break;
+                case "han_asc":
+                    query = query.OrderBy(l => l.HanDangKy);
+                    break;
+                case "han_desc":
+                    query = query.OrderByDescending(l => l.HanDangKy);
+                    break;
+                case "khaigiang_asc":
+                    query = query.OrderBy(l => l.NgayKhaiGiang);
+                    break;
+                case "khaigiang_desc":
+                    query = query.OrderByDescending(l => l.NgayKhaiGiang);
+                    break;
+                default:
+                    query = query.OrderByDescending(l => l.MaLopHoc);
+                    break;
+            }
 
-            // Đếm tổng số bản ghi thỏa mãn điều kiện
             int totalCount = await query.CountAsync();
-
-            // 4. PHÂN TRANG TRÊN SERVER BẰNG SKIP() & TAKE()
-            var items = await query
-                .Skip((pageIndex - 1) * pageSize)
-                .Take(pageSize)
-                .AsNoTracking()
-                .ToListAsync();
+            var items = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
 
             return (items, totalCount);
         }
@@ -231,10 +244,58 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         {
             var tongSoLop = await _context.LopHocs.CountAsync();
             var soLopDangMo = await _context.LopHocs.CountAsync(l => l.TrangThai == "Đang mở đăng ký");
-            var soLopDaDong = await _context.LopHocs.CountAsync(l => l.TrangThai == "Đã đóng đăng ký");
-            var soLopTamDung = await _context.LopHocs.CountAsync(l => l.TrangThai == "Tạm dừng" || l.TrangThai == "Chưa mở");
+            var soLopDaDong = await _context.LopHocs.CountAsync(l => l.TrangThai == "Đã kết thúc");
+            var soLopTamDung = await _context.LopHocs.CountAsync(l => l.TrangThai == "Tạm dừng");
 
             return (tongSoLop, soLopDangMo, soLopDaDong, soLopTamDung);
+        }
+
+        public async Task<int> CountOpenClassesAsync()
+        {
+            return await _context.LopHocs.CountAsync(l => l.TrangThai == "Đang mở đăng ký");
+        }
+
+        public async Task<int> CountTotalClassesAsync()
+        {
+            return await _context.LopHocs.CountAsync();
+        }
+
+        public async Task<IEnumerable<LopHoc>> GetHotCoursesAsync(int take = 4)
+        {
+            return await _context.LopHocs
+                .Include(l => l.ChuongTrinhDaoTao)
+                .Where(l => l.TrangThai == "Đang mở đăng ký")
+                .OrderByDescending(l => l.DangKyHocs.Count)
+                .Take(take)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<LopHoc>> GetUpcomingCoursesAsync(int take = 4)
+        {
+            return await _context.LopHocs
+                .Include(l => l.ChuongTrinhDaoTao)
+                .Where(l => l.TrangThai == "Đang mở đăng ký" && l.NgayKhaiGiang >= DateTime.Now)
+                .OrderBy(l => l.NgayKhaiGiang)
+                .Take(take)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<LopHoc>> GetSimilarCoursesAsync(int maChuongTrinh, int excludeMaLop, int take = 3)
+        {
+            return await _context.LopHocs
+                .Include(l => l.ChuongTrinhDaoTao)
+                .Where(l => l.MaChuongTrinh == maChuongTrinh && l.MaLopHoc != excludeMaLop && l.TrangThai == "Đang mở đăng ký")
+                .Take(take)
+                .ToListAsync();
+        }
+
+        public async Task<Dictionary<int, int>> GetOpenClassCountsByProgramAsync()
+        {
+            return await _context.LopHocs
+                .Where(l => l.TrangThai == "Đang mở đăng ký")
+                .GroupBy(l => l.MaChuongTrinh)
+                .Select(g => new { MaChuongTrinh = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.MaChuongTrinh, x => x.Count);
         }
     }
 }

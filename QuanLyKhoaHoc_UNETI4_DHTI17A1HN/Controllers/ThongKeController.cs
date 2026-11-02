@@ -1,13 +1,15 @@
 // ========================================================
 // Họ và tên: Nguyễn Tùng Dương
 // Mã sinh viên: 23103100003
-// Phụ trách: Module 5 - Lịch học, Kết quả học tập, Dashboard và Thống kê
+// Phụ trách: Module 5 - Buổi học, Điểm danh, Kết quả học tập & Thống kê báo cáo
+// Áp dụng: Repository Pattern (Bài tập 12, 13, 14, 15 - UNETI)
+// Controller không truy vấn trực tiếp DbContext / LINQ
 // ========================================================
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
@@ -15,11 +17,30 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
     [SessionAuthorize("Admin", "GiaoVu")]
     public class ThongKeController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IThongKeRepository _thongKeRepo;
+        private readonly IDangKyHocRepository _dangKyHocRepo;
+        private readonly IBuoiHocRepository _buoiHocRepo;
+        private readonly ILopHocRepository _lopHocRepo;
+        private readonly IChuongTrinhDaoTaoRepository _ctdtRepo;
+        private readonly IHocVienRepository _hocVienRepo;
+        private readonly IKetQuaHocTapRepository _ketQuaRepo;
 
-        public ThongKeController(ApplicationDbContext context)
+        public ThongKeController(
+            IThongKeRepository thongKeRepo,
+            IDangKyHocRepository dangKyHocRepo,
+            IBuoiHocRepository buoiHocRepo,
+            ILopHocRepository lopHocRepo,
+            IChuongTrinhDaoTaoRepository ctdtRepo,
+            IHocVienRepository hocVienRepo,
+            IKetQuaHocTapRepository ketQuaRepo)
         {
-            _context = context;
+            _thongKeRepo = thongKeRepo;
+            _dangKyHocRepo = dangKyHocRepo;
+            _buoiHocRepo = buoiHocRepo;
+            _lopHocRepo = lopHocRepo;
+            _ctdtRepo = ctdtRepo;
+            _hocVienRepo = hocVienRepo;
+            _ketQuaRepo = ketQuaRepo;
         }
 
         public async Task<IActionResult> Dashboard(int page = 1, string? status = "all", string? search = "")
@@ -38,63 +59,48 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             status = string.IsNullOrWhiteSpace(status) ? "all" : status.Trim();
             search = string.IsNullOrWhiteSpace(search) ? "" : search.Trim();
 
-            var query = _context.DangKyHocs
-                .Include(d => d.HocVien)
-                .Include(d => d.LopHoc)
-                .AsQueryable();
+            string? filterTrangThai = null;
+            if (status == "Chờ duyệt") filterTrangThai = "Chờ duyệt";
+            else if (status == "Đã duyệt") filterTrangThai = "Đã duyệt";
 
-            if (!string.IsNullOrEmpty(search))
-            {
-                string s = search.ToLower();
-                query = query.Where(d => (d.HocVien != null && (d.HocVien.HoTen.ToLower().Contains(s) || d.HocVien.MaHocVien.ToString().Contains(s)))
-                                      || (d.LopHoc != null && d.LopHoc.TenLop.ToLower().Contains(s)));
-            }
+            var (recentActivities, totalActivities) = await _dangKyHocRepo.GetPagedAsync(
+                search,
+                null,
+                null,
+                filterTrangThai,
+                null,
+                null,
+                "ngay_desc",
+                page,
+                pageSize);
 
-            if (status == "Chờ duyệt")
-            {
-                query = query.Where(d => d.TrangThai == "Chờ duyệt");
-            }
-            else if (status == "Đã duyệt")
-            {
-                query = query.Where(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học");
-            }
-
-            int totalActivities = await query.CountAsync();
             int totalPages = (int)Math.Ceiling(totalActivities / (double)pageSize);
             if (totalPages < 1) totalPages = 1;
             if (page < 1) page = 1;
             if (page > totalPages) page = totalPages;
 
-            var recentActivities = await query
-                .OrderByDescending(d => d.NgayDangKy)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            var allBuoiHocs = await _buoiHocRepo.GetAllAsync();
+            var danhSachBuoiHoc = allBuoiHocs.OrderBy(b => b.ThoiGianBatDau).Take(5).ToList();
 
-            var danhSachBuoiHoc = await _context.BuoiHocs
-                .Include(b => b.LopHoc)
-                .OrderBy(b => b.ThoiGianBatDau)
-                .Take(5)
-                .ToListAsync();
+            var (tongSoDiem, soDat, _, _) = await _ketQuaRepo.GetThongKePhoiDiemAsync();
+            double tyLeHT = tongSoDiem > 0 ? Math.Round((double)soDat / tongSoDiem * 100, 1) : 0;
 
-            int totalCoDiem = await _context.KetQuaHocTaps.CountAsync();
-            int soHoanThanh = await _context.KetQuaHocTaps.CountAsync(k => k.KetQua == "Hoàn thành");
-            double tyLeHT = totalCoDiem > 0 ? Math.Round((double)soHoanThanh / totalCoDiem * 100, 1) : 0;
+            var kpis = await _thongKeRepo.GetTongHopKpiAsync();
 
             var vm = new DashboardVM
             {
-                TongSoCTDT = await _context.ChuongTrinhDaoTaos.CountAsync(),
-                TongSoLop = await _context.LopHocs.CountAsync(),
-                LopDangMo = await _context.LopHocs.CountAsync(l => l.TrangThai == "Đang mở đăng ký"),
-                TongSoHocVien = await _context.HocViens.CountAsync(),
-                TongSoDangKy = await _context.DangKyHocs.CountAsync(),
-                DangKyChoDuyet = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Chờ duyệt"),
-                DangKyDaDuyet = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"),
-                BuoiHocSapToi = await _context.BuoiHocs.CountAsync(b => b.ThoiGianBatDau > DateTime.Now && b.TrangThai == "Đã lên lịch"),
-                HocVienHoanThanh = soHoanThanh,
+                TongSoCTDT = (int)kpis["TongSoCTDT"],
+                TongSoLop = (int)kpis["TongSoLop"],
+                LopDangMo = (int)kpis["LopDangMo"],
+                TongSoHocVien = (int)kpis["TongSoHocVien"],
+                TongSoDangKy = (int)kpis["TongSoDangKy"],
+                DangKyChoDuyet = (int)kpis["DangKyChoDuyet"],
+                DangKyDaDuyet = (int)kpis["DangKyDaDuyet"],
+                BuoiHocSapToi = (int)kpis["BuoiHocSapToi"],
+                HocVienHoanThanh = (int)kpis["HocVienHoanThanh"],
                 TyLeHoanThanh = tyLeHT,
                 DanhSachBuoiHoc = danhSachBuoiHoc,
-                HoatDongGanDay = recentActivities,
+                HoatDongGanDay = recentActivities.ToList(),
                 CurrentPage = page,
                 TotalPages = totalPages,
                 SelectedStatus = status,
@@ -108,12 +114,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         public async Task<IActionResult> DuyetNhanh(int id)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-            var dangKy = await _context.DangKyHocs.FindAsync(id);
+            var dangKy = await _dangKyHocRepo.GetByIdAsync(id);
             if (dangKy != null)
             {
                 dangKy.TrangThai = "Đã duyệt";
                 dangKy.NgayXuLy = DateTime.Now;
-                await _context.SaveChangesAsync();
+                await _dangKyHocRepo.UpdateAsync(dangKy);
                 if (isAjax)
                 {
                     return Json(new { success = true, message = "Đã phê duyệt đăng ký thành công!" });
@@ -141,125 +147,51 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction("TienTrinh", "CongHocVien");
             }
 
-            // 1. Số lớp học theo chương trình đào tạo (Mục 9.6)
-            ViewBag.LopTheoCTDT = await _context.LopHocs
-                .Where(l => l.ChuongTrinhDaoTao != null)
-                .GroupBy(l => l.ChuongTrinhDaoTao!.TenChuongTrinh)
-                .Select(g => new { Ten = g.Key, SoLuong = g.Count() })
-                .ToListAsync();
+            // 1. Số lớp học theo chương trình đào tạo (Bài tập 12 - GroupBy & Count)
+            ViewBag.LopTheoCTDT = await _thongKeRepo.GetLopTheoCTDTAsync();
 
-            // 2. Số đăng ký theo từng lớp (Mục 9.6)
-            ViewBag.DKTheoLop = await _context.DangKyHocs
-                .Where(d => d.LopHoc != null)
-                .GroupBy(d => d.LopHoc!.TenLop)
-                .Select(g => new { Ten = g.Key, SoLuong = g.Count() })
-                .ToListAsync();
+            // 2. Số đăng ký theo từng lớp (Bài tập 12 - GroupBy & Count)
+            ViewBag.DKTheoLop = await _thongKeRepo.GetDKTheoLopAsync();
 
-            // 3. Số đăng ký theo trạng thái (Mục 9.6)
-            ViewBag.DKTheoTrangThai = await _context.DangKyHocs
-                .GroupBy(d => d.TrangThai)
-                .Select(g => new { Ten = g.Key, SoLuong = g.Count() })
-                .ToListAsync();
+            // 3. Số đăng ký theo trạng thái
+            ViewBag.DKTheoTrangThai = await _thongKeRepo.GetDKTheoTrangThaiAsync();
 
-            // 4. Lớp có nhiều đăng ký nhất (Mục 9.6)
-            ViewBag.LopNhieuDKNhat = await _context.DangKyHocs
-                .Where(d => d.LopHoc != null)
-                .GroupBy(d => d.LopHoc!.TenLop)
-                .OrderByDescending(g => g.Count())
-                .Select(g => new { Ten = g.Key, SoLuong = g.Count() })
-                .FirstOrDefaultAsync();
+            // 4. Lớp có nhiều đăng ký nhất (Bài tập 14 - Min/Max)
+            ViewBag.LopNhieuDKNhat = await _thongKeRepo.GetLopNhieuDKNhatAsync();
 
-            // 5. Doanh thu theo tháng (Mục 9.6)
-            var doanhThu = await _context.DangKyHocs
-                .Where(d => d.NgayDongHocPhi != null)
-                .GroupBy(d => new { d.NgayDongHocPhi!.Value.Year, d.NgayDongHocPhi!.Value.Month })
-                .Select(g => new ThongKeDoanhThuVM
-                {
-                    Thang = g.Key.Month + "/" + g.Key.Year,
-                    TongDoanhThu = g.Sum(d => d.SoTienDaDong)
-                })
-                .OrderBy(r => r.Thang)
-                .ToListAsync();
-            ViewBag.DoanhThuTheoThang = doanhThu;
+            // 5. Doanh thu theo tháng (Bài tập 13 - Sum & GroupBy)
+            ViewBag.DoanhThuTheoThang = await _thongKeRepo.GetDoanhThuTheoThangAsync();
 
-            // 6. Doanh thu theo chương trình đào tạo (Mục 9.6)
-            ViewBag.DoanhThuTheoCTDT = await _context.DangKyHocs
-                .Where(d => d.NgayDongHocPhi != null && d.LopHoc != null && d.LopHoc.ChuongTrinhDaoTao != null)
-                .GroupBy(d => d.LopHoc!.ChuongTrinhDaoTao!.TenChuongTrinh)
-                .Select(g => new { Ten = g.Key, DoanhThu = g.Sum(d => d.SoTienDaDong) })
-                .ToListAsync();
+            // 6. Doanh thu theo chương trình đào tạo
+            ViewBag.DoanhThuTheoCTDT = await _thongKeRepo.GetDoanhThuTheoCTDTAsync();
 
-            // 7. Số đăng ký theo tháng (Mục 9.6)
-            ViewBag.DKTheoThang = await _context.DangKyHocs
-                .GroupBy(d => new { d.NgayDangKy.Year, d.NgayDangKy.Month })
-                .Select(g => new { Thang = g.Key.Month + "/" + g.Key.Year, SoLuong = g.Count() })
-                .ToListAsync();
+            // 7. Số đăng ký theo tháng
+            ViewBag.DKTheoThang = await _thongKeRepo.GetDKTheoThangAsync();
 
-            // 8. Số buổi học theo tháng (Mục 9.6)
-            ViewBag.BuoiHocTheoThang = await _context.BuoiHocs
-                .GroupBy(b => new { b.ThoiGianBatDau.Year, b.ThoiGianBatDau.Month })
-                .Select(g => new { Thang = g.Key.Month + "/" + g.Key.Year, SoLuong = g.Count() })
-                .ToListAsync();
+            // 8. Số buổi học theo tháng
+            ViewBag.BuoiHocTheoThang = await _thongKeRepo.GetBuoiHocTheoThangAsync();
 
-            // 9. Điểm tổng kết trung bình theo lớp (Mục 9.6)
-            ViewBag.DiemTBTheoLop = await _context.KetQuaHocTaps
-                .Where(k => k.DangKyHoc != null && k.DangKyHoc.LopHoc != null)
-                .GroupBy(k => k.DangKyHoc!.LopHoc!.TenLop)
-                .Select(g => new { Ten = g.Key, DiemTB = g.Average(k => k.DiemTongKet) })
-                .ToListAsync();
+            // 9. Điểm tổng kết trung bình theo lớp
+            ViewBag.DiemTBTheoLop = await _thongKeRepo.GetDiemTBTheoLopAsync();
 
-            // 10. Tỷ lệ lấp đầy sĩ số (Mục 9.6)
-            var tyLe = await _context.LopHocs
-                .Select(l => new TyLeLapDayVM
-                {
-                    TenLop = l.TenLop,
-                    SiSoToiDa = l.SiSoToiDa,
-                    SiSoHienTai = _context.DangKyHocs.Count(dk => dk.MaLopHoc == l.MaLopHoc && 
-                                  (dk.TrangThai == "Đã duyệt" || dk.TrangThai == "Đã đóng học phí" || dk.TrangThai == "Đang học")),
-                    TyLe = l.SiSoToiDa > 0 ? 
-                           (double)_context.DangKyHocs.Count(dk => dk.MaLopHoc == l.MaLopHoc && 
-                           (dk.TrangThai == "Đã duyệt" || dk.TrangThai == "Đã đóng học phí" || dk.TrangThai == "Đang học")) / l.SiSoToiDa * 100 
-                           : 0
-                })
-                .ToListAsync();
+            // 10. Tỷ lệ lấp đầy sĩ số
+            var tyLe = await _thongKeRepo.GetTyLeLapDayAsync();
             ViewBag.TyLeLapDay = tyLe;
 
-            // 11. Tỷ lệ Hoàn thành trên số học viên đã có kết quả (Mục 9.6)
-            var totalCoDiem = await _context.KetQuaHocTaps.CountAsync();
-            ViewBag.TyLeHoanThanh = totalCoDiem > 0 ? (double)(await _context.KetQuaHocTaps.CountAsync(k => k.KetQua == "Hoàn thành")) / totalCoDiem * 100 : 0;
+            // 11. Tỷ lệ Hoàn thành
+            ViewBag.TyLeHoanThanh = await _thongKeRepo.GetTyLeHoanThanhKhoaHocAsync();
 
-            // 12. Thống kê cấp cao phục vụ Dashboard & KPI
-            ViewBag.TongDoanhThu = (double)(await _context.DangKyHocs.Where(d => d.NgayDongHocPhi != null).SumAsync(d => (decimal?)d.SoTienDaDong) ?? 0);
-            ViewBag.TongBuoiHoc = await _context.BuoiHocs.CountAsync();
-            ViewBag.DangKyChoDuyet = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Chờ duyệt");
+            // 12. Thống kê nâng cao phục vụ Dashboard & KPI (Bài tập 15)
+            var kpis = await _thongKeRepo.GetTongHopKpiAsync();
+            ViewBag.TongDoanhThu = (double)kpis["TongDoanhThu"];
+            ViewBag.TongBuoiHoc = (int)kpis["TongBuoiHoc"];
+            ViewBag.DangKyChoDuyet = (int)kpis["DangKyChoDuyet"];
             ViewBag.AvgLapDay = tyLe.Any() ? Math.Round(tyLe.Average(t => t.TyLe), 1) : 0;
-            ViewBag.TongChoHoc = await _context.LopHocs.SumAsync(l => (int?)l.SiSoToiDa) ?? 0;
-            ViewBag.ChoDaDangKy = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học");
+            ViewBag.TongChoHoc = (int)kpis["TongChoHoc"];
+            ViewBag.ChoDaDangKy = (int)kpis["ChoDaDangKy"];
 
             // 13. Bảng xếp hạng giảng viên phụ trách
-            var lopList = await _context.LopHocs.ToListAsync();
-            var dkList = await _context.DangKyHocs.ToListAsync();
-            var kqList = await _context.KetQuaHocTaps.Include(k => k.DangKyHoc).ToListAsync();
-
-            ViewBag.TopGiangVien = lopList
-                .Where(l => !string.IsNullOrEmpty(l.TenGiangVien))
-                .GroupBy(l => l.TenGiangVien!)
-                .Select(g => {
-                    var maLops = g.Select(x => x.MaLopHoc).ToList();
-                    var svCount = dkList.Count(d => maLops.Contains(d.MaLopHoc) && (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"));
-                    var scores = kqList.Where(k => k.DangKyHoc != null && maLops.Contains(k.DangKyHoc.MaLopHoc)).Select(k => k.DiemTongKet).ToList();
-                    return new {
-                        GiangVien = g.Key,
-                        SoLop = g.Count(),
-                        MonHoc = string.Join(", ", g.Select(x => x.TenLop).Take(2)),
-                        SoSV = svCount,
-                        DiemTB = scores.Any() ? Math.Round(scores.Average(), 1) : 0,
-                        DanhGia = scores.Any() ? Math.Round(Math.Min(5.0, 3.5 + (scores.Average() / 10.0) * 1.5), 1) : 4.5
-                    };
-                })
-                .OrderByDescending(x => x.SoSV)
-                .Take(5)
-                .ToList();
+            ViewBag.TopGiangVien = await _thongKeRepo.GetTopGiangVienAsync();
 
             return View();
         }

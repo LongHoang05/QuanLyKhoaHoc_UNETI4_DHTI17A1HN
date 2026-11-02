@@ -5,9 +5,8 @@
 // ========================================================
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels;
 
@@ -16,12 +15,20 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
     public class HocVienController : Controller
     {
         private readonly IHocVienService _hocVienService;
-        private readonly ApplicationDbContext _context;
+        private readonly IHocVienRepository _hocVienRepo;
+        private readonly ILopHocRepository _lopHocRepo;
+        private readonly IChuongTrinhDaoTaoRepository _ctdtRepo;
 
-        public HocVienController(IHocVienService hocVienService, ApplicationDbContext context)
+        public HocVienController(
+            IHocVienService hocVienService,
+            IHocVienRepository hocVienRepo,
+            ILopHocRepository lopHocRepo,
+            IChuongTrinhDaoTaoRepository ctdtRepo)
         {
             _hocVienService = hocVienService;
-            _context = context;
+            _hocVienRepo = hocVienRepo;
+            _lopHocRepo = lopHocRepo;
+            _ctdtRepo = ctdtRepo;
         }
 
         #region Helper Phân Quyền Session (Theo Mục 5.4 & Mục 7)
@@ -236,11 +243,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         [HttpGet]
         public async Task<IActionResult> GetHocVienJson(int id)
         {
-            var hv = await _context.HocViens
-                .Include(h => h.TaiKhoan)
-                .Include(h => h.DangKyHocs)
-                    .ThenInclude(d => d.LopHoc)
-                .FirstOrDefaultAsync(h => h.MaHocVien == id);
+            var hv = await _hocVienRepo.GetByIdWithDetailsAsync(id);
 
             if (hv == null) return Json(new { success = false, message = "Không tìm thấy học viên." });
 
@@ -521,12 +524,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction("DangNhap", "TaiKhoan", new { returnUrl = "/HocVien/Portal" });
             }
 
-            var hocVien = await _context.HocViens
-                .Include(h => h.TaiKhoan)
-                .Include(h => h.DangKyHocs)
-                    .ThenInclude(d => d.LopHoc)
-                        .ThenInclude(l => l!.ChuongTrinhDaoTao)
-                .FirstOrDefaultAsync(h => h.MaTaiKhoan == maTaiKhoan.Value);
+            var hocVien = await _hocVienRepo.GetByMaTaiKhoanAsync(maTaiKhoan.Value);
 
             if (hocVien == null)
             {
@@ -534,12 +532,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            var lopHocDangMos = await _context.LopHocs
-                .Include(l => l.ChuongTrinhDaoTao)
-                .Where(l => l.TrangThai == "Đang mở đăng ký")
-                .ToListAsync();
+            var allLops = await _lopHocRepo.GetAllAsync();
+            var lopHocDangMos = allLops.Where(l => l.TrangThai == "Đang mở đăng ký").ToList();
 
-            var chuongTrinhs = await _context.ChuongTrinhDaoTaos.Where(c => c.TrangThai).ToListAsync();
+            var allCtdt = await _ctdtRepo.GetAllAsync();
+            var chuongTrinhs = allCtdt.Where(c => c.TrangThai).ToList();
 
             var viewModel = new CongHocVienViewModel
             {

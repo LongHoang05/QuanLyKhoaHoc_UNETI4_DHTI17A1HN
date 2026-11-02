@@ -2,6 +2,7 @@
 // Họ và tên: Vũ Đình Trường
 // Mã sinh viên: 23103100026
 // Phụ trách: Module 1 - Tài khoản, Đăng nhập, Phân quyền và Chương trình đào tạo
+// Bài tập thực hành: Repository Pattern - UNETI
 // ========================================================
 
 using Microsoft.EntityFrameworkCore;
@@ -104,6 +105,29 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         public async Task<bool> CoLopHocLienQuanAsync(int maChuongTrinh)
         {
             return await _context.LopHocs.AnyAsync(l => l.MaChuongTrinh == maChuongTrinh);
+        }
+
+        public async Task<int> CountLopHocByChuongTrinhAsync(int maChuongTrinh)
+        {
+            return await _context.LopHocs.CountAsync(l => l.MaChuongTrinh == maChuongTrinh);
+        }
+
+        public async Task<Dictionary<int, int>> GetClassCountsByProgramAsync(IEnumerable<int> ctdtIds)
+        {
+            return await _context.LopHocs
+                .Where(l => ctdtIds.Contains(l.MaChuongTrinh))
+                .GroupBy(l => l.MaChuongTrinh)
+                .Select(g => new { MaChuongTrinh = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.MaChuongTrinh, x => x.Count);
+        }
+
+        public async Task<(int TongCTDT, int DangHoatDong, int TongLopLienKet)> GetKpiStatsAsync()
+        {
+            int tongCTDT = await _context.ChuongTrinhDaoTaos.CountAsync();
+            int dangHoatDong = await _context.ChuongTrinhDaoTaos.CountAsync(c => c.TrangThai);
+            int tongLopLienKet = await _context.LopHocs.CountAsync();
+
+            return (tongCTDT, dangHoatDong, tongLopLienKet);
         }
 
         public async Task<bool> ExistsAsync(int id)

@@ -2,31 +2,41 @@
 // Họ và tên: Nguyễn Đình Kiên
 // Mã sinh viên: 23103100020
 // Phụ trách: Module 2 - Quản lý lớp học, Tìm kiếm, Lọc, Sắp xếp và Phân trang
+// Áp dụng: Repository Pattern theo hướng dẫn UNETI
+// Controller không truy vấn trực tiếp DbContext / LINQ
 // ========================================================
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 {
     [SessionAuthorize("Admin", "GiaoVu")]
     public class LopHocController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ILopHocRepository _lopHocRepo;
+        private readonly IChuongTrinhDaoTaoRepository _ctdtRepo;
+        private readonly IDangKyHocRepository _dangKyHocRepo;
+        private readonly IBuoiHocRepository _buoiHocRepo;
+        private readonly IGiangVienRepository _giangVienRepo;
 
-        public LopHocController(ApplicationDbContext context)
+        public LopHocController(
+            ILopHocRepository lopHocRepo,
+            IChuongTrinhDaoTaoRepository ctdtRepo,
+            IDangKyHocRepository dangKyHocRepo,
+            IBuoiHocRepository buoiHocRepo,
+            IGiangVienRepository giangVienRepo)
         {
-            _context = context;
+            _lopHocRepo = lopHocRepo;
+            _ctdtRepo = ctdtRepo;
+            _dangKyHocRepo = dangKyHocRepo;
+            _buoiHocRepo = buoiHocRepo;
+            _giangVienRepo = giangVienRepo;
         }
 
-        // --- DANH SÁCH LỚP HỌC (SEARCH + FILTER + SORT + PAGINATION) ---
+        // --- DANH SÁCH LỚP HỌC (SEARCH + FILTER + SORT + PAGINATION QUA REPOSITORY) ---
         public async Task<IActionResult> Index(
             int page = 1,
             string search = "",
@@ -44,128 +54,34 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             {
                 return RedirectToAction("DangKy", "CongHocVien");
             }
+
             int pageSize = 6;
-            var query = _context.LopHocs
-                .Include(l => l.ChuongTrinhDaoTao)
-                .AsQueryable();
 
-            // 1. Tìm kiếm LINQ (theo Tên lớp, Chương trình đào tạo, Giảng viên)
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                string s = search.ToLower().Trim();
-                query = query.Where(l => l.TenLop.ToLower().Contains(s) ||
-                                         (l.ChuongTrinhDaoTao != null && l.ChuongTrinhDaoTao.TenChuongTrinh.ToLower().Contains(s)) ||
-                                         (l.TenGiangVien != null && l.TenGiangVien.ToLower().Contains(s)));
-            }
+            // Gọi Repository thực hiện toàn bộ câu lệnh LINQ Skip & Take trên SQL Server
+            var (items, totalItems) = await _lopHocRepo.GetPagedAsync(
+                search,
+                maChuongTrinh,
+                trinhDo,
+                trangThai,
+                null,
+                hocPhiMin,
+                hocPhiMax,
+                hanDangKyStatus,
+                choTrongStatus,
+                sortBy,
+                page,
+                pageSize);
 
-            // 2. Lọc theo Chương trình đào tạo
-            if (maChuongTrinh.HasValue && maChuongTrinh.Value > 0)
-            {
-                query = query.Where(l => l.MaChuongTrinh == maChuongTrinh.Value);
-            }
-
-            // 3. Lọc theo Trình độ đầu vào
-            if (!string.IsNullOrWhiteSpace(trinhDo))
-            {
-                query = query.Where(l => l.TrinhDoDauVao == trinhDo);
-            }
-
-            // 4. Lọc theo Trạng thái lớp
-            if (!string.IsNullOrWhiteSpace(trangThai))
-            {
-                query = query.Where(l => l.TrangThai == trangThai);
-            }
-
-            // 5. Lọc theo Khoảng học phí
-            if (hocPhiMin.HasValue && hocPhiMin.Value >= 0)
-            {
-                query = query.Where(l => l.HocPhi >= hocPhiMin.Value);
-            }
-            if (hocPhiMax.HasValue && hocPhiMax.Value > 0)
-            {
-                query = query.Where(l => l.HocPhi <= hocPhiMax.Value);
-            }
-
-            // 6. Lọc theo Hạn đăng ký (Còn hạn / Hết hạn)
-            DateTime today = DateTime.Now;
-            if (hanDangKyStatus == "con_han")
-            {
-                query = query.Where(l => l.HanDangKy >= today.Date && l.NgayBatDauDangKy <= today);
-            }
-            else if (hanDangKyStatus == "het_han")
-            {
-                query = query.Where(l => l.HanDangKy < today.Date);
-            }
-
-            // 7. Lọc Còn chỗ / Hết chỗ bằng LINQ trực tiếp
-            if (choTrongStatus == "con_cho")
-            {
-                query = query.Where(l => l.DangKyHocs.Count(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học") < l.SiSoToiDa);
-            }
-            else if (choTrongStatus == "het_cho")
-            {
-                query = query.Where(l => l.DangKyHocs.Count(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học") >= l.SiSoToiDa);
-            }
-
-            // 8. Sắp xếp LINQ
-            switch (sortBy)
-            {
-                case "ten_asc":
-                    query = query.OrderBy(l => l.TenLop);
-                    break;
-                case "ten_desc":
-                    query = query.OrderByDescending(l => l.TenLop);
-                    break;
-                case "han_asc":
-                    query = query.OrderBy(l => l.HanDangKy);
-                    break;
-                case "han_desc":
-                    query = query.OrderByDescending(l => l.HanDangKy);
-                    break;
-                case "hocphi_asc":
-                    query = query.OrderBy(l => l.HocPhi);
-                    break;
-                case "hocphi_desc":
-                    query = query.OrderByDescending(l => l.HocPhi);
-                    break;
-                case "khaigiang_asc":
-                    query = query.OrderBy(l => l.NgayKhaiGiang);
-                    break;
-                case "khaigiang_desc":
-                    query = query.OrderByDescending(l => l.NgayKhaiGiang);
-                    break;
-                default:
-                    query = query.OrderByDescending(l => l.MaLopHoc);
-                    break;
-            }
-
-            // 9. Phân trang LINQ chuẩn EF Core (Mục 6.6 & 15: Skip, Take trực tiếp trên SQL Server)
-            int totalItems = await query.CountAsync();
             int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
             if (totalPages < 1) totalPages = 1;
             if (page < 1) page = 1;
             if (page > totalPages) page = totalPages;
 
-            var items = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            // Tính sĩ số đã duyệt và số buổi học cho các lớp trong trang hiện tại
             var pageLopIds = items.Select(l => l.MaLopHoc).ToList();
-            var siSoMap = await _context.DangKyHocs
-                .Where(d => pageLopIds.Contains(d.MaLopHoc) && (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"))
-                .GroupBy(d => d.MaLopHoc)
-                .Select(g => new { MaLop = g.Key, Count = g.Count() })
-                .ToDictionaryAsync(x => x.MaLop, x => x.Count);
+            var siSoMap = await _dangKyHocRepo.GetSiSoDaDangKyMapAsync(pageLopIds);
+            var buoiHocMap = await _buoiHocRepo.GetBuoiHocChuaHuyMapAsync(pageLopIds);
 
-            var buoiHocMap = await _context.BuoiHocs
-                .Where(b => pageLopIds.Contains(b.MaLopHoc) && b.TrangThai != "Đã hủy")
-                .GroupBy(b => b.MaLopHoc)
-                .Select(g => new { MaLop = g.Key, Count = g.Count() })
-                .ToDictionaryAsync(x => x.MaLop, x => x.Count);
-
-            // Gán ViewBag
+            // Gán ViewBag phục vụ Razor View
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
             ViewBag.TotalItems = totalItems;
@@ -181,13 +97,15 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             ViewBag.SiSoMap = siSoMap;
             ViewBag.BuoiHocMap = buoiHocMap;
-            ViewBag.ChuongTrinhList = await _context.ChuongTrinhDaoTaos.OrderBy(c => c.TenChuongTrinh).ToListAsync();
-            ViewBag.GiangVienList = await _context.GiangViens.Where(g => g.TrangThai).OrderBy(g => g.HoTen).ToListAsync();
+            ViewBag.ChuongTrinhList = await _ctdtRepo.GetAllAsync();
+            ViewBag.GiangVienList = await _giangVienRepo.GetAllAsync();
 
-            // 3 thẻ KPI
-            ViewBag.TongSoLop = await _context.LopHocs.CountAsync();
-            ViewBag.LopDangMo = await _context.LopHocs.CountAsync(l => l.TrangThai == "Đang mở đăng ký");
-            ViewBag.TongHocVienDangHoc = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Đang học" || d.TrangThai == "Đã đóng học phí");
+            // 3 thẻ KPI lấy từ Repository
+            var (tongSoLop, soLopDangMo, _, _) = await _lopHocRepo.GetThongKeNhanhAsync();
+            var (_, daDuyetCount, _) = await _dangKyHocRepo.GetThongKeNhanhAsync();
+            ViewBag.TongSoLop = tongSoLop;
+            ViewBag.LopDangMo = soLopDangMo;
+            ViewBag.TongHocVienDangHoc = daDuyetCount;
 
             return View(items);
         }
@@ -195,21 +113,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         // --- CHI TIẾT LỚP HỌC ---
         public async Task<IActionResult> Details(int id)
         {
-            var lop = await _context.LopHocs
-                .Include(l => l.ChuongTrinhDaoTao)
-                .FirstOrDefaultAsync(l => l.MaLopHoc == id);
-
+            var lop = await _lopHocRepo.GetByIdWithDetailsAsync(id);
             if (lop == null) return NotFound();
 
-            var buoiHocs = await _context.BuoiHocs
-                .Where(b => b.MaLopHoc == id)
-                .OrderBy(b => b.ThoiGianBatDau)
-                .ToListAsync();
-
-            var dangKys = await _context.DangKyHocs
-                .Include(d => d.HocVien)
-                .Where(d => d.MaLopHoc == id && (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"))
-                .ToListAsync();
+            var buoiHocs = await _buoiHocRepo.GetByLopHocIdAsync(id);
+            var dangKys = lop.DangKyHocs
+                .Where(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học")
+                .ToList();
 
             ViewBag.BuoiHocs = buoiHocs;
             ViewBag.DangKys = dangKys;
@@ -274,15 +184,15 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             if (!string.IsNullOrEmpty(lop.TenGiangVien) && lop.TenGiangVien != "Chưa xếp")
             {
-                var gvMatch = await _context.GiangViens.FirstOrDefaultAsync(g => g.HoTen == lop.TenGiangVien || lop.TenGiangVien.Contains(g.HoTen) || g.HoTen.Contains(lop.TenGiangVien));
+                var gvs = await _giangVienRepo.GetAllAsync();
+                var gvMatch = gvs.FirstOrDefault(g => g.HoTen == lop.TenGiangVien || lop.TenGiangVien.Contains(g.HoTen) || g.HoTen.Contains(lop.TenGiangVien));
                 if (gvMatch != null)
                 {
                     lop.MaGiangVien = gvMatch.MaGiangVien;
                 }
             }
 
-            _context.Add(lop);
-            await _context.SaveChangesAsync();
+            await _lopHocRepo.AddAsync(lop);
 
             if (isAjax) return Json(new { success = true, message = "Tạo lớp học mới thành công!" });
             TempData["Success"] = "Tạo lớp học mới thành công!";
@@ -309,7 +219,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             string trangThai)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-            var lop = await _context.LopHocs.FindAsync(maLop);
+            var lop = await _lopHocRepo.GetByIdAsync(maLop);
             if (lop == null)
             {
                 if (isAjax) return Json(new { success = false, message = "Không tìm thấy lớp học cần cập nhật." });
@@ -318,9 +228,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
 
             // Kiểm tra ràng buộc nghiệp vụ Mục 6.2: Không cho giảm sĩ số tối đa xuống thấp hơn số học viên đã duyệt
-            int soHocVienDaDuyet = await _context.DangKyHocs
-                .CountAsync(d => d.MaLopHoc == maLop && (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"));
-
+            int soHocVienDaDuyet = await _dangKyHocRepo.CountEnrolledInLopAsync(maLop);
             if (siSoToiDa < soHocVienDaDuyet)
             {
                 string msg = $"Không thể giảm sĩ số tối đa xuống {siSoToiDa} vì lớp đang có {soHocVienDaDuyet} học viên đã được duyệt/đóng học phí.";
@@ -349,7 +257,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             if (!string.IsNullOrEmpty(tenGiangVien) && tenGiangVien != "Chưa xếp")
             {
-                var gvMatch = await _context.GiangViens.FirstOrDefaultAsync(g => g.HoTen == tenGiangVien || tenGiangVien.Contains(g.HoTen) || g.HoTen.Contains(tenGiangVien));
+                var gvs = await _giangVienRepo.GetAllAsync();
+                var gvMatch = gvs.FirstOrDefault(g => g.HoTen == tenGiangVien || tenGiangVien.Contains(g.HoTen) || g.HoTen.Contains(tenGiangVien));
                 if (gvMatch != null)
                 {
                     lop.MaGiangVien = gvMatch.MaGiangVien;
@@ -371,19 +280,19 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             lop.YeuCauHocVien = yeuCauHocVien ?? "";
             lop.TrangThai = trangThai;
 
-            await _context.SaveChangesAsync();
+            await _lopHocRepo.UpdateAsync(lop);
 
             if (isAjax) return Json(new { success = true, message = "Cập nhật thông tin lớp học thành công!" });
             TempData["Success"] = "Cập nhật thông tin lớp học thành công!";
             return RedirectToAction(nameof(Index));
         }
 
-        // --- XÓA LỚP HỌC (AN TOÀN KIỂM SOÁT DỮ LIỆU) ---
+        // --- XÓA LỚP HỌC (AN TOÀN KIỂM SOÁT DỮ LIỆU QUA REPOSITORY) ---
         [HttpPost]
         public async Task<IActionResult> DeletePost(int id)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-            var lop = await _context.LopHocs.FindAsync(id);
+            var lop = await _lopHocRepo.GetByIdAsync(id);
             if (lop == null)
             {
                 if (isAjax) return Json(new { success = false, message = "Không tìm thấy lớp học." });
@@ -391,7 +300,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
 
             // Quy định nghiệp vụ Mục 6.2: Khi lớp đã có đăng ký, việc xóa phải được kiểm soát
-            int soDangKy = await _context.DangKyHocs.CountAsync(d => d.MaLopHoc == id);
+            int soDangKy = await _dangKyHocRepo.CountEnrolledInLopAsync(id);
             if (soDangKy > 0)
             {
                 string msg = $"Không thể xóa lớp '{lop.TenLop}' vì đã có {soDangKy} hồ sơ đăng ký của học viên liên quan. Bạn có thể chuyển trạng thái lớp sang 'Đã đóng đăng ký'.";
@@ -401,7 +310,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
 
             // Kiểm tra các buổi học đã xếp
-            int soBuoi = await _context.BuoiHocs.CountAsync(b => b.MaLopHoc == id);
+            int soBuoi = await _buoiHocRepo.CountBuoiHocChuaHuyAsync(id);
             if (soBuoi > 0)
             {
                 string msg = $"Không thể xóa lớp '{lop.TenLop}' vì đang có {soBuoi} buổi học trong lịch học. Vui lòng hủy các buổi học trước.";
@@ -410,8 +319,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            _context.LopHocs.Remove(lop);
-            await _context.SaveChangesAsync();
+            await _lopHocRepo.DeleteAsync(id);
 
             if (isAjax) return Json(new { success = true, message = $"Đã xóa lớp học '{lop.TenLop}' thành công." });
             TempData["Success"] = "Đã xóa lớp học thành công.";

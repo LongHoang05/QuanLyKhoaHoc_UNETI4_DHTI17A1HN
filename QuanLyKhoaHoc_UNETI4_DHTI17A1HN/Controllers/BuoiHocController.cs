@@ -1,25 +1,36 @@
 // ========================================================
 // Họ và tên: Nguyễn Tùng Dương
 // Mã sinh viên: 23103100003
-// Phụ trách: Module 5 - Lịch học, Kết quả học tập, Dashboard và Thống kê
+// Phụ trách: Module 5 - Buổi học, Điểm danh, Kết quả học tập & Thống kê báo cáo
+// Áp dụng: Repository Pattern theo hướng dẫn UNETI
+// Controller không truy vấn trực tiếp DbContext / LINQ
 // ========================================================
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 {
     [SessionAuthorize("Admin", "GiaoVu")]
     public class BuoiHocController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IBuoiHocRepository _buoiHocRepo;
+        private readonly ILopHocRepository _lopHocRepo;
+        private readonly IDangKyHocRepository _dangKyHocRepo;
+        private readonly IGiangVienRepository _giangVienRepo;
 
-        public BuoiHocController(ApplicationDbContext context)
+        public BuoiHocController(
+            IBuoiHocRepository buoiHocRepo,
+            ILopHocRepository lopHocRepo,
+            IDangKyHocRepository dangKyHocRepo,
+            IGiangVienRepository giangVienRepo)
         {
-            _context = context;
+            _buoiHocRepo = buoiHocRepo;
+            _lopHocRepo = lopHocRepo;
+            _dangKyHocRepo = dangKyHocRepo;
+            _giangVienRepo = giangVienRepo;
         }
 
         public async Task<IActionResult> Index(int? maLop, string? phong, string? trangThai, string? search, int page = 1)
@@ -29,74 +40,36 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             {
                 return RedirectToAction("TienTrinh", "CongHocVien", new { tab = "tkb" });
             }
+
             int pageSize = 8;
-            var query = _context.BuoiHocs
-                .Include(b => b.LopHoc)
-                .ThenInclude(l => l!.ChuongTrinhDaoTao)
-                .AsQueryable();
 
-            // 1. Kiểm tra xung đột trùng lịch bằng LINQ trên các ca học chưa hủy (Mục 9.2)
-            var allActive = await _context.BuoiHocs.Where(b => b.TrangThai != "Đã hủy").ToListAsync();
-            var conflictIds = new HashSet<int>();
-            for (int i = 0; i < allActive.Count; i++)
-            {
-                for (int j = i + 1; j < allActive.Count; j++)
-                {
-                    var b1 = allActive[i];
-                    var b2 = allActive[j];
-                    if ((b1.PhongHoc == b2.PhongHoc || b1.GiangVien == b2.GiangVien || b1.MaLopHoc == b2.MaLopHoc) &&
-                        (b1.ThoiGianBatDau < b2.ThoiGianKetThuc && b1.ThoiGianKetThuc > b2.ThoiGianBatDau))
-                    {
-                        conflictIds.Add(b1.MaBuoiHoc);
-                        conflictIds.Add(b2.MaBuoiHoc);
-                    }
-                }
-            }
+            // 1. Kiểm tra xung đột trùng lịch qua Repository
+            var (conflictIds, soLoiTrung) = await _buoiHocRepo.GetConflictSessionsAsync();
             ViewBag.ConflictIds = conflictIds;
-            ViewBag.SoLoiTrung = conflictIds.Count;
+            ViewBag.SoLoiTrung = soLoiTrung;
 
-            // 2. Thống kê KPI tổng quan (3 Card đầu trang)
-            ViewBag.TotalSessions = await _context.BuoiHocs.CountAsync();
-            ViewBag.CompletedSessions = await _context.BuoiHocs.CountAsync(b => b.TrangThai == "Đã hoàn thành");
-            ViewBag.ScheduledSessions = await _context.BuoiHocs.CountAsync(b => b.TrangThai == "Đã lên lịch");
-            ViewBag.CanceledSessions = await _context.BuoiHocs.CountAsync(b => b.TrangThai == "Đã hủy");
+            // 2. Thống kê KPI qua Repository
+            var (tongSoBuoi, daHoanThanh, daLenLich, daHuy) = await _buoiHocRepo.GetThongKeBuoiHocAsync();
+            ViewBag.TotalSessions = tongSoBuoi;
+            ViewBag.CompletedSessions = daHoanThanh;
+            ViewBag.ScheduledSessions = daLenLich;
+            ViewBag.CanceledSessions = daHuy;
 
-            // 3. Áp dụng bộ lọc
-            if (maLop.HasValue && maLop.Value > 0)
-            {
-                query = query.Where(b => b.MaLopHoc == maLop.Value);
-            }
+            // 3. Phân trang & Lọc LINQ qua Repository
+            var (buoiHocs, totalRecords) = await _buoiHocRepo.GetPagedAsync(
+                search,
+                maLop,
+                phong,
+                trangThai,
+                null,
+                null,
+                "thoigian_desc",
+                page,
+                pageSize);
 
-            if (!string.IsNullOrWhiteSpace(phong))
-            {
-                query = query.Where(b => b.PhongHoc == phong);
-            }
-
-            if (!string.IsNullOrWhiteSpace(trangThai))
-            {
-                query = query.Where(b => b.TrangThai == trangThai);
-            }
-
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                string s = search.ToLower().Trim();
-                query = query.Where(b => (b.GiangVien != null && b.GiangVien.ToLower().Contains(s)) ||
-                                         (b.PhongHoc != null && b.PhongHoc.ToLower().Contains(s)) ||
-                                         (b.NoiDung != null && b.NoiDung.ToLower().Contains(s)) ||
-                                         (b.LopHoc != null && b.LopHoc.TenLop.ToLower().Contains(s)));
-            }
-
-            // 4. Phân trang
-            int totalRecords = await query.CountAsync();
             int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
             if (page < 1) page = 1;
             if (page > totalPages && totalPages > 0) page = totalPages;
-
-            var buoiHocs = await query
-                .OrderByDescending(b => b.ThoiGianBatDau)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
 
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
@@ -106,10 +79,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             ViewBag.SelectedTrangThai = trangThai;
             ViewBag.Search = search;
 
-            // 5. Dữ liệu nạp Dropdowns & Thời khóa biểu tuần
-            ViewBag.LopHocList = await _context.LopHocs.ToListAsync();
-            var allSessions = await _context.BuoiHocs.Include(b => b.LopHoc).ToListAsync();
+            // 4. Dữ liệu nạp Dropdowns & Lịch tuần
+            ViewBag.LopHocList = await _lopHocRepo.GetAllAsync();
+            var allSessions = await _buoiHocRepo.GetAllAsync();
             ViewBag.AllBuoiHocs = allSessions;
+
             var activeSessions = allSessions.Where(b => b.TrangThai != "Đã hủy").ToList();
             ViewBag.SoThi = activeSessions.Count(b => b.NoiDung != null && (b.NoiDung.ToLower().Contains("thi") || b.NoiDung.ToLower().Contains("kiểm tra")));
             ViewBag.SoChinhKhoa = activeSessions.Count(b => b.NoiDung == null || (!b.NoiDung.ToLower().Contains("thi") && !b.NoiDung.ToLower().Contains("kiểm tra")));
@@ -132,11 +106,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             ModelState.Remove("LopHoc");
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
 
-            // 1. Kiểm tra lớp có ít nhất 1 đăng ký "Đã đóng học phí" hoặc "Đang học" hoặc "Đã duyệt" không? (Mục 9.2)
-            bool coHocVien = _context.DangKyHocs
-                .Any(dk => dk.MaLopHoc == buoiHoc.MaLopHoc && (dk.TrangThai == "Đã đóng học phí" || dk.TrangThai == "Đang học" || dk.TrangThai == "Đã duyệt"));
-            
-            if (!coHocVien)
+            // 1. Kiểm tra lớp có ít nhất 1 đăng ký hợp lệ không? (Mục 9.2)
+            int currentEnrolled = await _dangKyHocRepo.CountEnrolledInLopAsync(buoiHoc.MaLopHoc);
+            if (currentEnrolled == 0)
             {
                 ModelState.AddModelError("", "Lớp này chưa có học viên nào được duyệt hoặc đóng học phí, không được xếp lịch.");
             }
@@ -152,24 +124,23 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
 
             // 3. Kiểm tra số buổi học vượt quy định (Mục 9.2)
-            var lopHoc = await _context.LopHocs.FindAsync(buoiHoc.MaLopHoc);
+            var lopHoc = await _lopHocRepo.GetByIdAsync(buoiHoc.MaLopHoc);
             if (lopHoc != null)
             {
-                int soBuoiChuaHuy = _context.BuoiHocs
-                    .Count(b => b.MaLopHoc == buoiHoc.MaLopHoc && b.TrangThai != "Đã hủy");
-                
+                int soBuoiChuaHuy = await _buoiHocRepo.CountBuoiHocChuaHuyAsync(buoiHoc.MaLopHoc);
                 if (soBuoiChuaHuy >= lopHoc.SoBuoiHoc)
                 {
                     ModelState.AddModelError("", $"Lớp này đã xếp đủ {lopHoc.SoBuoiHoc} buổi học theo quy định.");
                 }
             }
 
-            // 4. KIỂM TRA TRÙNG LỊCH BẰNG LINQ (Lớp, Phòng, Giảng viên - Mục 9.2)
-            bool isTrungLich = _context.BuoiHocs.Any(b =>
-                b.TrangThai != "Đã hủy" &&
-                (b.MaLopHoc == buoiHoc.MaLopHoc || b.PhongHoc == buoiHoc.PhongHoc || b.GiangVien == buoiHoc.GiangVien) &&
-                (buoiHoc.ThoiGianBatDau < b.ThoiGianKetThuc && buoiHoc.ThoiGianKetThuc > b.ThoiGianBatDau)
-            );
+            // 4. KIỂM TRA TRÙNG LỊCH BẰNG REPOSITORY (Lớp, Phòng, Giảng viên - Mục 9.2)
+            bool isTrungLich = await _buoiHocRepo.KiemTraTrungLichBuoiHocAsync(
+                buoiHoc.MaLopHoc,
+                buoiHoc.PhongHoc,
+                buoiHoc.GiangVien,
+                buoiHoc.ThoiGianBatDau,
+                buoiHoc.ThoiGianKetThuc);
 
             if (isTrungLich)
             {
@@ -179,8 +150,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             if (ModelState.IsValid)
             {
                 if (string.IsNullOrEmpty(buoiHoc.TrangThai)) buoiHoc.TrangThai = "Đã lên lịch";
-                _context.Add(buoiHoc);
-                await _context.SaveChangesAsync();
+                await _buoiHocRepo.AddAsync(buoiHoc);
+
                 if (isAjax)
                 {
                     return Json(new { success = true, message = "Xếp lịch học thành công!" });
@@ -188,7 +159,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 TempData["Success"] = "Xếp lịch học thành công!";
                 return RedirectToAction(nameof(Index));
             }
-            
+
             string errorMsg = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
             if (isAjax)
             {
@@ -206,7 +177,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             ModelState.Remove("LopHoc");
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
 
-            var existing = await _context.BuoiHocs.FindAsync(buoiHoc.MaBuoiHoc);
+            var existing = await _buoiHocRepo.GetByIdAsync(buoiHoc.MaBuoiHoc);
             if (existing == null)
             {
                 if (isAjax) return Json(new { success = false, message = "Không tìm thấy buổi học cần chỉnh sửa." });
@@ -221,13 +192,14 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Kiểm tra trùng lịch ngoại trừ chính buổi học này (Mục 9.2)
-            bool isTrungLich = await _context.BuoiHocs.AnyAsync(b =>
-                b.MaBuoiHoc != buoiHoc.MaBuoiHoc &&
-                b.TrangThai != "Đã hủy" &&
-                (b.MaLopHoc == buoiHoc.MaLopHoc || b.PhongHoc == buoiHoc.PhongHoc || b.GiangVien == buoiHoc.GiangVien) &&
-                (buoiHoc.ThoiGianBatDau < b.ThoiGianKetThuc && buoiHoc.ThoiGianKetThuc > b.ThoiGianBatDau)
-            );
+            // Kiểm tra trùng lịch ngoại trừ chính buổi học này qua Repository (Mục 9.2)
+            bool isTrungLich = await _buoiHocRepo.KiemTraTrungLichBuoiHocAsync(
+                buoiHoc.MaLopHoc,
+                buoiHoc.PhongHoc,
+                buoiHoc.GiangVien,
+                buoiHoc.ThoiGianBatDau,
+                buoiHoc.ThoiGianKetThuc,
+                buoiHoc.MaBuoiHoc);
 
             if (isTrungLich)
             {
@@ -245,7 +217,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             existing.GhiChu = buoiHoc.GhiChu;
             existing.TrangThai = buoiHoc.TrangThai ?? existing.TrangThai;
 
-            await _context.SaveChangesAsync();
+            await _buoiHocRepo.UpdateAsync(existing);
+
             if (isAjax) return Json(new { success = true, message = "Cập nhật buổi học thành công!" });
             TempData["Success"] = "Cập nhật buổi học thành công!";
             return RedirectToAction(nameof(Index));
@@ -257,7 +230,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         public async Task<IActionResult> DeletePost(int id)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-            var buoiHoc = await _context.BuoiHocs.FindAsync(id);
+            var buoiHoc = await _buoiHocRepo.GetByIdAsync(id);
             if (buoiHoc == null)
             {
                 if (isAjax) return Json(new { success = false, message = "Không tìm thấy buổi học để xóa." });
@@ -265,8 +238,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            _context.BuoiHocs.Remove(buoiHoc);
-            await _context.SaveChangesAsync();
+            await _buoiHocRepo.DeleteAsync(id);
+
             if (isAjax) return Json(new { success = true, message = "Đã xóa vĩnh viễn buổi học khỏi hệ thống." });
             TempData["Success"] = "Đã xóa vĩnh viễn buổi học khỏi hệ thống.";
             return RedirectToAction(nameof(Index));
@@ -277,7 +250,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         public async Task<IActionResult> HoanThanh(int id)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-            var buoiHoc = await _context.BuoiHocs.FindAsync(id);
+            var buoiHoc = await _buoiHocRepo.GetByIdAsync(id);
             if (buoiHoc == null)
             {
                 if (isAjax) return Json(new { success = false, message = "Không tìm thấy buổi học." });
@@ -290,7 +263,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 TempData["Error"] = "Không thể hoàn thành buổi học đã hủy.";
                 return RedirectToAction(nameof(Index));
             }
-            
+
             if (buoiHoc.ThoiGianKetThuc > DateTime.Now)
             {
                 if (isAjax) return Json(new { success = false, message = "Buổi học chưa kết thúc (hoặc chưa diễn ra), không thể đánh dấu hoàn thành." });
@@ -299,8 +272,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
 
             buoiHoc.TrangThai = "Đã hoàn thành";
-            await _context.SaveChangesAsync();
-            
+            await _buoiHocRepo.UpdateAsync(buoiHoc);
+
             if (isAjax) return Json(new { success = true, message = "Đã cập nhật trạng thái hoàn thành thành công." });
             TempData["Success"] = "Đã cập nhật trạng thái hoàn thành thành công.";
             return RedirectToAction(nameof(Index));
@@ -310,7 +283,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         public async Task<IActionResult> Huy(int id)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-            var buoiHoc = await _context.BuoiHocs.FindAsync(id);
+            var buoiHoc = await _buoiHocRepo.GetByIdAsync(id);
             if (buoiHoc == null)
             {
                 if (isAjax) return Json(new { success = false, message = "Không tìm thấy buổi học." });
@@ -318,8 +291,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
 
             buoiHoc.TrangThai = "Đã hủy";
-            await _context.SaveChangesAsync();
-            
+            await _buoiHocRepo.UpdateAsync(buoiHoc);
+
             if (isAjax) return Json(new { success = true, message = "Đã hủy ca học thành công." });
             TempData["Success"] = "Đã hủy ca học thành công.";
             return RedirectToAction(nameof(Index));

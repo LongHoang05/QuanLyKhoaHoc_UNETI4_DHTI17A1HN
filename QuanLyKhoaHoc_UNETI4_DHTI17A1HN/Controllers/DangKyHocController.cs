@@ -1,32 +1,39 @@
 // ========================================================
 // Họ và tên: Nguyễn Hoàng Long
 // Mã sinh viên: 23103100046
-// Phụ trách: Module 4 - Tiếp nhận, Xét duyệt đăng ký và Thu học phí
+// Phụ trách: Module 4 - Đăng ký khóa học, Quản lý hồ sơ & Thu học phí
+// Áp dụng: Repository Pattern theo hướng dẫn UNETI
+// Controller không truy vấn trực tiếp DbContext / LINQ
 // ========================================================
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 {
     [SessionAuthorize("Admin", "GiaoVu")]
     public class DangKyHocController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IDangKyHocRepository _dangKyHocRepo;
+        private readonly ILopHocRepository _lopHocRepo;
+        private readonly IChuongTrinhDaoTaoRepository _ctdtRepo;
+        private readonly IBuoiHocRepository _buoiHocRepo;
 
-        public DangKyHocController(ApplicationDbContext context)
+        public DangKyHocController(
+            IDangKyHocRepository dangKyHocRepo,
+            ILopHocRepository lopHocRepo,
+            IChuongTrinhDaoTaoRepository ctdtRepo,
+            IBuoiHocRepository buoiHocRepo)
         {
-            _context = context;
+            _dangKyHocRepo = dangKyHocRepo;
+            _lopHocRepo = lopHocRepo;
+            _ctdtRepo = ctdtRepo;
+            _buoiHocRepo = buoiHocRepo;
         }
 
-        // --- DANH SÁCH HỒ SƠ ĐĂNG KÝ (LINQ MULTI-FILTER, SEARCH, PAGINATION, AJAX) ---
+        // --- DANH SÁCH HỒ SƠ ĐĂNG KÝ (LINQ MULTI-FILTER, SEARCH, PAGINATION QUA REPOSITORY) ---
         public async Task<IActionResult> Index(
             string? search,
             int? maChuongTrinh,
@@ -49,98 +56,43 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction("TienTrinh", "CongHocVien", new { tab = "dangky" });
             }
 
-            var query = _context.DangKyHocs
-                .Include(d => d.HocVien)
-                .Include(d => d.LopHoc)
-                    .ThenInclude(l => l!.ChuongTrinhDaoTao)
-                .AsNoTracking()
-                .AsQueryable();
+            // Gọi Repository thực hiện toàn bộ câu lệnh truy vấn LINQ
+            var (items, totalItems) = await _dangKyHocRepo.GetPagedAsync(
+                search,
+                maChuongTrinh,
+                maLop,
+                trangThai,
+                tuNgay,
+                denNgay,
+                sortBy,
+                page,
+                pageSize);
 
-            // 1. Tìm kiếm theo tên học viên, email, số điện thoại, tên lớp
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                string kw = search.Trim().ToLower();
-                query = query.Where(d =>
-                    (d.HocVien != null && d.HocVien.HoTen.ToLower().Contains(kw)) ||
-                    (d.HocVien != null && d.HocVien.Email.ToLower().Contains(kw)) ||
-                    (d.HocVien != null && d.HocVien.SoDienThoai != null && d.HocVien.SoDienThoai.Contains(kw)) ||
-                    (d.LopHoc != null && d.LopHoc.TenLop.ToLower().Contains(kw)) ||
-                    ("dk" + d.MaDangKy.ToString()).Contains(kw));
-            }
-
-            // 2. Lọc theo chương trình đào tạo
-            if (maChuongTrinh.HasValue)
-            {
-                query = query.Where(d => d.LopHoc != null && d.LopHoc.MaChuongTrinh == maChuongTrinh.Value);
-            }
-
-            // 3. Lọc theo lớp học
-            if (maLop.HasValue)
-            {
-                query = query.Where(d => d.MaLopHoc == maLop.Value);
-            }
-
-            // 4. Lọc theo trạng thái duyệt
-            if (!string.IsNullOrWhiteSpace(trangThai))
-            {
-                query = query.Where(d => d.TrangThai == trangThai);
-            }
-
-            // 5. Lọc theo khoảng ngày đăng ký
-            if (tuNgay.HasValue)
-            {
-                query = query.Where(d => d.NgayDangKy >= tuNgay.Value.Date);
-            }
-            if (denNgay.HasValue)
-            {
-                DateTime end = denNgay.Value.Date.AddDays(1).AddTicks(-1);
-                query = query.Where(d => d.NgayDangKy <= end);
-            }
-
-            // 6. Sắp xếp theo ngày đăng ký hoặc tên học viên
-            query = sortBy switch
-            {
-                "ngay_asc" => query.OrderBy(d => d.NgayDangKy),
-                "ten_asc" => query.OrderBy(d => d.HocVien != null ? d.HocVien.HoTen : ""),
-                "ten_desc" => query.OrderByDescending(d => d.HocVien != null ? d.HocVien.HoTen : ""),
-                _ => query.OrderByDescending(d => d.NgayDangKy)
-            };
-
-            // 3 KPI Cards (Toàn hệ thống)
-            ViewBag.ChoDuyetCount = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Chờ duyệt");
-            ViewBag.DaDuyetCount = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học");
-            ViewBag.TongDoanhThu = await _context.DangKyHocs.SumAsync(d => (double?)d.SoTienDaDong) ?? 0;
-
-            // Danh sách chương trình & lớp học cho dropdown filter
-            ViewBag.ChuongTrinhList = await _context.ChuongTrinhDaoTaos.OrderBy(c => c.TenChuongTrinh).ToListAsync();
-            ViewBag.LopHocList = await _context.LopHocs
-                .OrderByDescending(l => l.MaLopHoc)
-                .Select(l => new { l.MaLopHoc, l.TenLop, l.MaChuongTrinh })
-                .ToListAsync();
-
-            // Phân trang LINQ
-            int totalItems = await query.CountAsync();
-            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+            int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
             if (totalPages < 1) totalPages = 1;
             if (page < 1) page = 1;
             if (page > totalPages) page = totalPages;
 
-            var items = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            // Thống kê nhanh chỉ số qua Repository
+            var (choDuyetCount, daDuyetCount, tongDoanhThu) = await _dangKyHocRepo.GetThongKeNhanhAsync();
+            ViewBag.ChoDuyetCount = choDuyetCount;
+            ViewBag.DaDuyetCount = daDuyetCount;
+            ViewBag.TongDoanhThu = tongDoanhThu;
+
+            // Danh mục Dropdown
+            ViewBag.ChuongTrinhList = await _ctdtRepo.GetAllAsync();
+            ViewBag.LopHocList = await _lopHocRepo.GetAllAsync();
 
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
             ViewBag.TotalItems = totalItems;
             ViewBag.Search = search;
-            ViewBag.MaChuongTrinh = maChuongTrinh;
-            ViewBag.MaLop = maLop;
-            ViewBag.TrangThai = trangThai;
+            ViewBag.SelectedMaChuongTrinh = maChuongTrinh;
+            ViewBag.SelectedMaLop = maLop;
+            ViewBag.SelectedTrangThai = trangThai;
             ViewBag.TuNgay = tuNgay?.ToString("yyyy-MM-dd");
             ViewBag.DenNgay = denNgay?.ToString("yyyy-MM-dd");
             ViewBag.SortBy = sortBy;
-            ViewBag.PageSize = pageSize;
 
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
@@ -150,297 +102,225 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             return View(items);
         }
 
-        // --- CHI TIẾT ĐƠN ĐĂNG KÝ (AJAX JSON) ---
+        // --- AJAX: LẤY DANH SÁCH LỚP HỌC THEO CHƯƠNG TRÌNH ĐÀO TẠO ---
         [HttpGet]
-        public async Task<IActionResult> GetDetailsJson(int id)
+        public async Task<IActionResult> GetLopByChuongTrinh(int maChuongTrinh)
         {
-            var dk = await _context.DangKyHocs
-                .Include(d => d.HocVien)
-                .Include(d => d.LopHoc)
-                    .ThenInclude(l => l!.ChuongTrinhDaoTao)
-                .FirstOrDefaultAsync(d => d.MaDangKy == id);
-
-            if (dk == null) return NotFound(new { success = false, message = "Không tìm thấy hồ sơ đăng ký." });
-
-            int currentEnrolled = await _context.DangKyHocs.CountAsync(d =>
-                d.MaLopHoc == dk.MaLopHoc &&
-                (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"));
-
-            return Json(new
-            {
-                success = true,
-                data = new
+            var allLops = await _lopHocRepo.GetAllAsync();
+            var lops = allLops
+                .Where(l => l.MaChuongTrinh == maChuongTrinh)
+                .Select(l => new
                 {
-                    maDangKy = dk.MaDangKy,
-                    hoTen = dk.HocVien?.HoTen ?? "N/A",
-                    email = dk.HocVien?.Email ?? "N/A",
-                    soDienThoai = dk.HocVien?.SoDienThoai ?? "N/A",
-                    gioiTinh = dk.HocVien?.GioiTinh ?? "N/A",
-                    ngaySinh = dk.HocVien?.NgaySinh?.ToString("dd/MM/yyyy") ?? "N/A",
-                    diaChi = dk.HocVien?.DiaChi ?? "N/A",
-                    trinhDo = dk.HocVien?.TrinhDoHocVan ?? "N/A",
-                    ngheNghiep = dk.HocVien?.NgheNghiep ?? "N/A",
-                    tenLop = dk.LopHoc?.TenLop ?? "N/A",
-                    chuongTrinh = dk.LopHoc?.ChuongTrinhDaoTao?.TenChuongTrinh ?? "N/A",
-                    giangVien = dk.LopHoc?.TenGiangVien ?? "N/A",
-                    hocPhi = dk.LopHoc?.HocPhi ?? 0,
-                    siSoToiDa = dk.LopHoc?.SiSoToiDa ?? 0,
-                    currentEnrolled = currentEnrolled,
-                    ngayKhaiGiang = dk.LopHoc?.NgayKhaiGiang.ToString("dd/MM/yyyy") ?? "N/A",
-                    ngayDangKy = dk.NgayDangKy.ToString("dd/MM/yyyy HH:mm"),
-                    ngayXuLy = dk.NgayXuLy?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa xử lý",
-                    ngayDongHocPhi = dk.NgayDongHocPhi?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa nộp",
-                    soTienDaDong = dk.SoTienDaDong,
-                    trangThai = dk.TrangThai,
-                    ghiChu = dk.GhiChu,
-                    nhanXetGiaoVu = dk.NhanXetGiaoVu
-                }
-            });
+                    maLop = l.MaLopHoc,
+                    tenLop = l.TenLop,
+                    hocPhi = l.HocPhi,
+                    trangThai = l.TrangThai,
+                    siSoToiDa = l.SiSoToiDa
+                })
+                .ToList();
+
+            return Json(lops);
         }
 
-        // --- PHÊ DUYỆT ĐĂNG KÝ (KIỂM SOÁT SĨ SỐ TỐI ĐA - MỤC 8.2 & 8.3 & 8.6) ---
+        // --- DUYỆT HỒ SƠ ĐĂNG KÝ HỌC (Mục 7.2) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DuyetDangKyPost(int id, string? nhanXet)
+        public async Task<IActionResult> Duyet(int id)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            var dk = await _dangKyHocRepo.GetByIdWithDetailsAsync(id);
 
-            var dk = await _context.DangKyHocs
-                .Include(d => d.LopHoc)
-                .Include(d => d.HocVien)
-                .FirstOrDefaultAsync(d => d.MaDangKy == id);
-
-            if (dk == null)
-            {
-                if (isAjax) return Json(new { success = false, message = "Không tìm thấy đơn đăng ký." });
-                return RedirectToAction(nameof(Index));
-            }
-
-            // Chỉ đăng ký Chờ duyệt mới được duyệt (Mục 8.2)
-            if (dk.TrangThai != "Chờ duyệt")
-            {
-                if (isAjax) return Json(new { success = false, message = "Chỉ đơn đăng ký ở trạng thái 'Chờ duyệt' mới được xét duyệt." });
-                return RedirectToAction(nameof(Index));
-            }
-
-            // Học viên phải còn hoạt động (Mục 8.3)
-            if (dk.HocVien != null && !dk.HocVien.TrangThai)
-            {
-                if (isAjax) return Json(new { success = false, message = "Học viên đang bị khóa, không thể duyệt đăng ký." });
-                return RedirectToAction(nameof(Index));
-            }
-
-            var lop = dk.LopHoc;
-            if (lop == null)
-            {
-                if (isAjax) return Json(new { success = false, message = "Lớp học liên kết không tồn tại." });
-                return RedirectToAction(nameof(Index));
-            }
-
-            // Kiểm tra sĩ số hiện tại của lớp: Đã duyệt + Đã đóng học phí + Đang học (Mục 8.3 & 8.6)
-            int enrolledCount = await _context.DangKyHocs.CountAsync(d =>
-                d.MaLopHoc == lop.MaLopHoc &&
-                d.MaDangKy != id &&
-                (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"));
-
-            if (enrolledCount >= lop.SiSoToiDa)
-            {
-                string msg = $"Không thể duyệt đơn này! Lớp '{lop.TenLop}' đã đủ chỉ tiêu sĩ số ({enrolledCount}/{lop.SiSoToiDa} học viên).";
-                if (isAjax) return Json(new { success = false, message = msg });
-                TempData["Error"] = msg;
-                return RedirectToAction(nameof(Index));
-            }
-
-            dk.TrangThai = "Đã duyệt";
-            dk.NgayXuLy = DateTime.Now;
-            dk.NhanXetGiaoVu = string.IsNullOrWhiteSpace(nhanXet) ? "Đã duyệt hồ sơ đủ điều kiện nhập học." : nhanXet;
-
-            // Nếu đạt đủ sĩ số tối đa, tự động chuyển lớp sang 'Đã đóng đăng ký' (Mục 8.6)
-            if (enrolledCount + 1 >= lop.SiSoToiDa)
-            {
-                lop.TrangThai = "Đã đóng đăng ký";
-            }
-
-            await _context.SaveChangesAsync();
-
-            string okMsg = $"Đã duyệt hồ sơ thành công cho học viên! (Sĩ số hiện tại: {enrolledCount + 1}/{lop.SiSoToiDa})";
-            if (isAjax) return Json(new { success = true, message = okMsg });
-            TempData["Success"] = okMsg;
-            return RedirectToAction(nameof(Index));
-        }
-
-        // --- TỪ CHỐI ĐĂNG KÝ (MỤC 8.2) ---
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> TuChoiDangKyPost(int id, string? lyDo)
-        {
-            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-
-            var dk = await _context.DangKyHocs.FindAsync(id);
             if (dk == null)
             {
                 if (isAjax) return Json(new { success = false, message = "Không tìm thấy hồ sơ đăng ký." });
+                TempData["Error"] = "Không tìm thấy hồ sơ đăng ký.";
                 return RedirectToAction(nameof(Index));
             }
 
-            if (dk.TrangThai != "Chờ duyệt")
+            // Kiểm tra sĩ số tối đa của lớp học trước khi duyệt
+            if (dk.LopHoc != null)
             {
-                if (isAjax) return Json(new { success = false, message = "Chỉ đơn ở trạng thái 'Chờ duyệt' mới có thể từ chối." });
-                return RedirectToAction(nameof(Index));
+                int currentEnrolled = await _dangKyHocRepo.CountEnrolledInLopAsync(dk.MaLopHoc);
+                if (currentEnrolled >= dk.LopHoc.SiSoToiDa)
+                {
+                    string msg = $"Không thể duyệt hồ sơ #{id}! Lớp '{dk.LopHoc.TenLop}' đã đủ sĩ số tối đa ({dk.LopHoc.SiSoToiDa} học viên).";
+                    if (isAjax) return Json(new { success = false, message = msg });
+                    TempData["Error"] = msg;
+                    return RedirectToAction(nameof(Index));
+                }
             }
 
-            dk.TrangThai = "Từ chối";
+            // Cập nhật trạng thái
+            dk.TrangThai = "Đã duyệt";
             dk.NgayXuLy = DateTime.Now;
-            dk.NhanXetGiaoVu = string.IsNullOrWhiteSpace(lyDo) ? "Hồ sơ không đáp ứng yêu cầu tuyển sinh." : lyDo;
+            dk.NhanXetGiaoVu = HttpContext.Session.GetString("HoTen") ?? "Ban Giáo vụ";
 
-            await _context.SaveChangesAsync();
+            await _dangKyHocRepo.UpdateAsync(dk);
 
-            if (isAjax) return Json(new { success = true, message = "Đã từ chối đơn đăng ký." });
-            TempData["Success"] = "Đã từ chối đơn đăng ký.";
+            string successMsg = $"Đã duyệt hồ sơ đăng ký #{id} của học viên {dk.HocVien?.HoTen} thành công!";
+            if (isAjax) return Json(new { success = true, message = successMsg });
+            TempData["Success"] = successMsg;
             return RedirectToAction(nameof(Index));
         }
 
-        // --- GHI NHẬN ĐÓNG HỌC PHÍ (MỤC 8.4) ---
+        // --- XÁC NHẬN THU HỌC PHÍ (Mục 7.2 & 7.3) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ThuHocPhiPost(int id, decimal soTien, string? ghiChu)
+        public async Task<IActionResult> XacNhanHocPhi(int id, decimal soTien, string? ghiChu)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-
-            var dk = await _context.DangKyHocs
-                .Include(d => d.LopHoc)
-                .Include(d => d.HocVien)
-                .FirstOrDefaultAsync(d => d.MaDangKy == id);
+            var dk = await _dangKyHocRepo.GetByIdWithDetailsAsync(id);
 
             if (dk == null)
             {
-                if (isAjax) return Json(new { success = false, message = "Không tìm thấy hồ sơ." });
-                return RedirectToAction(nameof(Index));
-            }
-
-            // Chỉ đăng ký 'Đã duyệt' hoặc 'Đã đóng học phí' mới được ghi nhận học phí (Mục 8.4)
-            if (dk.TrangThai != "Đã duyệt" && dk.TrangThai != "Đã đóng học phí")
-            {
-                string msg = $"Chỉ đơn ở trạng thái 'Đã duyệt' mới được ghi nhận học phí (Trạng thái hiện tại: {dk.TrangThai}).";
-                if (isAjax) return Json(new { success = false, message = msg });
-                TempData["Error"] = msg;
+                if (isAjax) return Json(new { success = false, message = "Không tìm thấy hồ sơ đăng ký." });
+                TempData["Error"] = "Không tìm thấy hồ sơ.";
                 return RedirectToAction(nameof(Index));
             }
 
             if (soTien <= 0)
             {
                 if (isAjax) return Json(new { success = false, message = "Số tiền đóng học phí phải lớn hơn 0 VNĐ." });
+                TempData["Error"] = "Số tiền phải lớn hơn 0.";
                 return RedirectToAction(nameof(Index));
             }
 
-            decimal hocPhiGoc = dk.LopHoc?.HocPhi ?? 0m;
-            if (hocPhiGoc > 0 && soTien > hocPhiGoc)
+            if (dk.LopHoc != null && soTien > dk.LopHoc.HocPhi)
             {
-                if (isAjax) return Json(new { success = false, message = $"Số tiền nộp ({soTien:N0} đ) vượt quá mức học phí của lớp ({hocPhiGoc:N0} đ)." });
+                if (isAjax) return Json(new { success = false, message = $"Số tiền nộp ({soTien:N0} đ) vượt quá mức học phí quy định của lớp ({dk.LopHoc.HocPhi:N0} đ)." });
+                TempData["Error"] = "Số tiền nộp vượt quá học phí quy định.";
                 return RedirectToAction(nameof(Index));
+            }
+
+            // Kiểm tra sĩ số nếu hồ sơ trước đó chưa nằm trong nhóm đã duyệt
+            if (dk.TrangThai == "Chờ duyệt" && dk.LopHoc != null)
+            {
+                int enrolledCount = await _dangKyHocRepo.CountEnrolledInLopAsync(dk.MaLopHoc);
+                if (enrolledCount >= dk.LopHoc.SiSoToiDa)
+                {
+                    string msg = $"Không thể thu tiền! Lớp '{dk.LopHoc.TenLop}' đã đạt sĩ số tối đa ({dk.LopHoc.SiSoToiDa} học viên).";
+                    if (isAjax) return Json(new { success = false, message = msg });
+                    TempData["Error"] = msg;
+                    return RedirectToAction(nameof(Index));
+                }
             }
 
             dk.SoTienDaDong = soTien;
             dk.NgayDongHocPhi = DateTime.Now;
+            dk.TrangThai = "Đã đóng học phí";
+            dk.GhiChu = string.IsNullOrWhiteSpace(ghiChu) 
+                ? $"Xác nhận nộp đủ {soTien:N0} VNĐ bởi {HttpContext.Session.GetString("HoTen") ?? "Giáo vụ"}" 
+                : ghiChu.Trim();
 
-            if (soTien >= hocPhiGoc)
+            if (dk.NgayXuLy == null)
             {
-                dk.TrangThai = "Đã đóng học phí";
+                dk.NgayXuLy = DateTime.Now;
+                dk.NhanXetGiaoVu = HttpContext.Session.GetString("HoTen") ?? "Ban Giáo vụ";
             }
 
-            if (!string.IsNullOrWhiteSpace(ghiChu))
-            {
-                dk.NhanXetGiaoVu = (string.IsNullOrWhiteSpace(dk.NhanXetGiaoVu) ? "" : dk.NhanXetGiaoVu + " | ") + "Thu phí: " + ghiChu;
-            }
+            await _dangKyHocRepo.UpdateAsync(dk);
 
-            await _context.SaveChangesAsync();
-
-            string msgOk = $"Ghi nhận thu {soTien:N0} đ thành công! Trạng thái: {dk.TrangThai}";
-            if (isAjax) return Json(new { success = true, message = msgOk });
-            TempData["Success"] = msgOk;
+            string sMsg = $"Xác nhận thu học phí {soTien:N0} đ cho học viên {dk.HocVien?.HoTen} thành công!";
+            if (isAjax) return Json(new { success = true, message = sMsg });
+            TempData["Success"] = sMsg;
             return RedirectToAction(nameof(Index));
         }
 
-        // --- CHUYỂN TRẠNG THÁI SANG 'ĐANG HỌC' (MỤC 8.5) ---
+        // --- TỪ CHỐI HỒ SƠ ĐĂNG KÝ (Mục 7.2) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> BatDauHocPost(int id)
+        public async Task<IActionResult> TuChoi(int id, string lyDo)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-
-            var dk = await _context.DangKyHocs
-                .Include(d => d.LopHoc)
-                .FirstOrDefaultAsync(d => d.MaDangKy == id);
+            var dk = await _dangKyHocRepo.GetByIdAsync(id);
 
             if (dk == null)
             {
-                if (isAjax) return Json(new { success = false, message = "Không tìm thấy hồ sơ." });
+                if (isAjax) return Json(new { success = false, message = "Không tìm thấy hồ sơ đăng ký." });
+                TempData["Error"] = "Không tìm thấy hồ sơ.";
                 return RedirectToAction(nameof(Index));
             }
 
-            // Phải là 'Đã đóng học phí' hoặc 'Đã duyệt'
-            if (dk.TrangThai != "Đã đóng học phí" && dk.TrangThai != "Đã duyệt")
+            if (string.IsNullOrWhiteSpace(lyDo))
             {
-                string msg = $"Chỉ học viên đã hoàn tất học phí mới được chuyển sang 'Đang học' (Trạng thái hiện tại: {dk.TrangThai}).";
-                if (isAjax) return Json(new { success = false, message = msg });
-                TempData["Error"] = msg;
+                if (isAjax) return Json(new { success = false, message = "Vui lòng nhập lý do từ chối hồ sơ." });
+                TempData["Error"] = "Lý do từ chối không được để trống.";
                 return RedirectToAction(nameof(Index));
             }
 
-            // Kiểm tra lớp đã có ít nhất một buổi học được lên lịch (Mục 8.5)
-            bool coLichHoc = await _context.BuoiHocs.AnyAsync(b => b.MaLopHoc == dk.MaLopHoc && b.TrangThai != "Đã hủy");
-            if (!coLichHoc)
-            {
-                string msg = "Không thể chuyển sang 'Đang học' vì lớp này chưa có buổi học nào được lên lịch!";
-                if (isAjax) return Json(new { success = false, message = msg });
-                TempData["Error"] = msg;
-                return RedirectToAction(nameof(Index));
-            }
+            dk.TrangThai = "Từ chối";
+            dk.GhiChu = $"[Từ chối bởi {HttpContext.Session.GetString("HoTen") ?? "Giáo vụ"} vào {DateTime.Now:dd/MM/yyyy HH:mm}]: {lyDo.Trim()}";
 
-            // Kiểm tra đã đến ngày khai giảng chưa (Mục 8.5)
-            if (dk.LopHoc != null && DateTime.Today < dk.LopHoc.NgayKhaiGiang.Date)
-            {
-                string msg = $"Chưa đến ngày khai giảng ({dk.LopHoc.NgayKhaiGiang:dd/MM/yyyy}), chưa thể chuyển sang trạng thái 'Đang học'!";
-                if (isAjax) return Json(new { success = false, message = msg });
-                TempData["Error"] = msg;
-                return RedirectToAction(nameof(Index));
-            }
+            await _dangKyHocRepo.UpdateAsync(dk);
 
-            dk.TrangThai = "Đang học";
-            await _context.SaveChangesAsync();
-
-            if (isAjax) return Json(new { success = true, message = "Đã cập nhật trạng thái học viên sang 'Đang học'!" });
-            TempData["Success"] = "Đã cập nhật trạng thái học viên sang 'Đang học'!";
+            if (isAjax) return Json(new { success = true, message = $"Đã từ chối hồ sơ #{id} thành công!" });
+            TempData["Success"] = $"Đã từ chối hồ sơ #{id} thành công!";
             return RedirectToAction(nameof(Index));
         }
 
-        // --- XÓA ĐƠN ĐĂNG KÝ (RÀNG BUỘC HỌC PHÍ) ---
+        // --- HỦY ĐĂNG KÝ (Mục 7.2) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeletePost(int id)
+        public async Task<IActionResult> HuyDangKy(int id, string lyDo)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            var dk = await _dangKyHocRepo.GetByIdWithDetailsAsync(id);
 
-            var dk = await _context.DangKyHocs.FindAsync(id);
             if (dk == null)
             {
-                if (isAjax) return Json(new { success = false, message = "Không tìm thấy đơn đăng ký." });
+                if (isAjax) return Json(new { success = false, message = "Không tìm thấy hồ sơ đăng ký." });
+                TempData["Error"] = "Không tìm thấy hồ sơ.";
                 return RedirectToAction(nameof(Index));
             }
 
-            if (dk.SoTienDaDong > 0)
+            // Ràng buộc nghiệp vụ: Không được tự ý hủy khi lớp đã có lịch học/đang diễn ra nếu không có sự đồng ý của Admin
+            var vaiTro = HttpContext.Session.GetString("VaiTro");
+            bool coLichHoc = await _buoiHocRepo.HasLichHocLopChuaHuyAsync(dk.MaLopHoc);
+
+            if (coLichHoc && dk.TrangThai == "Đang học" && vaiTro != "Admin")
             {
-                string msg = $"Không thể xóa đơn đăng ký #{dk.MaDangKy} vì học viên đã đóng {dk.SoTienDaDong:N0} đ. Vui lòng hoàn phí hoặc chuyển sang trạng thái 'Đã hủy'.";
+                string warnMsg = "Lớp học đã lên lịch và đang học. Chỉ Quản trị viên (Admin) mới có quyền hủy hồ sơ trong giai đoạn này.";
+                if (isAjax) return Json(new { success = false, message = warnMsg });
+                TempData["Error"] = warnMsg;
+                return RedirectToAction(nameof(Index));
+            }
+
+            dk.TrangThai = "Đã hủy";
+            dk.GhiChu = $"[Hủy bởi {HttpContext.Session.GetString("HoTen") ?? "Giáo vụ"} lúc {DateTime.Now:dd/MM/yyyy HH:mm}]: {(string.IsNullOrWhiteSpace(lyDo) ? "Người dùng yêu cầu" : lyDo.Trim())}";
+
+            await _dangKyHocRepo.UpdateAsync(dk);
+
+            if (isAjax) return Json(new { success = true, message = $"Đã hủy hồ sơ đăng ký #{id} thành công!" });
+            TempData["Success"] = $"Đã hủy hồ sơ đăng ký #{id} thành công!";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // --- XÓA HỒ SƠ ĐĂNG KÝ (DÀNH CHO ADMIN KIỂM SOÁT) ---
+        [HttpPost]
+        public async Task<IActionResult> Xoa(int id)
+        {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            var dk = await _dangKyHocRepo.GetByIdAsync(id);
+
+            if (dk == null)
+            {
+                if (isAjax) return Json(new { success = false, message = "Không tìm thấy hồ sơ cần xóa." });
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Chỉ cho xóa hẳn bản ghi khi hồ sơ chưa thu tiền hoặc đã hủy/từ chối
+            if (dk.TrangThai != "Chờ duyệt" && dk.TrangThai != "Từ chối" && dk.TrangThai != "Đã hủy")
+            {
+                string msg = $"Không thể xóa hồ sơ #{id} vì đang ở trạng thái '{dk.TrangThai}'. Vui lòng chuyển trạng thái sang 'Đã hủy' trước.";
                 if (isAjax) return Json(new { success = false, message = msg });
                 TempData["Error"] = msg;
                 return RedirectToAction(nameof(Index));
             }
 
-            _context.DangKyHocs.Remove(dk);
-            await _context.SaveChangesAsync();
+            await _dangKyHocRepo.DeleteAsync(id);
 
-            if (isAjax) return Json(new { success = true, message = "Đã xóa đơn đăng ký thành công!" });
-            TempData["Success"] = "Đã xóa đơn đăng ký thành công!";
+            if (isAjax) return Json(new { success = true, message = $"Đã xóa hồ sơ đăng ký #{id} khỏi hệ thống." });
+            TempData["Success"] = $"Đã xóa hồ sơ đăng ký #{id} khỏi hệ thống.";
             return RedirectToAction(nameof(Index));
         }
     }

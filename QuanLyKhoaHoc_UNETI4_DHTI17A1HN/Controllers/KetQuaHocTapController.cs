@@ -1,25 +1,36 @@
 // ========================================================
 // Họ và tên: Nguyễn Tùng Dương
 // Mã sinh viên: 23103100003
-// Phụ trách: Module 5 - Lịch học, Kết quả học tập, Dashboard và Thống kê
+// Phụ trách: Module 5 - Buổi học, Điểm danh, Kết quả học tập & Thống kê báo cáo
+// Áp dụng: Repository Pattern theo hướng dẫn UNETI
+// Controller không truy vấn trực tiếp DbContext / LINQ
 // ========================================================
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 {
     [SessionAuthorize("Admin", "GiaoVu")]
     public class KetQuaHocTapController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IKetQuaHocTapRepository _ketQuaRepo;
+        private readonly IDangKyHocRepository _dangKyHocRepo;
+        private readonly ILopHocRepository _lopHocRepo;
+        private readonly IBuoiHocRepository _buoiHocRepo;
 
-        public KetQuaHocTapController(ApplicationDbContext context)
+        public KetQuaHocTapController(
+            IKetQuaHocTapRepository ketQuaRepo,
+            IDangKyHocRepository dangKyHocRepo,
+            ILopHocRepository lopHocRepo,
+            IBuoiHocRepository buoiHocRepo)
         {
-            _context = context;
+            _ketQuaRepo = ketQuaRepo;
+            _dangKyHocRepo = dangKyHocRepo;
+            _lopHocRepo = lopHocRepo;
+            _buoiHocRepo = buoiHocRepo;
         }
 
         public async Task<IActionResult> Index(int? maLop, string? ketQua, string? search, string? sortBy, int page = 1)
@@ -29,35 +40,20 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             {
                 return RedirectToAction("TienTrinh", "CongHocVien", new { tab = "ketqua" });
             }
+
             int pageSize = 8;
-            var query = _context.KetQuaHocTaps
-                .Include(k => k.DangKyHoc)
-                    .ThenInclude(d => d!.HocVien)
-                .Include(k => k.DangKyHoc)
-                    .ThenInclude(d => d!.LopHoc)
-                .AsQueryable();
 
-            // 1. Áp dụng bộ lọc
-            if (maLop.HasValue && maLop.Value > 0)
-            {
-                query = query.Where(k => k.DangKyHoc != null && k.DangKyHoc.MaLopHoc == maLop.Value);
-            }
+            // 1. Phân trang & Lọc LINQ qua Repository
+            var (ketQuas, totalRecords) = await _ketQuaRepo.GetPagedAsync(
+                search,
+                maLop,
+                null,
+                ketQua,
+                page,
+                pageSize);
 
-            if (!string.IsNullOrWhiteSpace(ketQua))
-            {
-                query = query.Where(k => k.KetQua == ketQua);
-            }
-
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                string s = search.ToLower().Trim();
-                query = query.Where(k => (k.DangKyHoc != null && k.DangKyHoc.HocVien != null && k.DangKyHoc.HocVien.HoTen.ToLower().Contains(s)) || 
-                                         (k.DangKyHoc != null && k.DangKyHoc.HocVien != null && k.DangKyHoc.HocVien.MaHocVien.ToString().Contains(s)) ||
-                                         (k.DangKyHoc != null && k.DangKyHoc.LopHoc != null && k.DangKyHoc.LopHoc.TenLop.ToLower().Contains(s)));
-            }
-
-            // 2. Tính toán KPI Stats cho Header
-            var allScores = await _context.KetQuaHocTaps.Select(k => new { k.DiemTongKet, k.KetQua }).ToListAsync();
+            // 2. Thống kê KPI & phổ điểm qua Repository
+            var allScores = (await _ketQuaRepo.GetAllAsync()).ToList();
             int totalGraded = allScores.Count;
             int passCount = allScores.Count(k => k.KetQua == "Hoàn thành");
             int failCount = allScores.Count(k => k.KetQua == "Không hoàn thành");
@@ -70,24 +66,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             ViewBag.AverageScore = avgScore;
             ViewBag.PassRate = passRate;
 
-            // Phổ điểm (Grade distribution)
+            // Phổ điểm
             ViewBag.CountA = allScores.Count(d => d.DiemTongKet >= 8.5);
             ViewBag.CountB = allScores.Count(d => d.DiemTongKet >= 7.0 && d.DiemTongKet < 8.5);
             ViewBag.CountC = allScores.Count(d => d.DiemTongKet >= 5.5 && d.DiemTongKet < 7.0);
             ViewBag.CountD = allScores.Count(d => d.DiemTongKet >= 4.0 && d.DiemTongKet < 5.5);
             ViewBag.CountF = allScores.Count(d => d.DiemTongKet < 4.0);
 
-            // 3. Phân trang
-            int totalRecords = await query.CountAsync();
             int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
             if (page < 1) page = 1;
             if (page > totalPages && totalPages > 0) page = totalPages;
-
-            var ketQuas = await query
-                .OrderByDescending(k => k.NgayCapNhat)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
 
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
@@ -96,22 +84,20 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             ViewBag.SelectedKetQua = ketQua;
             ViewBag.Search = search;
 
-            // 4. Danh sách chọn lớp học và danh sách học viên đủ điều kiện để nhập điểm
-            ViewBag.LopHocList = await _context.LopHocs.ToListAsync();
-            ViewBag.EligibleDangKys = await _context.DangKyHocs
-                .Include(d => d.HocVien)
-                .Include(d => d.LopHoc)
+            // 3. Dropdowns
+            ViewBag.LopHocList = await _lopHocRepo.GetAllAsync();
+            var allDangKys = await _dangKyHocRepo.GetAllAsync();
+            ViewBag.EligibleDangKys = allDangKys
                 .Where(d => d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành")
-                .ToListAsync();
+                .ToList();
 
             return View(ketQuas);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewBag.EligibleDangKys = _context.DangKyHocs
-                .Include(d => d.HocVien)
-                .Include(d => d.LopHoc)
+            var allDangKys = await _dangKyHocRepo.GetAllAsync();
+            ViewBag.EligibleDangKys = allDangKys
                 .Where(d => d.TrangThai == "Đang học")
                 .ToList();
             return View();
@@ -124,9 +110,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             ModelState.Remove("DangKyHoc");
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
 
-            var dangKy = await _context.DangKyHocs
-                .Include(d => d.LopHoc)
-                .FirstOrDefaultAsync(d => d.MaDangKy == kq.MaDangKy);
+            var dangKy = await _dangKyHocRepo.GetByIdWithDetailsAsync(kq.MaDangKy);
 
             if (dangKy == null)
             {
@@ -141,16 +125,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 }
 
                 // Kiểm tra xem đã có kết quả trước đó chưa
-                bool daCoDiem = await _context.KetQuaHocTaps.AnyAsync(k => k.MaDangKy == kq.MaDangKy);
+                bool daCoDiem = await _ketQuaRepo.ExistsByDangKyIdAsync(kq.MaDangKy);
                 if (daCoDiem)
                 {
                     ModelState.AddModelError("", "Học viên này đã được ghi nhận kết quả học tập.");
                 }
 
                 // Kiểm tra lớp học đã hoàn thành toàn bộ buổi học chưa (Mục 9.4)
-                var classSessions = await _context.BuoiHocs
-                    .Where(b => b.MaLopHoc == dangKy.MaLopHoc && b.TrangThai != "Đã hủy")
-                    .ToListAsync();
+                var classSessions = (await _buoiHocRepo.GetByLopHocIdAsync(dangKy.MaLopHoc))
+                    .Where(b => b.TrangThai != "Đã hủy")
+                    .ToList();
 
                 if (!classSessions.Any())
                 {
@@ -178,15 +162,15 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 }
                 kq.NgayCapNhat = DateTime.Now;
 
-                _context.Add(kq);
+                await _ketQuaRepo.AddAsync(kq);
 
                 // Cập nhật trạng thái đăng ký thành Hoàn thành hoặc Không hoàn thành
                 if (dangKy != null)
                 {
                     dangKy.TrangThai = kq.KetQua;
+                    await _dangKyHocRepo.UpdateAsync(dangKy);
                 }
 
-                await _context.SaveChangesAsync();
                 if (isAjax)
                 {
                     return Json(new { success = true, message = "Ghi nhận kết quả học tập thành công!" });
@@ -210,9 +194,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         public async Task<IActionResult> EditPost(int maKetQua, double diemChuyenCan, double diemCuoiKhoa, string? nhanXet, string? ketQua)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-            var kq = await _context.KetQuaHocTaps
-                .Include(k => k.DangKyHoc)
-                .FirstOrDefaultAsync(k => k.MaKetQua == maKetQua);
+            var kq = await _ketQuaRepo.GetByIdWithDetailsAsync(maKetQua);
 
             if (kq == null)
             {
@@ -248,7 +230,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 kq.DangKyHoc.TrangThai = kq.KetQua;
             }
 
-            await _context.SaveChangesAsync();
+            await _ketQuaRepo.UpdateAsync(kq);
+
             if (isAjax) return Json(new { success = true, message = "Đã cập nhật thành công kết quả học tập!" });
             TempData["Success"] = "Đã cập nhật thành công kết quả học tập!";
             return RedirectToAction(nameof(Index));
@@ -260,7 +243,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         public async Task<IActionResult> DeletePost(int id)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-            var kq = await _context.KetQuaHocTaps.FindAsync(id);
+            var kq = await _ketQuaRepo.GetByIdAsync(id);
             if (kq == null)
             {
                 if (isAjax) return Json(new { success = false, message = "Không tìm thấy kết quả học tập để xóa." });
@@ -268,8 +251,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            _context.KetQuaHocTaps.Remove(kq);
-            await _context.SaveChangesAsync();
+            await _ketQuaRepo.DeleteAsync(id);
+
             if (isAjax) return Json(new { success = true, message = "Đã xóa bản ghi kết quả học tập khỏi hệ thống." });
             TempData["Success"] = "Đã xóa bản ghi kết quả học tập khỏi hệ thống.";
             return RedirectToAction(nameof(Index));

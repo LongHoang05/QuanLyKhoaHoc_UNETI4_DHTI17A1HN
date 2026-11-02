@@ -1,4 +1,4 @@
-﻿// ========================================================
+// ========================================================
 // Họ và tên: Vũ Đình Trường
 // Mã sinh viên: 23103100026
 // Phụ trách: Module 1 - Tài khoản, Đăng nhập, Phân quyền và Chương trình đào tạo
@@ -6,7 +6,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services;
@@ -17,12 +17,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
     public class TaiKhoanController : Controller
     {
         private readonly ITaiKhoanService _taiKhoanService;
-        private readonly ApplicationDbContext _context;
+        private readonly ITaiKhoanRepository _taiKhoanRepo;
+        private readonly IHocVienRepository _hocVienRepo;
+        private readonly IGiangVienRepository _giangVienRepo;
 
-        public TaiKhoanController(ITaiKhoanService taiKhoanService, ApplicationDbContext context)
+        public TaiKhoanController(ITaiKhoanService taiKhoanService, ITaiKhoanRepository taiKhoanRepo, IHocVienRepository hocVienRepo, IGiangVienRepository giangVienRepo)
         {
             _taiKhoanService = taiKhoanService;
-            _context = context;
+            _taiKhoanRepo = taiKhoanRepo;
+            _hocVienRepo = hocVienRepo;
+            _giangVienRepo = giangVienRepo;
         }
 
         // ========================================================
@@ -73,13 +77,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             HttpContext.Session.SetString("VaiTro", user.VaiTro);
             HttpContext.Session.SetString("Email", user.Email);
 
-            var gv = await _context.GiangViens.FirstOrDefaultAsync(g => g.MaTaiKhoan == user.MaTaiKhoan);
+            var gv = await _giangVienRepo.GetByTaiKhoanIdAsync(user.MaTaiKhoan);
             if (gv != null)
             {
                 HttpContext.Session.SetInt32("MaGiangVien", gv.MaGiangVien);
             }
 
-            var hv = await _context.HocViens.FirstOrDefaultAsync(h => h.MaTaiKhoan == user.MaTaiKhoan);
+            var hv = await _hocVienRepo.GetByMaTaiKhoanAsync(user.MaTaiKhoan);
             if (hv != null)
             {
                 HttpContext.Session.SetInt32("MaHocVien", hv.MaHocVien);
@@ -142,7 +146,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             HttpContext.Session.SetString("VaiTro", user.VaiTro);
             HttpContext.Session.SetString("Email", user.Email);
 
-            var hv = await _context.HocViens.FirstOrDefaultAsync(h => h.MaTaiKhoan == user.MaTaiKhoan);
+            var hv = await _hocVienRepo.GetByMaTaiKhoanAsync(user.MaTaiKhoan);
             if (hv != null)
             {
                 HttpContext.Session.SetInt32("MaHocVien", hv.MaHocVien);
@@ -503,7 +507,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         public async Task<IActionResult> DeletePost(int id)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-            var tk = await _context.TaiKhoans.FindAsync(id);
+            var tk = await _taiKhoanRepo.GetByIdAsync(id);
             if (tk == null)
             {
                 if (isAjax) return Json(new { success = false, message = "Không tìm thấy tài khoản." });
@@ -519,8 +523,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            _context.TaiKhoans.Remove(tk);
-            await _context.SaveChangesAsync();
+            await _taiKhoanRepo.DeleteAsync(id);
+
 
             string msg = $"Đã xóa tài khoản '{tk.TenDangNhap}' thành công!";
             if (isAjax) return Json(new { success = true, message = msg });
