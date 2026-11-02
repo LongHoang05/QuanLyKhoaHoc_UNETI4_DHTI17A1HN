@@ -14,6 +14,7 @@ using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 {
+    [QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters.SessionAuthorize("Admin", "GiaoVu")]
     public class ChuongTrinhDaoTaoController : Controller
     {
         private readonly ApplicationDbContext _context;

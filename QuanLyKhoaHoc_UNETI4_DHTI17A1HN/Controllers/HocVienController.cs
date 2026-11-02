@@ -1,3 +1,9 @@
+// ========================================================
+// Họ và tên: Nguyễn Đức Linh
+// Mã sinh viên: 23103100042
+// Phụ trách: Module 3 - Quản lý học viên, Hồ sơ cá nhân và Đăng ký học
+// ========================================================
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
@@ -7,11 +13,6 @@ using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 {
-    // ========================================================
-    // Họ và tên: Nguyễn Đức Linh
-    // Mã sinh viên: 23103100042
-    // Phụ trách: Module 3 - Quản lý học viên, Hồ sơ cá nhân và Đăng ký học
-    // ========================================================
     public class HocVienController : Controller
     {
         private readonly IHocVienService _hocVienService;
@@ -23,7 +24,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             _context = context;
         }
 
-        #region Helper Phân Quyền Session (Theo Slide 8-11 Bài Giảng Cookie & Session)
+        #region Helper Phân Quyền Session (Theo Mục 5.4 & Mục 7)
         /// <summary>
         /// Xác thực vai trò người dùng trong Session: Chỉ Admin và GiaoVu mới có quyền quản lý toàn bộ học viên
         /// </summary>
@@ -32,64 +33,24 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             var vaiTro = HttpContext.Session.GetString("VaiTro");
             var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
 
-            // 1. Chưa đăng nhập -> Tự động khởi tạo phiên Giáo vụ mặc định để kiểm thử nhanh chóng
+            // 1. Chưa đăng nhập -> Chuyển về trang đăng nhập
             if (maTaiKhoan == null || string.IsNullOrEmpty(vaiTro))
             {
-                HttpContext.Session.SetInt32("MaTaiKhoan", 2);
-                HttpContext.Session.SetString("TenDangNhap", "giaovu");
-                HttpContext.Session.SetString("HoTen", "Giáo vụ Trung tâm");
-                HttpContext.Session.SetString("VaiTro", "GiaoVu");
-                vaiTro = "GiaoVu";
+                var returnUrl = Request.Path + Request.QueryString;
+                redirectResult = RedirectToAction("DangNhap", "TaiKhoan", new { returnUrl });
+                return false;
             }
 
-            // 2. Đăng nhập nhưng vai trò là Học viên -> Chặn quyền truy cập (chuẩn giáo trình Phân quyền Session UNETI)
+            // 2. Đăng nhập nhưng vai trò không phải Admin hoặc GiaoVu -> Chặn quyền truy cập
             if (vaiTro != "Admin" && vaiTro != "GiaoVu")
             {
-                TempData["Error"] = "Tài khoản học viên không có quyền quản lý danh sách học viên của trung tâm! (Đã bảo vệ bằng Session)";
-                redirectResult = RedirectToAction("Index", "Home");
+                TempData["Error"] = "Tài khoản học viên không có quyền quản lý danh sách học viên của trung tâm!";
+                redirectResult = RedirectToAction("AccessDenied", "Home");
                 return false;
             }
 
             redirectResult = null;
             return true;
-        }
-
-        // Hỗ trợ thiết lập nhanh Session khi kiểm thử (Role = GiaoVu | Admin | HocVien)
-        [HttpGet]
-        public IActionResult DangNhapThuNghiem(string role = "GiaoVu")
-        {
-            if (role == "Admin")
-            {
-                HttpContext.Session.SetInt32("MaTaiKhoan", 1);
-                HttpContext.Session.SetString("TenDangNhap", "admin");
-                HttpContext.Session.SetString("HoTen", "Quản trị viên Hệ thống");
-                HttpContext.Session.SetString("VaiTro", "Admin");
-            }
-            else if (role == "HocVien")
-            {
-                HttpContext.Session.SetInt32("MaTaiKhoan", 3);
-                HttpContext.Session.SetString("TenDangNhap", "hocvien");
-                HttpContext.Session.SetString("HoTen", "Học viên Nguyễn Văn An");
-                HttpContext.Session.SetString("VaiTro", "HocVien");
-            }
-            else
-            {
-                HttpContext.Session.SetInt32("MaTaiKhoan", 2);
-                HttpContext.Session.SetString("TenDangNhap", "giaovu");
-                HttpContext.Session.SetString("HoTen", "Giáo vụ Trung tâm");
-                HttpContext.Session.SetString("VaiTro", "GiaoVu");
-            }
-
-            TempData["Success"] = $"Đã thiết lập phiên đăng nhập thử nghiệm: {role}";
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpGet]
-        public IActionResult DangXuatThuNghiem()
-        {
-            HttpContext.Session.Clear();
-            TempData["Success"] = "Đã đăng xuất và xóa toàn bộ dữ liệu Session.";
-            return RedirectToAction("Index", "Home");
         }
         #endregion
 
@@ -157,7 +118,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         }
 
         // ========================================================
-        // 4. AJAX LẤY CHI TIẾT HỌC VIÊN RENDER MODAL (Chuẩn admin-tai-khoan.html)
+        // 4. AJAX LẤY CHI TIẾT HỌC VIÊN RENDER MODAL
         // ========================================================
         [HttpGet]
         public async Task<IActionResult> GetChiTietHocVienJson(int id)
@@ -549,32 +510,28 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         }
 
         // ========================================================
-        // 14. ACTION PORTAL: CỔNG THÔNG TIN HỌC VIÊN (Chuẩn Giao_DIen_Test hoc-vien.html)
+        // 14. ACTION PORTAL: CỔNG THÔNG TIN HỌC VIÊN (Yêu cầu đăng nhập)
         // ========================================================
         [HttpGet]
         public async Task<IActionResult> Portal()
         {
             var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
-            HocVien? hocVien = null;
-
-            if (maTaiKhoan != null)
+            if (maTaiKhoan == null)
             {
-                hocVien = await _context.HocViens
-                    .Include(h => h.TaiKhoan)
-                    .Include(h => h.DangKyHocs)
-                        .ThenInclude(d => d.LopHoc)
-                            .ThenInclude(l => l!.ChuongTrinhDaoTao)
-                    .FirstOrDefaultAsync(h => h.MaTaiKhoan == maTaiKhoan.Value);
+                return RedirectToAction("DangNhap", "TaiKhoan", new { returnUrl = "/HocVien/Portal" });
             }
+
+            var hocVien = await _context.HocViens
+                .Include(h => h.TaiKhoan)
+                .Include(h => h.DangKyHocs)
+                    .ThenInclude(d => d.LopHoc)
+                        .ThenInclude(l => l!.ChuongTrinhDaoTao)
+                .FirstOrDefaultAsync(h => h.MaTaiKhoan == maTaiKhoan.Value);
 
             if (hocVien == null)
             {
-                hocVien = await _context.HocViens
-                    .Include(h => h.TaiKhoan)
-                    .Include(h => h.DangKyHocs)
-                        .ThenInclude(d => d.LopHoc)
-                            .ThenInclude(l => l!.ChuongTrinhDaoTao)
-                    .FirstOrDefaultAsync() ?? new HocVien { HoTen = "Học viên Test", Email = "test@uneti.edu.vn" };
+                TempData["Error"] = "Không tìm thấy hồ sơ học viên liên kết với tài khoản này.";
+                return RedirectToAction("Index", "Home");
             }
 
             var lopHocDangMos = await _context.LopHocs

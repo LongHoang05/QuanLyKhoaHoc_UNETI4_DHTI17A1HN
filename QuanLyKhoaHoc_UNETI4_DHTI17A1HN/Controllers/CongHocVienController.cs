@@ -1,7 +1,7 @@
 // ========================================================
-// Họ và tên: Nguyễn Tùng Dương
-// Mã sinh viên: 23103100003
-// Phụ trách: Module 5 - Lịch học, Kết quả học tập, Dashboard và Thống kê
+// Họ và tên: Nguyễn Đức Linh
+// Mã sinh viên: 23103100042
+// Phụ trách: Module 3 - Quản lý học viên, Hồ sơ cá nhân và Đăng ký học
 // ========================================================
 
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +20,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             _context = context;
         }
 
-        // Helper lấy học viên hiện tại theo Session
+        // Helper lấy học viên hiện tại theo phiên Session đã đăng nhập (Không mock bừa bãi)
         private async Task<HocVien?> GetCurrentHocVienAsync()
         {
             int? maHocVien = HttpContext.Session.GetInt32("MaHocVien");
@@ -37,8 +37,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 if (hv != null) return hv;
             }
 
-            // Hỗ trợ test nhanh nếu chưa đăng nhập hoặc là Admin test cổng học viên: lấy học viên đầu tiên
-            return await _context.HocViens.FirstOrDefaultAsync();
+            return null;
         }
 
         // --- TRANG CHỦ MARKETPLACE KHÓA HỌC (STOREFRONT EDU-COMMERCE) ---
@@ -205,17 +204,25 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             return View(lop);
         }
 
-        // --- HÀNH ĐỘNG ĐĂNG KÝ LỚP HỌC (AJAX) ---
+        // --- HÀNH ĐỘNG ĐĂNG KÝ LỚP HỌC (AJAX) - TUÂN THỦ MỤC 7.3 ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DangKyLopPost(int maLop, string? ghiChu)
         {
+            // 1. Kiểm tra học viên đã đăng nhập
             var student = await GetCurrentHocVienAsync();
             if (student == null)
             {
                 return Json(new { success = false, message = "Bạn cần đăng nhập tài khoản học viên để thực hiện đăng ký." });
             }
 
+            // 2. Kiểm tra học viên đang hoạt động
+            if (!student.TrangThai)
+            {
+                return Json(new { success = false, message = "Tài khoản học viên của bạn đang bị khóa, không thể đăng ký khóa học." });
+            }
+
+            // 3. Kiểm tra lớp học tồn tại và ở trạng thái 'Đang mở đăng ký'
             var lop = await _context.LopHocs.FindAsync(maLop);
             if (lop == null)
             {
@@ -227,21 +234,27 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return Json(new { success = false, message = "Lớp học này hiện không mở tuyển sinh." });
             }
 
-            if (lop.HanDangKy < DateTime.Today)
+            // 4. Kiểm tra ngày hiện tại nằm trong thời gian mở đăng ký của lớp
+            if (DateTime.Today < lop.NgayBatDauDangKy.Date)
             {
-                return Json(new { success = false, message = "Lớp học đã hết thời hạn đăng ký." });
+                return Json(new { success = false, message = $"Lớp học chưa đến ngày mở đăng ký ({lop.NgayBatDauDangKy:dd/MM/yyyy})." });
             }
 
-            // Kiểm tra đã đăng ký chưa
+            if (DateTime.Today > lop.HanDangKy.Date)
+            {
+                return Json(new { success = false, message = "Lớp học đã hết thời hạn nhận đăng ký." });
+            }
+
+            // 5. Kiểm tra học viên không được có hai đăng ký đang xử lý cho cùng một lớp
             var existing = await _context.DangKyHocs
-                .FirstOrDefaultAsync(d => d.MaHocVien == student.MaHocVien && d.MaLopHoc == maLop && d.TrangThai != "Đã hủy");
+                .FirstOrDefaultAsync(d => d.MaHocVien == student.MaHocVien && d.MaLopHoc == maLop && d.TrangThai != "Đã hủy" && d.TrangThai != "Từ chối");
 
             if (existing != null)
             {
-                return Json(new { success = false, message = $"Bạn đã đăng ký khóa học này rồi (Trạng thái: {existing.TrangThai})." });
+                return Json(new { success = false, message = $"Bạn đã có hồ sơ đăng ký cho khóa học này rồi (Trạng thái: {existing.TrangThai})." });
             }
 
-            // Kiểm tra sĩ số còn chỗ
+            // 6. Kiểm tra lớp còn chỗ theo sĩ số tối đa
             int enrolledCount = await _context.DangKyHocs.CountAsync(d =>
                 d.MaLopHoc == maLop &&
                 (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"));
@@ -251,6 +264,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return Json(new { success = false, message = "Khóa học đã đủ chỉ tiêu sĩ số. Vui lòng chọn lớp học khác." });
             }
 
+            // 7. Tạo đăng ký mới với trạng thái 'Chờ duyệt', ngày do hệ thống xác định, học phí 0
             var dangKy = new DangKyHoc
             {
                 MaHocVien = student.MaHocVien,
@@ -271,13 +285,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             });
         }
 
-        // --- HÀNH ĐỘNG HỦY ĐĂNG KÝ LỚP HỌC (AJAX) ---
+        // --- HÀNH ĐỘNG HỦY ĐĂNG KÝ LỚP HỌC (AJAX) - TUÂN THỦ MỤC 7.4 ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> HuyDangKyPost(int maDangKy)
         {
             var student = await GetCurrentHocVienAsync();
-            if (student == null) return Json(new { success = false, message = "Chưa xác thực học viên." });
+            if (student == null) return Json(new { success = false, message = "Bạn cần đăng nhập để thao tác." });
 
             var dk = await _context.DangKyHocs
                 .Include(d => d.LopHoc)
@@ -285,15 +299,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             if (dk == null) return Json(new { success = false, message = "Không tìm thấy hồ sơ đăng ký." });
 
+            // Quy định: Học viên chỉ được hủy đăng ký của chính mình
             if (dk.MaHocVien != student.MaHocVien)
             {
                 return Json(new { success = false, message = "Bạn không có quyền thao tác trên hồ sơ của người khác." });
             }
 
-            // Chỉ cho hủy khi còn Chờ duyệt hoặc Đã duyệt mà chưa đóng tiền
-            if (dk.TrangThai == "Đã đóng học phí" || dk.TrangThai == "Đang học" || dk.TrangThai == "Hoàn thành")
+            // Quy định: Chỉ được hủy trong trạng thái Chờ duyệt hoặc Đã duyệt nhưng chưa đóng học phí
+            if (dk.TrangThai != "Chờ duyệt" && !(dk.TrangThai == "Đã duyệt" && dk.SoTienDaDong == 0))
             {
-                return Json(new { success = false, message = $"Không thể hủy lớp khi đã ở trạng thái '{dk.TrangThai}'. Vui lòng liên hệ ban giáo vụ để được hỗ trợ bảo lưu." });
+                return Json(new { success = false, message = $"Không thể tự hủy đơn khi đã ở trạng thái '{dk.TrangThai}'. Vui lòng liên hệ ban giáo vụ để được hỗ trợ giải quyết." });
             }
 
             dk.TrangThai = "Đã hủy";
@@ -309,12 +324,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             if (student == null)
             {
                 TempData["Error"] = "Vui lòng đăng nhập để xem không gian học tập.";
-                return RedirectToAction("Login", "TaiKhoan");
+                return RedirectToAction("DangNhap", "TaiKhoan");
             }
 
             ViewBag.CurrentStudent = student;
 
-            // Danh sách các đăng ký của học viên
+            // Danh sách các đăng ký của chính học viên này
             var dangKys = await _context.DangKyHocs
                 .Include(d => d.LopHoc)
                     .ThenInclude(l => l!.ChuongTrinhDaoTao)
@@ -362,7 +377,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             if (student == null)
             {
                 TempData["Error"] = "Vui lòng đăng nhập để xem hồ sơ.";
-                return RedirectToAction("Login", "TaiKhoan");
+                return RedirectToAction("DangNhap", "TaiKhoan");
             }
 
             var tk = await _context.TaiKhoans.FindAsync(student.MaTaiKhoan);

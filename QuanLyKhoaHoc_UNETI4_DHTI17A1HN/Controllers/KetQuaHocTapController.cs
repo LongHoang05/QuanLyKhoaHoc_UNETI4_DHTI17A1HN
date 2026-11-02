@@ -1,4 +1,4 @@
-﻿// ========================================================
+// ========================================================
 // Họ và tên: Nguyễn Tùng Dương
 // Mã sinh viên: 23103100003
 // Phụ trách: Module 5 - Lịch học, Kết quả học tập, Dashboard và Thống kê
@@ -7,10 +7,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 {
+    [SessionAuthorize("Admin", "GiaoVu")]
     public class KetQuaHocTapController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -54,7 +56,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                                          (k.DangKyHoc != null && k.DangKyHoc.LopHoc != null && k.DangKyHoc.LopHoc.TenLop.ToLower().Contains(s)));
             }
 
-            // 2. Tính toán 3 KPI Stats cho Header
+            // 2. Tính toán KPI Stats cho Header
             var allScores = await _context.KetQuaHocTaps.Select(k => new { k.DiemTongKet, k.KetQua }).ToListAsync();
             int totalGraded = allScores.Count;
             int passCount = allScores.Count(k => k.KetQua == "Hoàn thành");
@@ -99,7 +101,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             ViewBag.EligibleDangKys = await _context.DangKyHocs
                 .Include(d => d.HocVien)
                 .Include(d => d.LopHoc)
-                .Where(d => d.TrangThai == "Đang học" || d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí")
+                .Where(d => d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành")
                 .ToListAsync();
 
             return View(ketQuas);
@@ -110,6 +112,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             ViewBag.EligibleDangKys = _context.DangKyHocs
                 .Include(d => d.HocVien)
                 .Include(d => d.LopHoc)
+                .Where(d => d.TrangThai == "Đang học")
                 .ToList();
             return View();
         }
@@ -131,11 +134,32 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
             else
             {
+                // Kiểm tra trạng thái: Chỉ đăng ký 'Đang học' mới được ghi nhận kết quả cuối cùng (Mục 9.4 & 13)
+                if (dangKy.TrangThai != "Đang học")
+                {
+                    ModelState.AddModelError("", $"Chỉ học viên ở trạng thái 'Đang học' mới được chấm điểm kết quả cuối cùng (Trạng thái hiện tại: {dangKy.TrangThai}).");
+                }
+
                 // Kiểm tra xem đã có kết quả trước đó chưa
                 bool daCoDiem = await _context.KetQuaHocTaps.AnyAsync(k => k.MaDangKy == kq.MaDangKy);
                 if (daCoDiem)
                 {
                     ModelState.AddModelError("", "Học viên này đã được ghi nhận kết quả học tập.");
+                }
+
+                // Kiểm tra lớp học đã hoàn thành toàn bộ buổi học chưa (Mục 9.4)
+                var classSessions = await _context.BuoiHocs
+                    .Where(b => b.MaLopHoc == dangKy.MaLopHoc && b.TrangThai != "Đã hủy")
+                    .ToListAsync();
+
+                if (!classSessions.Any())
+                {
+                    ModelState.AddModelError("", "Lớp học này chưa có buổi học nào được lên lịch, không thể chấm điểm.");
+                }
+                else if (classSessions.Any(b => b.TrangThai != "Đã hoàn thành"))
+                {
+                    int chuaHoanThanh = classSessions.Count(b => b.TrangThai != "Đã hoàn thành");
+                    ModelState.AddModelError("", $"Lớp học vẫn còn {chuaHoanThanh} buổi học chưa hoàn thành. Chỉ khi toàn bộ buổi học đã hoàn thành mới được ghi nhận điểm cuối khóa.");
                 }
             }
 
@@ -146,7 +170,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             if (ModelState.IsValid)
             {
-                // Tự động tính điểm tổng kết: 40% Điểm quá trình + 60% Điểm thi cuối kỳ
+                // Tự động tính điểm tổng kết: 40% Điểm quá trình + 60% Điểm thi cuối kỳ (Chuẩn quy chế BTL)
                 kq.DiemTongKet = Math.Round((kq.DiemChuyenCan * 0.4) + (kq.DiemCuoiKhoa * 0.6), 2);
                 if (string.IsNullOrEmpty(kq.KetQua) || kq.KetQua == "Chưa xét")
                 {
@@ -156,10 +180,10 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
                 _context.Add(kq);
 
-                // Cập nhật trạng thái đăng ký thành Hoàn thành nếu đạt
+                // Cập nhật trạng thái đăng ký thành Hoàn thành hoặc Không hoàn thành
                 if (dangKy != null)
                 {
-                    dangKy.TrangThai = kq.KetQua == "Hoàn thành" ? "Hoàn thành" : "Không hoàn thành";
+                    dangKy.TrangThai = kq.KetQua;
                 }
 
                 await _context.SaveChangesAsync();

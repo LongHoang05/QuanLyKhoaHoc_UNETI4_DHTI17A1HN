@@ -1,4 +1,4 @@
-﻿// ========================================================
+// ========================================================
 // Họ và tên: Nguyễn Hoàng Long
 // Mã sinh viên: 23103100046
 // Phụ trách: Module 4 - Tiếp nhận, Xét duyệt đăng ký và Thu học phí
@@ -11,10 +11,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 {
+    [SessionAuthorize("Admin", "GiaoVu")]
     public class DangKyHocController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -196,7 +198,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             });
         }
 
-        // --- PHÊ DUYỆT ĐĂNG KÝ (KIỂM SOÁT SĨ SỐ TỐI ĐA) ---
+        // --- PHÊ DUYỆT ĐĂNG KÝ (KIỂM SOÁT SĨ SỐ TỐI ĐA - MỤC 8.2 & 8.3 & 8.6) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DuyetDangKyPost(int id, string? nhanXet)
@@ -214,16 +216,20 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            // Chỉ đăng ký Chờ duyệt mới được duyệt (Mục 8.2)
             if (dk.TrangThai != "Chờ duyệt")
             {
                 if (isAjax) return Json(new { success = false, message = "Chỉ đơn đăng ký ở trạng thái 'Chờ duyệt' mới được xét duyệt." });
                 return RedirectToAction(nameof(Index));
             }
+
+            // Học viên phải còn hoạt động (Mục 8.3)
             if (dk.HocVien != null && !dk.HocVien.TrangThai)
             {
                 if (isAjax) return Json(new { success = false, message = "Học viên đang bị khóa, không thể duyệt đăng ký." });
                 return RedirectToAction(nameof(Index));
             }
+
             var lop = dk.LopHoc;
             if (lop == null)
             {
@@ -231,7 +237,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Kiểm tra sĩ số hiện tại của lớp
+            // Kiểm tra sĩ số hiện tại của lớp: Đã duyệt + Đã đóng học phí + Đang học (Mục 8.3 & 8.6)
             int enrolledCount = await _context.DangKyHocs.CountAsync(d =>
                 d.MaLopHoc == lop.MaLopHoc &&
                 d.MaDangKy != id &&
@@ -249,6 +255,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             dk.NgayXuLy = DateTime.Now;
             dk.NhanXetGiaoVu = string.IsNullOrWhiteSpace(nhanXet) ? "Đã duyệt hồ sơ đủ điều kiện nhập học." : nhanXet;
 
+            // Nếu đạt đủ sĩ số tối đa, tự động chuyển lớp sang 'Đã đóng đăng ký' (Mục 8.6)
             if (enrolledCount + 1 >= lop.SiSoToiDa)
             {
                 lop.TrangThai = "Đã đóng đăng ký";
@@ -262,7 +269,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // --- TỪ CHỐI ĐĂNG KÝ ---
+        // --- TỪ CHỐI ĐĂNG KÝ (MỤC 8.2) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> TuChoiDangKyPost(int id, string? lyDo)
@@ -273,6 +280,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             if (dk == null)
             {
                 if (isAjax) return Json(new { success = false, message = "Không tìm thấy hồ sơ đăng ký." });
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (dk.TrangThai != "Chờ duyệt")
+            {
+                if (isAjax) return Json(new { success = false, message = "Chỉ đơn ở trạng thái 'Chờ duyệt' mới có thể từ chối." });
                 return RedirectToAction(nameof(Index));
             }
 
@@ -287,7 +300,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // --- GHI NHẬN ĐÓNG HỌC PHÍ ---
+        // --- GHI NHẬN ĐÓNG HỌC PHÍ (MỤC 8.4) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ThuHocPhiPost(int id, decimal soTien, string? ghiChu)
@@ -302,6 +315,15 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             if (dk == null)
             {
                 if (isAjax) return Json(new { success = false, message = "Không tìm thấy hồ sơ." });
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Chỉ đăng ký 'Đã duyệt' hoặc 'Đã đóng học phí' mới được ghi nhận học phí (Mục 8.4)
+            if (dk.TrangThai != "Đã duyệt" && dk.TrangThai != "Đã đóng học phí")
+            {
+                string msg = $"Chỉ đơn ở trạng thái 'Đã duyệt' mới được ghi nhận học phí (Trạng thái hiện tại: {dk.TrangThai}).";
+                if (isAjax) return Json(new { success = false, message = msg });
+                TempData["Error"] = msg;
                 return RedirectToAction(nameof(Index));
             }
 
@@ -333,23 +355,54 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             await _context.SaveChangesAsync();
 
-            string msg = $"Ghi nhận thu {soTien:N0} đ thành công! Trạng thái: {dk.TrangThai}";
-            if (isAjax) return Json(new { success = true, message = msg });
-            TempData["Success"] = msg;
+            string msgOk = $"Ghi nhận thu {soTien:N0} đ thành công! Trạng thái: {dk.TrangThai}";
+            if (isAjax) return Json(new { success = true, message = msgOk });
+            TempData["Success"] = msgOk;
             return RedirectToAction(nameof(Index));
         }
 
-        // --- CHUYỂN TRẠNG THÁI SANG 'ĐANG HỌC' ---
+        // --- CHUYỂN TRẠNG THÁI SANG 'ĐANG HỌC' (MỤC 8.5) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> BatDauHocPost(int id)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
 
-            var dk = await _context.DangKyHocs.FindAsync(id);
+            var dk = await _context.DangKyHocs
+                .Include(d => d.LopHoc)
+                .FirstOrDefaultAsync(d => d.MaDangKy == id);
+
             if (dk == null)
             {
                 if (isAjax) return Json(new { success = false, message = "Không tìm thấy hồ sơ." });
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Phải là 'Đã đóng học phí' hoặc 'Đã duyệt'
+            if (dk.TrangThai != "Đã đóng học phí" && dk.TrangThai != "Đã duyệt")
+            {
+                string msg = $"Chỉ học viên đã hoàn tất học phí mới được chuyển sang 'Đang học' (Trạng thái hiện tại: {dk.TrangThai}).";
+                if (isAjax) return Json(new { success = false, message = msg });
+                TempData["Error"] = msg;
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Kiểm tra lớp đã có ít nhất một buổi học được lên lịch (Mục 8.5)
+            bool coLichHoc = await _context.BuoiHocs.AnyAsync(b => b.MaLopHoc == dk.MaLopHoc && b.TrangThai != "Đã hủy");
+            if (!coLichHoc)
+            {
+                string msg = "Không thể chuyển sang 'Đang học' vì lớp này chưa có buổi học nào được lên lịch!";
+                if (isAjax) return Json(new { success = false, message = msg });
+                TempData["Error"] = msg;
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Kiểm tra đã đến ngày khai giảng chưa (Mục 8.5)
+            if (dk.LopHoc != null && DateTime.Today < dk.LopHoc.NgayKhaiGiang.Date)
+            {
+                string msg = $"Chưa đến ngày khai giảng ({dk.LopHoc.NgayKhaiGiang:dd/MM/yyyy}), chưa thể chuyển sang trạng thái 'Đang học'!";
+                if (isAjax) return Json(new { success = false, message = msg });
+                TempData["Error"] = msg;
                 return RedirectToAction(nameof(Index));
             }
 
@@ -357,6 +410,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             await _context.SaveChangesAsync();
 
             if (isAjax) return Json(new { success = true, message = "Đã cập nhật trạng thái học viên sang 'Đang học'!" });
+            TempData["Success"] = "Đã cập nhật trạng thái học viên sang 'Đang học'!";
             return RedirectToAction(nameof(Index));
         }
 

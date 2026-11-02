@@ -1,4 +1,4 @@
-﻿// ========================================================
+// ========================================================
 // Họ và tên: Nguyễn Đình Kiên
 // Mã sinh viên: 23103100020
 // Phụ trách: Module 2 - Quản lý lớp học, Tìm kiếm, Lọc, Sắp xếp và Phân trang
@@ -11,10 +11,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 {
+    [SessionAuthorize("Admin", "GiaoVu")]
     public class LopHocController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -95,7 +97,17 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 query = query.Where(l => l.HanDangKy < today.Date);
             }
 
-            // 7. Sắp xếp LINQ
+            // 7. Lọc Còn chỗ / Hết chỗ bằng LINQ trực tiếp
+            if (choTrongStatus == "con_cho")
+            {
+                query = query.Where(l => l.DangKyHocs.Count(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học") < l.SiSoToiDa);
+            }
+            else if (choTrongStatus == "het_cho")
+            {
+                query = query.Where(l => l.DangKyHocs.Count(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học") >= l.SiSoToiDa);
+            }
+
+            // 8. Sắp xếp LINQ
             switch (sortBy)
             {
                 case "ten_asc":
@@ -127,42 +139,28 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                     break;
             }
 
-            // Lấy danh sách tạm để tính sĩ số thực tế (Hỗ trợ lọc Còn chỗ / Hết chỗ)
-            var allFiltered = await query.ToListAsync();
-
-            // Tính sĩ số đã duyệt/đóng học phí/đang học cho từng lớp
-            var allLopIds = allFiltered.Select(l => l.MaLopHoc).ToList();
-            var siSoMap = await _context.DangKyHocs
-                .Where(d => allLopIds.Contains(d.MaLopHoc) && (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"))
-                .GroupBy(d => d.MaLopHoc)
-                .Select(g => new { MaLop = g.Key, Count = g.Count() })
-                .ToDictionaryAsync(x => x.MaLop, x => x.Count);
-
-            // 8. Lọc Còn chỗ / Hết chỗ
-            if (choTrongStatus == "con_cho")
-            {
-                allFiltered = allFiltered.Where(l => (siSoMap.ContainsKey(l.MaLopHoc) ? siSoMap[l.MaLopHoc] : 0) < l.SiSoToiDa).ToList();
-            }
-            else if (choTrongStatus == "het_cho")
-            {
-                allFiltered = allFiltered.Where(l => (siSoMap.ContainsKey(l.MaLopHoc) ? siSoMap[l.MaLopHoc] : 0) >= l.SiSoToiDa).ToList();
-            }
-
-            // 9. Phân trang LINQ
-            int totalItems = allFiltered.Count;
+            // 9. Phân trang LINQ chuẩn EF Core (Mục 6.6 & 15: Skip, Take trực tiếp trên SQL Server)
+            int totalItems = await query.CountAsync();
             int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
             if (totalPages < 1) totalPages = 1;
             if (page < 1) page = 1;
             if (page > totalPages) page = totalPages;
 
-            var items = allFiltered
+            var items = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .ToList();
+                .ToListAsync();
 
-            // Đếm số buổi học đã xếp
+            // Tính sĩ số đã duyệt và số buổi học cho các lớp trong trang hiện tại
+            var pageLopIds = items.Select(l => l.MaLopHoc).ToList();
+            var siSoMap = await _context.DangKyHocs
+                .Where(d => pageLopIds.Contains(d.MaLopHoc) && (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"))
+                .GroupBy(d => d.MaLopHoc)
+                .Select(g => new { MaLop = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.MaLop, x => x.Count);
+
             var buoiHocMap = await _context.BuoiHocs
-                .Where(b => allLopIds.Contains(b.MaLopHoc) && b.TrangThai != "Đã hủy")
+                .Where(b => pageLopIds.Contains(b.MaLopHoc) && b.TrangThai != "Đã hủy")
                 .GroupBy(b => b.MaLopHoc)
                 .Select(g => new { MaLop = g.Key, Count = g.Count() })
                 .ToDictionaryAsync(x => x.MaLop, x => x.Count);

@@ -1,4 +1,4 @@
-﻿// ========================================================
+// ========================================================
 // Họ và tên: Nguyễn Tùng Dương
 // Mã sinh viên: 23103100003
 // Phụ trách: Module 5 - Lịch học, Kết quả học tập, Dashboard và Thống kê
@@ -7,10 +7,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 {
+    [SessionAuthorize("Admin", "GiaoVu")]
     public class BuoiHocController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -33,7 +35,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 .ThenInclude(l => l!.ChuongTrinhDaoTao)
                 .AsQueryable();
 
-            // 1. Kiểm tra xung đột trùng lịch bằng LINQ trên các ca học chưa hủy
+            // 1. Kiểm tra xung đột trùng lịch bằng LINQ trên các ca học chưa hủy (Mục 9.2)
             var allActive = await _context.BuoiHocs.Where(b => b.TrangThai != "Đã hủy").ToListAsync();
             var conflictIds = new HashSet<int>();
             for (int i = 0; i < allActive.Count; i++)
@@ -130,7 +132,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             ModelState.Remove("LopHoc");
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
 
-            // 1. Kiểm tra lớp có ít nhất 1 đăng ký "Đã đóng học phí" hoặc "Đang học" hoặc "Đã duyệt" không?
+            // 1. Kiểm tra lớp có ít nhất 1 đăng ký "Đã đóng học phí" hoặc "Đang học" hoặc "Đã duyệt" không? (Mục 9.2)
             bool coHocVien = _context.DangKyHocs
                 .Any(dk => dk.MaLopHoc == buoiHoc.MaLopHoc && (dk.TrangThai == "Đã đóng học phí" || dk.TrangThai == "Đang học" || dk.TrangThai == "Đã duyệt"));
             
@@ -149,7 +151,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 ModelState.AddModelError("ThoiGianKetThuc", "Thời gian kết thúc phải sau thời gian bắt đầu.");
             }
 
-            // 3. Kiểm tra số buổi học vượt quy định
+            // 3. Kiểm tra số buổi học vượt quy định (Mục 9.2)
             var lopHoc = await _context.LopHocs.FindAsync(buoiHoc.MaLopHoc);
             if (lopHoc != null)
             {
@@ -162,7 +164,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 }
             }
 
-            // 4. KIỂM TRA TRÙNG LỊCH BẰNG LINQ (Lớp, Phòng, Giảng viên)
+            // 4. KIỂM TRA TRÙNG LỊCH BẰNG LINQ (Lớp, Phòng, Giảng viên - Mục 9.2)
             bool isTrungLich = _context.BuoiHocs.Any(b =>
                 b.TrangThai != "Đã hủy" &&
                 (b.MaLopHoc == buoiHoc.MaLopHoc || b.PhongHoc == buoiHoc.PhongHoc || b.GiangVien == buoiHoc.GiangVien) &&
@@ -219,7 +221,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Kiểm tra trùng lịch ngoại trừ chính buổi học này
+            // Kiểm tra trùng lịch ngoại trừ chính buổi học này (Mục 9.2)
             bool isTrungLich = await _context.BuoiHocs.AnyAsync(b =>
                 b.MaBuoiHoc != buoiHoc.MaBuoiHoc &&
                 b.TrangThai != "Đã hủy" &&

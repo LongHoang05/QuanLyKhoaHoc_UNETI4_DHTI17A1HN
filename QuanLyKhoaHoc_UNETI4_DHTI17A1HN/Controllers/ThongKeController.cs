@@ -7,10 +7,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels;
 
 namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 {
+    [SessionAuthorize("Admin", "GiaoVu")]
     public class ThongKeController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -139,27 +141,27 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction("TienTrinh", "CongHocVien");
             }
 
-            // 1. Số lớp học theo chương trình đào tạo
+            // 1. Số lớp học theo chương trình đào tạo (Mục 9.6)
             ViewBag.LopTheoCTDT = await _context.LopHocs
                 .Where(l => l.ChuongTrinhDaoTao != null)
                 .GroupBy(l => l.ChuongTrinhDaoTao!.TenChuongTrinh)
                 .Select(g => new { Ten = g.Key, SoLuong = g.Count() })
                 .ToListAsync();
 
-            // 2. Số đăng ký theo từng lớp
+            // 2. Số đăng ký theo từng lớp (Mục 9.6)
             ViewBag.DKTheoLop = await _context.DangKyHocs
                 .Where(d => d.LopHoc != null)
                 .GroupBy(d => d.LopHoc!.TenLop)
                 .Select(g => new { Ten = g.Key, SoLuong = g.Count() })
                 .ToListAsync();
 
-            // 3. Số đăng ký theo trạng thái
+            // 3. Số đăng ký theo trạng thái (Mục 9.6)
             ViewBag.DKTheoTrangThai = await _context.DangKyHocs
                 .GroupBy(d => d.TrangThai)
                 .Select(g => new { Ten = g.Key, SoLuong = g.Count() })
                 .ToListAsync();
 
-            // 4. Lớp có nhiều đăng ký nhất
+            // 4. Lớp có nhiều đăng ký nhất (Mục 9.6)
             ViewBag.LopNhieuDKNhat = await _context.DangKyHocs
                 .Where(d => d.LopHoc != null)
                 .GroupBy(d => d.LopHoc!.TenLop)
@@ -167,7 +169,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 .Select(g => new { Ten = g.Key, SoLuong = g.Count() })
                 .FirstOrDefaultAsync();
 
-            // 5. Doanh thu theo tháng
+            // 5. Doanh thu theo tháng (Mục 9.6)
             var doanhThu = await _context.DangKyHocs
                 .Where(d => d.NgayDongHocPhi != null)
                 .GroupBy(d => new { d.NgayDongHocPhi!.Value.Year, d.NgayDongHocPhi!.Value.Month })
@@ -180,33 +182,33 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 .ToListAsync();
             ViewBag.DoanhThuTheoThang = doanhThu;
 
-            // 6. Doanh thu theo chương trình đào tạo
+            // 6. Doanh thu theo chương trình đào tạo (Mục 9.6)
             ViewBag.DoanhThuTheoCTDT = await _context.DangKyHocs
                 .Where(d => d.NgayDongHocPhi != null && d.LopHoc != null && d.LopHoc.ChuongTrinhDaoTao != null)
                 .GroupBy(d => d.LopHoc!.ChuongTrinhDaoTao!.TenChuongTrinh)
                 .Select(g => new { Ten = g.Key, DoanhThu = g.Sum(d => d.SoTienDaDong) })
                 .ToListAsync();
 
-            // 7. Số đăng ký theo tháng
+            // 7. Số đăng ký theo tháng (Mục 9.6)
             ViewBag.DKTheoThang = await _context.DangKyHocs
                 .GroupBy(d => new { d.NgayDangKy.Year, d.NgayDangKy.Month })
                 .Select(g => new { Thang = g.Key.Month + "/" + g.Key.Year, SoLuong = g.Count() })
                 .ToListAsync();
 
-            // 8. Số buổi học theo tháng
+            // 8. Số buổi học theo tháng (Mục 9.6)
             ViewBag.BuoiHocTheoThang = await _context.BuoiHocs
                 .GroupBy(b => new { b.ThoiGianBatDau.Year, b.ThoiGianBatDau.Month })
                 .Select(g => new { Thang = g.Key.Month + "/" + g.Key.Year, SoLuong = g.Count() })
                 .ToListAsync();
 
-            // 9. Điểm tổng kết trung bình theo lớp
+            // 9. Điểm tổng kết trung bình theo lớp (Mục 9.6)
             ViewBag.DiemTBTheoLop = await _context.KetQuaHocTaps
                 .Where(k => k.DangKyHoc != null && k.DangKyHoc.LopHoc != null)
                 .GroupBy(k => k.DangKyHoc!.LopHoc!.TenLop)
                 .Select(g => new { Ten = g.Key, DiemTB = g.Average(k => k.DiemTongKet) })
                 .ToListAsync();
 
-            // 10. Tỷ lệ lấp đầy sĩ số
+            // 10. Tỷ lệ lấp đầy sĩ số (Mục 9.6)
             var tyLe = await _context.LopHocs
                 .Select(l => new TyLeLapDayVM
                 {
@@ -222,7 +224,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 .ToListAsync();
             ViewBag.TyLeLapDay = tyLe;
 
-            // 11. Tỷ lệ Hoàn thành trên số học viên đã có kết quả
+            // 11. Tỷ lệ Hoàn thành trên số học viên đã có kết quả (Mục 9.6)
             var totalCoDiem = await _context.KetQuaHocTaps.CountAsync();
             ViewBag.TyLeHoanThanh = totalCoDiem > 0 ? (double)(await _context.KetQuaHocTaps.CountAsync(k => k.KetQua == "Hoàn thành")) / totalCoDiem * 100 : 0;
 
