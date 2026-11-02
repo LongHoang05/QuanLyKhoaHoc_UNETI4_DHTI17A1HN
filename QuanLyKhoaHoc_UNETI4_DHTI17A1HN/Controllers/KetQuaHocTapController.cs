@@ -243,7 +243,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         public async Task<IActionResult> DeletePost(int id)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-            var kq = await _ketQuaRepo.GetByIdAsync(id);
+            var kq = await _ketQuaRepo.GetByIdWithDetailsAsync(id);
             if (kq == null)
             {
                 if (isAjax) return Json(new { success = false, message = "Không tìm thấy kết quả học tập để xóa." });
@@ -251,10 +251,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            if (kq.DangKyHoc != null)
+            {
+                kq.DangKyHoc.TrangThai = "Đang học";
+                await _dangKyHocRepo.UpdateAsync(kq.DangKyHoc);
+            }
+
             await _ketQuaRepo.DeleteAsync(id);
 
-            if (isAjax) return Json(new { success = true, message = "Đã xóa bản ghi kết quả học tập khỏi hệ thống." });
-            TempData["Success"] = "Đã xóa bản ghi kết quả học tập khỏi hệ thống.";
+            if (isAjax) return Json(new { success = true, message = "Đã xóa bản ghi kết quả học tập và hoàn lại trạng thái Đang học cho học viên!" });
+            TempData["Success"] = "Đã xóa bản ghi kết quả học tập và hoàn lại trạng thái Đang học cho học viên!";
             return RedirectToAction(nameof(Index));
         }
     }

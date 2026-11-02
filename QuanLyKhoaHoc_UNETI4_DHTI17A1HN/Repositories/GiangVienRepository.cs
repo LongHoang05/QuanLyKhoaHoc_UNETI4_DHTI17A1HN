@@ -208,9 +208,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 else if (tk >= 4.0) { ketQua.DiemChu = "D"; ketQua.DiemHe4 = 1.0; ketQua.XepLoai = "Yếu"; ketQua.KetQua = "Đạt"; }
                 else { ketQua.DiemChu = "F"; ketQua.DiemHe4 = 0.0; ketQua.XepLoai = "Kém"; ketQua.KetQua = "Không đạt"; }
 
-                if (ketQua.KetQua == "Đạt")
+                if (ketQua.KetQua == "Đạt" || ketQua.KetQua == "Hoàn thành")
                 {
                     dk.TrangThai = "Hoàn thành";
+                }
+                else
+                {
+                    dk.TrangThai = "Không hoàn thành";
                 }
             }
 

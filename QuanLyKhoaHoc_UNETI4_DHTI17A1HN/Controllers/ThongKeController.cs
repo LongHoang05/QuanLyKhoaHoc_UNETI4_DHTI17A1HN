@@ -114,11 +114,24 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         public async Task<IActionResult> DuyetNhanh(int id)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-            var dangKy = await _dangKyHocRepo.GetByIdAsync(id);
+            var dangKy = await _dangKyHocRepo.GetByIdWithDetailsAsync(id);
             if (dangKy != null)
             {
+                if (dangKy.LopHoc != null)
+                {
+                    int currentEnrolled = await _dangKyHocRepo.CountEnrolledInLopAsync(dangKy.MaLopHoc);
+                    if (currentEnrolled >= dangKy.LopHoc.SiSoToiDa)
+                    {
+                        string msg = $"Không thể duyệt! Lớp '{dangKy.LopHoc.TenLop}' đã đủ sĩ số tối đa ({dangKy.LopHoc.SiSoToiDa} học viên).";
+                        if (isAjax) return Json(new { success = false, message = msg });
+                        TempData["Error"] = msg;
+                        return RedirectToAction(nameof(Dashboard));
+                    }
+                }
+
                 dangKy.TrangThai = "Đã duyệt";
                 dangKy.NgayXuLy = DateTime.Now;
+                dangKy.NhanXetGiaoVu = HttpContext.Session.GetString("HoTen") ?? "Ban Quản trị";
                 await _dangKyHocRepo.UpdateAsync(dangKy);
                 if (isAjax)
                 {

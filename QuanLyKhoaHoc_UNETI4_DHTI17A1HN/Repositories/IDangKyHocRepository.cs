@@ -47,3 +47,4 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         Task<int> GetTotalCountExcludingCancelledAsync();
     }
 }
+
