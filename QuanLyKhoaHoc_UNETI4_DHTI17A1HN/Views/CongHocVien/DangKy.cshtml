@@ -19,103 +19,6 @@
     int totalItems = ViewBag.TotalItems ?? 0;
 }
 
-<!-- ================= HERO SECTION BANNER ================= -->
-<section class="relative bg-gradient-to-br from-brand-deep via-[#002773] to-primary text-white overflow-hidden py-14 sm:py-20 px-4 sm:px-6 lg:px-8">
-    <!-- Background Abstract Glow Shapes -->
-    <div class="absolute -top-24 -right-24 w-96 h-96 bg-primary/30 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-accent-orange/20 rounded-full blur-3xl pointer-events-none"></div>
-
-    <div class="max-w-7xl mx-auto relative z-10">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
-                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold text-white">
-                    <span class="w-2 h-2 rounded-full bg-accent-orange animate-ping"></span>
-                    <span>Tuyển Sinh Khóa Học Mới 2024 - 2025</span>
-                </div>
-                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-white">
-                    Học Kỹ Năng Thực Chiến <br class="hidden sm:inline"/>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-300 to-yellow-200">
-                        Bứt Phá Thu Nhập Cùng Doanh Nghiệp
-                    </span>
-                </h1>
-                <p class="text-slate-200 text-sm sm:text-base max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
-                    Chương trình đào tạo chuyên sâu được cố vấn trực tiếp bởi giảng viên và kỹ sư hàng đầu. Chứng chỉ giá trị từ Đại học Kinh tế - Kỹ thuật Công nghiệp (UNETI).
-                </p>
-
-                <!-- Search form in Hero -->
-                <form action="/CongHocVien/DangKy" method="get" class="max-w-xl mx-auto lg:mx-0 flex items-center bg-white rounded-2xl p-1.5 shadow-xl border border-white/20">
-                    <span class="material-symbols-outlined text-outline text-[22px] ml-3 shrink-0">search</span>
-                    <input type="text" name="search" value="@search" placeholder="Nhập tên khóa học, ngôn ngữ lập trình, giảng viên..."
-                           class="w-full px-3 py-2 text-xs sm:text-sm text-slate-800 placeholder:text-outline focus:outline-none bg-transparent" />
-                    <button type="submit" class="bg-primary hover:bg-primary-hover text-white text-xs sm:text-sm font-bold px-5 sm:px-6 py-2.5 rounded-xl shadow-md transition-all shrink-0">
-                        Khám phá ngay
-                    </button>
-                </form>
-
-                <!-- Trust Stats -->
-                <div class="grid grid-cols-3 gap-4 pt-4 border-t border-white/10 max-w-lg mx-auto lg:mx-0 text-left">
-                    <div>
-                        <span class="text-xl sm:text-2xl font-black text-amber-300 block">@ViewBag.TongKhoaHoc+</span>
-                        <span class="text-[11px] text-slate-300 font-medium">Lớp đang mở tuyển</span>
-                    </div>
-                    <div>
-                        <span class="text-xl sm:text-2xl font-black text-amber-300 block">@ViewBag.TongHocVien+</span>
-                        <span class="text-[11px] text-slate-300 font-medium">Học viên tin chọn</span>
-                    </div>
-                    <div>
-                        <span class="text-xl sm:text-2xl font-black text-amber-300 block">100%</span>
-                        <span class="text-[11px] text-slate-300 font-medium">Thực hành thực tế</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Hero Right Card Banner -->
-            <div class="lg:col-span-5 hidden lg:block">
-                <div class="relative bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-3xl shadow-2xl space-y-4">
-                    <div class="flex items-center justify-between pb-3 border-b border-white/10">
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-rose-500"></span>
-                            <span class="w-3 h-3 rounded-full bg-amber-400"></span>
-                            <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
-                        </div>
-                        <span class="text-xs font-mono text-amber-300 font-bold flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[16px]">local_fire_department</span> FLASH RECRUITMENT
-                        </span>
-                    </div>
-
-                    <div class="space-y-3">
-                        <div class="p-3.5 rounded-2xl bg-white/15 border border-white/10 flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center font-bold shrink-0">
-                                <span class="material-symbols-outlined text-[20px]">code</span>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <h4 class="text-xs font-bold text-white truncate">Lập trình Web ASP.NET Core MVC 10</h4>
-                                <span class="text-[11px] text-slate-300">Giảm 10% học phí khi đăng ký sớm</span>
-                            </div>
-                            <span class="text-xs font-bold text-amber-300 font-mono shrink-0">Hot</span>
-                        </div>
-
-                        <div class="p-3.5 rounded-2xl bg-white/15 border border-white/10 flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shrink-0">
-                                <span class="material-symbols-outlined text-[20px]">analytics</span>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <h4 class="text-xs font-bold text-white truncate">Khoa học Dữ liệu & AI với Python</h4>
-                                <span class="text-[11px] text-slate-300">Được kèm cặp bởi Chuyên gia AI</span>
-                            </div>
-                            <span class="text-xs font-bold text-emerald-300 font-mono shrink-0">Mới</span>
-                        </div>
-                    </div>
-
-                    <div class="pt-2 text-center text-xs text-slate-300">
-                        ✨ Cam kết hoàn 100% học phí trong 7 ngày nếu không hài lòng
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
 <!-- ================= QUICK CATEGORY CHIPS ================= -->
 <div class="bg-white border-b border-border-standard sticky top-20 z-30 shadow-xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
@@ -252,12 +155,23 @@
         <main class="lg:col-span-3 space-y-6">
             <!-- Top Controls Toolbar -->
             <div class="bg-white rounded-2xl p-4 border border-border-standard shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="text-xs text-outline">
-                    Hiển thị <strong class="text-brand-deep">@Model.Count()</strong> trên tổng số <strong class="text-brand-deep">@totalItems</strong> khóa học mở tuyển sinh
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <!-- Compact Search in Toolbar -->
+                    <form action="/CongHocVien/DangKy" method="get" class="flex items-center bg-slate-50 border border-border-standard rounded-xl px-3 py-1.5 focus-within:bg-white focus-within:ring-2 focus-within:ring-primary/20 w-full sm:w-80">
+                        <span class="material-symbols-outlined text-outline text-[18px] mr-2">search</span>
+                        <input type="text" name="search" value="@search" placeholder="Tìm tên khóa học, giảng viên..." class="w-full text-xs text-slate-800 placeholder:text-outline focus:outline-none bg-transparent" />
+                        @if (selectedMaCT.HasValue) { <input type="hidden" name="maChuongTrinh" value="@selectedMaCT.Value" /> }
+                        @if (!string.IsNullOrEmpty(selectedTrinhDo)) { <input type="hidden" name="trinhDo" value="@selectedTrinhDo" /> }
+                        @if (!string.IsNullOrEmpty(selectedMucGia)) { <input type="hidden" name="mucGia" value="@selectedMucGia" /> }
+                        @if (!string.IsNullOrEmpty(selectedSapXep)) { <input type="hidden" name="sapXep" value="@selectedSapXep" /> }
+                    </form>
+                    <div class="text-xs text-outline hidden md:block whitespace-nowrap">
+                        Hiển thị <strong class="text-brand-deep">@Model.Count()</strong>/<strong class="text-brand-deep">@totalItems</strong> khóa học
+                    </div>
                 </div>
 
                 <!-- Sort Control -->
-                <div class="flex items-center gap-2 text-xs">
+                <div class="flex items-center gap-2 text-xs w-full sm:w-auto justify-end">
                     <span class="text-outline shrink-0">Sắp xếp theo:</span>
                     <select onchange="location.href = updateQueryParam('sapXep', this.value)"
                             class="px-3 py-1.5 rounded-xl border border-border-standard bg-slate-50 focus:bg-white text-xs font-semibold text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20">
