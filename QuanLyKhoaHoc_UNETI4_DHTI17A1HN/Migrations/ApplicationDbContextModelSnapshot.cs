@@ -39,6 +39,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<int?>("MaGiangVien")
+                        .HasColumnType("int");
+
                     b.Property<int>("MaLopHoc")
                         .HasColumnType("int");
 
@@ -63,6 +66,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("MaBuoiHoc");
+
+                    b.HasIndex("MaGiangVien");
 
                     b.HasIndex("MaLopHoc");
 
@@ -178,6 +183,73 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
                             NgayDangKy = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             SoTienDaDong = 0m,
                             TrangThai = "Chờ duyệt"
+                        });
+                });
+
+            modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien", b =>
+                {
+                    b.Property<int>("MaGiangVien")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaGiangVien"));
+
+                    b.Property<string>("ChuyenNganh")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("GioiThieu")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("HoTen")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("HocVi")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("MaTaiKhoan")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("NgayTao")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SoDienThoai")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<bool>("TrangThai")
+                        .HasColumnType("bit");
+
+                    b.HasKey("MaGiangVien");
+
+                    b.HasIndex("MaTaiKhoan")
+                        .IsUnique()
+                        .HasFilter("[MaTaiKhoan] IS NOT NULL");
+
+                    b.ToTable("GiangVien");
+
+                    b.HasData(
+                        new
+                        {
+                            MaGiangVien = 1,
+                            ChuyenNganh = "Công nghệ phần mềm & Lập trình ứng dụng",
+                            Email = "hung.tran@uneti.edu.vn",
+                            GioiThieu = "Giảng viên bộ môn Công nghệ phần mềm Khoa CNTT UNETI. Hơn 8 năm kinh nghiệm giảng dạy ASP.NET Core, C#, SQL Server.",
+                            HoTen = "ThS. Trần Văn Hùng",
+                            HocVi = "Thạc sĩ",
+                            MaTaiKhoan = 4,
+                            NgayTao = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            SoDienThoai = "0912345678",
+                            TrangThai = true
                         });
                 });
 
@@ -318,6 +390,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
                     b.Property<int>("MaChuongTrinh")
                         .HasColumnType("int");
 
+                    b.Property<int?>("MaGiangVien")
+                        .HasColumnType("int");
+
                     b.Property<string>("MoTa")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
@@ -367,6 +442,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
 
                     b.HasIndex("MaChuongTrinh");
 
+                    b.HasIndex("MaGiangVien");
+
                     b.ToTable("LopHoc");
 
                     b.HasData(
@@ -376,6 +453,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
                             HanDangKy = new DateTime(2026, 12, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             HocPhi = 3500000m,
                             MaChuongTrinh = 1,
+                            MaGiangVien = 1,
                             MoTa = "Lớp học buổi tối thứ 2-4-6 từ 18:00 - 21:00",
                             NgayBatDauDangKy = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NgayKhaiGiang = new DateTime(2027, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -467,16 +545,34 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
                             TenDangNhap = "hocvien",
                             TrangThai = true,
                             VaiTro = "HocVien"
+                        },
+                        new
+                        {
+                            MaTaiKhoan = 4,
+                            Email = "hung.tran@uneti.edu.vn",
+                            HoTen = "ThS. Trần Văn Hùng",
+                            MatKhau = "giangvien123",
+                            NgayTao = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TenDangNhap = "giangvien",
+                            TrangThai = true,
+                            VaiTro = "GiangVien"
                         });
                 });
 
             modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.BuoiHoc", b =>
                 {
+                    b.HasOne("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien", "GiangVienObj")
+                        .WithMany("BuoiHocs")
+                        .HasForeignKey("MaGiangVien")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc", "LopHoc")
                         .WithMany("BuoiHocs")
                         .HasForeignKey("MaLopHoc")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("GiangVienObj");
 
                     b.Navigation("LopHoc");
                 });
@@ -498,6 +594,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
                     b.Navigation("HocVien");
 
                     b.Navigation("LopHoc");
+                });
+
+            modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien", b =>
+                {
+                    b.HasOne("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.TaiKhoan", "TaiKhoan")
+                        .WithOne("GiangVien")
+                        .HasForeignKey("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien", "MaTaiKhoan")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("TaiKhoan");
                 });
 
             modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.HocVien", b =>
@@ -529,7 +635,14 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien", "GiangVien")
+                        .WithMany("LopHocs")
+                        .HasForeignKey("MaGiangVien")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("ChuongTrinhDaoTao");
+
+                    b.Navigation("GiangVien");
                 });
 
             modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.ChuongTrinhDaoTao", b =>
@@ -540,6 +653,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
             modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc", b =>
                 {
                     b.Navigation("KetQuaHocTap");
+                });
+
+            modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien", b =>
+                {
+                    b.Navigation("BuoiHocs");
+
+                    b.Navigation("LopHocs");
                 });
 
             modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.HocVien", b =>
@@ -556,6 +676,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Migrations
 
             modelBuilder.Entity("QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.TaiKhoan", b =>
                 {
+                    b.Navigation("GiangVien");
+
                     b.Navigation("HocVien");
                 });
 #pragma warning restore 612, 618
