@@ -1,4 +1,4 @@
-﻿@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels.TaiKhoanListViewModel
+@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels.TaiKhoanListViewModel
 @{
     ViewData["Title"] = "Quản lý Tài khoản & Phân quyền";
     var totalCount = Model.TotalCount;
@@ -266,6 +266,7 @@
         <div>
             <label class="block font-bold text-brand-deep uppercase mb-1">Tên đăng nhập <span class="text-rose-500">*</span></label>
             <input type="text" id="drawer-user" required placeholder="VD: giaovu03" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep font-mono">
+            <p id="drawer-user-hint" class="text-[11px] text-outline mt-1 hidden">Tên đăng nhập có thể thay đổi (phải là duy nhất trong hệ thống).</p>
         </div>
 
         <div>
@@ -279,8 +280,9 @@
         </div>
 
         <div id="drawer-pwd-group">
-            <label class="block font-bold text-brand-deep uppercase mb-1">Mật khẩu khởi tạo</label>
+            <label class="block font-bold text-brand-deep uppercase mb-1" id="drawer-pwd-label">Mật khẩu khởi tạo</label>
             <input type="password" id="drawer-pwd" placeholder="Mặc định: 123456" value="123456" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep font-mono">
+            <p id="drawer-pwd-hint" class="text-[11px] text-outline mt-1 hidden">Để trống nếu muốn giữ nguyên mật khẩu hiện tại.</p>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -354,10 +356,14 @@
         document.getElementById('drawer-title').innerText = 'Thêm tài khoản người dùng';
         document.getElementById('drawer-user').value = '';
         document.getElementById('drawer-user').readOnly = false;
+        document.getElementById('drawer-user-hint').classList.add('hidden');
         document.getElementById('drawer-name').value = '';
         document.getElementById('drawer-email').value = '';
         document.getElementById('drawer-pwd-group').style.display = 'block';
+        document.getElementById('drawer-pwd-label').innerText = 'Mật khẩu khởi tạo';
+        document.getElementById('drawer-pwd').placeholder = 'Mặc định: 123456';
         document.getElementById('drawer-pwd').value = '123456';
+        document.getElementById('drawer-pwd-hint').classList.add('hidden');
         document.getElementById('drawer-role').value = 'HocVien';
         document.getElementById('drawer-status').value = 'true';
     }
@@ -372,16 +378,25 @@
         editingTkId = id;
         document.getElementById('drawer-title').innerText = 'Chỉnh sửa tài khoản';
         document.getElementById('drawer-matk').value = id;
-        document.getElementById('drawer-pwd-group').style.display = 'none';
+
+        // Cho phép Admin cập nhật mật khẩu mới nếu muốn
+        document.getElementById('drawer-pwd-group').style.display = 'block';
+        document.getElementById('drawer-pwd-label').innerText = 'Mật khẩu mới';
+        document.getElementById('drawer-pwd').placeholder = 'Để trống nếu giữ nguyên mật khẩu...';
+        document.getElementById('drawer-pwd').value = '';
+        document.getElementById('drawer-pwd-hint').classList.remove('hidden');
+
+        // Cho phép Admin chỉnh sửa Tên đăng nhập
+        document.getElementById('drawer-user').readOnly = false;
+        document.getElementById('drawer-user-hint').classList.remove('hidden');
 
         // Load data via AJAX
-        fetch(`/TaiKhoan/GetTaiKhoanJson?id=${id}`)
+        fetch('/TaiKhoan/GetTaiKhoanJson?id=' + id)
             .then(res => res.json())
             .then(res => {
                 if (res.success) {
                     const data = res.data;
                     document.getElementById('drawer-user').value = data.tenDangNhap;
-                    document.getElementById('drawer-user').readOnly = true;
                     document.getElementById('drawer-name').value = data.hoTen;
                     document.getElementById('drawer-email').value = data.email;
                     document.getElementById('drawer-role').value = data.vaiTro;
@@ -421,8 +436,11 @@
         if (id > 0) {
             url = '/TaiKhoan/EditPost';
             formData.append('maTaiKhoan', id);
+            if (pwd) {
+                formData.append('matKhau', pwd);
+            }
         } else {
-            formData.append('matKhau', pwd);
+            formData.append('matKhau', pwd || '123456');
         }
 
         fetch(url, {

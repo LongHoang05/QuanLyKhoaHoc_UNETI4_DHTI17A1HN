@@ -472,7 +472,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         [SessionAuthorize("Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditPost(int maTaiKhoan, string tenDangNhap, string hoTen, string email, string vaiTro, bool trangThai)
+        public async Task<IActionResult> EditPost(int maTaiKhoan, string tenDangNhap, string hoTen, string email, string vaiTro, bool trangThai, string? matKhau = null)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
             var tk = await _taiKhoanService.GetTaiKhoanByIdAsync(maTaiKhoan);
@@ -483,11 +483,23 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            tk.TenDangNhap = tenDangNhap?.Trim() ?? tk.TenDangNhap;
+            if (string.IsNullOrWhiteSpace(tenDangNhap))
+            {
+                if (isAjax) return Json(new { success = false, message = "Tên đăng nhập không được để trống." });
+                TempData["Error"] = "Tên đăng nhập không được để trống.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            tk.TenDangNhap = tenDangNhap.Trim();
             tk.HoTen = hoTen?.Trim() ?? tk.HoTen;
             tk.Email = email?.Trim() ?? tk.Email;
             tk.VaiTro = string.IsNullOrWhiteSpace(vaiTro) ? tk.VaiTro : vaiTro;
             tk.TrangThai = trangThai;
+
+            if (!string.IsNullOrWhiteSpace(matKhau))
+            {
+                tk.MatKhau = matKhau.Trim();
+            }
 
             var (success, errorMessage) = await _taiKhoanService.CapNhatTaiKhoanAsync(tk);
             if (!success)
@@ -495,6 +507,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 if (isAjax) return Json(new { success = false, message = errorMessage ?? "Cập nhật tài khoản thất bại." });
                 TempData["Error"] = errorMessage;
                 return RedirectToAction(nameof(Index));
+            }
+
+            // Đồng bộ Session nếu Admin chỉnh sửa chính tài khoản đang đăng nhập
+            int? currentSessionId = HttpContext.Session.GetInt32("MaTaiKhoan");
+            if (currentSessionId == tk.MaTaiKhoan)
+            {
+                HttpContext.Session.SetString("TenDangNhap", tk.TenDangNhap);
+                HttpContext.Session.SetString("HoTen", tk.HoTen);
+                HttpContext.Session.SetString("Email", tk.Email);
+                HttpContext.Session.SetString("VaiTro", tk.VaiTro);
             }
 
             string msg = $"Cập nhật tài khoản '{tk.TenDangNhap}' thành công!";
