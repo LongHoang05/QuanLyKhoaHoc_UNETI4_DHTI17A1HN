@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Http
 @inject IHttpContextAccessor HttpContextAccessor
 @{
     var session = HttpContextAccessor.HttpContext?.Session;
@@ -188,6 +188,11 @@
                         <a href="/LopHoc/Index" data-url="/lophoc" class="sidebar-link flex items-center gap-2.5 px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
                             <span class="material-symbols-outlined text-[19px] text-outline">meeting_room</span>
                             <span>Lớp học phần</span>
+                        </a>
+
+                        <a href="/LopHoc/TimKiemAjax" data-url="/lophoc/timkiemajax" class="sidebar-link flex items-center gap-2.5 px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all" title="Bài tập thực hành JavaScript, jQuery, AJAX UNETI">
+                            <span class="material-symbols-outlined text-[19px] text-primary">search_spark</span>
+                            <span>Tìm kiếm AJAX (BTH)</span>
                         </a>
 
                         <a href="/BuoiHoc/Index" data-url="/buoihoc" class="sidebar-link flex items-center gap-2.5 px-3 py-2 rounded-xl font-medium text-[13px] text-on-surface-variant hover:text-brand-deep hover:bg-surface-container-low transition-all">
@@ -413,6 +418,9 @@
 
     <!-- Global Delete Confirmation Modal for all pages -->
     <partial name="_DeleteModal" />
+
+    <!-- jQuery thư viện cốt lõi cho JavaScript - jQuery - AJAX -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

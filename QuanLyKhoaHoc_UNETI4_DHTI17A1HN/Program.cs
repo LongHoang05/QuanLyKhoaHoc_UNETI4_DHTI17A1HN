@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
@@ -15,7 +16,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 // ========================================================
-// 2. Cấu hình Session & Cookie cho đăng nhập / phân quyền
+// 2. Cấu hình Session & Cookie Authentication cho đăng nhập / phân quyền (Theo bài giảng Bảo mật UNETI)
 // ========================================================
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -24,6 +25,19 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+// Cấu hình Cookie Authentication với Claims (Slide 14-32 Bài giảng Bảo mật)
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/TaiKhoan/DangNhap";
+        options.LogoutPath = "/TaiKhoan/DangXuat";
+        options.AccessDeniedPath = "/Home/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromHours(2);
+        options.SlidingExpiration = true;
+        options.Cookie.HttpOnly = true;
+        options.Cookie.Name = "UNETI_Auth_Cookie";
+    });
 
 builder.Services.AddHttpContextAccessor();
 
@@ -133,9 +147,9 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// Bật Session (bắt buộc đặt trước UseAuthorization)
+// Bật Cookie Authentication & Session theo chuẩn bài giảng ASP.NET Core & Bảo mật UNETI
+app.UseAuthentication();
 app.UseSession();
-
 app.UseAuthorization();
 
 // Route thân thiện cho Khám phá khóa học

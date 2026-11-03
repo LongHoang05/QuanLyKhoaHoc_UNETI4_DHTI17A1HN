@@ -6,6 +6,7 @@
 // Controller không truy vấn trực tiếp DbContext / LINQ
 // ========================================================
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
@@ -324,6 +325,53 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             if (isAjax) return Json(new { success = true, message = $"Đã xóa lớp học '{lop.TenLop}' thành công." });
             TempData["Success"] = "Đã xóa lớp học thành công.";
             return RedirectToAction(nameof(Index));
+        }
+
+        // ========================================================
+        // BÀI TẬP THỰC HÀNH JAVASCRIPT, JQUERY, AJAX (BÀI 11 - BÀI 15)
+        // ========================================================
+
+        /// <summary>
+        /// Bài 11: AJAX đơn giản tải chuỗi dữ liệu từ Server mà không tải lại trang
+        /// </summary>
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult XinChao()
+        {
+            return Content($"Xin chào từ Server ASP.NET Core! [UNETI AJAX Response - Thời gian: {DateTime.Now:HH:mm:ss dd/MM/yyyy}]");
+        }
+
+        /// <summary>
+        /// Bài 12 - 15: Tìm kiếm theo từ khóa (GET), Lọc theo danh mục Dropdown onchange, Tìm kiếm thời gian thực keyup
+        /// Trả về PartialView khi gọi bằng AJAX, hoặc View đầy đủ khi truy cập qua URL
+        /// </summary>
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> TimKiemAjax(string? keyword, int? maChuongTrinh)
+        {
+            var dsLop = await _lopHocRepo.SearchAjaxAsync(keyword, maChuongTrinh);
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_DanhSachLopPartial", dsLop);
+            }
+
+            ViewBag.ChuongTrinhList = await _lopHocRepo.GetChuongTrinhListAsync();
+            ViewBag.Keyword = keyword;
+            ViewBag.MaChuongTrinh = maChuongTrinh;
+            return View(dsLop);
+        }
+
+        /// <summary>
+        /// Bài 13: AJAX gửi dữ liệu bằng phương thức POST
+        /// </summary>
+        [HttpPost]
+        [ActionName("TimKiemAjax")]
+        [AllowAnonymous]
+        public async Task<IActionResult> TimKiemAjaxPost(string? keyword, int? maChuongTrinh)
+        {
+            var dsLop = await _lopHocRepo.SearchAjaxAsync(keyword, maChuongTrinh);
+            return PartialView("_DanhSachLopPartial", dsLop);
         }
     }
 }

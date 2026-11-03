@@ -1,0 +1,289 @@
+@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>
+@{
+    ViewData["Title"] = "Thực hành JavaScript - jQuery - AJAX";
+    var chuongTrinhs = ViewBag.ChuongTrinhList as IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.ChuongTrinhDaoTao> ?? Enumerable.Empty<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.ChuongTrinhDaoTao>();
+}
+
+<div class="space-y-6 max-w-7xl mx-auto">
+    <!-- Header Banner Giới thiệu bài thực hành UNETI -->
+    <div class="bg-gradient-to-r from-brand-deep via-[#0A3D91] to-primary p-6 sm:p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="relative z-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-semibold mb-3 border border-white/20">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                <span>BÀI TẬP THỰC HÀNH KHOA CNTT - UNETI</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-black tracking-tight mb-2">
+                Minh Họa Toàn Diện JavaScript, jQuery &amp; AJAX (Bài 1 - 15)
+            </h1>
+            <p class="text-slate-200 text-xs sm:text-sm max-w-3xl leading-relaxed">
+                Trang chức năng tích hợp đầy đủ 15 bài thực hành: Xử lý DOM &amp; Sự kiện (Bài 1-5), Thao tác jQuery &amp; Hiệu ứng (Bài 6-10), Gọi AJAX Server (Bài 11), Tìm kiếm AJAX GET/POST (Bài 12-13), Tìm kiếm thời gian thực (Bài 14) và Lọc Dropdown danh mục (Bài 15) theo mô hình Repository Pattern.
+            </p>
+        </div>
+    </div>
+
+    <!-- KHỐI 1: BÀI 11 - AJAX ĐƠN GIẢN TẢI NỘI DUNG TỪ SERVER -->
+    <div class="bg-surface-white p-5 rounded-3xl border border-border-standard shadow-xs space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-border-standard">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
+                    11
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-brand-deep">Bài 11: AJAX Đơn giản tải chuỗi dữ liệu từ Server</h3>
+                    <p class="text-[11px] text-outline">Gửi Request GET tới Action <code>LopHoc/XinChao</code> và hiển thị phản hồi mà không tải lại trang</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" id="btnXinChao" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-xs shadow-xs transition-all cursor-pointer">
+                    <span class="material-symbols-outlined text-[16px]">waving_hand</span>
+                    <span>Bấm Thử Nghiệm AJAX Xin Chào</span>
+                </button>
+                <button type="button" id="btnToggleHuongDan" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-medium text-xs transition-all cursor-pointer">
+                    <span class="material-symbols-outlined text-[16px]">help</span>
+                    <span>Xem ghi chú kỹ thuật</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Vùng hiển thị kết quả Bài 11 -->
+        <div id="vungXinChao" class="hidden p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-medium flex items-center justify-between transition-all">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-emerald-600 text-[20px]">verified</span>
+                <span id="noiDungXinChao" class="font-mono">Chưa có phản hồi</span>
+            </div>
+            <button type="button" onclick="$('#vungXinChao').slideUp();" class="text-emerald-700 hover:text-emerald-900 cursor-pointer">
+                <span class="material-symbols-outlined text-[16px]">close</span>
+            </button>
+        </div>
+
+        <!-- Ghi chú kỹ thuật (Slide & Tài liệu thực hành) -->
+        <div id="hopHuongDan" class="hidden p-4 rounded-2xl bg-surface-container-low text-xs space-y-2 text-on-surface-variant">
+            <div class="font-bold text-brand-deep">Kỹ thuật áp dụng theo tài liệu giảng dạy UNETI:</div>
+            <ul class="list-disc list-inside space-y-1 text-[11px] text-outline">
+                <li><strong>Bài 1-5 (JS thuần):</strong> DOM getElementById, xử lý chuỗi, validate độ dài, alert/toast notification.</li>
+                <li><strong>Bài 6-10 (jQuery):</strong> Bắt sự kiện <code>click</code>, <code>change</code>, <code>keyup</code>; hiệu ứng <code>slideToggle()</code>, <code>fadeIn()</code>; thêm sửa CSS classes.</li>
+                <li><strong>Bài 11-15 (AJAX):</strong> <code>$.ajax()</code> tương tác bất đồng bộ với ASP.NET Core MVC Controller, nạp Partial View <code>_DanhSachLopPartial</code> trực tiếp vào DOM không reload.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- KHỐI 2: BÀI 12, 13, 14, 15 - TÌM KIẾM & LỌC DỮ LIỆU THỜI GIAN THỰC (AJAX) -->
+    <div class="bg-surface-white p-5 rounded-3xl border border-border-standard shadow-xs space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-border-standard">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-brand-deep text-white flex items-center justify-center font-bold text-sm">
+                    12-15
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-brand-deep">Bộ Lọc &amp; Tìm Kiếm Thời Gian Thực (Live Search AJAX)</h3>
+                    <p class="text-[11px] text-outline">Bài 12 (GET), Bài 13 (POST), Bài 14 (Sự kiện keyup), Bài 15 (Sự kiện dropdown change)</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" id="btnSearchPost" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-brand-deep font-semibold text-xs transition-all cursor-pointer" title="Minh họa gửi yêu cầu bằng AJAX POST theo Bài 13">
+                    <span class="material-symbols-outlined text-[16px] text-primary">send</span>
+                    <span>Test AJAX POST (Bài 13)</span>
+                </button>
+                <button type="button" id="btnResetFilter" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-outline font-medium text-xs transition-all cursor-pointer">
+                    <span class="material-symbols-outlined text-[16px]">refresh</span>
+                    <span>Làm mới</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Form điều khiển AJAX: Search Input + Category Dropdown -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5">
+            <!-- Ô tìm kiếm từ khóa (Bài 12 & Bài 14: sự kiện keyup thời gian thực) -->
+            <div class="md:col-span-7 relative">
+                <label for="keyword" class="block text-[11px] font-bold text-on-surface-variant mb-1.5">
+                    Từ khóa tìm kiếm (Bài 14: Tự động tìm khi gõ - Live Keyup)
+                </label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+                    <input type="text" id="keyword" value="@ViewBag.Keyword" placeholder="Nhập tên lớp học phần, tên giảng viên, phòng học..." class="w-full pl-10 pr-10 py-2.5 rounded-xl border border-border-standard bg-surface-container-low focus:bg-surface-white focus:border-primary focus:outline-none text-xs transition-colors font-medium">
+                    <button type="button" id="btnClearKeyword" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-brand-deep cursor-pointer">
+                        <span class="material-symbols-outlined text-[18px]">cancel</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dropdown chọn chương trình đào tạo (Bài 15: sự kiện change lọc dữ liệu) -->
+            <div class="md:col-span-3">
+                <label for="maChuongTrinh" class="block text-[11px] font-bold text-on-surface-variant mb-1.5">
+                    Chương trình đào tạo (Bài 15: Lọc onchange)
+                </label>
+                <select id="maChuongTrinh" class="w-full py-2.5 px-3 rounded-xl border border-border-standard bg-surface-container-low focus:bg-surface-white focus:border-primary focus:outline-none text-xs transition-colors font-medium cursor-pointer">
+                    <option value="">-- Tất cả chương trình --</option>
+                    @foreach (var ct in chuongTrinhs)
+                    {
+                        if (ViewBag.MaChuongTrinh != null && (int)ViewBag.MaChuongTrinh == ct.MaChuongTrinh)
+                        {
+                            <option value="@ct.MaChuongTrinh" selected>@ct.TenChuongTrinh</option>
+                        }
+                        else
+                        {
+                            <option value="@ct.MaChuongTrinh">@ct.TenChuongTrinh</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <!-- Nút bấm tìm kiếm thủ công (Bài 12: GET qua AJAX) -->
+            <div class="md:col-span-2 flex items-end">
+                <button type="button" id="btnSearchGet" class="w-full py-2.5 px-4 rounded-xl bg-brand-deep hover:bg-[#082d6b] text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span class="material-symbols-outlined text-[18px]">search</span>
+                    <span>Tìm kiếm GET</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Spinner Indicator (Ẩn/Hiện bằng jQuery) -->
+        <div id="loadingIndicator" class="hidden py-6 text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+                <svg class="animate-spin h-4 w-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                </svg>
+                <span>Đang xử lý AJAX và nạp dữ liệu từ Server...</span>
+            </div>
+        </div>
+
+        <!-- KHU VỰC KẾT QUẢ AJAX ĐƯỢC CHÈN BẰNG JQUERY $.html() -->
+        <div id="ketQua" class="transition-all duration-300">
+            @await Html.PartialAsync("_DanhSachLopPartial", Model)
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            console.log("UNETI AJAX Module Initialized - jQuery Version: " + $.fn.jquery);
+
+            // ========================================================
+            // BÀI 1-5: JavaScript cơ bản (Hiệu ứng, toggle, alert/toast)
+            // ========================================================
+            $('#btnToggleHuongDan').click(function () {
+                $('#hopHuongDan').slideToggle(250);
+            });
+
+            // ========================================================
+            // BÀI 11: AJAX đơn giản tải chuỗi dữ liệu từ Server (Action XinChao)
+            // ========================================================
+            $('#btnXinChao').click(function () {
+                var $btn = $(this);
+                $btn.prop('disabled', true).addClass('opacity-70');
+
+                $.ajax({
+                    url: '/LopHoc/XinChao',
+                    type: 'GET',
+                    success: function (data) {
+                        $('#noiDungXinChao').text(data);
+                        $('#vungXinChao').hide().removeClass('hidden').slideDown(300);
+                        if (window.showToast) {
+                            window.showToast('AJAX Bài 11 thực thi thành công!', 'success');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Lỗi AJAX Bài 11: ' + (error || status));
+                    },
+                    complete: function () {
+                        $btn.prop('disabled', false).removeClass('opacity-70');
+                    }
+                });
+            });
+
+            // ========================================================
+            // BÀI 12 & 14: Hàm dùng chung thực thi AJAX tìm kiếm và nạp Partial View
+            // ========================================================
+            function thucHienTimKiemAjax(method) {
+                var keyword = $('#keyword').val();
+                var maChuongTrinh = $('#maChuongTrinh').val();
+                method = method || 'GET';
+
+                $('#loadingIndicator').removeClass('hidden');
+
+                $.ajax({
+                    url: '/LopHoc/TimKiemAjax',
+                    type: method,
+                    data: {
+                        keyword: keyword,
+                        maChuongTrinh: maChuongTrinh
+                    },
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function (htmlData) {
+                        // Cập nhật DOM bằng jQuery .html() và hiệu ứng fadeIn (Bài 6-10)
+                        $('#ketQua').hide().html(htmlData).fadeIn(300);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Lỗi khi gọi TimKiemAjax:', error);
+                        $('#ketQua').html('<div class="p-4 bg-red-50 text-red-700 rounded-2xl text-xs">Đã xảy ra lỗi khi tải kết quả qua AJAX.</div>');
+                    },
+                    complete: function () {
+                        $('#loadingIndicator').addClass('hidden');
+                    }
+                });
+            }
+
+            // Nút tìm kiếm GET (Bài 12)
+            $('#btnSearchGet').click(function () {
+                thucHienTimKiemAjax('GET');
+            });
+
+            // Nút kiểm tra POST (Bài 13)
+            $('#btnSearchPost').click(function () {
+                thucHienTimKiemAjax('POST');
+                if (window.showToast) {
+                    window.showToast('Đang gửi dữ liệu bằng AJAX POST (Bài 13)...', 'success');
+                }
+            });
+
+            // ========================================================
+            // BÀI 14: AJAX tìm kiếm thời gian thực (Live Search với sự kiện keyup & debounce)
+            // ========================================================
+            var searchTimer = null;
+            $('#keyword').on('keyup', function () {
+                var val = $(this).val();
+                if (val.length > 0) {
+                    $('#btnClearKeyword').removeClass('hidden');
+                } else {
+                    $('#btnClearKeyword').addClass('hidden');
+                }
+
+                // Debounce 350ms tránh spam request lên server
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(function () {
+                    thucHienTimKiemAjax('GET');
+                }, 350);
+            });
+
+            // Nút xóa nhanh từ khóa tìm kiếm
+            $('#btnClearKeyword').click(function () {
+                $('#keyword').val('').focus();
+                $(this).addClass('hidden');
+                thucHienTimKiemAjax('GET');
+            });
+
+            // ========================================================
+            // BÀI 15: AJAX lọc dữ liệu theo DropdownList (Sự kiện change)
+            // ========================================================
+            $('#maChuongTrinh').on('change', function () {
+                thucHienTimKiemAjax('GET');
+            });
+
+            // Nút làm mới bộ lọc về mặc định
+            $('#btnResetFilter').click(function () {
+                $('#keyword').val('');
+                $('#btnClearKeyword').addClass('hidden');
+                $('#maChuongTrinh').val('');
+                thucHienTimKiemAjax('GET');
+                if (window.showToast) {
+                    window.showToast('Đã làm mới bộ lọc tìm kiếm.', 'success');
+                }
+            });
+        });
+    </script>
+}

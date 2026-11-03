@@ -1,0 +1,125 @@
+@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>
+@{
+    int totalCount = Model?.Count() ?? 0;
+}
+
+<div class="space-y-4">
+    <!-- Thanh thông tin kết quả -->
+    <div class="flex flex-wrap items-center justify-between gap-3 bg-surface-white px-4 py-3 rounded-2xl border border-border-standard shadow-xs">
+        <div class="flex items-center gap-2">
+            <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-primary/10 text-primary font-bold text-xs">
+                @totalCount
+            </span>
+            <span class="text-xs sm:text-sm font-semibold text-brand-deep">
+                Kết quả tìm kiếm AJAX thời gian thực
+            </span>
+        </div>
+        <span class="text-[11px] text-outline font-mono">
+            Cập nhật lúc: @DateTime.Now.ToString("HH:mm:ss")
+        </span>
+    </div>
+
+    @if (totalCount == 0)
+    {
+        <div class="p-8 text-center bg-surface-white rounded-3xl border border-border-standard shadow-xs">
+            <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-slate-100 flex items-center justify-center text-outline">
+                <span class="material-symbols-outlined text-[32px]">search_off</span>
+            </div>
+            <h4 class="text-sm font-bold text-on-surface mb-1">Không tìm thấy lớp học phần phù hợp</h4>
+            <p class="text-xs text-outline max-w-md mx-auto">
+                Không có lớp học nào thỏa mãn từ khóa hoặc danh mục đã lọc. Vui lòng thử tìm với từ khóa khác hoặc chọn "Tất cả chương trình".
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="overflow-x-auto rounded-2xl border border-border-standard bg-surface-white shadow-xs">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                    <tr class="bg-surface-container-low text-on-surface-variant font-bold border-b border-border-standard">
+                        <th class="py-3 px-4 text-center w-12">STT</th>
+                        <th class="py-3 px-4">Lớp học phần</th>
+                        <th class="py-3 px-4">Chương trình đào tạo</th>
+                        <th class="py-3 px-4">Giảng viên</th>
+                        <th class="py-3 px-4 text-center">Khai giảng</th>
+                        <th class="py-3 px-4 text-center">Sĩ số</th>
+                        <th class="py-3 px-4 text-right">Học phí</th>
+                        <th class="py-3 px-4 text-center">Trạng thái</th>
+                        <th class="py-3 px-4 text-center w-24">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle font-medium text-on-surface">
+                    @{
+                        int index = 1;
+                        foreach (var item in Model!)
+                        {
+                            int soDangKy = item.DangKyHocs?.Count(d => d.TrangThai != "Đã hủy") ?? 0;
+                            double phanTram = item.SiSoToiDa > 0 ? (double)soDangKy / item.SiSoToiDa * 100 : 0;
+                            if (phanTram > 100) phanTram = 100;
+                            string tenGv = !string.IsNullOrEmpty(item.TenGiangVien) ? item.TenGiangVien : (item.GiangVien?.HoTen ?? "Chưa phân công");
+
+                            <tr class="hover:bg-surface-container-lowest/60 transition-colors">
+                                <td class="py-3.5 px-4 text-center text-outline font-mono">@(index++)</td>
+                                <td class="py-3.5 px-4">
+                                    <div class="font-bold text-brand-deep text-[13px]">@item.TenLop</div>
+                                    <div class="text-[11px] text-outline font-mono">Mã lớp: #@item.MaLopHoc • Phòng: @(string.IsNullOrEmpty(item.PhongHoc) ? "Chưa xếp" : item.PhongHoc)</div>
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary/10 text-primary font-semibold text-[11px]">
+                                        <span class="material-symbols-outlined text-[14px]">school</span>
+                                        @(item.ChuongTrinhDaoTao?.TenChuongTrinh ?? "Chưa phân loại")
+                                    </span>
+                                </td>
+                                <td class="py-3.5 px-4 text-on-surface-variant font-medium">
+                                    @tenGv
+                                </td>
+                                <td class="py-3.5 px-4 text-center font-mono text-outline">
+                                    @item.NgayKhaiGiang.ToString("dd/MM/yyyy")
+                                </td>
+                                <td class="py-3.5 px-4 text-center">
+                                    <div class="flex items-center justify-center gap-1.5 font-bold text-[11px]">
+                                        <span class="@(soDangKy >= item.SiSoToiDa ? "text-danger-crimson" : "text-brand-deep")">@soDangKy</span>
+                                        <span class="text-outline">/</span>
+                                        <span class="text-outline">@item.SiSoToiDa</span>
+                                    </div>
+                                    <div class="w-20 mx-auto bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
+                                        <div class="h-full rounded-full @(phanTram >= 100 ? "bg-danger-crimson" : "bg-primary")" style="width: @(phanTram)%"></div>
+                                    </div>
+                                </td>
+                                <td class="py-3.5 px-4 text-right font-bold text-brand-deep">
+                                    @string.Format("{0:N0} đ", item.HocPhi)
+                                </td>
+                                <td class="py-3.5 px-4 text-center">
+                                    @if (item.TrangThai == "Đang mở đăng ký")
+                                    {
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                            Đang mở
+                                        </span>
+                                    }
+                                    else if (item.TrangThai == "Đã kết thúc")
+                                    {
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold">
+                                            Đã đóng
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold">
+                                            @item.TrangThai
+                                        </span>
+                                    }
+                                </td>
+                                <td class="py-3.5 px-4 text-center">
+                                    <a href="/LopHoc/Details/@item.MaLopHoc" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-surface-container-low hover:bg-brand-deep hover:text-white text-brand-deep transition-all shadow-xs" title="Xem chi tiết lớp học">
+                                        <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

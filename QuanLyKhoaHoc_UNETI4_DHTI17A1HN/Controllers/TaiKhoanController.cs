@@ -1,9 +1,12 @@
-// ========================================================
+﻿// ========================================================
 // Họ và tên: Vũ Đình Trường
 // Mã sinh viên: 23103100026
 // Phụ trách: Module 1 - Tài khoản, Đăng nhập, Phân quyền và Chương trình đào tạo
 // ========================================================
 
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
@@ -89,6 +92,23 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 HttpContext.Session.SetInt32("MaHocVien", hv.MaHocVien);
             }
 
+            // Ghi nhận Claims & Cookie Authentication theo Slide 14-32 Bài giảng Bảo mật UNETI
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.MaTaiKhoan.ToString()),
+                new Claim(ClaimTypes.Name, user.TenDangNhap),
+                new Claim(ClaimTypes.Role, user.VaiTro),
+                new Claim(ClaimTypes.Email, user.Email ?? ""),
+                new Claim("HoTen", user.HoTen ?? "")
+            };
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = true,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddHours(2)
+            };
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
+
             TempData["Success"] = $"Chào mừng {user.HoTen} ({user.VaiTro}) đã đăng nhập thành công!";
 
             if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
@@ -152,6 +172,18 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 HttpContext.Session.SetInt32("MaHocVien", hv.MaHocVien);
             }
 
+            // Ghi nhận Claims & Cookie Authentication theo Slide 14-32 Bài giảng Bảo mật UNETI
+            var regClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.MaTaiKhoan.ToString()),
+                new Claim(ClaimTypes.Name, user.TenDangNhap),
+                new Claim(ClaimTypes.Role, user.VaiTro),
+                new Claim(ClaimTypes.Email, user.Email ?? ""),
+                new Claim("HoTen", user.HoTen ?? "")
+            };
+            var regIdentity = new ClaimsIdentity(regClaims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(regIdentity));
+
             TempData["Success"] = "Đăng ký tài khoản học viên thành công! Bạn đã được đăng nhập tự động.";
             return RedirectToAction("Index", "Home");
         }
@@ -162,8 +194,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         [HttpGet, HttpPost]
         [Route("TaiKhoan/DangXuat")]
         [Route("TaiKhoan/Logout")]
-        public IActionResult DangXuat()
+        public async Task<IActionResult> DangXuat()
         {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             HttpContext.Session.Clear();
             TempData["Success"] = "Bạn đã đăng xuất khỏi hệ thống thành công.";
             return RedirectToAction(nameof(DangNhap));

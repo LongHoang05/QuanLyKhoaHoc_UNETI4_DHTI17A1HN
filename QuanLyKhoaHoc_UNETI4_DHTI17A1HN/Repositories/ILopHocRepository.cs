@@ -53,5 +53,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         Task<IEnumerable<LopHoc>> GetUpcomingCoursesAsync(int take = 4);
         Task<IEnumerable<LopHoc>> GetSimilarCoursesAsync(int maChuongTrinh, int excludeMaLop, int take = 3);
         Task<Dictionary<int, int>> GetOpenClassCountsByProgramAsync();
+
+        // 6. Phương thức tìm kiếm AJAX theo bài thực hành Javascript - jQuery - AJAX (Bài 11 - Bài 15)
+        Task<IEnumerable<LopHoc>> SearchAjaxAsync(string? keyword, int? maChuongTrinh = null);
     }
 }

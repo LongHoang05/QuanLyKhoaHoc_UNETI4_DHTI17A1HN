@@ -297,5 +297,37 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 .Select(g => new { MaChuongTrinh = g.Key, Count = g.Count() })
                 .ToDictionaryAsync(x => x.MaChuongTrinh, x => x.Count);
         }
+
+        // --- BÀI TẬP THỰC HÀNH JAVASCRIPT, JQUERY, AJAX (BÀI 11 - BÀI 15) ---
+        public async Task<IEnumerable<LopHoc>> SearchAjaxAsync(string? keyword, int? maChuongTrinh = null)
+        {
+            var query = _context.LopHocs
+                .Include(l => l.ChuongTrinhDaoTao)
+                .Include(l => l.GiangVien)
+                .Include(l => l.DangKyHocs)
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                var kw = keyword.Trim();
+                query = query.Where(l =>
+                    l.TenLop.Contains(kw) ||
+                    (l.ChuongTrinhDaoTao != null && l.ChuongTrinhDaoTao.TenChuongTrinh.Contains(kw)) ||
+                    (l.TenGiangVien != null && l.TenGiangVien.Contains(kw)) ||
+                    (l.GiangVien != null && l.GiangVien.HoTen.Contains(kw)) ||
+                    (l.PhongHoc != null && l.PhongHoc.Contains(kw)));
+            }
+
+            if (maChuongTrinh.HasValue && maChuongTrinh.Value > 0)
+            {
+                query = query.Where(l => l.MaChuongTrinh == maChuongTrinh.Value);
+            }
+
+            return await query
+                .OrderByDescending(l => l.NgayKhaiGiang)
+                .Take(50)
+                .ToListAsync();
+        }
     }
 }
