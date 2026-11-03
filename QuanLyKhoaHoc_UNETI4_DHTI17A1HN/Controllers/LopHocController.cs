@@ -2,8 +2,6 @@
 // Họ và tên: Nguyễn Đình Kiên
 // Mã sinh viên: 23103100020
 // Phụ trách: Module 2 - Quản lý lớp học, Tìm kiếm, Lọc, Sắp xếp và Phân trang
-// Áp dụng: Repository Pattern theo hướng dẫn UNETI
-// Controller không truy vấn trực tiếp DbContext / LINQ
 // ========================================================
 
 using Microsoft.AspNetCore.Authorization;

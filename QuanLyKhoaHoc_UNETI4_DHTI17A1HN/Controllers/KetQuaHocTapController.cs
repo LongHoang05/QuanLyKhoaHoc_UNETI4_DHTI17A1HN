@@ -2,8 +2,6 @@
 // Họ và tên: Nguyễn Tùng Dương
 // Mã sinh viên: 23103100003
 // Phụ trách: Module 5 - Buổi học, Điểm danh, Kết quả học tập & Thống kê báo cáo
-// Áp dụng: Repository Pattern theo hướng dẫn UNETI
-// Controller không truy vấn trực tiếp DbContext / LINQ
 // ========================================================
 
 using Microsoft.AspNetCore.Mvc;

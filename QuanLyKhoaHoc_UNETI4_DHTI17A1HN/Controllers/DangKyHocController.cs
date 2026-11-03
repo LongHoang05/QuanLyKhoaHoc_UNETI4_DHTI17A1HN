@@ -2,8 +2,6 @@
 // Họ và tên: Nguyễn Hoàng Long
 // Mã sinh viên: 23103100046
 // Phụ trách: Module 4 - Đăng ký khóa học, Quản lý hồ sơ & Thu học phí
-// Áp dụng: Repository Pattern theo hướng dẫn UNETI
-// Controller không truy vấn trực tiếp DbContext / LINQ
 // ========================================================
 
 using Microsoft.AspNetCore.Mvc;

@@ -2,8 +2,6 @@
 // Họ và tên: Nhóm 4 (Vũ Đình Trường - Nguyễn Đình Kiên - Nguyễn Đức Linh - Nguyễn Hoàng Long - Nguyễn Tùng Dương)
 // Lớp: DHTI17A1HN - Đại học Kinh tế - Kỹ thuật Công nghiệp (UNETI)
 // Nội dung thực hiện: Trang chủ Nền tảng Thương mại Giáo dục UNETI EDUSPACE (EdTech Commercial Homepage)
-// Áp dụng: Repository Pattern theo hướng dẫn UNETI
-// Controller không truy vấn trực tiếp DbContext / LINQ
 // ========================================================
 
 using System.Diagnostics;

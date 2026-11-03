@@ -1,8 +1,6 @@
 // ========================================================
 // Cổng Học Viên - Portal Khám phá, Đăng ký và Quản lý Học tập
 // Tác giả: Vũ Đình Trường, Nguyễn Đình Kiên, Nguyễn Đức Linh, Nguyễn Hoàng Long, Nguyễn Tùng Dương
-// Áp dụng: Repository Pattern theo hướng dẫn UNETI
-// Controller không truy vấn trực tiếp DbContext / LINQ
 // ========================================================
 
 using Microsoft.AspNetCore.Mvc;
