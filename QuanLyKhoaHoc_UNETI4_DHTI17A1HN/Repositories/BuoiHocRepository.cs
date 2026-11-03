@@ -24,7 +24,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         {
             return await _context.BuoiHocs
                 .Include(b => b.LopHoc)
-                .Include(b => b.GiangVien)
+                .Include(b => b.GiangVienObj)
                 .AsNoTracking()
                 .OrderBy(b => b.ThoiGianBatDau)
                 .ToListAsync();
@@ -40,7 +40,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             return await _context.BuoiHocs
                 .Include(b => b.LopHoc)
                     .ThenInclude(l => l!.ChuongTrinhDaoTao)
-                .Include(b => b.GiangVien)
+                .Include(b => b.GiangVienObj)
                 .FirstOrDefaultAsync(b => b.MaBuoiHoc == id);
         }
 
@@ -90,7 +90,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             var query = _context.BuoiHocs
                 .Include(b => b.LopHoc)
                     .ThenInclude(l => l!.ChuongTrinhDaoTao)
-                .Include(b => b.GiangVien)
+                .Include(b => b.GiangVienObj)
                 .AsQueryable();
 
             // 1. Tìm kiếm LINQ
@@ -241,7 +241,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         public async Task<IEnumerable<BuoiHoc>> GetByLopHocIdAsync(int maLopHoc)
         {
             return await _context.BuoiHocs
-                .Include(b => b.GiangVien)
+                .Include(b => b.GiangVienObj)
                 .Include(b => b.LopHoc)
                 .Where(b => b.MaLopHoc == maLopHoc)
                 .OrderBy(b => b.ThoiGianBatDau)
@@ -252,7 +252,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         {
             return await _context.BuoiHocs
                 .Include(b => b.LopHoc)
-                .Include(b => b.GiangVien)
+                .Include(b => b.GiangVienObj)
                 .Where(b => lopHocIds.Contains(b.MaLopHoc))
                 .OrderBy(b => b.ThoiGianBatDau)
                 .ToListAsync();

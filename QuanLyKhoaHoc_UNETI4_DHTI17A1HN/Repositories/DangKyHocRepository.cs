@@ -205,6 +205,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             return await _context.DangKyHocs
                 .Include(d => d.LopHoc)
                     .ThenInclude(l => l!.ChuongTrinhDaoTao)
+                .Include(d => d.KetQuaHocTap)
                 .Where(d => d.MaHocVien == maHocVien)
                 .OrderByDescending(d => d.NgayDangKy)
                 .ToListAsync();

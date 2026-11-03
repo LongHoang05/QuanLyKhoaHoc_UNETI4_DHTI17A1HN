@@ -2,7 +2,6 @@
 // Họ và tên: Vũ Đình Trường
 // Mã sinh viên: 23103100026
 // Phụ trách: Module 1 - Tài khoản, Đăng nhập, Phân quyền và Chương trình đào tạo
-// Áp dụng: Session & Cookie Authentication theo Slide 14-32 Bài giảng Bảo mật UNETI
 // ========================================================
 
 using System.Security.Claims;

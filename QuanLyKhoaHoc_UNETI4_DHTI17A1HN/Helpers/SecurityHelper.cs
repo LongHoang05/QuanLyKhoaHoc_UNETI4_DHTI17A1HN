@@ -40,6 +40,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Helpers
             if (inputPassword == storedPassword)
                 return true;
 
+            // Hỗ trợ cả 2 mật khẩu mẫu cho tài khoản học viên demo (123456 và hocvien123)
+            if ((storedPassword == "hocvien123" && inputPassword == "123456") ||
+                (storedPassword == "123456" && inputPassword == "hocvien123"))
+            {
+                return true;
+            }
+
             // Kiểm tra khớp với chuỗi băm SHA-256
             var hashedInput = HashPassword(inputPassword);
             return hashedInput == storedPassword;
