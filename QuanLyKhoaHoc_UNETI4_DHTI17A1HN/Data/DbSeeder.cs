@@ -240,7 +240,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                 new LopHoc { TenLop = "NETCORE10-K00", MaChuongTrinh = ctdt1, MaGiangVien = gvId1, TenGiangVien = "ThS. Trần Văn Hùng", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 5, SoBuoiHoc = 16, HocPhi = 3500000, NgayBatDauDangKy = DateTime.Today.AddDays(-40), HanDangKy = DateTime.Today.AddDays(-15), NgayKhaiGiang = DateTime.Today.AddDays(-10), MoTa = "Lớp đã hoàn thành tuyển sinh và đang trong quá trình học tập thực tế.", YeuCauHocVien = "C# căn bản", TrangThai = "Đã đóng đăng ký", PhongHoc = "Lab 402" },
                 new LopHoc { TenLop = "PYTHON-K01", MaChuongTrinh = ctdt2, MaGiangVien = gvId2, TenGiangVien = "TS. Hoàng Thị Lan", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 6, SoBuoiHoc = 14, HocPhi = 3200000, NgayBatDauDangKy = DateTime.Today.AddDays(-35), HanDangKy = DateTime.Today.AddDays(-12), NgayKhaiGiang = DateTime.Today.AddDays(-8), MoTa = "Lớp học đã đủ sĩ số tối đa và hoàn tất xếp lịch học.", YeuCauHocVien = "Không yêu cầu", TrangThai = "Đã đóng đăng ký", PhongHoc = "Lab 305" },
                 new LopHoc { TenLop = "REACT-K04", MaChuongTrinh = ctdt1, MaGiangVien = gvId1, TenGiangVien = "ThS. Trần Văn Hùng", TrinhDoDauVao = "Trung cấp", SiSoToiDa = 20, SoBuoiHoc = 16, HocPhi = 3800000, NgayBatDauDangKy = DateTime.Today.AddDays(-45), HanDangKy = DateTime.Today.AddDays(-2), NgayKhaiGiang = DateTime.Today.AddDays(5), MoTa = "Đã kết thúc giai đoạn nộp hồ sơ, chuẩn bị khai giảng.", YeuCauHocVien = "HTML/CSS/JS", TrangThai = "Đã đóng đăng ký", PhongHoc = "Lab 402" },
-                new LopHoc { TenLop = "FLUTTER-K02", MaChuongTrinh = ctdt3, MaGiangVien = gvId3, TenGiangVien = "ThS. Nguyễn Thành Nam", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 22, SoBuoiHoc = 16, HocPhi = 4200000, NgayBatDauDangKy = DateTime.Today.AddDays(-50), HanDangKy = DateTime.Today.AddDays(-20), NgayKhaiGiang = DateTime.Today.AddDays(-15), MoTa = "Khóa học di động đợt trước, chuẩn bị bước vào giai đoạn làm đồ án.", YeuCauHocVien = "Có tư duy lập trình", TrangThai = "Đang mở đăng ký", PhongHoc = "Lab 201 - Minh Khai" },
+                new LopHoc { TenLop = "FLUTTER-K02", MaChuongTrinh = ctdt3, MaGiangVien = gvId3, TenGiangVien = "ThS. Nguyễn Thành Nam", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 22, SoBuoiHoc = 16, HocPhi = 4200000, NgayBatDauDangKy = DateTime.Today.AddDays(-50), HanDangKy = DateTime.Today.AddDays(-20), NgayKhaiGiang = DateTime.Today.AddDays(-15), MoTa = "Khóa học di động đợt trước, chuẩn bị bước vào giai đoạn làm đồ án.", YeuCauHocVien = "Có tư duy lập trình", TrangThai = "Đã đóng đăng ký", PhongHoc = "Lab 201 - Minh Khai" },
                 new LopHoc { TenLop = "CEH-K07", MaChuongTrinh = ctdt4, MaGiangVien = gvId3, TenGiangVien = "ThS. Nguyễn Thành Nam", TrinhDoDauVao = "Nâng cao", SiSoToiDa = 18, SoBuoiHoc = 18, HocPhi = 5500000, NgayBatDauDangKy = DateTime.Today.AddDays(-40), HanDangKy = DateTime.Today.AddDays(-10), NgayKhaiGiang = DateTime.Today.AddDays(-5), MoTa = "Đã kín chỗ khóa học an toàn thông tin chuyên sâu.", YeuCauHocVien = "Hiểu mạng máy tính căn bản", TrangThai = "Đã đóng đăng ký", PhongHoc = "Phòng Lab 501" },
 
                 // Nhóm 3: Tạm dừng (3 lớp)
@@ -262,6 +262,30 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                 }
             }
             context.SaveChanges();
+
+            // Tự động gia hạn các lớp đang mở tuyển sinh nếu hạn đăng ký mẫu bị trôi qua ngày hiện tại
+            var expiredOpenClasses = context.LopHocs
+                .Where(l => l.TrangThai == "Đang mở đăng ký" && l.HanDangKy < DateTime.Today)
+                .ToList();
+            if (expiredOpenClasses.Any())
+            {
+                foreach (var openLop in expiredOpenClasses)
+                {
+                    if (openLop.TenLop == "FLUTTER-K02")
+                    {
+                        openLop.TrangThai = "Đã đóng đăng ký";
+                    }
+                    else
+                    {
+                        openLop.HanDangKy = DateTime.Today.AddDays(20);
+                        if (openLop.NgayKhaiGiang <= openLop.HanDangKy)
+                        {
+                            openLop.NgayKhaiGiang = DateTime.Today.AddDays(27);
+                        }
+                    }
+                }
+                context.SaveChanges();
+            }
 
             var allLops = context.LopHocs.OrderBy(l => l.MaLopHoc).ToList();
 

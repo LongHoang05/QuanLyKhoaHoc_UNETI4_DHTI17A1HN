@@ -199,7 +199,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             HttpContext.Session.Clear();
             TempData["Success"] = "Bạn đã đăng xuất khỏi hệ thống thành công.";
-            return RedirectToAction(nameof(DangNhap));
+            return RedirectToAction("Index", "Home");
         }
 
         // ========================================================
@@ -301,6 +301,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         [SessionAuthorize("Admin")]
         public async Task<IActionResult> Index(string? keyword, string? vaiTro, bool? trangThai, int page = 1)
         {
+            var allUsers = (await _taiKhoanRepo.GetAllAsync()).ToList();
+            ViewBag.TotalSysAccounts = allUsers.Count;
+            ViewBag.ActiveSysAccounts = allUsers.Count(t => t.TrangThai);
+            ViewBag.LockedSysAccounts = allUsers.Count(t => !t.TrangThai);
+
             var viewModel = await _taiKhoanService.GetDanhSachTaiKhoanPagedAsync(
                 keyword, vaiTro, trangThai, page, 10);
             return View(viewModel);

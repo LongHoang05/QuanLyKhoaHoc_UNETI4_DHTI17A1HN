@@ -1,4 +1,4 @@
-﻿@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc>
+@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc>
 @{
     // Họ và tên: Nguyễn Hoàng Long
     // Mã sinh viên: 23103100046
@@ -50,7 +50,7 @@
                 </div>
             </div>
             <div class="flex items-baseline gap-2">
-                <span class="font-display text-[30px] leading-8 text-amber-700 tracking-tight font-black font-mono">@ViewBag.ChoDuyetCount</span>
+                <span id="kpi-choduyet" class="font-display text-[30px] leading-8 text-amber-700 tracking-tight font-black font-mono">@ViewBag.ChoDuyetCount</span>
                 <span class="text-xs text-amber-600 font-medium">cần xử lý</span>
             </div>
         </div>
@@ -63,7 +63,7 @@
                 </div>
             </div>
             <div class="flex items-baseline gap-2">
-                <span class="font-display text-[30px] leading-8 text-blue-700 tracking-tight font-black font-mono">@ViewBag.DaDuyetCount</span>
+                <span id="kpi-daduyet" class="font-display text-[30px] leading-8 text-blue-700 tracking-tight font-black font-mono">@ViewBag.DaDuyetCount</span>
                 <span class="text-xs text-blue-600 font-medium font-mono">học viên đủ điều kiện</span>
             </div>
         </div>
@@ -76,7 +76,7 @@
                 </div>
             </div>
             <div class="flex items-baseline gap-2">
-                <span class="font-display text-[26px] leading-8 text-emerald-700 tracking-tight font-black font-mono">
+                <span id="kpi-doanhthu" class="font-display text-[26px] leading-8 text-emerald-700 tracking-tight font-black font-mono">
                     @(((double)ViewBag.TongDoanhThu).ToString("N0")) đ
                 </span>
             </div>
@@ -104,17 +104,6 @@
                 </select>
             </div>
 
-            <!-- Filter Lớp học -->
-            <div class="min-w-[170px]">
-                <select id="filterMaLop" class="w-full px-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep">
-                    <option value="">Tất cả lớp học</option>
-                    @foreach (var lop in lopHocList)
-                    {
-                        <!option value="@lop.MaLopHoc" @(selectedMaLop == lop.MaLopHoc ? "selected" : "")>@lop.TenLop</!option>
-                    }
-                </select>
-            </div>
-
             <!-- Filter Trạng thái duyệt -->
             <div class="min-w-[150px]">
                 <select id="filterTrangThai" class="w-full px-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep">
@@ -130,12 +119,13 @@
             </div>
 
             <!-- Sắp xếp (Mục 8.1) -->
-            <div class="hidden">
+            <div class="min-w-[155px]">
                 <select id="filterSortBy" class="w-full px-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep">
                     <!option value="" @(sortBy == "" ? "selected" : "")>Mới nhất trước</!option>
                     <!option value="ngay_asc" @(sortBy == "ngay_asc" ? "selected" : "")>Cũ nhất trước</!option>
                     <!option value="ten_asc" @(sortBy == "ten_asc" ? "selected" : "")>Tên học viên A-Z</!option>
                     <!option value="ten_desc" @(sortBy == "ten_desc" ? "selected" : "")>Tên học viên Z-A</!option>
+                    <!option value="tien_desc" @(sortBy == "tien_desc" ? "selected" : "")>Học phí đã thu cao nhất</!option>
                 </select>
             </div>
 
@@ -315,21 +305,19 @@
         searchDebounceTimer = setTimeout(() => { currentPage = 1; loadTableData(); }, 350);
     });
 
-    document.getElementById('filterMaCT').addEventListener('change', () => { currentPage = 1; loadTableData(); });
-    document.getElementById('filterMaLop').addEventListener('change', () => { currentPage = 1; loadTableData(); });
-    document.getElementById('filterTrangThai').addEventListener('change', () => { currentPage = 1; loadTableData(); });
-    document.getElementById('filterSortBy').addEventListener('change', () => { currentPage = 1; loadTableData(); });
-    document.getElementById('filterTuNgay').addEventListener('change', () => { currentPage = 1; loadTableData(); });
-    document.getElementById('filterDenNgay').addEventListener('change', () => { currentPage = 1; loadTableData(); });
+    document.getElementById('filterMaCT')?.addEventListener('change', () => { currentPage = 1; loadTableData(); });
+    document.getElementById('filterTrangThai')?.addEventListener('change', () => { currentPage = 1; loadTableData(); });
+    document.getElementById('filterSortBy')?.addEventListener('change', () => { currentPage = 1; loadTableData(); });
+    document.getElementById('filterTuNgay')?.addEventListener('change', () => { currentPage = 1; loadTableData(); });
+    document.getElementById('filterDenNgay')?.addEventListener('change', () => { currentPage = 1; loadTableData(); });
 
     function resetFilters() {
-        document.getElementById('searchInput').value = '';
-        document.getElementById('filterMaCT').value = '';
-        document.getElementById('filterMaLop').value = '';
-        document.getElementById('filterTrangThai').value = '';
-        document.getElementById('filterSortBy').value = '';
-        document.getElementById('filterTuNgay').value = '';
-        document.getElementById('filterDenNgay').value = '';
+        if (document.getElementById('searchInput')) document.getElementById('searchInput').value = '';
+        if (document.getElementById('filterMaCT')) document.getElementById('filterMaCT').value = '';
+        if (document.getElementById('filterTrangThai')) document.getElementById('filterTrangThai').value = '';
+        if (document.getElementById('filterSortBy')) document.getElementById('filterSortBy').value = '';
+        if (document.getElementById('filterTuNgay')) document.getElementById('filterTuNgay').value = '';
+        if (document.getElementById('filterDenNgay')) document.getElementById('filterDenNgay').value = '';
         currentPage = 1;
         loadTableData();
     }
@@ -340,18 +328,16 @@
     }
 
     function loadTableData() {
-        const search = document.getElementById('searchInput').value.trim();
-        const maChuongTrinh = document.getElementById('filterMaCT').value;
-        const maLop = document.getElementById('filterMaLop').value;
-        const trangThai = document.getElementById('filterTrangThai').value;
-        const sortBy = document.getElementById('filterSortBy').value;
-        const tuNgay = document.getElementById('filterTuNgay').value;
-        const denNgay = document.getElementById('filterDenNgay').value;
+        const search = document.getElementById('searchInput')?.value.trim() || '';
+        const maChuongTrinh = document.getElementById('filterMaCT')?.value || '';
+        const trangThai = document.getElementById('filterTrangThai')?.value || '';
+        const sortBy = document.getElementById('filterSortBy')?.value || '';
+        const tuNgay = document.getElementById('filterTuNgay')?.value || '';
+        const denNgay = document.getElementById('filterDenNgay')?.value || '';
 
         const params = new URLSearchParams({
             search: search,
             maChuongTrinh: maChuongTrinh,
-            maLop: maLop,
             trangThai: trangThai,
             sortBy: sortBy,
             tuNgay: tuNgay,
@@ -398,6 +384,16 @@
         content.classList.add('scale-95');
     }
 
+    function updateKpiStats(stats) {
+        if (!stats) return;
+        const elChoDuyet = document.getElementById('kpi-choduyet');
+        const elDaDuyet = document.getElementById('kpi-daduyet');
+        const elDoanhThu = document.getElementById('kpi-doanhthu');
+        if (elChoDuyet && stats.choDuyetCount !== undefined) elChoDuyet.innerText = stats.choDuyetCount;
+        if (elDaDuyet && stats.daDuyetCount !== undefined) elDaDuyet.innerText = stats.daDuyetCount;
+        if (elDoanhThu && stats.tongDoanhThuFormatted) elDoanhThu.innerText = stats.tongDoanhThuFormatted;
+    }
+
     function submitDuyet(e) {
         e.preventDefault();
         const formData = new FormData(document.getElementById('duyetForm'));
@@ -412,11 +408,13 @@
             if (res.success) {
                 closeDuyetModal();
                 if (window.showToast) window.showToast(res.message, 'success');
+                updateKpiStats(res.stats);
                 loadTableData();
             } else {
                 if (window.showToast) window.showToast(res.message, 'error');
             }
-        });
+        })
+        .catch(() => { if (window.showToast) window.showToast('Có lỗi xảy ra khi phê duyệt hồ sơ.', 'error'); });
     }
 
     // Modal Từ Chối
@@ -454,11 +452,13 @@
             if (res.success) {
                 closeTuChoiModal();
                 if (window.showToast) window.showToast(res.message, 'success');
+                updateKpiStats(res.stats);
                 loadTableData();
             } else {
                 if (window.showToast) window.showToast(res.message, 'error');
             }
-        });
+        })
+        .catch(() => { if (window.showToast) window.showToast('Có lỗi xảy ra khi từ chối hồ sơ.', 'error'); });
     }
 
     // Modal Thu Học Phí
@@ -471,11 +471,12 @@
                     document.getElementById('thuphi-MaDangKy').value = d.maDangKy;
                     document.getElementById('thuphi-tenHV').innerText = d.tenHocVien;
                     document.getElementById('thuphi-tenLop').innerText = d.tenLop;
-                    document.getElementById('thuphi-hocPhiGoc').innerText = d.hocPhi.toLocaleString() + ' đ';
-                    document.getElementById('thuphi-daDong').innerText = d.soTienDaDong.toLocaleString() + ' đ';
+                    document.getElementById('thuphi-hocPhiGoc').innerText = Number(d.hocPhi).toLocaleString('vi-VN') + ' đ';
+                    document.getElementById('thuphi-daDong').innerText = Number(d.soTienDaDong).toLocaleString('vi-VN') + ' đ';
                     
-                    currentHocPhiGoc = d.hocPhi;
-                    document.getElementById('thuphi-SoTien').value = d.hocPhi; // default fill full tuition
+                    const conLai = Math.max(0, Number(d.hocPhi) - Number(d.soTienDaDong));
+                    currentHocPhiGoc = conLai > 0 ? conLai : Number(d.hocPhi);
+                    document.getElementById('thuphi-SoTien').value = currentHocPhiGoc;
                     document.getElementById('thuphi-GhiChu').value = '';
 
                     const modal = document.getElementById('thuphi-modal');
@@ -486,7 +487,8 @@
                 } else {
                     if (window.showToast) window.showToast(res.message, 'error');
                 }
-            });
+            })
+            .catch(() => { if (window.showToast) window.showToast('Không thể tải thông tin học phí.', 'error'); });
     }
 
     function fillFullTuition() {
@@ -515,11 +517,13 @@
             if (res.success) {
                 closeThuPhiModal();
                 if (window.showToast) window.showToast(res.message, 'success');
+                updateKpiStats(res.stats);
                 loadTableData();
             } else {
                 if (window.showToast) window.showToast(res.message, 'error');
             }
-        });
+        })
+        .catch(() => { if (window.showToast) window.showToast('Có lỗi xảy ra khi thu học phí.', 'error'); });
     }
 
     // Bắt đầu học
@@ -537,9 +541,13 @@
         .then(res => {
             if (res.success) {
                 if (window.showToast) window.showToast(res.message, 'success');
+                updateKpiStats(res.stats);
                 loadTableData();
+            } else {
+                if (window.showToast) window.showToast(res.message, 'error');
             }
-        });
+        })
+        .catch(() => { if (window.showToast) window.showToast('Có lỗi xảy ra khi cập nhật trạng thái học.', 'error'); });
     }
 
     // Xóa đơn đăng ký
@@ -547,10 +555,14 @@
         if (typeof openGlobalDeleteModal === 'function') {
             openGlobalDeleteModal({
                 title: 'Xóa đơn đăng ký',
-                message: `Bạn có chắc muốn xóa đơn đăng ký #${id} của học viên "${name}"? Thao tác này không thể hoàn tác nếu học viên đã đóng học phí.`,
-                confirmUrl: '/DangKyHoc/DeletePost',
-                itemId: id,
-                onSuccess: function() { loadTableData(); }
+                message: `Bạn có chắc muốn xóa đơn đăng ký #DK${String(id).padStart(3, '0')} của học viên "${name}"?`,
+                warning: 'Chỉ xóa được đơn ở trạng thái Chờ duyệt, Từ chối hoặc Đã hủy.',
+                action: '/DangKyHoc/DeletePost',
+                id: id,
+                onSuccess: function(data) {
+                    if (data && data.stats) updateKpiStats(data.stats);
+                    loadTableData();
+                }
             });
         }
     }

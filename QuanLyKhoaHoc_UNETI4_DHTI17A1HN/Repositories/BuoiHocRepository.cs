@@ -146,6 +146,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                     query = query.OrderBy(b => b.LopHoc != null ? b.LopHoc.TenLop : "");
                     break;
                 case "thoigian_asc":
+                    query = query.OrderBy(b => b.ThoiGianBatDau);
+                    break;
                 default:
                     query = query.OrderByDescending(b => b.ThoiGianBatDau);
                     break;
@@ -203,13 +205,76 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 b.ThoiGianKetThuc > batDau);
         }
 
+        private static string NormalizePhong(string? p)
+        {
+            if (string.IsNullOrWhiteSpace(p)) return string.Empty;
+            var s = p.Trim().ToLower();
+            if (s.StartsWith("phòng ")) s = s.Substring(6).Trim();
+            if (s.StartsWith("p.")) s = s.Substring(2).Trim();
+            if (s.StartsWith("p ")) s = s.Substring(2).Trim();
+            return s.Replace(" ", "");
+        }
+
+        private static string NormalizeTen(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return string.Empty;
+            var s = name.Trim().ToLower();
+            string[] prefixes = { "pgs.ts.", "pgs.ts", "pgs.", "ts.", "ts", "ths.", "ths", "thạc sĩ", "tiến sĩ", "gv.", "gv" };
+            foreach (var pre in prefixes)
+            {
+                if (s.StartsWith(pre))
+                {
+                    s = s.Substring(pre.Length).Trim();
+                    break;
+                }
+            }
+            return s.Replace(" ", "");
+        }
+
+        public async Task<(bool HasConflict, string? ConflictMessage, BuoiHoc? ConflictingSession)> KiemTraTrungLichChiTietAsync(
+            int maLopHoc, string phongHoc, string? tenGiangVien, DateTime batDau, DateTime ketThuc, int? excludeId = null)
+        {
+            var cleanPhong = NormalizePhong(phongHoc);
+            var cleanGv = NormalizeTen(tenGiangVien);
+
+            var activeSessions = await _context.BuoiHocs
+                .Include(b => b.LopHoc)
+                .Where(b => (!excludeId.HasValue || b.MaBuoiHoc != excludeId.Value) && b.TrangThai != "Đã hủy")
+                .ToListAsync();
+
+            foreach (var b in activeSessions)
+            {
+                // Kiểm tra khoảng thời gian giao nhau: batDau < b.ThoiGianKetThuc && ketThuc > b.ThoiGianBatDau
+                bool isTimeOverlap = (batDau < b.ThoiGianKetThuc && ketThuc > b.ThoiGianBatDau);
+                if (!isTimeOverlap) continue;
+
+                var existingPhong = NormalizePhong(b.PhongHoc);
+                var existingGv = NormalizeTen(b.GiangVien);
+                string tenLop = b.LopHoc?.TenLop ?? $"Lớp #{b.MaLopHoc}";
+
+                if (b.MaLopHoc == maLopHoc)
+                {
+                    return (true, $"Trùng lịch lớp học: Lớp '{tenLop}' đã có ca học từ {b.ThoiGianBatDau:HH:mm} đến {b.ThoiGianKetThuc:HH:mm} ngày {b.ThoiGianBatDau:dd/MM/yyyy} (Phòng: {b.PhongHoc})!", b);
+                }
+
+                if (!string.IsNullOrEmpty(cleanPhong) && cleanPhong == existingPhong)
+                {
+                    return (true, $"Trùng lịch phòng học: Phòng '{b.PhongHoc}' đã có lớp '{tenLop}' (GV: {b.GiangVien}) sử dụng từ {b.ThoiGianBatDau:HH:mm} đến {b.ThoiGianKetThuc:HH:mm} ngày {b.ThoiGianBatDau:dd/MM/yyyy}!", b);
+                }
+
+                if (!string.IsNullOrEmpty(cleanGv) && !string.IsNullOrEmpty(existingGv) && (cleanGv == existingGv || cleanGv.Contains(existingGv) || existingGv.Contains(cleanGv)))
+                {
+                    return (true, $"Trùng lịch giảng viên: Giảng viên '{b.GiangVien}' đã có ca dạy lớp '{tenLop}' từ {b.ThoiGianBatDau:HH:mm} đến {b.ThoiGianKetThuc:HH:mm} ngày {b.ThoiGianBatDau:dd/MM/yyyy} (Phòng: {b.PhongHoc})!", b);
+                }
+            }
+
+            return (false, null, null);
+        }
+
         public async Task<bool> KiemTraTrungLichBuoiHocAsync(int maLopHoc, string phongHoc, string? tenGiangVien, DateTime batDau, DateTime ketThuc, int? excludeId = null)
         {
-            return await _context.BuoiHocs.AnyAsync(b =>
-                (!excludeId.HasValue || b.MaBuoiHoc != excludeId.Value) &&
-                b.TrangThai != "Đã hủy" &&
-                (b.MaLopHoc == maLopHoc || b.PhongHoc == phongHoc || (!string.IsNullOrEmpty(tenGiangVien) && b.GiangVien == tenGiangVien)) &&
-                (batDau < b.ThoiGianKetThuc && ketThuc > b.ThoiGianBatDau));
+            var res = await KiemTraTrungLichChiTietAsync(maLopHoc, phongHoc, tenGiangVien, batDau, ketThuc, excludeId);
+            return res.HasConflict;
         }
 
         public async Task<(HashSet<int> ConflictIds, int SoLoiTrung)> GetConflictSessionsAsync()
@@ -222,8 +287,14 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 {
                     var b1 = allActive[i];
                     var b2 = allActive[j];
-                    if ((b1.PhongHoc == b2.PhongHoc || b1.GiangVien == b2.GiangVien || b1.MaLopHoc == b2.MaLopHoc) &&
-                        (b1.ThoiGianBatDau < b2.ThoiGianKetThuc && b1.ThoiGianKetThuc > b2.ThoiGianBatDau))
+                    bool timeOverlap = (b1.ThoiGianBatDau < b2.ThoiGianKetThuc && b1.ThoiGianKetThuc > b2.ThoiGianBatDau);
+                    if (!timeOverlap) continue;
+
+                    bool sameClass = (b1.MaLopHoc == b2.MaLopHoc);
+                    bool sameRoom = (!string.IsNullOrEmpty(b1.PhongHoc) && NormalizePhong(b1.PhongHoc) == NormalizePhong(b2.PhongHoc));
+                    bool sameTeacher = (!string.IsNullOrEmpty(b1.GiangVien) && NormalizeTen(b1.GiangVien) == NormalizeTen(b2.GiangVien));
+
+                    if (sameClass || sameRoom || sameTeacher)
                     {
                         conflictIds.Add(b1.MaBuoiHoc);
                         conflictIds.Add(b2.MaBuoiHoc);
@@ -231,6 +302,55 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 }
             }
             return (conflictIds, conflictIds.Count);
+        }
+
+        public async Task<int> XuLyCaTrungLichTuDongAsync()
+        {
+            var allActive = await _context.BuoiHocs
+                .Where(b => b.TrangThai != "Đã hủy")
+                .OrderBy(b => b.MaBuoiHoc)
+                .ToListAsync();
+
+            int removedCount = 0;
+            var validList = new List<BuoiHoc>();
+
+            foreach (var b in allActive)
+            {
+                bool hasConflict = false;
+                foreach (var v in validList)
+                {
+                    bool timeOverlap = (b.ThoiGianBatDau < v.ThoiGianKetThuc && b.ThoiGianKetThuc > v.ThoiGianBatDau);
+                    if (!timeOverlap) continue;
+
+                    bool sameClass = (b.MaLopHoc == v.MaLopHoc);
+                    bool sameRoom = (!string.IsNullOrEmpty(b.PhongHoc) && NormalizePhong(b.PhongHoc) == NormalizePhong(v.PhongHoc));
+                    bool sameTeacher = (!string.IsNullOrEmpty(b.GiangVien) && NormalizeTen(b.GiangVien) == NormalizeTen(v.GiangVien));
+
+                    if (sameClass || sameRoom || sameTeacher)
+                    {
+                        hasConflict = true;
+                        break;
+                    }
+                }
+
+                if (hasConflict)
+                {
+                    b.TrangThai = "Đã hủy";
+                    b.GhiChu = (b.GhiChu + " (Tự động hủy do xung đột trùng lịch)").Trim();
+                    removedCount++;
+                }
+                else
+                {
+                    validList.Add(b);
+                }
+            }
+
+            if (removedCount > 0)
+            {
+                await _context.SaveChangesAsync();
+            }
+
+            return removedCount;
         }
 
         public async Task<bool> HasLichHocLopChuaHuyAsync(int maLopHoc)

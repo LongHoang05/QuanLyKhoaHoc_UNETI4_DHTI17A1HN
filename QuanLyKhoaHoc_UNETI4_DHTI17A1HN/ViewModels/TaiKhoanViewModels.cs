@@ -51,8 +51,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels
         [Display(Name = "Địa chỉ Email")]
         public string Email { get; set; } = string.Empty;
 
-        [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
-        [StringLength(15)]
+        [StringLength(10, MinimumLength = 10, ErrorMessage = "Số điện thoại phải gồm đúng 10 chữ số")]
+        [RegularExpression(@"^0\d{9}$", ErrorMessage = "Số điện thoại phải gồm đúng 10 chữ số (bắt đầu bằng số 0)")]
         [Display(Name = "Số điện thoại")]
         public string? SoDienThoai { get; set; }
 
@@ -116,7 +116,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels
         [Display(Name = "Vai trò người dùng")]
         public string VaiTro { get; set; } = string.Empty;
 
-        [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
+        [StringLength(10, MinimumLength = 10, ErrorMessage = "Số điện thoại phải gồm đúng 10 chữ số")]
+        [RegularExpression(@"^0\d{9}$", ErrorMessage = "Số điện thoại phải gồm đúng 10 chữ số (bắt đầu bằng số 0)")]
         [Display(Name = "Số điện thoại")]
         public string? SoDienThoai { get; set; }
 

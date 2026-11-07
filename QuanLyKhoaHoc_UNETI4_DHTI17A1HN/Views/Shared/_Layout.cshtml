@@ -338,8 +338,16 @@
             
             links.forEach(link => {
                 const targetUrl = link.getAttribute('data-url').toLowerCase();
-                const isMatch = (currentPath === '/' && targetUrl.includes('dashboard')) || 
-                                (currentPath.includes(targetUrl));
+                let isMatch = false;
+                if (currentPath === '/' && targetUrl.includes('dashboard')) {
+                    isMatch = true;
+                } else if ((currentPath === '/thongke' || currentPath === '/thongke/') && targetUrl === '/thongke/index') {
+                    isMatch = true;
+                } else if ((currentPath === '/giangvien' || currentPath === '/giangvien/') && targetUrl === '/giangvien/index') {
+                    isMatch = true;
+                } else if (currentPath.startsWith(targetUrl)) {
+                    isMatch = true;
+                }
 
                 if (isMatch) {
                     link.className = 'sidebar-link flex items-center gap-2.5 px-3 py-2 rounded-xl bg-brand-deep text-surface-white font-semibold text-[13px] shadow-xs transition-all';

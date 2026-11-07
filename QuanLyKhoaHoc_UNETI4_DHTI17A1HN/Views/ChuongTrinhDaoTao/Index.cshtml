@@ -7,6 +7,7 @@
     int currentPage = ViewBag.CurrentPage ?? 1;
     int totalPages = ViewBag.TotalPages ?? 1;
     int totalItems = ViewBag.TotalItems ?? 0;
+    int pageSize = ViewBag.PageSize ?? 8;
     string search = ViewBag.Search ?? "";
     string selectedTrangThai = ViewBag.SelectedTrangThai ?? "";
     var classCounts = ViewBag.ClassCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
@@ -178,7 +179,7 @@
                                         <button onclick="openEditDrawerFromRow(this)" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container-low transition-colors cursor-pointer" title="Chỉnh sửa">
                                             <span class="material-symbols-outlined text-[18px]">edit</span>
                                         </button>
-                                        <button onclick="confirmDeleteCtdt(@item.MaChuongTrinh, '@item.TenChuongTrinh', @soLop)" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50 transition-colors cursor-pointer" title="Xóa chương trình">
+                                        <button onclick="confirmDeleteCtdt(@item.MaChuongTrinh, '@(item.TenChuongTrinh?.Replace("'", "\\'") ?? "")', @soLop)" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50 transition-colors cursor-pointer" title="Xóa chương trình">
                                             <span class="material-symbols-outlined text-[18px]">delete</span>
                                         </button>
                                     </div>
@@ -190,50 +191,20 @@
             </table>
         </div>
 
-        <!-- Pagination Toolbar -->
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border-t border-border-subtle font-body-sm text-body-sm text-outline">
-            <span class="tabular-nums">
-                Trang <strong class="text-brand-deep font-semibold">@currentPage</strong> / <strong class="text-brand-deep font-semibold">@totalPages</strong> (Tổng @totalItems chương trình)
-            </span>
-            <div class="inline-flex items-center gap-1">
-                @if (currentPage > 1)
-                {
-                    <a href="/ChuongTrinhDaoTao/Index?page=@(currentPage - 1)&search=@search&trangThai=@selectedTrangThai" onclick="event.preventDefault(); loadCtdtPage(this.href)" class="px-2.5 py-1 rounded-lg border border-border-standard text-brand-deep hover:bg-canvas-base transition-colors font-label-md text-label-md cursor-pointer">
-                        Trước
-                    </a>
-                }
-                else
-                {
-                    <span class="px-2.5 py-1 rounded-lg border border-border-standard text-outline/40 font-label-md text-label-md cursor-not-allowed">Trước</span>
-                }
-
-                @for (int p = currentPage - 1; p <= currentPage + 1; p++)
-                {
-                    if (p >= 1 && p <= totalPages)
-                    {
-                        if (p == currentPage)
-                        {
-                            <span class="w-8 h-8 rounded-lg bg-primary-container text-surface-white font-label-md text-label-md font-bold flex items-center justify-center font-mono">@p</span>
-                        }
-                        else
-                        {
-                            <a href="/ChuongTrinhDaoTao/Index?page=@p&search=@search&trangThai=@selectedTrangThai" onclick="event.preventDefault(); loadCtdtPage(this.href)" class="w-8 h-8 rounded-lg border border-border-standard text-brand-deep hover:bg-canvas-base transition-colors font-label-md text-label-md flex items-center justify-center font-mono cursor-pointer">@p</a>
-                        }
-                    }
-                }
-
-                @if (currentPage < totalPages)
-                {
-                    <a href="/ChuongTrinhDaoTao/Index?page=@(currentPage + 1)&search=@search&trangThai=@selectedTrangThai" onclick="event.preventDefault(); loadCtdtPage(this.href)" class="px-2.5 py-1 rounded-lg border border-border-standard text-brand-deep hover:bg-canvas-base transition-colors font-label-md text-label-md cursor-pointer">
-                        Sau
-                    </a>
-                }
-                else
-                {
-                    <span class="px-2.5 py-1 rounded-lg border border-border-standard text-outline/40 font-label-md text-label-md cursor-not-allowed">Sau</span>
-                }
-            </div>
-        </div>
+        <!-- Clean Reusable Pagination Component -->
+        @await Html.PartialAsync("_Pagination", new QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels.PaginationModel {
+            CurrentPage = currentPage,
+            TotalPages = totalPages,
+            TotalItems = totalItems,
+            PageSize = pageSize,
+            ItemLabel = "chương trình",
+            BaseUrl = "/ChuongTrinhDaoTao/Index",
+            AjaxFunction = "loadCtdtPage",
+            RouteParams = new Dictionary<string, string?> {
+                { "search", search },
+                { "trangThai", selectedTrangThai }
+            }
+        })
     </div>
 </div>
 
@@ -349,11 +320,9 @@
                 itemName: tenCtdt,
                 message: `Chương trình <strong class="text-brand-deep">${tenCtdt}</strong> hiện đang có <strong>${soLop} lớp học trực thuộc</strong>. Quy định nghiệp vụ không cho phép xóa chương trình có dữ liệu lớp học đang liên kết.`,
                 warning: 'Vui lòng chuyển hoặc xóa toàn bộ lớp học trước khi xóa chương trình.',
-                submitText: 'Đã hiểu'
+                submitText: 'Đã hiểu',
+                onConfirm: function() {}
             });
-            // Ẩn nút xóa thực tế
-            const btn = document.querySelector('#global-delete-modal button[type="submit"]');
-            if (btn) btn.onclick = (e) => { e.preventDefault(); closeGlobalDeleteModal(); };
             return;
         }
 

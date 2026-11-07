@@ -1,4 +1,4 @@
-﻿@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>
+@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>
 @{
     // Họ và tên: Nguyễn Đình Kiên
     // Mã sinh viên: 23103100020
@@ -7,6 +7,7 @@
     int currentPage = ViewBag.CurrentPage ?? 1;
     int totalPages = ViewBag.TotalPages ?? 1;
     int totalItems = ViewBag.TotalItems ?? 0;
+    int pageSize = ViewBag.PageSize ?? 6;
     string search = ViewBag.Search ?? "";
     int? selectedMaCT = ViewBag.SelectedMaChuongTrinh;
     string selectedTrinhDo = ViewBag.SelectedTrinhDo ?? "";
@@ -114,6 +115,7 @@
                 <select name="trinhDo" onchange="filterLopHocAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
                     <option value="">Trình độ: Tất cả</option>
                     <!option value="Cơ bản" @(selectedTrinhDo == "Cơ bản" ? "selected" : "")>Cơ bản</!option>
+                    <!option value="Trung cấp" @(selectedTrinhDo == "Trung cấp" ? "selected" : "")>Trung cấp</!option>
                     <!option value="Nâng cao" @(selectedTrinhDo == "Nâng cao" ? "selected" : "")>Nâng cao</!option>
                     <!option value="Chuyên sâu" @(selectedTrinhDo == "Chuyên sâu" ? "selected" : "")>Chuyên sâu</!option>
                 </select>
@@ -127,6 +129,7 @@
                     <!option value="Đang mở đăng ký" @(selectedTrangThai == "Đang mở đăng ký" ? "selected" : "")>● Đang mở đăng ký</!option>
                     <!option value="Chưa mở" @(selectedTrangThai == "Chưa mở" ? "selected" : "")>○ Chưa mở</!option>
                     <!option value="Đã đóng đăng ký" @(selectedTrangThai == "Đã đóng đăng ký" ? "selected" : "")>✕ Đã đóng đăng ký</!option>
+                    <!option value="Đã kết thúc" @(selectedTrangThai == "Đã kết thúc" ? "selected" : "")>✓ Đã kết thúc</!option>
                     <!option value="Tạm dừng" @(selectedTrangThai == "Tạm dừng" ? "selected" : "")>⏸ Tạm dừng</!option>
                 </select>
                 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
@@ -290,10 +293,16 @@
                                             <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Tạm dừng
                                         </span>
                                     }
+                                    else if (item.TrangThai == "Đã kết thúc")
+                                    {
+                                        <span class="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-slate-700 bg-slate-100 px-2.5 py-1 rounded-full font-semibold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>Đã kết thúc
+                                        </span>
+                                    }
                                     else
                                     {
                                         <span class="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full font-semibold">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Chưa mở
+                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>@item.TrangThai
                                         </span>
                                     }
                                 </td>
@@ -305,7 +314,7 @@
                                         <button onclick="openEditDrawerFromRow(this)" class="p-1.5 rounded-lg text-outline hover:text-secondary-container hover:bg-surface-container-low transition-colors cursor-pointer" title="Chỉnh sửa lớp">
                                             <span class="material-symbols-outlined text-[18px]">edit</span>
                                         </button>
-                                        <button onclick="confirmDeleteLop(@item.MaLopHoc, '@item.TenLop', @siSo)" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50 transition-colors cursor-pointer" title="Xóa lớp">
+                                        <button onclick="confirmDeleteLop(@item.MaLopHoc, '@(item.TenLop?.Replace("'", "\\'") ?? "")', @(item.DangKyHocs?.Count ?? siSo))" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50 transition-colors cursor-pointer" title="Xóa lớp">
                                             <span class="material-symbols-outlined text-[18px]">delete</span>
                                         </button>
                                     </div>
@@ -322,6 +331,7 @@
             CurrentPage = currentPage,
             TotalPages = totalPages,
             TotalItems = totalItems,
+            PageSize = pageSize,
             ItemLabel = "lớp học",
             BaseUrl = "/LopHoc/Index",
             AjaxFunction = "loadLopHocPage",
@@ -382,6 +392,7 @@
                         <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Trình độ đầu vào</label>
                         <select name="TrinhDoDauVao" id="drawer-trinhdo" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:border-primary cursor-pointer">
                             <option value="Cơ bản">Cơ bản</option>
+                            <option value="Trung cấp">Trung cấp</option>
                             <option value="Nâng cao">Nâng cao</option>
                             <option value="Chuyên sâu">Chuyên sâu</option>
                         </select>
@@ -397,7 +408,15 @@
                             {
                                 foreach (var gv in (IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien>)ViewBag.GiangVienList)
                                 {
-                                    <option value="@gv.HocVi @gv.HoTen">@gv.ChuyenNganh</option>
+                                    var gvNameTrim = (gv.HoTen ?? "").Trim();
+                                    var hasPrefix = gvNameTrim.StartsWith("ThS", StringComparison.OrdinalIgnoreCase)
+                                        || gvNameTrim.StartsWith("TS", StringComparison.OrdinalIgnoreCase)
+                                        || gvNameTrim.StartsWith("PGS", StringComparison.OrdinalIgnoreCase)
+                                        || gvNameTrim.StartsWith("GS", StringComparison.OrdinalIgnoreCase)
+                                        || gvNameTrim.StartsWith("Kỹ sư", StringComparison.OrdinalIgnoreCase)
+                                        || gvNameTrim.StartsWith("Cử nhân", StringComparison.OrdinalIgnoreCase);
+                                    var displayGvOption = hasPrefix || string.IsNullOrWhiteSpace(gv.HocVi) ? gvNameTrim : $"{gv.HocVi} {gvNameTrim}";
+                                    <option value="@displayGvOption">@gv.ChuyenNganh</option>
                                 }
                             }
                         </datalist>
@@ -405,7 +424,7 @@
 
                     <div class="space-y-1.5">
                         <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Học phí (VNĐ) <span class="text-danger-crimson">*</span></label>
-                        <input type="number" step="100000" min="0" name="HocPhi" id="drawer-hocphi" required class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="5000000"/>
+                        <input type="number" step="any" min="0" name="HocPhi" id="drawer-hocphi" required class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="5000000"/>
                     </div>
                 </div>
 
@@ -445,6 +464,7 @@
                         <option value="Đang mở đăng ký">Đang mở đăng ký</option>
                         <option value="Tạm dừng">Tạm dừng</option>
                         <option value="Đã đóng đăng ký">Đã đóng đăng ký</option>
+                        <option value="Đã kết thúc">Đã kết thúc</option>
                     </select>
                 </div>
 
@@ -544,12 +564,11 @@
                 id: id,
                 title: 'Không thể xóa lớp học!',
                 itemName: tenLop,
-                message: `Lớp học <strong class="text-brand-deep">${tenLop}</strong> hiện đã có <strong>${soHocVien} học viên đăng ký</strong>. Quy định nghiệp vụ không cho phép xóa lớp học đã có hồ sơ lịch sử.`,
+                message: `Lớp học <strong class="text-brand-deep">${tenLop}</strong> hiện đã có <strong>${soHocVien} hồ sơ đăng ký</strong>. Quy định nghiệp vụ không cho phép xóa lớp học đã có hồ sơ lịch sử.`,
                 warning: 'Bạn có thể chuyển trạng thái lớp sang "Đã đóng đăng ký" hoặc "Tạm dừng".',
-                submitText: 'Đã hiểu'
+                submitText: 'Đã hiểu',
+                onConfirm: function() {}
             });
-            const btn = document.querySelector('#global-delete-modal button[type="submit"]');
-            if (btn) btn.onclick = (e) => { e.preventDefault(); closeGlobalDeleteModal(); };
             return;
         }
 

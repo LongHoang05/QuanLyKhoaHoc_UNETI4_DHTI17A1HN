@@ -1,4 +1,4 @@
-﻿@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien>
+@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien>
 @{
     // ========================================================
     // Bổ sung theo yêu cầu giảng viên hướng dẫn:
@@ -221,7 +221,7 @@
                                 </td>
                                 <td class="py-3.5 px-4 text-center">
                                     <div class="flex items-center justify-center gap-1">
-                                        <a href="/GiangVien/LichDay" title="Xem lịch dạy" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container transition-colors">
+                                        <a href="/GiangVien/LichDay?maGiangVien=@gv.MaGiangVien" title="Xem lịch dạy" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container transition-colors">
                                             <span class="material-symbols-outlined text-[18px]">calendar_month</span>
                                         </a>
                                         <button type="button" onclick="editTeacher(@gv.MaGiangVien)" title="Chỉnh sửa hồ sơ" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container transition-colors cursor-pointer">
@@ -253,6 +253,7 @@
             CurrentPage = (int)(ViewBag.CurrentPage ?? 1),
             TotalPages = (int)(ViewBag.TotalPages ?? 1),
             TotalItems = (int)(ViewBag.TotalItems ?? 0),
+            PageSize = (int)(ViewBag.PageSize ?? 6),
             ItemLabel = "giảng viên",
             BaseUrl = "/GiangVien/QuanLy",
             RouteParams = new Dictionary<string, string?> {
@@ -303,8 +304,11 @@
                 <label class="block text-xs font-bold text-brand-deep uppercase tracking-wider mb-1">Học vị</label>
                 <select id="gv-hocVi" name="HocVi" class="w-full px-3 py-2.5 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep">
                     <option value="ThS.">Thạc sĩ (ThS.)</option>
+                    <option value="Thạc sĩ">Thạc sĩ</option>
                     <option value="TS.">Tiến sĩ (TS.)</option>
+                    <option value="Tiến sĩ">Tiến sĩ</option>
                     <option value="PGS.TS.">Phó Giáo sư (PGS.TS.)</option>
+                    <option value="PGS. Tiến sĩ">Phó Giáo sư (PGS. Tiến sĩ)</option>
                     <option value="GS.TS.">Giáo sư (GS.TS.)</option>
                     <option value="Kỹ sư">Kỹ sư</option>
                     <option value="Cử nhân">Cử nhân</option>

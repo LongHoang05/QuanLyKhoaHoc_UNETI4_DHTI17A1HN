@@ -1,4 +1,4 @@
-﻿@*
+@*
 Họ và tên: Nguyễn Tùng Dương
 Mã sinh viên: 23103100003
 Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
@@ -147,10 +147,10 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
         </div>
     </section>
 
-    <!-- 3. Middle Split Section (Lịch học Module 5 & Phân tích Đào tạo) -->
-    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- 3. Middle Split Section: Lịch học phần sắp tới (1/2) & Hoạt động đăng ký (1/2) -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Left: Lịch Lớp Học Phần Sắp Tới (Module 5 BuoiHoc) -->
-        <div class="lg:col-span-2 bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col gap-4">
+        <div class="bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col gap-4 h-full">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border-subtle">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary-container">calendar_clock</span>
@@ -161,14 +161,14 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
                 </a>
             </div>
 
-            <div class="flex flex-col gap-3">
+            <div class="flex flex-col gap-3 flex-1">
                 @if (Model.DanhSachBuoiHoc != null && Model.DanhSachBuoiHoc.Any())
                 {
                     @foreach (var buoi in Model.DanhSachBuoiHoc)
                     {
                         var isSapDienRa = buoi.ThoiGianBatDau > DateTime.Now && buoi.ThoiGianBatDau <= DateTime.Now.AddDays(7);
-                        <div class="border @(isSapDienRa ? "border-primary-fixed bg-surface-container-low/40" : "border-border-standard bg-surface-white") rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-surface-container-low/70 transition-colors">
-                            <div class="flex items-start gap-3">
+                        <div class="border @(isSapDienRa ? "border-primary-fixed bg-surface-container-low/40" : "border-border-standard bg-surface-white") rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-surface-container-low/70 transition-colors">
+                            <div class="flex items-start gap-3 min-w-0">
                                 <div class="px-2.5 py-1.5 rounded-lg @(isSapDienRa ? "bg-primary-container/10 text-primary-container" : "bg-surface-container-high text-on-surface-variant") font-label-sm text-label-sm font-bold flex-shrink-0 whitespace-nowrap mt-0.5 text-center font-mono">
                                     @buoi.ThoiGianBatDau.ToString("HH:mm") - @buoi.ThoiGianKetThuc.ToString("HH:mm")<br>
                                     <span class="text-[10px] font-normal">@buoi.ThoiGianBatDau.ToString("dd/MM/yyyy")</span>
@@ -178,7 +178,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
                                         <h3 class="font-headline-sm text-[15px] font-bold text-brand-deep truncate">
                                             @(buoi.LopHoc != null ? buoi.LopHoc.TenLop : "Buổi học mã #" + buoi.MaBuoiHoc)
                                         </h3>
-                                        <span class="px-2 py-0.5 rounded-md bg-surface-white text-brand-deep font-label-sm text-label-sm border border-border-standard">
+                                        <span class="px-2 py-0.5 rounded-md bg-surface-white text-brand-deep font-label-sm text-label-sm border border-border-standard flex-shrink-0">
                                             Phòng @buoi.PhongHoc
                                         </span>
                                     </div>
@@ -195,7 +195,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-2 md:flex-col md:items-end flex-shrink-0">
+                            <div class="flex items-center gap-2 sm:flex-col sm:items-end flex-shrink-0">
                                 @if (buoi.TrangThai == "Đã lên lịch")
                                 {
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success-emerald/10 text-success-emerald font-label-sm text-label-sm font-semibold">
@@ -229,263 +229,122 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
             </div>
         </div>
 
-        <!-- Right: Hiệu suất & Phân tích Đào tạo -->
-        <div class="lg:col-span-1 bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between gap-5">
-            <div>
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-secondary-container flex items-center justify-center text-surface-white shadow-xs">
-                            <span class="material-symbols-outlined text-base">insights</span>
-                        </div>
-                        <div>
-                            <h2 class="font-headline-sm text-headline-sm text-brand-deep font-bold leading-tight">Chỉ Số Đào Tạo</h2>
-                            <span class="text-outline font-label-sm text-label-sm">Thống kê tự động từ DB</span>
-                        </div>
-                    </div>
-                    <span class="px-2 py-0.5 rounded-full bg-primary-container/10 text-primary-container font-label-sm text-label-sm font-semibold">Module 5</span>
+        <!-- Right: Hoạt động đăng ký gần đây -->
+        <div class="bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col gap-4 h-full">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border-subtle">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary-container">history</span>
+                    <h2 class="font-headline-sm text-headline-sm text-brand-deep font-bold">Hoạt động đăng ký gần đây</h2>
                 </div>
-
-                <div class="flex flex-col items-center justify-center py-2 text-center">
-                    <div class="relative w-36 h-36 flex items-center justify-center">
-                        <svg class="w-36 h-36 -rotate-90" viewBox="0 0 100 100">
-                            <circle class="text-border-subtle" cx="50" cy="50" fill="transparent" r="42" stroke="currentColor" stroke-width="8"></circle>
-                            <circle class="transition-all duration-1000 ease-out text-primary-container" cx="50" cy="50" fill="transparent" r="42" stroke="currentColor" stroke-dasharray="263.89" stroke-dashoffset="@(263.89 * (1 - Model.TyLeHoanThanh / 100.0))" stroke-linecap="round" stroke-width="8"></circle>
-                        </svg>
-                        <div class="absolute flex flex-col items-center">
-                            <span class="font-display text-[32px] font-black text-brand-deep tabular-nums leading-none font-mono">
-                                @Model.TyLeHoanThanh%
-                            </span>
-                            <span class="font-label-sm text-[11px] text-outline font-medium mt-1">Hoàn thành</span>
-                        </div>
-                    </div>
-                    <p class="font-label-md text-label-md text-brand-deep font-semibold mt-3">Tỷ lệ học viên hoàn thành môn</p>
-                    <p class="font-body-sm text-body-sm text-outline mt-0.5">Dựa trên kết quả học tập đã nhập điểm</p>
-                </div>
-            </div>
-
-            <div class="relative bg-gradient-to-br from-surface-container-low via-surface-container/60 to-surface-white border border-primary-fixed rounded-xl p-4 overflow-hidden">
-                <div class="flex items-center gap-1.5 text-primary-container font-label-sm text-label-sm font-bold uppercase tracking-wider mb-1">
-                    <span class="material-symbols-outlined text-[15px]">tips_and_updates</span>
-                    <span>Thông tin vận hành</span>
-                </div>
-                <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-                    Hiện có <strong>@Model.LopDangMo lớp</strong> đang mở đăng ký. Đảm bảo lịch trình buổi học và phòng máy được phân bổ trước ngày khai giảng.
-                </p>
-                <a class="mt-3 inline-flex items-center gap-1 font-label-md text-label-md font-bold text-primary-container hover:text-primary transition-colors group" href="/BuoiHoc/Index">
-                    <span>Xem danh sách lịch học</span>
-                    <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                <a href="/DangKyHoc/Index" class="text-xs text-primary-container hover:text-primary font-semibold flex items-center gap-1">
+                    Xem tất cả đơn đăng ký <span class="material-symbols-outlined text-sm">arrow_forward</span>
                 </a>
             </div>
-        </div>
-    </section>
 
-    <!-- 4. Data Table Section: Hoạt động đăng ký gần đây -->
-    <section id="dashboard-activity-section" class="bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col gap-4 transition-opacity duration-200">
-        <input type="hidden" id="dashboardCurrentStatus" value="@Model.SelectedStatus" />
-        <input type="hidden" id="dashboardCurrentSearch" value="@Model.Search" />
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-3 border-b border-border-subtle">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-primary-container/10 text-primary-container flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[18px]">history</span>
-                </div>
-                <div>
-                    <h2 class="font-headline-sm text-headline-sm text-brand-deep font-bold">Hoạt động đăng ký học phần</h2>
-                    <span class="text-xs text-outline">Dữ liệu từ bảng Đăng ký học (cập nhật mới nhất)</span>
-                </div>
-            </div>
-
-            <!-- Search & Filters Container -->
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <div class="relative">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px] pointer-events-none">search</span>
-                    <input id="activitySearchInput" value="@Model.Search" class="pl-9 pr-3 py-1.5 rounded-xl border border-border-standard text-brand-deep placeholder:text-outline font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container w-full sm:w-60" placeholder="Tìm sinh viên, lớp..." type="text">
-                </div>
-                <div class="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl overflow-x-auto">
-                    <a href="/ThongKe/Dashboard?page=1&status=all&search=@Model.Search" 
-                       onclick="event.preventDefault(); switchActivityStatus('all')" 
-                       class="activity-filter-btn px-2.5 py-1 rounded-lg font-label-sm text-label-sm @(Model.SelectedStatus == "all" || string.IsNullOrEmpty(Model.SelectedStatus) ? "bg-surface-white text-primary-container font-bold shadow-xs" : "text-outline hover:text-brand-deep") whitespace-nowrap cursor-pointer">Tất cả</a>
-                    <a href="/ThongKe/Dashboard?page=1&status=Chờ duyệt&search=@Model.Search" 
-                       onclick="event.preventDefault(); switchActivityStatus('Chờ duyệt')" 
-                       class="activity-filter-btn px-2.5 py-1 rounded-lg font-label-sm text-label-sm @(Model.SelectedStatus == "Chờ duyệt" ? "bg-surface-white text-primary-container font-bold shadow-xs" : "text-outline hover:text-brand-deep") whitespace-nowrap cursor-pointer">Chờ duyệt (@Model.DangKyChoDuyet)</a>
-                    <a href="/ThongKe/Dashboard?page=1&status=Đã duyệt&search=@Model.Search" 
-                       onclick="event.preventDefault(); switchActivityStatus('Đã duyệt')" 
-                       class="activity-filter-btn px-2.5 py-1 rounded-lg font-label-sm text-label-sm @(Model.SelectedStatus == "Đã duyệt" ? "bg-surface-white text-primary-container font-bold shadow-xs" : "text-outline hover:text-brand-deep") whitespace-nowrap cursor-pointer">Đã duyệt (@Model.DangKyDaDuyet)</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Table Container -->
-        <div class="w-full overflow-x-auto">
-            <table class="w-full text-left border-collapse min-w-[840px]">
-                <thead>
-                    <tr class="border-b border-border-standard bg-canvas-base/60 text-outline font-label-sm text-label-sm uppercase tracking-wider">
-                        <th class="py-3 px-4">Sinh viên</th>
-                        <th class="py-3 px-4">Lớp học phần đăng ký</th>
-                        <th class="py-3 px-4">Thời gian đăng ký</th>
-                        <th class="py-3 px-4 text-center">Trạng thái</th>
-                        <th class="py-3 px-4 text-right">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-border-subtle font-body-sm text-body-sm" id="activityTableBody">
-                    @if (Model.HoatDongGanDay != null && Model.HoatDongGanDay.Any())
-                    {
-                        @foreach (var item in Model.HoatDongGanDay)
+            <!-- Table Container -->
+            <div class="w-full overflow-x-auto flex-1">
+                <table class="w-full text-left border-collapse min-w-[560px] h-full">
+                    <thead>
+                        <tr class="border-b border-border-standard bg-canvas-base/60 text-outline font-label-sm text-label-sm uppercase tracking-wider">
+                            <th class="py-3 px-3">Sinh viên</th>
+                            <th class="py-3 px-3">Lớp học phần</th>
+                            <th class="py-3 px-3">Thời gian</th>
+                            <th class="py-3 px-3 text-center">Trạng thái</th>
+                            <th class="py-3 px-3 text-right">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border-subtle font-body-sm text-body-sm">
+                        @if (Model.HoatDongGanDay != null && Model.HoatDongGanDay.Any())
                         {
-                            <tr class="activity-row hover:bg-canvas-base/80 transition-colors" data-category="@item.TrangThai">
-                                <td class="py-3 px-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-primary-container/10 text-primary-container font-bold flex items-center justify-center font-label-md text-label-md flex-shrink-0">
-                                            @(item.HocVien != null && !string.IsNullOrEmpty(item.HocVien.HoTen) ? item.HocVien.HoTen.Substring(0, 1) : "H")
+                            @foreach (var item in Model.HoatDongGanDay.Take(5))
+                            {
+                                <tr class="hover:bg-canvas-base/80 transition-colors">
+                                    <td class="py-3.5 px-3">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-8 h-8 rounded-full bg-primary-container/10 text-primary-container font-bold flex items-center justify-center font-label-md text-label-md flex-shrink-0">
+                                                @(item.HocVien != null && !string.IsNullOrEmpty(item.HocVien.HoTen) ? item.HocVien.HoTen.Substring(0, 1) : "H")
+                                            </div>
+                                            <div class="flex flex-col min-w-0">
+                                                <span class="font-headline-sm text-brand-deep font-semibold text-[13px] truncate">
+                                                    @(item.HocVien != null ? item.HocVien.HoTen : "Học viên #" + item.MaHocVien)
+                                                </span>
+                                                <span class="font-mono text-outline text-[11px] tabular-nums">
+                                                    MSSV: @(item.HocVien != null ? item.HocVien.MaHocVien.ToString() : "N/A")
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div class="flex flex-col">
-                                            <span class="font-headline-sm text-brand-deep font-semibold text-[14px]">
-                                                @(item.HocVien != null ? item.HocVien.HoTen : "Học viên #" + item.MaHocVien)
+                                    </td>
+                                    <td class="py-3.5 px-3">
+                                        <div class="flex flex-col min-w-0">
+                                            <span class="font-semibold text-brand-deep text-[13px] truncate">
+                                                @(item.LopHoc != null ? item.LopHoc.TenLop : "Lớp #" + item.MaLopHoc)
                                             </span>
-                                            <span class="font-mono text-outline text-[11px] tabular-nums">
-                                                MSSV: @(item.HocVien != null ? item.HocVien.MaHocVien.ToString() : "N/A")
+                                            <span class="text-outline text-[11px] font-mono truncate">
+                                                GV: @(item.LopHoc != null ? item.LopHoc.TenGiangVien : "Chưa xếp")
                                             </span>
                                         </div>
-                                    </div>
-                                </td>
-                                <td class="py-3 px-4">
-                                    <div class="flex flex-col">
-                                        <span class="font-semibold text-brand-deep">
-                                            @(item.LopHoc != null ? item.LopHoc.TenLop : "Lớp #" + item.MaLopHoc)
+                                    </td>
+                                    <td class="py-3.5 px-3 whitespace-nowrap">
+                                        <span class="font-mono text-outline text-[11px] flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[13px]">schedule</span>
+                                            @item.NgayDangKy.ToString("dd/MM/yyyy HH:mm")
                                         </span>
-                                        <span class="text-outline text-[12px] font-mono">
-                                            GV: @(item.LopHoc != null ? item.LopHoc.TenGiangVien : "Chưa xếp")
-                                        </span>
-                                    </div>
-                                </td>
-                                <td class="py-3 px-4">
-                                    <span class="font-mono text-outline text-[12px] flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[14px]">schedule</span>
-                                        @item.NgayDangKy.ToString("dd/MM/yyyy HH:mm")
-                                    </span>
-                                </td>
-                                <td class="py-3 px-4 text-center">
-                                    @if (item.TrangThai == "Chờ duyệt")
-                                    {
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-warning-amber/10 text-secondary font-label-sm text-label-sm font-semibold">
-                                            <span class="h-1.5 w-1.5 rounded-full bg-warning-amber animate-pulse"></span>Chờ duyệt
-                                        </span>
-                                    }
-                                    else if (item.TrangThai == "Đã duyệt" || item.TrangThai == "Đã đóng học phí" || item.TrangThai == "Đang học")
-                                    {
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-success-emerald/10 text-success-emerald font-label-sm text-label-sm font-semibold">
-                                            <span class="h-1.5 w-1.5 rounded-full bg-success-emerald"></span>@item.TrangThai
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-error-container text-danger-crimson font-label-sm text-label-sm font-semibold">
-                                            <span class="h-1.5 w-1.5 rounded-full bg-danger-crimson"></span>@item.TrangThai
-                                        </span>
-                                    }
-                                </td>
-                                <td class="py-3 px-4 text-right">
-                                    <div class="inline-flex items-center gap-1">
+                                    </td>
+                                    <td class="py-3.5 px-3 text-center whitespace-nowrap">
                                         @if (item.TrangThai == "Chờ duyệt")
                                         {
-                                            <form asp-controller="ThongKe" asp-action="DuyetNhanh" asp-route-id="@item.MaDangKy" method="post" class="inline" onsubmit="event.preventDefault(); submitDuyetNhanh(this);">
-                                                <button class="p-1 rounded-lg text-outline hover:text-success-emerald hover:bg-success-emerald/10 transition-colors cursor-pointer" title="Duyệt nhanh" type="submit">
-                                                    <span class="material-symbols-outlined text-[19px]">check_circle</span>
-                                                </button>
-                                            </form>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning-amber/10 text-secondary font-label-sm text-[11px] font-semibold">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-warning-amber animate-pulse"></span>Chờ duyệt
+                                            </span>
                                         }
-                                        <a href="/KetQuaHocTap/Index" class="p-1 rounded-lg text-outline hover:text-primary-container hover:bg-surface-container-low transition-colors" title="Xem kết quả">
-                                            <span class="material-symbols-outlined text-[19px]">visibility</span>
-                                        </a>
-                                    </div>
+                                        else if (item.TrangThai == "Đã duyệt" || item.TrangThai == "Đã đóng học phí" || item.TrangThai == "Đang học")
+                                        {
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success-emerald/10 text-success-emerald font-label-sm text-[11px] font-semibold">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-success-emerald"></span>@item.TrangThai
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-error-container text-danger-crimson font-label-sm text-[11px] font-semibold">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-danger-crimson"></span>@item.TrangThai
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="py-3.5 px-3 text-right whitespace-nowrap">
+                                        <div class="inline-flex items-center gap-1">
+                                            @if (item.TrangThai == "Chờ duyệt")
+                                            {
+                                                <form asp-controller="ThongKe" asp-action="DuyetNhanh" asp-route-id="@item.MaDangKy" method="post" class="inline" onsubmit="event.preventDefault(); submitDuyetNhanh(this);">
+                                                    <button class="p-1 rounded-lg text-outline hover:text-success-emerald hover:bg-success-emerald/10 transition-colors cursor-pointer" title="Duyệt nhanh" type="submit">
+                                                        <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                                                    </button>
+                                                </form>
+                                            }
+                                            <a href="/DangKyHoc/Index" class="p-1 rounded-lg text-outline hover:text-primary-container hover:bg-surface-container-low transition-colors" title="Xem trong danh sách đăng ký">
+                                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="py-8 text-center text-outline">
+                                    Không có dữ liệu hoạt động đăng ký.
                                 </td>
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="5" class="py-8 text-center text-outline">
-                                Không có dữ liệu hoạt động đăng ký.
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
-
-        <!-- Clean Reusable Pagination Component -->
-        @await Html.PartialAsync("_Pagination", new QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels.PaginationModel {
-            CurrentPage = Model.CurrentPage,
-            TotalPages = Model.TotalPages,
-            TotalItems = Model.TongSoDangKy,
-            ItemLabel = "đơn đăng ký",
-            BaseUrl = "/ThongKe/Dashboard",
-            AjaxFunction = "loadDashboardPage",
-            RouteParams = new Dictionary<string, string?> {
-                { "status", Model.SelectedStatus },
-                { "search", Model.Search }
-            }
-        })
     </section>
 </div>
 
 @section Scripts {
 <script>
-    // Universal AJAX Page Loader for Dashboard Activities Table
-    async function loadDashboardPage(url, pushState = true) {
-        const section = document.getElementById('dashboard-activity-section');
-        const searchInput = document.getElementById('activitySearchInput');
-        const wasSearchFocused = (document.activeElement === searchInput);
-        const cursorStart = searchInput ? searchInput.selectionStart : 0;
-        const cursorEnd = searchInput ? searchInput.selectionEnd : 0;
-
-        if (section) {
-            section.classList.add('opacity-50', 'pointer-events-none');
-        }
-
-        try {
-            const res = await fetch(url, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
-            const html = await res.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-
-            const newSection = doc.getElementById('dashboard-activity-section');
-            if (newSection && section) {
-                section.innerHTML = newSection.innerHTML;
-                initActivityFilters();
-
-                if (wasSearchFocused) {
-                    const newSearch = document.getElementById('activitySearchInput');
-                    if (newSearch) {
-                        newSearch.focus();
-                        newSearch.setSelectionRange(cursorStart, cursorEnd);
-                    }
-                }
-            }
-
-            if (pushState) {
-                window.history.pushState({ url: url }, '', url);
-            }
-        } catch (err) {
-            console.error('Lỗi khi tải trang Dashboard:', err);
-            window.location.href = url;
-        } finally {
-            if (section) {
-                section.classList.remove('opacity-50', 'pointer-events-none');
-            }
-        }
-    }
-
-    window.addEventListener('popstate', (e) => {
-        if (e.state && e.state.url) {
-            loadDashboardPage(e.state.url, false);
-        } else {
-            loadDashboardPage(window.location.href, false);
-        }
-    });
-
     // Handle AJAX DuyetNhanh
     async function submitDuyetNhanh(form) {
         const btn = form.querySelector('button');
@@ -504,12 +363,12 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
                 const data = await res.json();
                 if (data.success) {
                     if (window.showToast) window.showToast(data.message, 'success');
-                    await loadDashboardPage(window.location.href, false);
+                    setTimeout(() => window.location.reload(), 400);
                 } else {
                     if (window.showToast) window.showToast(data.message, 'error');
                 }
             } else {
-                await loadDashboardPage(window.location.href, false);
+                window.location.reload();
             }
         } catch (err) {
             console.error('Lỗi duyệt nhanh:', err);
@@ -518,45 +377,5 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
             if (btn) btn.disabled = false;
         }
     }
-
-    // Switch status filter preserving current search query
-    function switchActivityStatus(status) {
-        const searchInput = document.getElementById('activitySearchInput');
-        const search = searchInput ? searchInput.value.trim() : '';
-        const url = `/ThongKe/Dashboard?page=1&status=${encodeURIComponent(status)}&search=${encodeURIComponent(search)}`;
-        loadDashboardPage(url);
-    }
-
-    // Initialize activity search & enter handling
-    let dashboardSearchTimer = null;
-    function initActivityFilters() {
-        const searchInput = document.getElementById('activitySearchInput');
-        if (searchInput) {
-            searchInput.oninput = (e) => {
-                clearTimeout(dashboardSearchTimer);
-                dashboardSearchTimer = setTimeout(() => {
-                    const q = e.target.value.trim();
-                    const status = document.getElementById('dashboardCurrentStatus')?.value || 'all';
-                    const url = `/ThongKe/Dashboard?page=1&status=${encodeURIComponent(status)}&search=${encodeURIComponent(q)}`;
-                    loadDashboardPage(url);
-                }, 400);
-            };
-
-            searchInput.onkeydown = (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    clearTimeout(dashboardSearchTimer);
-                    const q = searchInput.value.trim();
-                    const status = document.getElementById('dashboardCurrentStatus')?.value || 'all';
-                    const url = `/ThongKe/Dashboard?page=1&status=${encodeURIComponent(status)}&search=${encodeURIComponent(q)}`;
-                    loadDashboardPage(url);
-                }
-            };
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        initActivityFilters();
-    });
 </script>
 }

@@ -63,7 +63,7 @@
                         <label asp-for="SoDienThoai" class="form-label fw-semibold small text-muted">Số điện thoại liên hệ</label>
                         <div class="input-group">
                             <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-telephone"></i></span>
-                            <input asp-for="SoDienThoai" class="form-control border-start-0" placeholder="Ví dụ: 0912345678" />
+                            <input asp-for="SoDienThoai" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" class="form-control border-start-0" placeholder="Ví dụ: 0912345678" />
                         </div>
                         <span asp-validation-for="SoDienThoai" class="text-danger small"></span>
                     </div>

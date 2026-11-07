@@ -86,7 +86,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         {
             return await _context.DangKyHocs
                 .CountAsync(d => d.MaLopHoc == id &&
-                    (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"));
+                    (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành"));
         }
 
         public async Task<bool> ExistsTenLopAsync(string tenLop, int? excludeId = null)

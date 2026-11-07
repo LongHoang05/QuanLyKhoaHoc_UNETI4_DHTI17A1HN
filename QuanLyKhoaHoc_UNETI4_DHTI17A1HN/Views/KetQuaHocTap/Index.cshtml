@@ -1,4 +1,4 @@
-﻿@*
+@*
 Họ và tên: Nguyễn Tùng Dương
 Mã sinh viên: 23103100003
 Nội dung thực hiện: Module 5 - Quản lý Kết quả học tập CRUD chuẩn phong cách Prep.vn
@@ -23,7 +23,7 @@ Nội dung thực hiện: Module 5 - Quản lý Kết quả học tập CRUD chu
     int currentPage = ViewBag.CurrentPage ?? 1;
     int totalPages = ViewBag.TotalPages ?? 1;
     int totalRecords = ViewBag.TotalRecords ?? 0;
-    int pageSize = 8;
+    int pageSize = ViewBag.PageSize ?? 8;
     int startRecord = totalRecords == 0 ? 0 : (currentPage - 1) * pageSize + 1;
     int endRecord = Math.Min(currentPage * pageSize, totalRecords);
 
@@ -166,7 +166,7 @@ Nội dung thực hiện: Module 5 - Quản lý Kết quả học tập CRUD chu
 
             <!-- Filter Dropdown: Lớp học -->
             <div class="relative">
-                <select name="MaLopHoc" onchange="filterKetQuaAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
+                <select name="maLop" onchange="filterKetQuaAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
                     <option value="">Tất cả Lớp học</option>
                     @foreach (var lop in lopHocs)
                     {
@@ -348,6 +348,7 @@ Nội dung thực hiện: Module 5 - Quản lý Kết quả học tập CRUD chu
             CurrentPage = currentPage,
             TotalPages = totalPages,
             TotalItems = totalRecords,
+            PageSize = pageSize,
             ItemLabel = "kết quả",
             BaseUrl = "/KetQuaHocTap/Index",
             AjaxFunction = "loadKetQuaPage",

@@ -29,8 +29,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models
         [Display(Name = "Email")]
         public string Email { get; set; } = string.Empty;
 
-        [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
-        [StringLength(15)]
+        [Required(ErrorMessage = "Số điện thoại không được để trống")]
+        [StringLength(10, MinimumLength = 10, ErrorMessage = "Số điện thoại phải gồm đúng 10 chữ số")]
+        [RegularExpression(@"^0\d{9}$", ErrorMessage = "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0 (Ví dụ: 0912345678)")]
         [Display(Name = "Số điện thoại")]
         public string? SoDienThoai { get; set; }
 

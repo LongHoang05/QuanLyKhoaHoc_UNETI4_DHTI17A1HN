@@ -82,15 +82,23 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
-        context.Database.Migrate();
+        try
+        {
+            context.Database.Migrate();
+        }
+        catch (Exception migEx)
+        {
+            logger.LogWarning("Migrate warning: {Msg}. Tiếp tục nạp dữ liệu mẫu.", migEx.Message);
+        }
         DbSeeder.SeedMockData(context);
+        logger.LogInformation("Nạp dữ liệu mẫu thành công!");
     }
     catch (Exception ex)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "Lưu ý khi kết nối Database: Đảm bảo SQL Server đang chạy và chuỗi kết nối DefaultConnection chính xác.");
     }
 }
@@ -110,8 +118,40 @@ app.UseStaticFiles();
 app.UseRouting();
 
 // Bật Cookie Authentication & Session theo chuẩn bài giảng ASP.NET Core & Bảo mật UNETI
+var supportedCultures = new[] { new System.Globalization.CultureInfo("en-US") };
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("en-US"),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures
+});
+
 app.UseAuthentication();
 app.UseSession();
+
+// Đồng bộ trạng thái từ Cookie Claims sang Session nếu Session bị làm mới (tránh mất phiên đăng nhập ở Cổng Học viên / Trang chủ)
+app.Use(async (context, next) =>
+{
+    if (context.Session.GetInt32("MaTaiKhoan") == null && context.User.Identity?.IsAuthenticated == true)
+    {
+        var idClaim = context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (int.TryParse(idClaim, out int uid))
+        {
+            var roleClaim = context.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "";
+            var nameClaim = context.User.Identity?.Name;
+            var hoTenClaim = context.User.FindFirst("HoTen")?.Value;
+            var emailClaim = context.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+
+            context.Session.SetInt32("MaTaiKhoan", uid);
+            context.Session.SetString("VaiTro", roleClaim);
+            if (!string.IsNullOrEmpty(nameClaim)) context.Session.SetString("TenDangNhap", nameClaim);
+            if (!string.IsNullOrEmpty(hoTenClaim)) context.Session.SetString("HoTen", hoTenClaim);
+            if (!string.IsNullOrEmpty(emailClaim)) context.Session.SetString("Email", emailClaim);
+        }
+    }
+    await next();
+});
+
 app.UseAuthorization();
 
 // Route thân thiện cho Khám phá khóa học

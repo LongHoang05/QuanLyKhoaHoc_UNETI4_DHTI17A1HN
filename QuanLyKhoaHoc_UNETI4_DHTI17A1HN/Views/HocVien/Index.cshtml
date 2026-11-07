@@ -1,9 +1,17 @@
-﻿@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels.HocVienIndexViewModel
+@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels.HocVienIndexViewModel
 @{
     ViewData["Title"] = "Quản lý Hồ sơ Học viên";
     int tongSoHocVien = Model.TongSoHocVien > 0 ? Model.TongSoHocVien : Model.DanhSachHocVien.Count;
-    int dangHocCount = Model.DanhSachHocVien.Count(h => h.TrangThai);
-    int hoanThanhCount = Model.DanhSachHocVien.Count(h => !h.TrangThai);
+    int dangHocCount = ViewBag.DangHocCount ?? Model.DanhSachHocVien.Count(h => h.TrangThai);
+    int hoanThanhCount = ViewBag.TamKhoaCount ?? Model.DanhSachHocVien.Count(h => !h.TrangThai);
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalItems = ViewBag.TotalItems ?? Model.DanhSachHocVien.Count;
+    int pageSize = ViewBag.PageSize ?? 8;
+    string search = ViewBag.Search as string ?? "";
+    string selectedTrangThai = ViewBag.SelectedTrangThai as string ?? "";
+    string selectedTrinhDo = ViewBag.SelectedTrinhDo as string ?? "";
+    string sortBy = ViewBag.SortBy as string ?? "";
 }
 
 <!--
@@ -86,33 +94,53 @@
     </div>
 
     <!-- Filter Toolbar -->
-    <div class="bg-surface-white rounded-2xl p-4 border border-border-subtle shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto flex-1">
-            <div class="relative flex-1 min-w-[240px]">
+    <div class="bg-surface-white rounded-2xl p-4 border border-border-subtle shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto flex-1">
+            <div class="relative flex-1 min-w-[220px]">
                 <span class="material-symbols-outlined text-outline absolute left-3 top-1/2 -translate-y-1/2 text-[18px]">search</span>
-                <input id="hvSearchInput" onkeyup="filterHvTable()" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep font-body-sm text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Tìm theo mã HV, họ tên, email, sđt..." type="text">
+                <input id="hvSearchInput" value="@search" oninput="debounceHvFilter()" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep font-body-sm text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Tìm theo mã HV, họ tên, email, sđt..." type="text">
             </div>
 
             <!-- Filter Trạng thái -->
-            <div class="min-w-[150px]">
-                <select id="filterHvStatus" onchange="filterHvTable()" class="w-full px-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:border-primary text-brand-deep">
+            <div class="min-w-[155px]">
+                <select id="filterHvStatus" onchange="filterHvTable()" class="w-full px-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:border-primary text-brand-deep cursor-pointer">
                     <option value="">Tất cả trạng thái</option>
-                    <option value="Đang học">Đang học (Hoạt động)</option>
-                    <option value="Tạm khóa">Tạm khóa / Nghỉ</option>
+                    <!option value="Đang học" @(selectedTrangThai == "Đang học" ? "selected" : "")>Đang học (Hoạt động)</!option>
+                    <!option value="Tạm khóa" @(selectedTrangThai == "Tạm khóa" ? "selected" : "")>Tạm khóa / Nghỉ</!option>
                 </select>
             </div>
 
             <!-- Filter Trình độ học vấn -->
-            <div class="min-w-[160px]">
-                <select id="filterHvLevel" onchange="filterHvTable()" class="w-full px-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:border-primary text-brand-deep">
+            <div class="min-w-[150px]">
+                <select id="filterHvLevel" onchange="filterHvTable()" class="w-full px-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:border-primary text-brand-deep cursor-pointer">
                     <option value="">Tất cả trình độ</option>
-                    <option value="Đại học">Đại học</option>
-                    <option value="Cao đẳng">Cao đẳng</option>
-                    <option value="THPT">THPT</option>
-                    <option value="Sau đại học">Sau đại học</option>
+                    <!option value="Đại học" @(selectedTrinhDo == "Đại học" ? "selected" : "")>Đại học</!option>
+                    <!option value="Kỹ sư" @(selectedTrinhDo == "Kỹ sư" ? "selected" : "")>Kỹ sư</!option>
+                    <!option value="Thạc sĩ" @(selectedTrinhDo == "Thạc sĩ" ? "selected" : "")>Thạc sĩ</!option>
+                    <!option value="Cao đẳng" @(selectedTrinhDo == "Cao đẳng" ? "selected" : "")>Cao đẳng</!option>
+                    <!option value="Trung cấp" @(selectedTrinhDo == "Trung cấp" ? "selected" : "")>Trung cấp</!option>
+                    <!option value="THPT" @(selectedTrinhDo == "THPT" ? "selected" : "")>THPT</!option>
+                    <!option value="Sau đại học" @(selectedTrinhDo == "Sau đại học" ? "selected" : "")>Sau đại học</!option>
+                </select>
+            </div>
+
+            <!-- Sắp xếp (Sort) -->
+            <div class="min-w-[175px]">
+                <select id="filterHvSortBy" onchange="filterHvTable()" class="w-full px-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:border-primary text-brand-deep font-medium cursor-pointer">
+                    <!option value="" @(sortBy == "" ? "selected" : "")>Sắp xếp: Mới nhất</!option>
+                    <!option value="ten_asc" @(sortBy == "ten_asc" ? "selected" : "")>Họ tên: A → Z</!option>
+                    <!option value="ten_desc" @(sortBy == "ten_desc" ? "selected" : "")>Họ tên: Z → A</!option>
+                    <!option value="mahv_asc" @(sortBy == "mahv_asc" ? "selected" : "")>Mã HV: Tăng dần</!option>
+                    <!option value="mahv_desc" @(sortBy == "mahv_desc" ? "selected" : "")>Mã HV: Giảm dần</!option>
+                    <!option value="ngaysinh_asc" @(sortBy == "ngaysinh_asc" ? "selected" : "")>Ngày sinh: Cũ → Mới</!option>
                 </select>
             </div>
         </div>
+
+        <button type="button" onclick="resetHvFilters()" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1 px-3 py-2 rounded-xl hover:bg-surface-container-low transition-colors cursor-pointer shrink-0">
+            <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+            <span>Đặt lại</span>
+        </button>
     </div>
 
     <!-- Table Section -->
@@ -143,15 +171,15 @@
                     }
                     else
                     {
-                        int idx = 1;
+                        int idx = (currentPage - 1) * pageSize + 1;
                         foreach (var item in Model.DanhSachHocVien)
                         {
                             string initialLetter = string.IsNullOrWhiteSpace(item.HoTen) ? "H" : item.HoTen.Trim().Substring(item.HoTen.Trim().LastIndexOf(' ') + 1).Substring(0, 1).ToUpper();
                             string statusText = item.TrangThai ? "Đang học" : "Tạm khóa";
 
-                            <tr class="hv-row hover:bg-canvas-base/60 transition-colors" data-id="@item.MaHocVien" data-mahv="HV@item.MaHocVien.ToString("D3")" data-name="@item.HoTen" data-email="@item.Email" data-phone="@item.SoDienThoai" data-birth="@(item.NgaySinh?.ToString("dd/MM/yyyy") ?? "")" data-gender="@(item.GioiTinh ?? "Nam")" data-address="@(item.DiaChi ?? "")" data-level="@(item.TrinhDoHocVan ?? "Đại học")" data-job="@(item.NgheNghiep ?? "")" data-status="@statusText">
+                            <tr class="hv-row hover:bg-canvas-base/60 transition-colors" data-id="@item.MaHocVien" data-mahv="HV@(item.MaHocVien.ToString("D3"))" data-name="@item.HoTen" data-email="@item.Email" data-phone="@item.SoDienThoai" data-birth="@(item.NgaySinh?.ToString("dd/MM/yyyy") ?? "")" data-gender="@(item.GioiTinh ?? "Nam")" data-address="@(item.DiaChi ?? "")" data-level="@(item.TrinhDoHocVan ?? "Đại học")" data-job="@(item.NgheNghiep ?? "")" data-status="@statusText">
                                 <td class="py-3.5 px-4 text-center text-outline font-mono text-[11px]">@(idx++)</td>
-                                <td class="py-3.5 px-4 font-mono font-semibold text-primary">#HV@item.MaHocVien.ToString("D3")</td>
+                                <td class="py-3.5 px-4 font-mono font-semibold text-primary">#HV@(item.MaHocVien.ToString("D3"))</td>
                                 <td class="py-3.5 px-4">
                                     <div class="flex items-center gap-3">
                                         <div class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-xs shrink-0">@initialLetter</div>
@@ -200,7 +228,7 @@
                                         <button onclick="toggleStatusHv(this, @item.MaHocVien)" class="p-1.5 rounded-lg text-outline hover:text-amber-600 hover:bg-amber-50 cursor-pointer" title="Đổi trạng thái">
                                             <span class="material-symbols-outlined text-[18px]">sync</span>
                                         </button>
-                                        <button onclick="confirmDeleteHv(@item.MaHocVien, '@item.HoTen')" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50 cursor-pointer" title="Xóa">
+                                        <button onclick="confirmDeleteHv(@item.MaHocVien, '@(item.HoTen?.Replace("'", "\\'") ?? "")')" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50 cursor-pointer" title="Xóa">
                                             <span class="material-symbols-outlined text-[18px]">delete</span>
                                         </button>
                                     </div>
@@ -211,6 +239,23 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Clean Reusable Pagination Component -->
+        @await Html.PartialAsync("_Pagination", new QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels.PaginationModel {
+            CurrentPage = currentPage,
+            TotalPages = totalPages,
+            TotalItems = totalItems,
+            PageSize = pageSize,
+            ItemLabel = "học viên",
+            BaseUrl = "/HocVien/Index",
+            AjaxFunction = "loadHocVienPage",
+            RouteParams = new Dictionary<string, string?> {
+                { "search", search },
+                { "trangThai", selectedTrangThai },
+                { "trinhDo", selectedTrinhDo },
+                { "sortBy", sortBy }
+            }
+        })
     </div>
 </div>
 
@@ -238,13 +283,13 @@
 
         <div>
             <label class="block font-bold text-brand-deep uppercase mb-1">Họ và tên <span class="text-rose-500">*</span></label>
-            <input type="text" id="drawer-name" required placeholder="Nguyễn Văn A" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep">
+            <input type="text" id="drawer-name" required maxlength="100" placeholder="Nguyễn Văn A" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
             <div>
                 <label class="block font-bold text-brand-deep uppercase mb-1">Số điện thoại <span class="text-rose-500">*</span></label>
-                <input type="tel" id="drawer-phone" required placeholder="0912345678" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-surface-white font-mono focus:outline-none focus:border-primary text-brand-deep">
+                <input type="tel" id="drawer-phone" required maxlength="10" pattern="0[0-9]{9}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" placeholder="0912345678" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-surface-white font-mono focus:outline-none focus:border-primary text-brand-deep">
             </div>
             <div>
                 <label class="block font-bold text-brand-deep uppercase mb-1">Email <span class="text-rose-500">*</span></label>
@@ -277,7 +322,10 @@
                 <label class="block font-bold text-brand-deep uppercase mb-1">Trình độ học vấn</label>
                 <select id="drawer-level" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep">
                     <option value="Đại học">Đại học</option>
+                    <option value="Kỹ sư">Kỹ sư</option>
+                    <option value="Thạc sĩ">Thạc sĩ</option>
                     <option value="Cao đẳng">Cao đẳng</option>
+                    <option value="Trung cấp">Trung cấp</option>
                     <option value="THPT">THPT</option>
                     <option value="Sau đại học">Sau đại học</option>
                 </select>
@@ -430,6 +478,18 @@
         const name = document.getElementById('drawer-name').value.trim();
         const phone = document.getElementById('drawer-phone').value.trim();
         const email = document.getElementById('drawer-email').value.trim();
+
+        if (!name || name.length < 2) {
+            showToast('Vui lòng nhập họ và tên học viên hợp lệ (từ 2 đến 100 ký tự)!', 'error');
+            document.getElementById('drawer-name').focus();
+            return;
+        }
+
+        if (!/^0\d{9}$/.test(phone)) {
+            showToast('Số điện thoại phải gồm đúng 10 chữ số (bắt đầu bằng số 0, ví dụ: 0912345678)!', 'error');
+            document.getElementById('drawer-phone').focus();
+            return;
+        }
         const birth = document.getElementById('drawer-birth').value;
         const gender = document.getElementById('drawer-gender').value;
         const address = document.getElementById('drawer-address').value.trim();
@@ -567,27 +627,58 @@
         });
     }
 
-    function filterHvTable() {
-        const query = document.getElementById('hvSearchInput').value.toLowerCase().trim();
-        const status = document.getElementById('filterHvStatus').value;
-        const level = document.getElementById('filterHvLevel').value;
-
-        const rows = document.querySelectorAll('#hvTableBody tr.hv-row');
-        rows.forEach(row => {
-            const mahv = row.dataset.mahv.toLowerCase();
-            const name = row.dataset.name.toLowerCase();
-            const email = row.dataset.email.toLowerCase();
-            const phone = row.dataset.phone.toLowerCase();
-            const rowStatus = row.dataset.status;
-            const rowLevel = row.dataset.level;
-
-            const matchQuery = (!query || mahv.includes(query) || name.includes(query) || email.includes(query) || phone.includes(query));
-            const matchStatus = (!status || rowStatus === status);
-            const matchLevel = (!level || rowLevel === level);
-
-            row.style.display = (matchQuery && matchStatus && matchLevel) ? '' : 'none';
-        });
+    let hvDebounceTimer = null;
+    function debounceHvFilter() {
+        clearTimeout(hvDebounceTimer);
+        hvDebounceTimer = setTimeout(() => filterHvTable(), 320);
     }
+
+    function filterHvTable() {
+        const search = document.getElementById('hvSearchInput')?.value.trim() || '';
+        const trangThai = document.getElementById('filterHvStatus')?.value || '';
+        const trinhDo = document.getElementById('filterHvLevel')?.value || '';
+        const sortBy = document.getElementById('filterHvSortBy')?.value || '';
+
+        const params = new URLSearchParams();
+        if (search) params.set('search', search);
+        if (trangThai) params.set('trangThai', trangThai);
+        if (trinhDo) params.set('trinhDo', trinhDo);
+        if (sortBy) params.set('sortBy', sortBy);
+        params.set('page', '1');
+
+        loadHocVienPage(`/HocVien/Index?${params.toString()}`);
+    }
+
+    function resetHvFilters() {
+        if (document.getElementById('hvSearchInput')) document.getElementById('hvSearchInput').value = '';
+        if (document.getElementById('filterHvStatus')) document.getElementById('filterHvStatus').value = '';
+        if (document.getElementById('filterHvLevel')) document.getElementById('filterHvLevel').value = '';
+        if (document.getElementById('filterHvSortBy')) document.getElementById('filterHvSortBy').value = '';
+        loadHocVienPage('/HocVien/Index');
+    }
+
+    async function loadHocVienPage(url, pushState = true) {
+        const area = document.getElementById('hocvien-content-area');
+        if (area) area.classList.add('opacity-50', 'pointer-events-none');
+        try {
+            const res = await fetch(url);
+            const html = await res.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const newContent = doc.getElementById('hocvien-content-area');
+            if (newContent && area) {
+                area.innerHTML = newContent.innerHTML;
+            }
+            if (pushState) window.history.pushState({ url }, '', url);
+        } catch (err) {
+            window.location.href = url;
+        } finally {
+            if (area) area.classList.remove('opacity-50', 'pointer-events-none');
+        }
+    }
+
+    window.addEventListener('popstate', (e) => {
+        if (e.state && e.state.url) loadHocVienPage(e.state.url, false);
+    });
 
     function exportTableToCSV(filename) {
         const rows = document.querySelectorAll('#hvTable tr');

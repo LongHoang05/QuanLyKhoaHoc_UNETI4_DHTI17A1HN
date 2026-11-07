@@ -85,7 +85,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             string? xepLoai,
             string? ketQua,
             int page,
-            int pageSize)
+            int pageSize,
+            string? sortBy = null)
         {
             var query = _context.KetQuaHocTaps
                 .Include(k => k.DangKyHoc)
@@ -110,10 +111,24 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 query = query.Where(k => k.DangKyHoc != null && k.DangKyHoc.MaLopHoc == maLop.Value);
             }
 
-            // 3. Lọc theo Xếp loại (Xuất sắc, Giỏi, Khá, Trung bình, Yếu)
+            // 3. Lọc theo Xếp loại (Dịch trực tiếp sang SQL dựa trên DiemTongKet do XepLoai là [NotMapped])
             if (!string.IsNullOrWhiteSpace(xepLoai))
             {
-                query = query.Where(k => k.XepLoai == xepLoai);
+                string xl = xepLoai.Trim();
+                if (xl == "Xuất sắc")
+                    query = query.Where(k => k.DiemTongKet >= 8.5);
+                else if (xl == "Giỏi")
+                    query = query.Where(k => k.DiemTongKet >= 8.0 && k.DiemTongKet < 8.5);
+                else if (xl == "Khá")
+                    query = query.Where(k => k.DiemTongKet >= 7.0 && k.DiemTongKet < 8.0);
+                else if (xl == "Trung bình khá")
+                    query = query.Where(k => k.DiemTongKet >= 6.5 && k.DiemTongKet < 7.0);
+                else if (xl == "Trung bình")
+                    query = query.Where(k => k.DiemTongKet >= 5.0 && k.DiemTongKet < 7.0);
+                else if (xl == "Trung bình yếu")
+                    query = query.Where(k => k.DiemTongKet >= 5.0 && k.DiemTongKet < 5.5);
+                else if (xl == "Yếu" || xl == "Kém")
+                    query = query.Where(k => k.DiemTongKet < 5.0);
             }
 
             // 4. Lọc theo Kết quả (Hoàn thành / Chưa hoàn thành)
@@ -123,8 +138,19 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             }
 
             int totalCount = await query.CountAsync();
+
+            query = sortBy switch
+            {
+                "diem_desc" => query.OrderByDescending(k => k.DiemTongKet),
+                "diem_asc" => query.OrderBy(k => k.DiemTongKet),
+                "ten_asc" => query.OrderBy(k => k.DangKyHoc != null && k.DangKyHoc.HocVien != null ? k.DangKyHoc.HocVien.HoTen : ""),
+                "ten_desc" => query.OrderByDescending(k => k.DangKyHoc != null && k.DangKyHoc.HocVien != null ? k.DangKyHoc.HocVien.HoTen : ""),
+                "quatrinh_desc" => query.OrderByDescending(k => k.DiemChuyenCan),
+                "cuoiky_desc" => query.OrderByDescending(k => k.DiemCuoiKhoa),
+                _ => query.OrderByDescending(k => k.NgayCapNhat)
+            };
+
             var items = await query
-                .OrderByDescending(k => k.NgayCapNhat)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -166,7 +192,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             var query = _context.DangKyHocs
                 .Include(d => d.HocVien)
                 .Include(d => d.LopHoc)
-                .Where(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học");
+                .Include(d => d.KetQuaHocTap)
+                .Where(d => (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học") && d.KetQuaHocTap == null);
 
             if (maLopHoc.HasValue && maLopHoc.Value > 0)
             {

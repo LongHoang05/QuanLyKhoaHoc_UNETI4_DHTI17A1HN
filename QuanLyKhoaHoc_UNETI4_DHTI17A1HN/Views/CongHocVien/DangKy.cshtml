@@ -1,4 +1,4 @@
-﻿@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>
+@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>
 @{
     // Họ và tên: Nguyễn Đức Linh
     // Mã sinh viên: 23103100042
@@ -17,6 +17,7 @@
     int currentPage = ViewBag.CurrentPage ?? 1;
     int totalPages = ViewBag.TotalPages ?? 1;
     int totalItems = ViewBag.TotalItems ?? 0;
+    int pageSize = ViewBag.PageSize ?? 8;
 }
 
 <!-- ================= QUICK CATEGORY CHIPS ================= -->
@@ -27,7 +28,7 @@
             
             <a href="/CongHocVien/DangKy"
                class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all @(!selectedMaCT.HasValue ? "bg-primary text-white shadow-xs" : "bg-slate-100 text-slate-700 hover:bg-slate-200")">
-                Tất cả (@totalItems)
+                Tất cả (@(ViewBag.TongKhoaHoc ?? totalItems))
             </a>
 
             @foreach (var ct in chuongTrinhList)
@@ -96,6 +97,11 @@
                                 <input type="radio" name="trinhDo" value="Cơ bản" onchange="this.form.submit()" @(selectedTrinhDo == "Cơ bản" ? "checked" : "")
                                        class="text-primary focus:ring-primary h-3.5 w-3.5" />
                                 <span>Cơ bản (Người mới bắt đầu)</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-xs text-slate-700 hover:text-primary cursor-pointer">
+                                <input type="radio" name="trinhDo" value="Trung cấp" onchange="this.form.submit()" @(selectedTrinhDo == "Trung cấp" ? "checked" : "")
+                                       class="text-primary focus:ring-primary h-3.5 w-3.5" />
+                                <span>Trung cấp (Thực hành chuyên môn)</span>
                             </label>
                             <label class="flex items-center gap-2 text-xs text-slate-700 hover:text-primary cursor-pointer">
                                 <input type="radio" name="trinhDo" value="Nâng cao" onchange="this.form.submit()" @(selectedTrinhDo == "Nâng cao" ? "checked" : "")
@@ -177,6 +183,7 @@
                             class="px-3 py-1.5 rounded-xl border border-border-standard bg-slate-50 focus:bg-white text-xs font-semibold text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20">
                         <!option value="" @(string.IsNullOrEmpty(selectedSapXep) ? "selected" : "")>Mới nhất</!option>
                         <!option value="khai_giang_som" @(selectedSapXep == "khai_giang_som" ? "selected" : "")>Khai giảng sớm nhất</!option>
+                        <!option value="han_dang_ky" @(selectedSapXep == "han_dang_ky" ? "selected" : "")>Sắp hết hạn đăng ký</!option>
                         <!option value="gia_tang" @(selectedSapXep == "gia_tang" ? "selected" : "")>Học phí: Thấp đến cao</!option>
                         <!option value="gia_giam" @(selectedSapXep == "gia_giam" ? "selected" : "")>Học phí: Cao đến thấp</!option>
                     </select>
@@ -342,6 +349,7 @@
                         CurrentPage = currentPage,
                         TotalPages = totalPages,
                         TotalItems = totalItems,
+                        PageSize = pageSize,
                         ItemLabel = "khóa học",
                         BaseUrl = "/CongHocVien/DangKy",
                         RouteParams = new Dictionary<string, string?> {
@@ -378,7 +386,7 @@
 
         <form id="enrollForm" onsubmit="submitEnrollment(event)" class="space-y-4 pt-4">
             @Html.AntiForgeryToken()
-            <input type="hidden" id="modal-maLop" name="MaLopHoc" value="" />
+            <input type="hidden" id="modal-maLop" name="maLop" value="" />
 
             <!-- Order Summary Card -->
             <div class="p-4 rounded-2xl bg-slate-50 border border-border-standard space-y-2 text-xs">
@@ -397,7 +405,7 @@
             {
                 <div class="p-3.5 rounded-2xl bg-primary-light/60 border border-primary/20 text-xs space-y-1">
                     <div class="text-[11px] text-primary font-bold uppercase tracking-wider">Thông tin người học:</div>
-                    <div class="font-bold text-brand-deep">@currentStudent.HoTen <span class="text-outline font-normal font-mono">(#HV@currentStudent.MaHocVien.ToString("D3"))</span></div>
+                    <div class="font-bold text-brand-deep">@currentStudent.HoTen <span class="text-outline font-normal font-mono">(#HV@(currentStudent.MaHocVien.ToString("D3")))</span></div>
                     <div class="text-slate-600">Email: @currentStudent.Email • SĐT: @(currentStudent.SoDienThoai ?? "Chưa cập nhật")</div>
                 </div>
             }
@@ -441,6 +449,7 @@
         } else {
             url.searchParams.delete(key);
         }
+        url.searchParams.delete('page');
         return url.pathname + url.search;
     }
 

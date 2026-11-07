@@ -1,4 +1,4 @@
-﻿@*
+@*
 Họ và tên: Nguyễn Tùng Dương
 Mã sinh viên: 23103100003
 Nội dung thực hiện: Module 5 - Báo cáo Thống kê LINQ - Phong cách Prep.vn
@@ -200,7 +200,7 @@ Nội dung thực hiện: Module 5 - Báo cáo Thống kê LINQ - Phong cách Pr
                         if ((int)item.SoLuong > maxCount) maxCount = (int)item.SoLuong;
                     }
 
-                    <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4 items-end min-h-[180px] pt-4 px-2">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4 items-end h-[195px] pt-4 px-2">
                         @foreach (var item in dkTheoThang)
                         {
                             int heightPct = (int)Math.Max(15, ((double)item.SoLuong / maxCount) * 100);

@@ -40,6 +40,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
 
             int pageSize = 8;
+            if (page < 1) page = 1;
 
             // 1. Phân trang & Lọc LINQ qua Repository
             var (ketQuas, totalRecords) = await _ketQuaRepo.GetPagedAsync(
@@ -48,7 +49,17 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 null,
                 ketQua,
                 page,
-                pageSize);
+                pageSize,
+                sortBy);
+
+            int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
+            if (totalPages < 1) totalPages = 1;
+            if (page > totalPages)
+            {
+                page = totalPages;
+                (ketQuas, totalRecords) = await _ketQuaRepo.GetPagedAsync(
+                    search, maLop, null, ketQua, page, pageSize, sortBy);
+            }
 
             // 2. Thống kê KPI & phổ điểm qua Repository
             var allScores = (await _ketQuaRepo.GetAllAsync()).ToList();
@@ -71,33 +82,25 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             ViewBag.CountD = allScores.Count(d => d.DiemTongKet >= 4.0 && d.DiemTongKet < 5.5);
             ViewBag.CountF = allScores.Count(d => d.DiemTongKet < 4.0);
 
-            int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
-            if (page < 1) page = 1;
-            if (page > totalPages && totalPages > 0) page = totalPages;
-
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
             ViewBag.TotalRecords = totalRecords;
+            ViewBag.PageSize = pageSize;
             ViewBag.SelectedMaLop = maLop;
             ViewBag.SelectedKetQua = ketQua;
             ViewBag.Search = search;
+            ViewBag.SortBy = sortBy;
 
-            // 3. Dropdowns
+            // 3. Dropdowns (Chỉ liệt kê hồ sơ đủ điều kiện chấm điểm và chưa có kết quả)
             ViewBag.LopHocList = await _lopHocRepo.GetAllAsync();
-            var allDangKys = await _dangKyHocRepo.GetAllAsync();
-            ViewBag.EligibleDangKys = allDangKys
-                .Where(d => d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành")
-                .ToList();
+            ViewBag.EligibleDangKys = (await _ketQuaRepo.GetEligibleDangKysForGradingAsync()).ToList();
 
             return View(ketQuas);
         }
 
         public async Task<IActionResult> Create()
         {
-            var allDangKys = await _dangKyHocRepo.GetAllAsync();
-            ViewBag.EligibleDangKys = allDangKys
-                .Where(d => d.TrangThai == "Đang học")
-                .ToList();
+            ViewBag.EligibleDangKys = (await _ketQuaRepo.GetEligibleDangKysForGradingAsync()).ToList();
             return View();
         }
 
@@ -116,10 +119,10 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
             else
             {
-                // Kiểm tra trạng thái: Chỉ đăng ký 'Đang học' mới được ghi nhận kết quả cuối cùng (Mục 9.4 & 13)
-                if (dangKy.TrangThai != "Đang học")
+                // Kiểm tra trạng thái hợp lệ để chấm điểm (Đã duyệt / Đã đóng học phí / Đang học)
+                if (dangKy.TrangThai != "Đang học" && dangKy.TrangThai != "Đã đóng học phí" && dangKy.TrangThai != "Đã duyệt")
                 {
-                    ModelState.AddModelError("", $"Chỉ học viên ở trạng thái 'Đang học' mới được chấm điểm kết quả cuối cùng (Trạng thái hiện tại: {dangKy.TrangThai}).");
+                    ModelState.AddModelError("", $"Hồ sơ đăng ký này không ở trạng thái đủ điều kiện chấm điểm (Trạng thái hiện tại: {dangKy.TrangThai}).");
                 }
 
                 // Kiểm tra xem đã có kết quả trước đó chưa

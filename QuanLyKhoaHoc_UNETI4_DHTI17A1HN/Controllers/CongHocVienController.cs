@@ -65,7 +65,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             string? mucGia,
             string? sapXep,
             int page = 1,
-            int pageSize = 12)
+            int pageSize = 8)
         {
             var student = await GetCurrentHocVienAsync();
             ViewBag.CurrentStudent = student;
@@ -95,6 +95,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 _ => ""
             };
 
+            if (page < 1) page = 1;
             var (classes, totalItems) = await _lopHocRepo.GetPagedAsync(
                 search,
                 maChuongTrinh,
@@ -111,8 +112,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
             if (totalPages < 1) totalPages = 1;
-            if (page < 1) page = 1;
-            if (page > totalPages) page = totalPages;
+            if (page > totalPages)
+            {
+                page = totalPages;
+                (classes, totalItems) = await _lopHocRepo.GetPagedAsync(
+                    search, maChuongTrinh, trinhDo, "Đang mở đăng ký", null, minHocPhi, maxHocPhi, null, null, sortBy, page, pageSize);
+            }
 
             var classIds = classes.Select(c => c.MaLopHoc).ToList();
             var siSoMap = await _dangKyHocRepo.GetSiSoDaDangKyMapAsync(classIds);
@@ -123,7 +128,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             {
                 var dks = await _dangKyHocRepo.GetByHocVienIdAsync(student.MaHocVien);
                 myRegistrations = dks
-                    .Where(d => d.TrangThai != "Đã hủy")
+                    .Where(d => d.TrangThai != "Đã hủy" && d.TrangThai != "Từ chối")
                     .GroupBy(d => d.MaLopHoc)
                     .ToDictionary(g => g.Key, g => g.OrderByDescending(d => d.MaDangKy).First());
             }
@@ -145,6 +150,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
             ViewBag.TotalItems = totalItems;
+            ViewBag.PageSize = pageSize;
 
             return View(classes);
         }
@@ -190,8 +196,10 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         // --- HÀNH ĐỘNG ĐĂNG KÝ LỚP HỌC (AJAX) - TUÂN THỦ MỤC 7.3 ---
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DangKyLopPost(int maLop, string? ghiChu)
+        public async Task<IActionResult> DangKyLopPost(int maLop, int? maLopHoc, string? ghiChu)
         {
+            int targetMaLop = maLop > 0 ? maLop : (maLopHoc ?? 0);
+
             // 1. Kiểm tra học viên đã đăng nhập
             var student = await GetCurrentHocVienAsync();
             if (student == null)
@@ -206,7 +214,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
 
             // 3. Kiểm tra lớp học tồn tại và ở trạng thái 'Đang mở đăng ký'
-            var lop = await _lopHocRepo.GetByIdAsync(maLop);
+            var lop = await _lopHocRepo.GetByIdAsync(targetMaLop);
             if (lop == null)
             {
                 return Json(new { success = false, message = "Lớp học không tồn tại." });
@@ -229,14 +237,14 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
 
             // 5. Kiểm tra học viên không được có hai đăng ký đang xử lý cho cùng một lớp
-            bool daDangKy = await _dangKyHocRepo.HasEnrolledAsync(student.MaHocVien, maLop);
+            bool daDangKy = await _dangKyHocRepo.HasEnrolledAsync(student.MaHocVien, targetMaLop);
             if (daDangKy)
             {
                 return Json(new { success = false, message = "Bạn đã có hồ sơ đăng ký cho khóa học này rồi." });
             }
 
             // 6. Kiểm tra lớp còn chỗ theo sĩ số tối đa
-            int enrolledCount = await _dangKyHocRepo.CountEnrolledInLopAsync(maLop);
+            int enrolledCount = await _dangKyHocRepo.CountEnrolledInLopAsync(targetMaLop);
             if (enrolledCount >= lop.SiSoToiDa)
             {
                 return Json(new { success = false, message = "Khóa học đã đủ chỉ tiêu sĩ số. Vui lòng chọn lớp học khác." });
@@ -246,7 +254,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             var dangKy = new DangKyHoc
             {
                 MaHocVien = student.MaHocVien,
-                MaLopHoc = maLop,
+                MaLopHoc = targetMaLop,
                 NgayDangKy = DateTime.Now,
                 TrangThai = "Chờ duyệt",
                 GhiChu = ghiChu ?? "",
@@ -292,7 +300,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         }
 
         // --- KHÔNG GIAN HỌC TẬP CỦA TÔI (MY LEARNING DASHBOARD) ---
-        public async Task<IActionResult> TienTrinh()
+        public async Task<IActionResult> TienTrinh(string? tab = null, DateTime? weekStart = null, int? maLop = null)
         {
             var student = await GetCurrentHocVienAsync();
             if (student == null)
@@ -302,6 +310,27 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
 
             ViewBag.CurrentStudent = student;
+
+            if ((weekStart.HasValue || maLop.HasValue) && string.IsNullOrEmpty(tab))
+            {
+                tab = "schedule";
+            }
+
+            // Ánh xạ tham số tab trên URL từ menu người dùng sang tab tương ứng
+            string activeTab = (tab ?? "").Trim().ToLower() switch
+            {
+                "tkb" or "schedule" => "schedule",
+                "ketqua" or "grades" => "grades",
+                "hoso" or "profile" => "profile",
+                _ => "courses"
+            };
+            ViewBag.ActiveTab = activeTab;
+
+            // Thông tin tài khoản & Lịch sử đóng học phí cho Tab Thẻ sinh viên & Hồ sơ
+            var tk = student.MaTaiKhoan.HasValue ? await _taiKhoanRepo.GetByIdAsync(student.MaTaiKhoan.Value) : null;
+            ViewBag.TaiKhoan = tk;
+            var paymentHistory = await _dangKyHocRepo.GetPaymentHistoryByHocVienIdAsync(student.MaHocVien);
+            ViewBag.PaymentHistory = paymentHistory;
 
             // Danh sách các đăng ký của chính học viên này
             var dangKys = (await _dangKyHocRepo.GetByHocVienIdAsync(student.MaHocVien)).ToList();
@@ -317,6 +346,31 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 .Where(b => b.TrangThai != "Đã hủy")
                 .OrderBy(b => b.ThoiGianBatDau)
                 .ToList();
+
+            // Lớp học của tôi phục vụ bộ lọc thời khóa biểu
+            var myClasses = dangKys
+                .Where(d => d.LopHoc != null && (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"))
+                .Select(d => d.LopHoc!)
+                .GroupBy(l => l.MaLopHoc)
+                .Select(g => g.First())
+                .ToList();
+            ViewBag.MyClasses = myClasses;
+
+            // Tính tuần học (Thứ 2 đầu tuần)
+            int diffWeek = (7 + (DateTime.Today.DayOfWeek - DayOfWeek.Monday)) % 7;
+            DateTime currentWeekStart = weekStart ?? DateTime.Today.AddDays(-diffWeek);
+            ViewBag.SelectedWeek = currentWeekStart;
+            ViewBag.SelectedMaLop = maLop;
+
+            // Lọc theo lớp nếu có
+            if (maLop.HasValue && maLop.Value > 0)
+            {
+                buoiHocs = buoiHocs.Where(b => b.MaLopHoc == maLop.Value).ToList();
+            }
+
+            DateTime weekEnd = currentWeekStart.AddDays(7);
+            int totalWeekSessions = buoiHocs.Count(b => b.ThoiGianBatDau >= currentWeekStart && b.ThoiGianBatDau < weekEnd);
+            ViewBag.TotalWeekSessions = totalWeekSessions;
 
             // Đếm số buổi đã hoàn thành cho từng lớp để tính tiến độ %
             var completedSessionsCount = buoiHocs
@@ -360,28 +414,45 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         public async Task<IActionResult> CapNhatHoSoPost(HocVien model)
         {
             var student = await GetCurrentHocVienAsync();
-            if (student == null || student.MaHocVien != model.MaHocVien)
+            if (student == null || (model.MaHocVien > 0 && student.MaHocVien != model.MaHocVien))
             {
                 return Json(new { success = false, message = "Bạn không có quyền chỉnh sửa hồ sơ này." });
             }
 
-            student.HoTen = model.HoTen;
-            student.NgaySinh = model.NgaySinh;
-            student.GioiTinh = model.GioiTinh;
-            student.SoDienThoai = model.SoDienThoai;
-            student.DiaChi = model.DiaChi;
-            student.TrinhDoHocVan = model.TrinhDoHocVan;
-            student.NgheNghiep = model.NgheNghiep;
+            if (string.IsNullOrWhiteSpace(model.HoTen))
+            {
+                return Json(new { success = false, message = "Họ và tên học viên không được để trống." });
+            }
+
+            if (model.NgaySinh.HasValue && model.NgaySinh.Value.Date > DateTime.Today)
+            {
+                return Json(new { success = false, message = "Ngày sinh không được lớn hơn ngày hiện tại." });
+            }
+
+            if (!string.IsNullOrWhiteSpace(model.SoDienThoai) && !System.Text.RegularExpressions.Regex.IsMatch(model.SoDienThoai.Trim(), @"^0\d{9}$"))
+            {
+                return Json(new { success = false, message = "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0 (Ví dụ: 0912345678)." });
+            }
+
+            student.HoTen = model.HoTen.Trim();
+            if (model.NgaySinh.HasValue) student.NgaySinh = model.NgaySinh;
+            if (!string.IsNullOrWhiteSpace(model.GioiTinh)) student.GioiTinh = model.GioiTinh;
+            if (model.SoDienThoai != null) student.SoDienThoai = model.SoDienThoai.Trim();
+            if (model.DiaChi != null) student.DiaChi = model.DiaChi.Trim();
+            if (!string.IsNullOrWhiteSpace(model.TrinhDoHocVan)) student.TrinhDoHocVan = model.TrinhDoHocVan;
+            if (model.NgheNghiep != null) student.NgheNghiep = model.NgheNghiep.Trim();
 
             await _hocVienRepo.UpdateAsync(student);
 
-            // Đồng bộ tên sang tài khoản
+            // Đồng bộ tên lên Session & Tài khoản để thanh điều hướng cập nhật ngay
+            HttpContext.Session.SetString("HoTen", student.HoTen);
+
             if (student.MaTaiKhoan.HasValue)
             {
                 var tk = await _taiKhoanRepo.GetByIdAsync(student.MaTaiKhoan.Value);
                 if (tk != null)
                 {
-                    tk.HoTen = model.HoTen;
+                    tk.HoTen = student.HoTen;
                     await _taiKhoanRepo.UpdateAsync(tk);
                 }
             }

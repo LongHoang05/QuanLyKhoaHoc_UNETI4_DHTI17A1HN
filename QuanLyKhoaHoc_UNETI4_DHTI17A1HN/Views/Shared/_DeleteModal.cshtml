@@ -48,8 +48,11 @@
 </div>
 
 <script>
+    window._currentDeleteOptions = null;
+
     window.openGlobalDeleteModal = function(options) {
         options = options || {};
+        window._currentDeleteOptions = options;
         const modal = document.getElementById('global-delete-modal');
         if (!modal) return;
 
@@ -60,10 +63,20 @@
         const warningEl = document.getElementById('global-delete-warning');
         const btnTextEl = document.getElementById('global-delete-btn-text');
         const iconEl = document.getElementById('global-delete-icon');
+        const submitBtn = document.getElementById('global-delete-submit-btn');
 
-        if (options.action) form.action = options.action;
-        if (options.id !== undefined) idInput.value = options.id;
-        if (options.title) titleEl.innerText = options.title;
+        // Reset custom onclick handlers from previous modal invocations
+        if (submitBtn) {
+            submitBtn.onclick = null;
+            submitBtn.disabled = false;
+        }
+
+        const actionUrl = options.action || options.confirmUrl || '';
+        const targetId = options.id !== undefined ? options.id : options.itemId;
+
+        form.action = actionUrl;
+        idInput.value = targetId !== undefined ? targetId : 0;
+        titleEl.innerText = options.title || 'Xác nhận xóa?';
 
         if (options.message) {
             msgEl.innerHTML = options.message;
@@ -73,9 +86,9 @@
             msgEl.innerText = 'Bạn có chắc chắn muốn xóa bản ghi này?';
         }
 
-        if (options.warning) warningEl.innerText = options.warning;
-        if (options.submitText) btnTextEl.innerText = options.submitText;
-        if (options.icon) iconEl.innerText = options.icon;
+        warningEl.innerText = options.warning || 'Hành động này mang tính vĩnh viễn và không thể hoàn tác sau khi xác nhận.';
+        btnTextEl.innerText = options.submitText || 'Xóa vĩnh viễn';
+        iconEl.innerText = options.icon || 'delete_forever';
 
         modal.classList.remove('hidden');
     };
@@ -115,7 +128,20 @@
         const deleteForm = document.getElementById('global-delete-form');
         if (deleteForm) {
             deleteForm.addEventListener('submit', async function(e) {
-                if (typeof window.onDeleteSuccess === 'function') {
+                const opts = window._currentDeleteOptions || {};
+
+                if (typeof opts.onConfirm === 'function') {
+                    e.preventDefault();
+                    closeGlobalDeleteModal();
+                    opts.onConfirm();
+                    return;
+                }
+
+                const successCallback = typeof opts.onSuccess === 'function'
+                    ? opts.onSuccess
+                    : (typeof window.onDeleteSuccess === 'function' ? window.onDeleteSuccess : null);
+
+                if (successCallback) {
                     e.preventDefault();
                     const submitBtn = document.getElementById('global-delete-submit-btn');
                     const btnText = document.getElementById('global-delete-btn-text');
@@ -137,7 +163,7 @@
                             closeGlobalDeleteModal();
                             if (data.success) {
                                 if (window.showToast) window.showToast(data.message, 'success');
-                                window.onDeleteSuccess(data);
+                                successCallback(data);
                             } else {
                                 if (window.showToast) window.showToast(data.message, 'error');
                             }

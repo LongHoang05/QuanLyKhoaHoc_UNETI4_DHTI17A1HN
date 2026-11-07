@@ -1,4 +1,4 @@
-﻿@{
+@{
     // Họ và tên: Nhóm 4 (Vũ Đình Trường - Nguyễn Đình Kiên - Nguyễn Đức Linh - Nguyễn Hoàng Long - Nguyễn Tùng Dương)
     // Đề tài 36: Xây dựng hệ thống quản lý đăng ký khóa học và học viên trung tâm đào tạo
     // Lớp: DHTI17A1HN - Đại học Kinh tế - Kỹ thuật Công nghiệp (UNETI)
@@ -194,9 +194,14 @@
             {
                 int currentSiSo = allSiSoMap.ContainsKey(cls.MaLopHoc) ? allSiSoMap[cls.MaLopHoc] : 0;
                 string seatStatus = currentSiSo >= cls.SiSoToiDa * 0.8 ? "sap-day" : "con-cho";
-                string gvDisplay = !string.IsNullOrWhiteSpace(cls.GiangVien?.HoTen)
-                    ? ($"{cls.GiangVien.HocVi ?? "ThS."} {cls.GiangVien.HoTen}")
-                    : (!string.IsNullOrWhiteSpace(cls.TenGiangVien) ? cls.TenGiangVien : "ThS. Giảng viên UNETI");
+                string gvRawName = cls.GiangVien?.HoTen ?? cls.TenGiangVien ?? "ThS. Giảng viên UNETI";
+                bool hasDegreePrefix = gvRawName.StartsWith("ThS", StringComparison.OrdinalIgnoreCase)
+                    || gvRawName.StartsWith("TS", StringComparison.OrdinalIgnoreCase)
+                    || gvRawName.StartsWith("PGS", StringComparison.OrdinalIgnoreCase)
+                    || gvRawName.StartsWith("GS", StringComparison.OrdinalIgnoreCase);
+                string gvDisplay = (!hasDegreePrefix && !string.IsNullOrWhiteSpace(cls.GiangVien?.HocVi))
+                    ? $"{cls.GiangVien.HocVi} {gvRawName}"
+                    : gvRawName;
                 string hinhAnh = cls.TenLop.Contains("React", StringComparison.OrdinalIgnoreCase)
                     ? "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=600&q=80"
                     : (cls.TenLop.Contains("Python", StringComparison.OrdinalIgnoreCase) || cls.TenLop.Contains("AI", StringComparison.OrdinalIgnoreCase))
@@ -562,7 +567,7 @@
                                 <td class="p-3.5 text-center">
                                     @if (kq != null)
                                     {
-                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold @(kq.KetQua == "Đạt" ? "bg-emerald-100 text-emerald-800 border border-emerald-300" : "bg-rose-100 text-rose-800 border border-rose-300")">
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold @(kq.KetQua == "Đạt" || kq.KetQua == "Hoàn thành" ? "bg-emerald-100 text-emerald-800 border border-emerald-300" : "bg-rose-100 text-rose-800 border border-rose-300")">
                                             @kq.KetQua (@kq.XepLoai)
                                         </span>
                                     }
@@ -643,11 +648,13 @@
                     <p class="text-xs text-outline">Cập nhật thông tin liên lạc nhận thông báo lịch học và chứng chỉ tốt nghiệp</p>
                 </div>
 
-                <form onsubmit="saveStudentProfile(event)" class="space-y-4 text-xs">
+                <form id="homeStudentProfileForm" onsubmit="saveStudentProfile(event)" class="space-y-4 text-xs">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="MaHocVien" value="@(currentStudent?.MaHocVien ?? 0)" />
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="space-y-1.5">
                             <label class="font-semibold text-slate-700">Họ và tên</label>
-                            <input type="text" value="@studentDisplayName" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <input type="text" name="HoTen" value="@studentDisplayName" required class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20" />
                         </div>
                         <div class="space-y-1.5">
                             <label class="font-semibold text-slate-700">Mã học viên (Cố định)</label>
@@ -658,11 +665,11 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="space-y-1.5">
                             <label class="font-semibold text-slate-700">Email nhận chứng chỉ</label>
-                            <input type="email" value="@(currentStudent?.Email ?? "tuan.tm@uneti.edu.vn")" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <input type="email" name="Email" value="@(currentStudent?.Email ?? "tuan.tm@uneti.edu.vn")" readonly class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-slate-100 text-outline cursor-not-allowed" />
                         </div>
                         <div class="space-y-1.5">
                             <label class="font-semibold text-slate-700">Số điện thoại liên hệ</label>
-                            <input type="tel" value="@(currentStudent?.SoDienThoai ?? "0912 345 602")" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <input type="tel" name="SoDienThoai" value="@(currentStudent?.SoDienThoai ?? "0912345602")" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20" />
                         </div>
                     </div>
 
@@ -672,8 +679,8 @@
                             <input type="text" value="Công nghệ Thông tin (K17)" readonly class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-slate-100 text-outline cursor-not-allowed" />
                         </div>
                         <div class="space-y-1.5">
-                            <label class="font-semibold text-slate-700">Cơ sở học tập chính</label>
-                            <input type="text" value="Cơ sở Lĩnh Nam & Minh Khai, Hà Nội" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <label class="font-semibold text-slate-700">Địa chỉ / Cơ sở học tập</label>
+                            <input type="text" name="DiaChi" value="@(currentStudent?.DiaChi ?? "Cơ sở Lĩnh Nam & Minh Khai, Hà Nội")" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20" />
                         </div>
                     </div>
 
@@ -1421,7 +1428,15 @@
                         @initials
                     </div>
                     <div>
-                        <h4 class="text-base font-bold text-brand-deep">@gv.HocVi @gv.HoTen</h4>
+                        @{
+                            bool gvHasTitle = !string.IsNullOrWhiteSpace(gv.HoTen) && (
+                                gv.HoTen.StartsWith("ThS", StringComparison.OrdinalIgnoreCase) ||
+                                gv.HoTen.StartsWith("TS", StringComparison.OrdinalIgnoreCase) ||
+                                gv.HoTen.StartsWith("PGS", StringComparison.OrdinalIgnoreCase) ||
+                                gv.HoTen.StartsWith("GS", StringComparison.OrdinalIgnoreCase));
+                            string fullGvTitle = gvHasTitle || string.IsNullOrWhiteSpace(gv.HocVi) ? gv.HoTen : $"{gv.HocVi} {gv.HoTen}";
+                        }
+                        <h4 class="text-base font-bold text-brand-deep">@fullGvTitle</h4>
                         <p class="text-xs text-primary font-semibold">@gv.ChuyenNganh</p>
                         <p class="text-[11px] text-outline mt-1 font-mono">@gv.Email</p>
                     </div>
@@ -1858,16 +1873,20 @@
     }
 
     // ================= 4. MODAL THANH TOÁN HỌC PHÍ VIETQR =================
+    const currentPortalStudentName = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(studentDisplayName));
+    const isRealLoggedInStudent = @(isLoggedInStudent ? "true" : "false");
+
     function openVietQRModal(code, courseName, amount) {
         const modal = document.getElementById('vietQrModal');
         const amountDisplay = document.getElementById('qrAmountDisplay');
         const noteDisplay = document.getElementById('qrNoteDisplay');
         const qrImg = document.getElementById('vietQrImg');
+        const transferNote = code + ' ' + currentPortalStudentName;
 
         if (amountDisplay) amountDisplay.textContent = Number(amount).toLocaleString('vi-VN') + ' đ';
-        if (noteDisplay) noteDisplay.textContent = code + ' TRAN MINH TUAN';
+        if (noteDisplay) noteDisplay.textContent = transferNote;
         if (qrImg) {
-            qrImg.src = 'https://api.vietqr.io/image/970422-1903686888-qrx68.jpg?amount=' + amount + '&addInfo=' + encodeURIComponent(code + ' TRAN MINH TUAN');
+            qrImg.src = 'https://api.vietqr.io/image/970422-1903686888-qrx68.jpg?amount=' + amount + '&addInfo=' + encodeURIComponent(transferNote);
         }
 
         if (modal) modal.classList.remove('hidden');
@@ -1925,7 +1944,30 @@
     // ================= 6. LƯU THAY ĐỔI HỒ SƠ =================
     function saveStudentProfile(e) {
         e.preventDefault();
-        showStudentToast('Cập nhật hồ sơ cá nhân học viên thành công!', 'success');
+        if (!isRealLoggedInStudent) {
+            showStudentToast('Cập nhật hồ sơ mẫu thành công! (Đăng nhập học viên để lưu thật)', 'success');
+            return;
+        }
+
+        const form = document.getElementById('homeStudentProfileForm');
+        if (!form) return;
+        const formData = new FormData(form);
+
+        fetch('/CongHocVien/CapNhatHoSoPost', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                showStudentToast(res.message, 'success');
+                setTimeout(() => window.location.reload(), 800);
+            } else {
+                showStudentToast(res.message || 'Không thể lưu hồ sơ.', 'error');
+            }
+        })
+        .catch(() => showStudentToast('Có lỗi xảy ra khi cập nhật hồ sơ!', 'error'));
     }
 
     // ================= 7. TOAST NOTIFICATION HELPER =================

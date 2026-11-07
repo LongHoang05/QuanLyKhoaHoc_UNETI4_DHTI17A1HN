@@ -1,4 +1,4 @@
-﻿@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc
+@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc
 @{
     // Họ và tên: Nguyễn Đức Linh
     // Mã sinh viên: 23103100042
@@ -11,6 +11,7 @@
     var myReg = ViewBag.MyRegistration as QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc;
     bool isRegistered = myReg != null;
     bool isExpired = Model.HanDangKy < DateTime.Today;
+    bool isNotOpen = Model.TrangThai != "Đang mở đăng ký" || DateTime.Today < Model.NgayBatDauDangKy.Date;
     bool isFull = remainingSeats <= 0;
     var similarCourses = ViewBag.SimilarCourses as List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>();
 }
@@ -37,7 +38,7 @@
                         <span class="material-symbols-outlined text-[14px]">star</span> 4.9 (128 đánh giá)
                     </span>
                     <span class="text-xs text-slate-300">
-                        Mã khóa học: <strong class="text-white font-mono">#LH@Model.MaLopHoc.ToString("D3")</strong>
+                        Mã khóa học: <strong class="text-white font-mono">#LH@(Model.MaLopHoc.ToString("D3"))</strong>
                     </span>
                 </div>
 
@@ -297,6 +298,12 @@
                             Đã hết hạn đăng ký khóa học
                         </button>
                     }
+                    else if (isNotOpen)
+                    {
+                        <button disabled class="w-full py-3.5 px-4 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 font-bold text-xs sm:text-sm text-center cursor-not-allowed">
+                            Khóa học hiện chưa mở tuyển sinh
+                        </button>
+                    }
                     else if (isFull)
                     {
                         <button disabled class="w-full py-3.5 px-4 rounded-2xl bg-rose-50 text-rose-400 font-bold text-xs sm:text-sm text-center cursor-not-allowed">
@@ -368,7 +375,7 @@
 
         <form id="enrollForm" onsubmit="submitEnrollment(event)" class="space-y-4 pt-4">
             @Html.AntiForgeryToken()
-            <input type="hidden" id="modal-maLop" name="MaLopHoc" value="@Model.MaLopHoc" />
+            <input type="hidden" id="modal-maLop" name="maLop" value="@Model.MaLopHoc" />
 
             <div class="p-4 rounded-2xl bg-slate-50 border border-border-standard space-y-2 text-xs">
                 <div class="flex justify-between items-start gap-2">
