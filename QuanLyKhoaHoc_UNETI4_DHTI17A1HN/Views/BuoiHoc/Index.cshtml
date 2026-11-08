@@ -198,13 +198,10 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                     {
                         <span class="font-label-md text-label-md text-danger-crimson font-bold tabular-nums">Cần xếp lại</span>
                         <span class="font-body-sm text-body-sm text-outline">(Trùng phòng / GV)</span>
-                        <form method="post" action="/BuoiHoc/XuLyTrungLich" class="inline" onsubmit="return confirm('Bạn có chắc muốn tự động dọn dẹp các ca học bị trùng lịch (hủy bớt các ca lặp và giữ lại 1 ca chuẩn)?')">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="px-2 py-0.5 bg-danger-crimson hover:bg-red-700 text-surface-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer inline-flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[14px]">auto_fix_high</span>
-                                Dọn dẹp ca trùng
-                            </button>
-                        </form>
+                        <button type="button" onclick="confirmCleanupConflicts()" class="px-2 py-0.5 bg-danger-crimson hover:bg-red-700 text-surface-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer inline-flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px]">auto_fix_high</span>
+                            Dọn dẹp ca trùng
+                        </button>
                     }
                     else
                     {
@@ -286,13 +283,10 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
 
                 @if (conflictCount > 0)
                 {
-                    <form method="post" action="/BuoiHoc/XuLyTrungLich" class="inline" onsubmit="return confirm('Bạn có chắc muốn tự động dọn dẹp các ca học bị trùng lặp?')">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="px-2.5 py-1.5 bg-danger-crimson hover:bg-red-700 text-surface-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer inline-flex items-center gap-1" title="Tự động hủy các ca trùng lặp">
-                            <span class="material-symbols-outlined text-[14px]">auto_fix_high</span>
-                            Dọn dẹp ca trùng
-                        </button>
-                    </form>
+                    <button type="button" onclick="confirmCleanupConflicts()" class="px-2.5 py-1.5 bg-danger-crimson hover:bg-red-700 text-surface-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer inline-flex items-center gap-1" title="Tự động hủy các ca trùng lặp">
+                        <span class="material-symbols-outlined text-[14px]">auto_fix_high</span>
+                        Dọn dẹp ca trùng
+                    </button>
                 }
 
                 <!-- Nút cuộn ma trận ngang -->
@@ -1881,7 +1875,29 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         downloadLink.click();
         document.body.removeChild(downloadLink);
     }
-// Tự động mở ngăn kéo Xếp lịch học nếu URL có tham số create=true
+    function confirmCleanupConflicts() {
+        if (window.openGlobalDeleteModal) {
+            window.openGlobalDeleteModal({
+                title: 'Dọn dẹp ca học trùng lặp?',
+                action: '/BuoiHoc/XuLyTrungLich',
+                id: 0,
+                itemName: 'Các ca học bị trùng lịch',
+                message: 'Hệ thống sẽ tự động quét toàn bộ lịch học, hủy các ca lặp và giữ lại 1 ca chuẩn cho mỗi phòng/giảng viên.',
+                warning: 'Thao tác này sẽ chuyển các ca trùng sang trạng thái "Đã hủy" và không thể hoàn tác.',
+                submitText: 'Tiến hành dọn dẹp'
+            });
+        } else {
+            if (confirm('Bạn có chắc muốn tự động dọn dẹp các ca học bị trùng lặp?')) {
+                const form = document.createElement('form');
+                form.method = 'post';
+                form.action = '/BuoiHoc/XuLyTrungLich';
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    }
+
+    // Tự động mở ngăn kéo Xếp lịch học nếu URL có tham số create=true
     (function checkUrlForCreate() {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('create') === 'true' || urlParams.get('action') === 'create') {

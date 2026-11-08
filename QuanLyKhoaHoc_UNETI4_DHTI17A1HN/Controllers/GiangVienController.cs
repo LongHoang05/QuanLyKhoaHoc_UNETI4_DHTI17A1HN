@@ -243,6 +243,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             });
         }
 
+        [HttpGet]
+        [SessionAuthorize("Admin", "GiaoVu")]
+        public IActionResult Create()
+        {
+            return RedirectToAction(nameof(QuanLy), new { create = "true" });
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         [SessionAuthorize("Admin", "GiaoVu")]

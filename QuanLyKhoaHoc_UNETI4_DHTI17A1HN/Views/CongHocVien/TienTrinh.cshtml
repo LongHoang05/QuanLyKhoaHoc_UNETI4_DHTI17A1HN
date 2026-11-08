@@ -841,6 +841,24 @@
     }
 
     function confirmHuyDangKy(maDangKy, tenLop) {
+        if (window.openGlobalDeleteModal) {
+            window.openGlobalDeleteModal({
+                title: 'Hủy đăng ký khóa học?',
+                action: '/CongHocVien/HuyDangKyPost',
+                id: maDangKy,
+                paramName: 'maDangKy',
+                itemName: `Khóa học "${tenLop}"`,
+                message: `Bạn có chắc chắn muốn hủy đăng ký khóa học <strong class="text-brand-deep">${tenLop}</strong>?`,
+                warning: 'Nếu lớp đã bắt đầu hoặc hết hạn đăng ký, bạn có thể không thể đăng ký lại.',
+                submitText: 'Xác nhận hủy',
+                onSuccess: function(res) {
+                    if (window.showToast) window.showToast(res.message || 'Đã hủy đăng ký thành công!', 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                }
+            });
+            return;
+        }
+
         if (confirm(`Bạn có chắc chắn muốn hủy đăng ký khóa học "${tenLop}" không?`)) {
             const formData = new FormData();
             formData.append('maDangKy', maDangKy);

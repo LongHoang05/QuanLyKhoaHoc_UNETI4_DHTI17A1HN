@@ -80,6 +80,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             return View(items);
         }
 
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return RedirectToAction(nameof(Index), new { create = "true" });
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreatePost([Bind("TenChuongTrinh,MoTa,EmailLienHe")] ChuongTrinhDaoTao ctdt, string? TrangThai)

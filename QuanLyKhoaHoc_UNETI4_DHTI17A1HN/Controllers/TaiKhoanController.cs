@@ -318,7 +318,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            return View(new TaiKhoan { TrangThai = true, VaiTro = "HocVien" });
+            return RedirectToAction(nameof(Index), new { create = "true" });
         }
 
         [SessionAuthorize("Admin")]

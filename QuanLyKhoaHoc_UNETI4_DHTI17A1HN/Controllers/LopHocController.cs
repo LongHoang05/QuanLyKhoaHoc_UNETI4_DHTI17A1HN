@@ -134,6 +134,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             return View(lop);
         }
 
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return RedirectToAction(nameof(Index), new { create = "true" });
+        }
+
         // --- CREATE LỚP HỌC (DRAWER AJAX) ---
         [HttpPost]
         [ValidateAntiForgeryToken]

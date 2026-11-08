@@ -475,7 +475,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return redirectResult!;
             }
 
-            return View(new HocVien { TrangThai = true });
+            return RedirectToAction(nameof(Index), new { create = "true" });
         }
 
         [HttpPost]

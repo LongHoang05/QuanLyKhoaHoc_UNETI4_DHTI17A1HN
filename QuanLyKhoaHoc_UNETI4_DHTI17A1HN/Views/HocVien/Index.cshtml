@@ -707,5 +707,13 @@
         downloadLink.click();
         document.body.removeChild(downloadLink);
     }
+
+    // Tự động mở drawer nếu URL có ?create=true
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('create') === 'true' || urlParams.get('action') === 'create') {
+        openDrawer('create');
+        const cleanUrl = window.location.pathname + window.location.search.replace(/[?&]create=true/, '').replace(/[?&]action=create/, '');
+        window.history.replaceState({}, document.title, cleanUrl || window.location.pathname);
+    }
 </script>
 }
