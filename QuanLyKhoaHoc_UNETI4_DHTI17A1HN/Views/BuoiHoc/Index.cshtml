@@ -111,13 +111,13 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
 
 <div id="buoihoc-content-area" class="flex flex-col gap-y-6 transition-opacity duration-200">
     <!-- Contextual Sub-Header & Controls -->
-    <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-surface-white p-5 rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)]">
+    <section class="card-pro p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div class="flex items-center gap-space-sm min-w-0">
             <div class="flex flex-col">
                 <div class="flex items-center gap-1.5 text-outline font-label-sm text-label-sm tracking-wide">
                     <span>ĐÀO TẠO UNETI</span>
                     <span class="material-symbols-outlined text-[13px]">chevron_right</span>
-                    <span class="text-primary-container font-semibold">LỊCH HỌC & PHÒNG MÁY</span>
+                    <span class="text-primary font-semibold">LỊCH HỌC & PHÒNG MÁY</span>
                 </div>
                 <h1 class="font-headline-md text-headline-md text-brand-deep tracking-tight truncate font-extrabold mt-0.5">
                     Quản lý lịch học
@@ -128,21 +128,17 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         <div class="flex items-center flex-wrap gap-2.5">
             <!-- View Mode Switcher -->
             <div class="flex p-1 bg-surface-container-low rounded-xl border border-border-subtle text-xs font-semibold">
-                <button type="button" id="tab-btn-timetable" onclick="switchView('timetable')" class="px-3.5 py-1.5 rounded-lg bg-surface-white text-primary-container font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer">
+                <button type="button" id="tab-btn-timetable" onclick="switchView('timetable')" class="px-3.5 py-1.5 rounded-lg bg-surface-white text-primary font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95">
                     <span class="material-symbols-outlined text-[16px]">calendar_view_week</span>
                     <span>Thời khóa biểu tuần</span>
                 </button>
-                <button type="button" id="tab-btn-table" onclick="switchView('table')" class="px-3.5 py-1.5 rounded-lg text-outline hover:text-brand-deep transition-all flex items-center gap-1.5 cursor-pointer">
+                <button type="button" id="tab-btn-table" onclick="switchView('table')" class="px-3.5 py-1.5 rounded-lg text-outline hover:text-brand-deep transition-all flex items-center gap-1.5 cursor-pointer active:scale-95">
                     <span class="material-symbols-outlined text-[16px]">table_rows</span>
                     <span>Danh sách chi tiết</span>
                 </button>
             </div>
 
-            @* <button onclick="exportTableToCSV('danh-sach-lich-hoc.csv')" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-3.5 py-2 rounded-xl transition-all shadow-xs cursor-pointer">
-                <span class="material-symbols-outlined text-[18px] text-primary">file_download</span>
-                <span class="hidden sm:inline">Xuất Excel</span>
-            </button> *@
-            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-secondary-container hover:bg-secondary text-surface-white font-label-md text-label-md px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition-transform active:scale-95 cursor-pointer">
+            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-hover text-surface-white font-label-md text-label-md px-4 py-2 rounded-xl shadow-sm hover:shadow-card transition-all active:scale-95 cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">add_circle</span>
                 <span> Xếp lịch học</span>
             </button>
@@ -152,7 +148,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
     <!-- Quick Analytics Stats Row (3 Cards) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         <!-- Stat 1 -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_1px_3px_rgba(13, 71, 161,0.04),0_8px_24px_-4px_rgba(13, 71, 161,0.06)] flex items-center justify-between">
+        <div class="card-pro card-pro-hover p-5 flex items-center justify-between">
             <div>
                 <span class="font-label-sm text-label-sm text-outline tracking-wider uppercase block mb-1">Tổng số buổi học</span>
                 <div class="flex items-baseline gap-2">
@@ -173,7 +169,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         </div>
 
         <!-- Stat 2 -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_1px_3px_rgba(13, 71, 161,0.04),0_8px_24px_-4px_rgba(13, 71, 161,0.06)] flex items-center justify-between">
+        <div class="card-pro card-pro-hover p-5 flex items-center justify-between">
             <div>
                 <span class="font-label-sm text-label-sm text-outline tracking-wider uppercase block mb-1">Buổi học đã hoàn thành</span>
                 <div class="flex items-baseline gap-2">
@@ -185,13 +181,13 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                     <span class="font-body-sm text-body-sm text-on-surface-variant">tiến độ hoàn tất</span>
                 </div>
             </div>
-            <div class="w-12 h-12 rounded-2xl bg-secondary-container/10 flex items-center justify-center text-secondary-container">
+            <div class="w-12 h-12 rounded-2xl bg-primary-light flex items-center justify-center text-primary">
                 <span class="material-symbols-outlined text-[26px]">fact_check</span>
             </div>
         </div>
 
         <!-- Stat 3 -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_1px_3px_rgba(13, 71, 161,0.04),0_8px_24px_-4px_rgba(13, 71, 161,0.06)] flex items-center justify-between">
+        <div class="card-pro card-pro-hover p-5 flex items-center justify-between">
             <div class="min-w-0 pr-2">
                 <span class="font-label-sm text-label-sm text-outline tracking-wider uppercase block mb-1">Cảnh báo trùng lịch</span>
                 <p class="font-headline-sm text-headline-sm text-brand-deep truncate">

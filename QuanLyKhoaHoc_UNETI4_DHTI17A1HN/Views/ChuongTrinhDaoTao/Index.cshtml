@@ -28,7 +28,7 @@
         </div>
 
         <div class="flex items-center gap-2.5">
-            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
+            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-hover text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-card transition-all active:scale-95 cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">add_circle</span>
                 <span>Thêm chương trình</span>
             </button>
@@ -37,10 +37,10 @@
 
     <!-- 3 Stat Cards (Top KPI) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Tổng số chương trình</span>
-                <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <span class="text-outline font-label-md text-label-md font-medium">Tổng số chương trình</span>
+                <div class="w-10 h-10 rounded-2xl bg-primary-light flex items-center justify-center text-primary">
                     <span class="material-symbols-outlined text-[20px]">auto_stories</span>
                 </div>
             </div>
@@ -50,23 +50,23 @@
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Đang hoạt động</span>
-                <div class="w-9 h-9 rounded-xl bg-success-emerald/10 flex items-center justify-center text-success-emerald">
+                <span class="text-outline font-label-md text-label-md font-medium">Đang hoạt động</span>
+                <div class="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
                     <span class="material-symbols-outlined text-[20px]">check_circle</span>
                 </div>
             </div>
             <div class="flex items-baseline gap-2">
-                <span class="font-display text-[30px] leading-8 text-success-emerald tracking-tight font-black font-mono">@ViewBag.DangHoatDong</span>
+                <span class="font-display text-[30px] leading-8 text-emerald-700 tracking-tight font-black font-mono">@ViewBag.DangHoatDong</span>
                 <span class="text-xs text-outline font-medium">chương trình tuyển sinh</span>
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Tổng lớp học liên kết</span>
-                <div class="w-9 h-9 rounded-xl bg-secondary-container/10 flex items-center justify-center text-secondary-container">
+                <span class="text-outline font-label-md text-label-md font-medium">Tổng lớp học liên kết</span>
+                <div class="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center text-primary">
                     <span class="material-symbols-outlined text-[20px]">meeting_room</span>
                 </div>
             </div>
@@ -78,7 +78,7 @@
     </div>
 
     <!-- Filter & Operation Toolbar -->
-    <div class="bg-surface-white rounded-2xl p-4 border border-border-subtle shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4">
+    <div class="card-pro p-4 flex flex-col lg:flex-row items-center justify-between gap-4">
         <form method="get" action="/ChuongTrinhDaoTao/Index" class="flex flex-wrap items-center gap-3 w-full lg:w-auto" id="filter-form" onsubmit="event.preventDefault(); filterCtdtAjax();">
             <div class="relative flex-1 sm:w-80">
                 <span class="material-symbols-outlined text-outline absolute left-3 top-1/2 -translate-y-1/2 text-[18px]">search</span>

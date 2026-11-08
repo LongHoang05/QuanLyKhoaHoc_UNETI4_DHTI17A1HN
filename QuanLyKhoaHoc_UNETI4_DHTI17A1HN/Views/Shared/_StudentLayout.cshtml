@@ -19,11 +19,36 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>@ViewData["Title"] - Hệ Thống Quản Lý Đăng Ký Khóa Học Và Học Viên - Đề Tài 36 (Nhóm 4 - DHTI17A1HN)</title>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         @@layer base {
-            html, body { margin: 0; padding: 0; font-family: 'Be Vietnam Pro', 'Inter', sans-serif; scroll-behavior: smooth; }
+            html, body {
+                margin: 0;
+                padding: 0;
+                font-family: 'Plus Jakarta Sans', 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+                scroll-behavior: smooth;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
             body { background-color: #F8FAFC; color: #0F172A; }
+        }
+        .interactive-scale {
+            transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 200ms ease-out;
+        }
+        .interactive-scale:active {
+            transform: scale(0.98);
+        }
+        .card-pro {
+            background-color: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+            transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .card-pro-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+            border-color: #CBD5E1;
         }
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
@@ -56,8 +81,18 @@
                         'accent-orange': '#FF6B00',
                         'accent-emerald': '#10B981'
                     },
+                    boxShadow: {
+                        "soft": "0 2px 10px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)",
+                        "card": "0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02)",
+                        "elevated": "0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.03)",
+                        "glow": "0 0 20px -3px rgba(0, 82, 204, 0.2)"
+                    },
+                    borderRadius: {
+                        "2xl": "1rem",
+                        "3xl": "1.5rem"
+                    },
                     fontFamily: {
-                        sans: ['"Be Vietnam Pro"', 'Inter', 'sans-serif']
+                        sans: ["'Plus Jakarta Sans'", "'Be Vietnam Pro'", "Inter", "sans-serif"]
                     }
                 }
             }
@@ -96,15 +131,15 @@
 
             <!-- Navigation Links (Role-aware) -->
             <nav class="hidden md:flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-bold text-brand-deep">
-                <a href="/?storefront=true#gioi-thieu" class="px-3.5 py-2 rounded-xl hover:bg-primary-light hover:text-primary transition-colors flex items-center gap-1.5">
+                <a href="/?storefront=true#gioi-thieu" class="px-3.5 py-2 rounded-xl hover:bg-primary-light hover:text-primary transition-colors flex items-center gap-1.5 active:scale-[0.98]">
                     <span class="material-symbols-outlined text-[19px] text-primary">info</span>
                     <span>Giới thiệu</span>
                 </a>
-                <a href="/CongHocVien/DangKy" class="px-3.5 py-2 rounded-xl hover:bg-primary-light hover:text-primary transition-colors flex items-center gap-1.5">
+                <a href="/CongHocVien/DangKy" class="px-3.5 py-2 rounded-xl hover:bg-primary-light hover:text-primary transition-colors flex items-center gap-1.5 active:scale-[0.98]">
                     <span class="material-symbols-outlined text-[19px] text-primary">explore</span>
                     <span>Khám phá khóa học</span>
                 </a>
-                <a href="/?storefront=true#lien-he" class="px-3.5 py-2 rounded-xl hover:bg-amber-50 text-slate-700 hover:text-amber-700 transition-colors flex items-center gap-1.5 cursor-pointer">
+                <a href="/?storefront=true#lien-he" class="px-3.5 py-2 rounded-xl hover:bg-amber-50 text-slate-700 hover:text-amber-700 transition-colors flex items-center gap-1.5 cursor-pointer active:scale-[0.98]">
                     <span class="material-symbols-outlined text-[19px] text-amber-500">support_agent</span>
                     <span>Liên hệ</span>
                 </a>
@@ -113,7 +148,7 @@
             <!-- Navigation Links & Account Area -->
             <div class="flex items-center gap-2 sm:gap-4 shrink-0">
                 <!-- Mobile Contact button -->
-                <button type="button" onclick="openContactSupportModal()" class="md:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100 flex items-center gap-1 text-xs font-semibold" title="Liên hệ">
+                <button type="button" onclick="openContactSupportModal()" class="md:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100 flex items-center gap-1 text-xs font-semibold active:scale-[0.98]" title="Liên hệ">
                     <span class="material-symbols-outlined text-[20px] text-amber-500">support_agent</span>
                     <span>Liên hệ</span>
                 </button>
@@ -124,7 +159,7 @@
                 {
                     <!-- User Account Dropdown -->
                     <div class="relative" id="user-menu-wrapper">
-                        <button type="button" onclick="toggleUserDropdown()" class="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-2 rounded-2xl hover:bg-slate-100 transition-colors cursor-pointer border border-border-standard">
+                        <button type="button" onclick="toggleUserDropdown()" class="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-2 rounded-2xl hover:bg-slate-100 transition-colors cursor-pointer border border-border-standard active:scale-[0.98]">
                             <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-brand-deep to-primary text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
                                 @(string.IsNullOrWhiteSpace(userHoTen) ? "U" : userHoTen.Substring(0, 1).ToUpper())
                             </div>
@@ -136,7 +171,7 @@
                         </button>
 
                         <!-- Dropdown Menu -->
-                        <div id="user-dropdown" class="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-border-standard py-2 z-50 hidden transform transition-all origin-top-right">
+                        <div id="user-dropdown" class="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-elevated border border-border-standard py-2 z-50 hidden transform transition-all origin-top-right">
                             <div class="px-4 py-3 border-b border-border-standard bg-slate-50/70 rounded-t-2xl">
                                 <p class="text-xs text-outline">Đang đăng nhập với</p>
                                 <p class="text-xs font-bold text-brand-deep truncate">@userHoTen</p>
@@ -209,10 +244,10 @@
                 else
                 {
                     <div class="flex items-center gap-2">
-                        <a href="/TaiKhoan/Login" class="text-xs font-bold text-brand-deep hover:text-primary px-3 py-2 rounded-xl hover:bg-slate-100 transition-colors">
+                        <a href="/TaiKhoan/Login" class="text-xs font-bold text-brand-deep hover:text-primary px-3 py-2 rounded-xl hover:bg-slate-100 transition-colors active:scale-[0.98]">
                             Đăng nhập
                         </a>
-                        <a href="/TaiKhoan/DangKy" class="text-xs font-bold text-white bg-primary hover:bg-primary-hover px-4 py-2 rounded-xl shadow-xs hover:shadow transition-all">
+                        <a href="/TaiKhoan/DangKy" class="text-xs font-bold text-white bg-primary hover:bg-primary-hover px-4 py-2 rounded-xl shadow-xs hover:shadow transition-all active:scale-[0.98]">
                             Đăng ký tài khoản
                         </a>
                     </div>

@@ -225,22 +225,22 @@
                         };
                         string gradient = gradients[lop.MaLopHoc % gradients.Length];
 
-                        <div class="bg-white rounded-3xl border border-border-standard hover:border-primary/50 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden group">
+                        <div class="card-pro card-pro-hover flex flex-col justify-between overflow-hidden group">
                             <!-- Card Thumbnail / Cover -->
                             <div class="relative h-44 bg-gradient-to-tr @gradient p-5 flex flex-col justify-between text-white overflow-hidden">
-                                <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none group-hover:scale-125 transition-transform"></div>
+                                <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none group-hover:scale-125 transition-transform duration-300"></div>
                                 
                                 <div class="flex items-center justify-between relative z-10">
-                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-white/20 backdrop-blur-md uppercase tracking-wider border border-white/20">
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-white/20 backdrop-blur-md uppercase tracking-wider border border-white/20 min-w-0 whitespace-nowrap truncate shrink-0">
                                         @lop.TrinhDoDauVao
                                     </span>
-                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-400 text-slate-900 shadow-sm flex items-center gap-1">
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-400 text-slate-900 shadow-sm flex items-center gap-1 shrink-0">
                                         <span class="material-symbols-outlined text-[13px]">star</span> 4.9 (120+)
                                     </span>
                                 </div>
 
                                 <div class="relative z-10 space-y-1">
-                                    <span class="text-[11px] text-white/80 block uppercase tracking-wider font-semibold">
+                                    <span class="text-[11px] text-white/80 block uppercase tracking-wider font-semibold truncate">
                                         @(lop.ChuongTrinhDaoTao?.TenChuongTrinh ?? "Chứng chỉ nghề nghiệp")
                                     </span>
                                     <h3 class="text-base font-bold text-white line-clamp-2 leading-snug group-hover:text-amber-200 transition-colors">
@@ -254,13 +254,13 @@
                                 <div class="space-y-3">
                                     <!-- Instructor & Key specs -->
                                     <div class="flex items-center justify-between text-xs text-outline pb-3 border-b border-border-standard">
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-primary font-bold text-[10px]">
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-primary font-bold text-[10px] shrink-0">
                                                 @(string.IsNullOrWhiteSpace(lop.TenGiangVien) ? "GV" : lop.TenGiangVien.Substring(0, 1))
                                             </div>
                                             <span class="font-medium text-brand-deep truncate max-w-[110px]">@lop.TenGiangVien</span>
                                         </div>
-                                        <span class="flex items-center gap-1 font-mono">
+                                        <span class="flex items-center gap-1 font-mono shrink-0">
                                             <span class="material-symbols-outlined text-[15px] text-primary">schedule</span>
                                             @lop.SoBuoiHoc buổi
                                         </span>
@@ -288,8 +288,8 @@
                                                 @(isFull ? "Đã hết chỗ" : $"Còn {remainingSeats} chỗ trống")
                                             </span>
                                         </div>
-                                        <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                                            <div class="h-1.5 rounded-full transition-all duration-300 @(fillPercent >= 100 ? "bg-rose-500" : fillPercent >= 80 ? "bg-amber-500" : "bg-primary")"
+                                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                            <div class="h-2 rounded-full transition-all duration-300 @(fillPercent >= 100 ? "bg-rose-500" : fillPercent >= 80 ? "bg-amber-500" : "bg-primary")"
                                                  style="width: @fillPercent%"></div>
                                         </div>
                                     </div>
@@ -306,13 +306,13 @@
 
                                     <div class="grid grid-cols-2 gap-2">
                                         <a asp-action="ChiTiet" asp-route-id="@lop.MaLopHoc"
-                                           class="w-full py-2.5 px-2 rounded-xl border border-border-standard hover:bg-slate-50 text-brand-deep text-xs font-bold text-center transition-colors">
+                                           class="w-full py-2.5 px-2 rounded-xl border border-border-standard hover:bg-slate-50 text-brand-deep text-xs font-bold text-center transition-all duration-200 active:scale-[0.98]">
                                             Chi tiết
                                         </a>
 
                                         @if (isRegistered)
                                         {
-                                            <a asp-action="TienTrinh" class="w-full py-2.5 px-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold text-center flex items-center justify-center gap-1">
+                                            <a asp-action="TienTrinh" class="w-full py-2.5 px-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold text-center flex items-center justify-center gap-1 active:scale-[0.98]">
                                                 <span class="material-symbols-outlined text-[15px]">verified</span>
                                                 <span>Đã đăng ký</span>
                                             </a>
@@ -332,7 +332,7 @@
                                         else
                                         {
                                             <button type="button" onclick="openEnrollModal(@lop.MaLopHoc, '@lop.TenLop.Replace("'", "\\'") ', @lop.HocPhi)"
-                                                    class="w-full py-2.5 px-2 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-xs transition-all text-center flex items-center justify-center gap-1 cursor-pointer">
+                                                    class="w-full py-2.5 px-2 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-xs hover:shadow-card transition-all duration-200 text-center flex items-center justify-center gap-1 cursor-pointer active:scale-[0.98]">
                                                 <span>Đăng ký ngay</span>
                                             </button>
                                         }

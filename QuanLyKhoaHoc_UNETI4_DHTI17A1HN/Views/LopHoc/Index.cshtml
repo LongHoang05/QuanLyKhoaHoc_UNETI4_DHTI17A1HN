@@ -40,7 +40,7 @@
                 <span class="material-symbols-outlined text-[18px] text-primary">file_download</span>
                 <span class="hidden sm:inline">Xuất Excel</span>
             </button>
-            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
+            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-hover text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-card transition-all active:scale-95 cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">add_circle</span>
                 <span>Thêm lớp học</span>
             </button>
@@ -49,10 +49,10 @@
 
     <!-- 3 Stat Cards (Top KPI) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Tổng số lớp học</span>
-                <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <span class="text-outline font-label-md text-label-md font-medium">Tổng số lớp học</span>
+                <div class="w-10 h-10 rounded-2xl bg-primary-light flex items-center justify-center text-primary">
                     <span class="material-symbols-outlined text-[20px]">meeting_room</span>
                 </div>
             </div>
@@ -62,23 +62,23 @@
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Đang mở đăng ký</span>
-                <div class="w-9 h-9 rounded-xl bg-success-emerald/10 flex items-center justify-center text-success-emerald">
+                <span class="text-outline font-label-md text-label-md font-medium">Đang mở đăng ký</span>
+                <div class="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
                     <span class="material-symbols-outlined text-[20px]">how_to_reg</span>
                 </div>
             </div>
             <div class="flex items-baseline gap-2">
-                <span class="font-display text-[30px] leading-8 text-success-emerald tracking-tight font-black font-mono">@ViewBag.LopDangMo</span>
+                <span class="font-display text-[30px] leading-8 text-emerald-700 tracking-tight font-black font-mono">@ViewBag.LopDangMo</span>
                 <span class="text-xs text-outline font-medium">lớp tiếp nhận hồ sơ</span>
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Học viên đang theo học</span>
-                <div class="w-9 h-9 rounded-xl bg-secondary-container/10 flex items-center justify-center text-secondary-container">
+                <span class="text-outline font-label-md text-label-md font-medium">Học viên đang theo học</span>
+                <div class="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center text-primary">
                     <span class="material-symbols-outlined text-[20px]">person_pin</span>
                 </div>
             </div>
@@ -90,7 +90,7 @@
     </div>
 
     <!-- Multi-criteria Filter Toolbar (Mục 6.3 - 6.5) -->
-    <div class="bg-surface-white rounded-2xl p-4 border border-border-subtle shadow-sm flex flex-col gap-3">
+    <div class="card-pro p-4 flex flex-col gap-3">
         <form method="get" action="/LopHoc/Index" class="flex flex-wrap items-center gap-3 w-full" id="filter-form" onsubmit="event.preventDefault(); filterLopHocAjax();">
             <!-- Search Field -->
             <div class="relative flex-1 min-w-[240px]">

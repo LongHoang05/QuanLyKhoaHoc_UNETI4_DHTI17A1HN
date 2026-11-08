@@ -40,11 +40,11 @@
         </div>
 
         <div class="flex items-center gap-2.5">
-            <button onclick="exportTableToCSV('danh-sach-hoc-vien.csv')" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-surface-container-low text-brand-deep font-label-md text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-xs cursor-pointer">
+            <button onclick="exportTableToCSV('danh-sach-hoc-vien.csv')" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-slate-50 text-brand-deep font-label-md text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer">
                 <span class="material-symbols-outlined text-[18px] text-primary">file_download</span>
                 <span class="hidden sm:inline">Xuất Excel</span>
             </button>
-            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-[#0047b3] text-surface-white font-label-md text-xs px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
+            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-hover text-surface-white font-label-md text-xs px-4 py-2.5 rounded-xl shadow-sm hover:shadow-card transition-all active:scale-95 cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">person_add</span>
                 <span>Thêm học viên</span>
             </button>
@@ -53,10 +53,10 @@
 
     <!-- 3 Stat Cards (Top KPI) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Tổng số học viên</span>
-                <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <span class="text-outline font-label-md text-label-md font-medium">Tổng số học viên</span>
+                <div class="w-10 h-10 rounded-2xl bg-primary-light flex items-center justify-center text-primary">
                     <span class="material-symbols-outlined text-[20px]">group</span>
                 </div>
             </div>
@@ -66,10 +66,10 @@
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Học viên đang hoạt động</span>
-                <div class="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                <span class="text-outline font-label-md text-label-md font-medium">Học viên đang hoạt động</span>
+                <div class="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
                     <span class="material-symbols-outlined text-[20px]">school</span>
                 </div>
             </div>
@@ -79,10 +79,10 @@
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(0,22,86,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Đã hoàn thành / Tạm dừng</span>
-                <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                <span class="text-outline font-label-md text-label-md font-medium">Đã hoàn thành / Tạm dừng</span>
+                <div class="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center text-primary">
                     <span class="material-symbols-outlined text-[20px]">verified</span>
                 </div>
             </div>
