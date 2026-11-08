@@ -25,10 +25,10 @@ Nội dung thực hiện: Module 5 - Báo cáo Thống kê LINQ - Phong cách Pr
     <!-- Top Header Bar -->
     <section class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 card-pro">
         <div class="flex flex-col gap-1">
-            <div class="flex items-center gap-2 text-outline font-body-sm text-body-sm">
-                <span>Đào tạo UNETI</span>
+            <div class="flex items-center gap-2 text-outline font-label-sm text-label-sm uppercase tracking-wider mb-1">
+                <span>BÁO CÁO &amp; THỐNG KÊ</span>
                 <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-primary-container font-label-md text-label-md">Thống kê tổng hợp</span>
+                <span class="text-primary font-semibold">THỐNG KÊ TỔNG HỢP</span>
             </div>
             <h1 class="font-headline-lg-mobile lg:font-headline-lg text-brand-deep tracking-tight font-extrabold">
                 Báo cáo thống kê
@@ -305,14 +305,14 @@ Nội dung thực hiện: Module 5 - Báo cáo Thống kê LINQ - Phong cách Pr
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs">
                     <thead>
-                        <tr class="text-outline font-label-sm text-label-sm border-b border-border-subtle uppercase">
-                            <th class="py-2.5 pr-3 font-bold">Giảng viên</th>
-                            <th class="py-2.5 px-3 font-bold">Lớp phụ trách</th>
-                            <th class="py-2.5 px-3 font-bold text-center">Số SV</th>
-                            <th class="py-2.5 pl-3 font-bold text-right">Điểm TB</th>
+                        <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
+                            <th class="py-3 px-3 font-bold">Giảng viên</th>
+                            <th class="py-3 px-3 font-bold">Lớp phụ trách</th>
+                            <th class="py-3 px-3 font-bold text-center">Số SV</th>
+                            <th class="py-3 px-3 font-bold text-right">Điểm TB</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-border-subtle">
+                    <tbody class="divide-y divide-border-subtle text-xs text-brand-deep">
                         @if (topGiangVien.Any())
                         {
                             foreach (var gv in topGiangVien)

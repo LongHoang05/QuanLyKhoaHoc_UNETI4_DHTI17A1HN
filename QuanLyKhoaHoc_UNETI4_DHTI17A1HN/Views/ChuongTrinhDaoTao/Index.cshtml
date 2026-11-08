@@ -18,9 +18,9 @@
     <section class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 card-pro">
         <div>
             <div class="flex items-center gap-2 text-outline font-label-sm text-label-sm uppercase tracking-wider mb-1">
-                <span>ĐÀO TẠO</span>
+                <span>ĐÀO TẠO UNETI</span>
                 <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-brand-deep font-semibold">CHƯƠNG TRÌNH ĐÀO TẠO</span>
+                <span class="text-primary font-semibold">CHƯƠNG TRÌNH ĐÀO TẠO</span>
             </div>
             <h1 class="font-headline-md text-headline-md text-brand-deep font-bold tracking-tight">
                 Danh mục Chương trình đào tạo
@@ -103,20 +103,20 @@
     </div>
 
     <!-- Data Table Container -->
-    <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-[0_1px_3px_rgba(0,22,86,0.04)] overflow-hidden">
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm overflow-hidden card-pro">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse" id="crud-table">
                 <thead>
-                    <tr class="bg-surface-container-low/70 border-b border-border-subtle font-label-sm text-label-sm text-outline tracking-wider uppercase">
-                        <th class="py-4 px-6">Chương trình đào tạo</th>
-                        <th class="py-4 px-4">Mô tả tóm tắt</th>
-                        <th class="py-4 px-4">Email liên hệ</th>
-                        <th class="py-4 px-4 text-center">Lớp liên kết</th>
-                        <th class="py-4 px-4 text-center">Trạng thái</th>
-                        <th class="py-4 px-6 text-right">Thao tác</th>
+                    <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
+                        <th class="py-3.5 px-4 pl-6">Chương trình đào tạo</th>
+                        <th class="py-3.5 px-4">Mô tả tóm tắt</th>
+                        <th class="py-3.5 px-4">Email liên hệ</th>
+                        <th class="py-3.5 px-4 text-center">Lớp liên kết</th>
+                        <th class="py-3.5 px-4 text-center">Trạng thái</th>
+                        <th class="py-3.5 px-4 pr-6 text-right">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-border-subtle font-body-sm text-body-sm">
+                <tbody class="divide-y divide-border-subtle text-xs text-brand-deep">
                     @if (!Model.Any())
                     {
                         <tr>

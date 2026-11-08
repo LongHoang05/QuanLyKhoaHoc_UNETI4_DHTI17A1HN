@@ -241,15 +241,15 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
             <div class="w-full overflow-x-auto flex-1">
                 <table class="w-full text-left border-collapse min-w-[560px] h-full">
                     <thead>
-                        <tr class="border-b border-border-standard bg-slate-50/80 text-outline font-label-sm text-label-sm uppercase tracking-wider">
-                            <th class="py-3 px-3">Sinh viên</th>
-                            <th class="py-3 px-3">Lớp học phần</th>
-                            <th class="py-3 px-3">Thời gian</th>
-                            <th class="py-3 px-3 text-center">Trạng thái</th>
-                            <th class="py-3 px-3 text-right">Thao tác</th>
+                        <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
+                            <th class="py-3.5 px-3">Sinh viên</th>
+                            <th class="py-3.5 px-3">Lớp học phần</th>
+                            <th class="py-3.5 px-3">Thời gian</th>
+                            <th class="py-3.5 px-3 text-center">Trạng thái</th>
+                            <th class="py-3.5 px-3 text-right">Thao tác</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-border-subtle font-body-sm text-body-sm">
+                    <tbody class="divide-y divide-border-subtle text-xs text-brand-deep">
                         @if (Model.HoatDongGanDay != null && Model.HoatDongGanDay.Any())
                         {
                             @foreach (var item in Model.HoatDongGanDay.Take(5))

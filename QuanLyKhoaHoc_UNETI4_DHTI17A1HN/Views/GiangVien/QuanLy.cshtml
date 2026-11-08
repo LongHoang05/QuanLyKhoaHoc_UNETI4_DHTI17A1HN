@@ -19,9 +19,9 @@
     <section class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 card-pro">
         <div>
             <div class="flex items-center gap-2 text-outline font-label-sm text-label-sm uppercase tracking-wider mb-1">
-                <span>QUẢN TRỊ ĐÀO TẠO</span>
+                <span>ĐÀO TẠO UNETI</span>
                 <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-brand-deep font-semibold">ĐỘI NGŨ GIẢNG VIÊN</span>
+                <span class="text-primary font-semibold">ĐỘI NGŨ GIẢNG VIÊN</span>
             </div>
             <h1 class="font-headline-md text-headline-md text-brand-deep font-bold tracking-tight">
                 Danh Sách Hồ Sơ Giảng Viên
@@ -120,11 +120,11 @@
     </div>
 
     <!-- Teacher Table -->
-    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-[0_4px_20px_rgba(13, 71, 161,0.03)] overflow-hidden">
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm overflow-hidden card-pro">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse" id="teacherTable">
                 <thead>
-                    <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-[11px] uppercase tracking-wider border-b border-border-standard">
+                    <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
                         <th class="py-3.5 px-3 text-center w-12">Mã</th>
                         <th class="py-3.5 px-4 min-w-[220px]">Giảng viên</th>
                         <th class="py-3.5 px-3 min-w-[140px]">Học vị &amp; Chuyên ngành</th>
@@ -135,7 +135,7 @@
                         <th class="py-3.5 px-4 text-center w-36">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-border-subtle font-body-sm text-xs">
+                <tbody class="divide-y divide-border-subtle text-xs text-brand-deep">
                     @if (Model != null && Model.Any())
                     {
                         foreach (var gv in Model)

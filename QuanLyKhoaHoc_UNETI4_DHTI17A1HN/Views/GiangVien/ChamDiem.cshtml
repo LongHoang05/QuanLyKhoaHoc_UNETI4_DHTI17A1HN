@@ -36,7 +36,7 @@
             <div class="flex items-center gap-2 text-outline font-label-sm text-label-sm uppercase tracking-wider mb-1">
                 <span>CỔNG GIẢNG VIÊN</span>
                 <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-brand-deep font-semibold">SỔ ĐIỂM HỌC VIÊN</span>
+                <span class="text-primary font-semibold">SỔ ĐIỂM HỌC VIÊN</span>
             </div>
             <h1 class="font-headline-md text-headline-md text-brand-deep font-bold tracking-tight flex items-center gap-2">
                 <span>Chấm Điểm &amp; Đánh Giá Lớp Học Phần</span>
@@ -178,7 +178,7 @@
     </div>
 
     <!-- Student Grading Table -->
-    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-[0_4px_20px_rgba(13, 71, 161,0.03)] overflow-hidden">
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm overflow-hidden card-pro">
         <div class="p-4 border-b border-border-subtle flex flex-col sm:flex-row items-center justify-between gap-3 bg-surface-container-low/30">
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary text-[20px]">fact_check</span>
@@ -192,7 +192,7 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse" id="gradeTable">
                 <thead>
-                    <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-[11px] uppercase tracking-wider border-b border-border-standard">
+                    <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
                         <th class="py-3 px-3 text-center w-10">STT</th>
                         <th class="py-3 px-4 min-w-[200px]">Học viên</th>
                         <th class="py-3 px-3 text-center w-28">Trạng thái</th>
@@ -206,7 +206,7 @@
                         <th class="py-3 px-3 text-center w-24">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-border-subtle font-body-sm text-xs">
+                <tbody class="divide-y divide-border-subtle text-xs text-brand-deep">
                     @if (Model != null && Model.Any())
                     {
                         int stt = 1;
