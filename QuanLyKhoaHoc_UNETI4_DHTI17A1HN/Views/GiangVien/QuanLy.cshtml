@@ -125,8 +125,9 @@
             <table class="w-full text-left border-collapse" id="teacherTable">
                 <thead>
                     <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
-                        <th class="py-3.5 px-3 text-center w-12">Mã</th>
-                        <th class="py-3.5 px-4 min-w-[220px]">Giảng viên</th>
+                        <th class="py-3.5 px-4 w-12 text-center">#</th>
+                        <th class="py-3.5 px-4">Mã GV</th>
+                        <th class="py-3.5 px-4 min-w-[200px]">Giảng viên</th>
                         <th class="py-3.5 px-3 min-w-[140px]">Học vị &amp; Chuyên ngành</th>
                         <th class="py-3.5 px-3 min-w-[180px]">Thông tin liên hệ</th>
                         <th class="py-3.5 px-3 text-center min-w-[130px]">Tài khoản</th>
@@ -138,6 +139,7 @@
                 <tbody class="divide-y divide-border-subtle text-xs text-brand-deep">
                     @if (Model != null && Model.Any())
                     {
+                        int idx = 1;
                         foreach (var gv in Model)
                         {
                             var hoTenGv = gv.HoTen ?? "";
@@ -148,8 +150,9 @@
                             var initialLetter = string.IsNullOrWhiteSpace(hoTenGv) ? "T" : (hoTenGv.Trim().Contains(' ') ? hoTenGv.Trim().Substring(hoTenGv.Trim().LastIndexOf(' ') + 1).Substring(0, 1).ToUpper() : hoTenGv.Substring(0, 1).ToUpper());
 
                             <tr class="hover:bg-surface-container-low/40 transition-colors">
-                                <td class="py-3.5 px-3 text-center font-mono font-bold text-outline">
-                                    GV-@(gv.MaGiangVien.ToString("D3"))
+                                <td class="py-3.5 px-4 text-center text-outline font-mono text-[11px]">@(idx++)</td>
+                                <td class="py-3.5 px-4 font-mono font-semibold text-primary">
+                                    #GV@(gv.MaGiangVien.ToString("D3"))
                                 </td>
                                 <td class="py-3.5 px-4">
                                     <div class="flex items-center gap-3">

@@ -216,6 +216,7 @@ Nội dung thực hiện: Module 5 - Quản lý Kết quả học tập CRUD chu
                         <th class="py-3.5 pl-6 w-12 text-center">
                             <input class="rounded border-border-standard text-primary focus:ring-primary h-4 w-4 cursor-pointer" type="checkbox" id="select-all"/>
                         </th>
+                        <th class="py-3.5 px-3 w-10 text-center">#</th>
                         <th class="py-3.5 px-4">Học viên</th>
                         <th class="py-3.5 px-4 min-w-[200px]">Lớp học</th>
                         <th class="py-3.5 px-3 text-center">Điểm quá trình (40%)</th>
@@ -230,7 +231,7 @@ Nội dung thực hiện: Module 5 - Quản lý Kết quả học tập CRUD chu
                     @if (!Model.Any())
                     {
                         <tr>
-                            <td colspan="9" class="py-12 text-center text-outline">
+                            <td colspan="10" class="py-12 text-center text-outline">
                                 <span class="material-symbols-outlined text-4xl block mb-2 text-outline/50">grading</span>
                                 Chưa có dữ liệu điểm học viên phù hợp với bộ lọc hiện tại.
                             </td>
@@ -238,6 +239,7 @@ Nội dung thực hiện: Module 5 - Quản lý Kết quả học tập CRUD chu
                     }
                     else
                     {
+                        int idx = (currentPage - 1) * pageSize + 1;
                         @foreach (var item in Model)
                         {
                             var hv = item.DangKyHoc?.HocVien;
@@ -261,9 +263,10 @@ Nội dung thực hiện: Module 5 - Quản lý Kết quả học tập CRUD chu
                                 data-tk="@item.DiemTongKet"
                                 data-nhanxet="@item.NhanXet"
                                 data-ketqua="@item.KetQua">
-                                <td class="p-4 pl-6 text-center">
+                                <td class="py-3.5 pl-6 text-center">
                                     <input class="rounded border-border-standard text-primary focus:ring-primary h-4 w-4 row-checkbox cursor-pointer" type="checkbox"/>
                                 </td>
+                                <td class="py-3.5 px-3 text-center text-outline font-mono text-[11px]">@(idx++)</td>
                                 <td class="py-4 px-4">
                                     <div class="flex items-center gap-2.5">
                                         <div class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center flex-shrink-0">

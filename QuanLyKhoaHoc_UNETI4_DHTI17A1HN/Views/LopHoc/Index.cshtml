@@ -182,7 +182,8 @@
             <table class="w-full text-left border-collapse" id="crud-table">
                 <thead>
                     <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
-                        <th class="py-3.5 px-4 pl-6">Thông tin lớp học</th>
+                        <th class="py-3.5 px-4 w-12 text-center">#</th>
+                        <th class="py-3.5 px-4">Thông tin lớp học</th>
                         <th class="py-3.5 px-4">Giảng viên / Trình độ</th>
                         <th class="py-3.5 px-4 text-center">Sĩ số (Đã duyệt)</th>
                         <th class="py-3.5 px-4 text-center">Số buổi (Đã lên lịch)</th>
@@ -196,7 +197,7 @@
                     @if (!Model.Any())
                     {
                         <tr>
-                            <td colspan="8" class="py-12 text-center text-outline">
+                            <td colspan="9" class="py-12 text-center text-outline">
                                 <span class="material-symbols-outlined text-4xl block mb-2 text-outline/50">search_off</span>
                                 Không có lớp học nào phù hợp với bộ lọc hiện tại.
                             </td>
@@ -204,6 +205,7 @@
                     }
                     else
                     {
+                        int idx = (currentPage - 1) * pageSize + 1;
                         @foreach (var item in Model)
                         {
                             int siSo = siSoMap.ContainsKey(item.MaLopHoc) ? siSoMap[item.MaLopHoc] : 0;
@@ -227,14 +229,15 @@
                                 data-mota="@item.MoTa"
                                 data-yeucau="@item.YeuCauHocVien"
                                 data-trangthai="@item.TrangThai">
-                                <td class="py-4 px-6">
+                                <td class="py-3.5 px-4 text-center text-outline font-mono text-[11px]">@(idx++)</td>
+                                <td class="py-3.5 px-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary font-bold text-xs flex items-center justify-center flex-shrink-0 font-mono">
-                                            #@item.MaLopHoc
+                                        <div class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                                            <span class="material-symbols-outlined text-[18px]">school</span>
                                         </div>
                                         <div>
-                                            <a href="/LopHoc/Details/@item.MaLopHoc" class="font-semibold text-brand-deep hover:text-primary transition-colors">@item.TenLop</a>
-                                            <div class="text-xs text-outline font-medium">@(item.ChuongTrinhDaoTao?.TenChuongTrinh ?? "N/A")</div>
+                                            <a href="/LopHoc/Details/@item.MaLopHoc" class="font-bold text-brand-deep hover:text-primary transition-colors">@item.TenLop</a>
+                                            <div class="text-[11px] text-outline font-medium">@(item.ChuongTrinhDaoTao?.TenChuongTrinh ?? "N/A") • <span class="font-mono text-primary font-semibold">#LH@(item.MaLopHoc.ToString("D2"))</span></div>
                                         </div>
                                     </div>
                                 </td>
