@@ -78,15 +78,15 @@
     </div>
 
     <!-- Filter & Operation Toolbar -->
-    <div class="card-pro p-4 flex flex-col lg:flex-row items-center justify-between gap-4">
-        <form method="get" action="/ChuongTrinhDaoTao/Index" class="flex flex-wrap items-center gap-3 w-full lg:w-auto" id="filter-form" onsubmit="event.preventDefault(); filterCtdtAjax();">
-            <div class="relative flex-1 sm:w-80">
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-4 card-pro flex flex-wrap items-center justify-between gap-3">
+        <form method="get" action="/ChuongTrinhDaoTao/Index" class="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]" id="filter-form" onsubmit="event.preventDefault(); filterCtdtAjax();">
+            <div class="relative flex-1 min-w-[240px] sm:max-w-xs">
                 <span class="material-symbols-outlined text-outline absolute left-3 top-1/2 -translate-y-1/2 text-[18px]">search</span>
-                <input name="search" value="@search" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Tìm theo tên chương trình, mô tả..." type="text"/>
+                <input name="search" value="@search" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Tìm theo tên chương trình, mô tả..." type="text"/>
             </div>
 
-            <div class="relative">
-                <select name="trangThai" onchange="filterCtdtAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
+            <div class="relative min-w-[170px]">
+                <select name="trangThai" onchange="filterCtdtAjax()" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
                     <option value="">Tất cả Trạng thái</option>
                     <!option value="Đang hoạt động" @(selectedTrangThai == "Đang hoạt động" ? "selected" : "")>● Đang hoạt động</!option>
                     <!option value="Tạm dừng" @(selectedTrangThai == "Tạm dừng" ? "selected" : "")>○ Tạm dừng</!option>
@@ -95,11 +95,10 @@
             </div>
         </form>
 
-        <div class="flex items-center gap-2 w-full lg:w-auto justify-end">
-            <a href="/ChuongTrinhDaoTao/Index" onclick="event.preventDefault(); loadCtdtPage(this.href);" class="p-2 border border-border-standard rounded-xl text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors cursor-pointer" title="Làm mới">
-                <span class="material-symbols-outlined text-[20px] block">refresh</span>
-            </a>
-        </div>
+        <a href="/ChuongTrinhDaoTao/Index" onclick="event.preventDefault(); loadCtdtPage(this.href);" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
+            <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+            <span>Đặt lại</span>
+        </a>
     </div>
 
     <!-- Data Table Container -->
@@ -179,6 +178,9 @@
                                 </td>
                                 <td class="py-4 px-6 text-right">
                                     <div class="inline-flex items-center gap-1">
+                                        <a href="/ChuongTrinhDaoTao/Details/@item.MaChuongTrinh" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container-low transition-colors cursor-pointer" title="Xem chi tiết">
+                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                        </a>
                                         <button onclick="openEditDrawerFromRow(this)" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container-low transition-colors cursor-pointer" title="Chỉnh sửa">
                                             <span class="material-symbols-outlined text-[18px]">edit</span>
                                         </button>

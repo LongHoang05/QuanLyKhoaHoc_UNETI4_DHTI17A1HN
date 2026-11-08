@@ -90,17 +90,17 @@
     </div>
 
     <!-- Multi-criteria Filter Toolbar (Mục 6.3 - 6.5) -->
-    <div class="card-pro p-4 flex flex-col gap-3">
-        <form method="get" action="/LopHoc/Index" class="flex flex-wrap items-center gap-3 w-full" id="filter-form" onsubmit="event.preventDefault(); filterLopHocAjax();">
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-4 card-pro flex flex-wrap items-center justify-between gap-3">
+        <form method="get" action="/LopHoc/Index" class="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]" id="filter-form" onsubmit="event.preventDefault(); filterLopHocAjax();">
             <!-- Search Field -->
             <div class="relative flex-1 min-w-[240px]">
                 <span class="material-symbols-outlined text-outline absolute left-3 top-1/2 -translate-y-1/2 text-[18px]">search</span>
-                <input name="search" value="@search" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Tìm theo tên lớp, CTĐT, giảng viên..." type="text"/>
+                <input name="search" value="@search" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Tìm theo tên lớp, CTĐT, giảng viên..." type="text"/>
             </div>
 
             <!-- Program Filter -->
-            <div class="relative">
-                <select name="maChuongTrinh" onchange="filterLopHocAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
+            <div class="relative min-w-[170px]">
+                <select name="maChuongTrinh" onchange="filterLopHocAjax()" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
                     <option value="">Tất cả Chương trình</option>
                     @foreach (var ct in chuongTrinhList)
                     {
@@ -110,21 +110,9 @@
                 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
             </div>
 
-            <!-- Level Filter -->
-            <div class="hidden">
-                <select name="trinhDo" onchange="filterLopHocAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
-                    <option value="">Trình độ: Tất cả</option>
-                    <!option value="Cơ bản" @(selectedTrinhDo == "Cơ bản" ? "selected" : "")>Cơ bản</!option>
-                    <!option value="Trung cấp" @(selectedTrinhDo == "Trung cấp" ? "selected" : "")>Trung cấp</!option>
-                    <!option value="Nâng cao" @(selectedTrinhDo == "Nâng cao" ? "selected" : "")>Nâng cao</!option>
-                    <!option value="Chuyên sâu" @(selectedTrinhDo == "Chuyên sâu" ? "selected" : "")>Chuyên sâu</!option>
-                </select>
-                <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
-            </div>
-
             <!-- Status Filter -->
-            <div class="relative">
-                <select name="trangThai" onchange="filterLopHocAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
+            <div class="relative min-w-[160px]">
+                <select name="trangThai" onchange="filterLopHocAjax()" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
                     <option value="">Trạng thái: Tất cả</option>
                     <!option value="Đang mở đăng ký" @(selectedTrangThai == "Đang mở đăng ký" ? "selected" : "")>● Đang mở đăng ký</!option>
                     <!option value="Chưa mở" @(selectedTrangThai == "Chưa mở" ? "selected" : "")>○ Chưa mở</!option>
@@ -135,29 +123,9 @@
                 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
             </div>
 
-            <!-- Deadline Filter -->
-            <div class="hidden">
-                <select name="hanDangKyStatus" onchange="filterLopHocAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
-                    <option value="">Hạn ĐK: Tất cả</option>
-                    <!option value="con_han" @(hanDangKyStatus == "con_han" ? "selected" : "")>Còn hạn đăng ký</!option>
-                    <!option value="het_han" @(hanDangKyStatus == "het_han" ? "selected" : "")>Hết hạn đăng ký</!option>
-                </select>
-                <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
-            </div>
-
-            <!-- Capacity Filter -->
-            <div class="hidden">
-                <select name="choTrongStatus" onchange="filterLopHocAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
-                    <option value="">Sĩ số: Tất cả</option>
-                    <!option value="con_cho" @(choTrongStatus == "con_cho" ? "selected" : "")>Còn chỗ trống</!option>
-                    <!option value="het_cho" @(choTrongStatus == "het_cho" ? "selected" : "")>Đã đầy chỗ</!option>
-                </select>
-                <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
-            </div>
-
             <!-- Sort By -->
-            <div class="relative">
-                <select name="sortBy" onchange="filterLopHocAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors font-medium">
+            <div class="relative min-w-[165px]">
+                <select name="sortBy" onchange="filterLopHocAjax()" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors font-medium">
                     <option value="">Sắp xếp mặc định</option>
                     <!option value="ten_asc" @(sortBy == "ten_asc" ? "selected" : "")>Tên lớp: A → Z</!option>
                     <!option value="ten_desc" @(sortBy == "ten_desc" ? "selected" : "")>Tên lớp: Z → A</!option>
@@ -169,11 +137,12 @@
                 </select>
                 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">sort</span>
             </div>
-
-            <a href="/LopHoc/Index" onclick="event.preventDefault(); loadLopHocPage(this.href);" class="p-2 border border-border-standard rounded-xl text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors cursor-pointer" title="Làm mới bộ lọc">
-                <span class="material-symbols-outlined text-[20px] block">refresh</span>
-            </a>
         </form>
+
+        <a href="/LopHoc/Index" onclick="event.preventDefault(); loadLopHocPage(this.href);" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
+            <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+            <span>Đặt lại</span>
+        </a>
     </div>
 
     <!-- Data Table Container -->

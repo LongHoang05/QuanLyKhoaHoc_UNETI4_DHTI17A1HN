@@ -84,29 +84,18 @@
     </div>
 
     <!-- Filters & Search Toolbar -->
-    <div class="card-pro p-4 flex flex-wrap items-center justify-between gap-3">
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-4 card-pro flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
             <!-- Search Input -->
-            <div class="relative flex-1 min-w-[220px]">
+            <div class="relative flex-1 min-w-[240px]">
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span>
                 <input type="text" id="searchInput" value="@search" placeholder="Tìm kiếm theo học viên, email, SĐT, lớp..." 
-                       class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep placeholder:text-outline/60" />
-            </div>
-
-            <!-- Filter Chương trình đào tạo (Mục 8.1) -->
-            <div class="hidden">
-                <select id="filterMaCT" class="w-full px-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep">
-                    <option value="">Tất cả CTĐT</option>
-                    @foreach (var ct in chuongTrinhList)
-                    {
-                        <!option value="@ct.MaChuongTrinh" @(selectedMaCT == ct.MaChuongTrinh ? "selected" : "")>@ct.TenChuongTrinh</!option>
-                    }
-                </select>
+                       class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
             </div>
 
             <!-- Filter Trạng thái duyệt -->
-            <div class="min-w-[150px]">
-                <select id="filterTrangThai" class="w-full px-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep">
+            <div class="relative min-w-[160px]">
+                <select id="filterTrangThai" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
                     <option value="">Tất cả trạng thái</option>
                     <!option value="Chờ duyệt" @(selectedTrangThai == "Chờ duyệt" ? "selected" : "")>Chờ duyệt</!option>
                     <!option value="Đã duyệt" @(selectedTrangThai == "Đã duyệt" ? "selected" : "")>Đã duyệt</!option>
@@ -116,29 +105,23 @@
                     <!option value="Từ chối" @(selectedTrangThai == "Từ chối" ? "selected" : "")>Từ chối</!option>
                     <!option value="Đã hủy" @(selectedTrangThai == "Đã hủy" ? "selected" : "")>Đã hủy</!option>
                 </select>
+                <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
             </div>
 
             <!-- Sắp xếp (Mục 8.1) -->
-            <div class="min-w-[155px]">
-                <select id="filterSortBy" class="w-full px-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep">
+            <div class="relative min-w-[165px]">
+                <select id="filterSortBy" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors font-medium">
                     <!option value="" @(sortBy == "" ? "selected" : "")>Mới nhất trước</!option>
                     <!option value="ngay_asc" @(sortBy == "ngay_asc" ? "selected" : "")>Cũ nhất trước</!option>
                     <!option value="ten_asc" @(sortBy == "ten_asc" ? "selected" : "")>Tên học viên A-Z</!option>
                     <!option value="ten_desc" @(sortBy == "ten_desc" ? "selected" : "")>Tên học viên Z-A</!option>
                     <!option value="tien_desc" @(sortBy == "tien_desc" ? "selected" : "")>Học phí đã thu cao nhất</!option>
                 </select>
-            </div>
-
-            <!-- Date Range Filters -->
-            <div class="hidden">
-                <span>Từ:</span>
-                <input type="date" id="filterTuNgay" value="@tuNgay" class="px-2 py-1.5 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white font-mono" />
-                <span>Đến:</span>
-                <input type="date" id="filterDenNgay" value="@denNgay" class="px-2 py-1.5 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white font-mono" />
+                <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">sort</span>
             </div>
         </div>
 
-        <button type="button" onclick="resetFilters()" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1 px-3 py-2 rounded-xl hover:bg-surface-container-low transition-colors">
+        <button type="button" onclick="resetFilters()" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
             <span class="material-symbols-outlined text-[16px]">restart_alt</span>
             <span>Đặt lại</span>
         </button>

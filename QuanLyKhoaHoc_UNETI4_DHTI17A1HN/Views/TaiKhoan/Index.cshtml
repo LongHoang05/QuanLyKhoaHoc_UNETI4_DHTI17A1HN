@@ -89,16 +89,16 @@
     </div>
 
     <!-- Filter Toolbar -->
-    <div class="bg-surface-white rounded-2xl p-4 border border-border-subtle shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto flex-1">
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-4 card-pro flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
             <div class="relative flex-1 min-w-[240px]">
                 <span class="material-symbols-outlined text-outline absolute left-3 top-1/2 -translate-y-1/2 text-[18px]">search</span>
-                <input id="tkSearchInput" onkeyup="filterTkTable()" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep font-body-sm text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Tìm theo username, họ tên, email..." type="text" value="@Model.Keyword">
+                <input id="tkSearchInput" onkeyup="filterTkTable()" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep font-body-sm text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Tìm theo username, họ tên, email..." type="text" value="@Model.Keyword">
             </div>
 
             <!-- Role Filter -->
-            <div class="relative">
-                <select id="filterRole" onchange="filterTkTable()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary">
+            <div class="relative min-w-[170px]">
+                <select id="filterRole" onchange="filterTkTable()" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
                     <option value="">Tất cả vai trò</option>
                     <option value="Admin" selected="@(Model.VaiTro == "Admin")">Quản trị viên (Admin)</option>
                     <option value="GiaoVu" selected="@(Model.VaiTro == "GiaoVu")">Giáo vụ đào tạo</option>
@@ -109,8 +109,8 @@
             </div>
 
             <!-- Status Filter -->
-            <div class="relative">
-                <select id="filterStatus" onchange="filterTkTable()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary">
+            <div class="relative min-w-[160px]">
+                <select id="filterStatus" onchange="filterTkTable()" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
                     <option value="">Tất cả trạng thái</option>
                     <option value="true" selected="@(Model.TrangThai == true)">Đang hoạt động</option>
                     <option value="false" selected="@(Model.TrangThai == false)">Bị khóa</option>
@@ -118,7 +118,7 @@
                 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
             </div>
         </div>
-        <button type="button" onclick="resetTkFilter()" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1 px-3 py-2 rounded-xl hover:bg-surface-container-low transition-colors cursor-pointer">
+        <button type="button" onclick="resetTkFilter()" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
             <span class="material-symbols-outlined text-[16px]">restart_alt</span>
             <span>Đặt lại</span>
         </button>

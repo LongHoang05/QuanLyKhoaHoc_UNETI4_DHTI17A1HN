@@ -83,35 +83,38 @@
     </div>
 
     <!-- Filters & Search Toolbar -->
-    <div class="card-pro p-4 flex flex-col md:flex-row items-center justify-between gap-3">
-        <form method="get" action="/GiangVien/QuanLy" class="flex flex-wrap items-center gap-3 w-full">
-            <!-- Search Field -->
-            <div class="relative flex-1 min-w-[240px]">
-                <span class="material-symbols-outlined text-outline absolute left-3 top-1/2 -translate-y-1/2 text-[18px]">search</span>
-                <input name="search" value="@search" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-xs" placeholder="Tìm theo họ tên, email, số điện thoại..." type="text"/>
-            </div>
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-4 card-pro">
+        <form method="get" action="/GiangVien/QuanLy" class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
+                <!-- Search Field -->
+                <div class="relative flex-1 min-w-[240px] max-w-md">
+                    <span class="material-symbols-outlined text-outline absolute left-3 top-1/2 -translate-y-1/2 text-[18px]">search</span>
+                    <input name="search" value="@search" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-xs" placeholder="Tìm theo họ tên, email, số điện thoại..." type="text"/>
+                </div>
 
-            <!-- Degree Filter -->
-            <div class="min-w-[160px]">
-                <select name="hocVi" class="w-full bg-surface-container-low border border-border-standard px-3 py-2 rounded-xl text-brand-deep font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-xs">
-                    <option value="">Tất cả học vị</option>
-                    <!option value="ThS." @(hocVi == "ThS." ? "selected" : "")>Thạc sĩ (ThS.)</!option>
-                    <!option value="TS." @(hocVi == "TS." ? "selected" : "")>Tiến sĩ (TS.)</!option>
-                    <!option value="PGS.TS." @(hocVi == "PGS.TS." ? "selected" : "")>Phó Giáo sư (PGS.TS)</!option>
-                    <!option value="GS.TS." @(hocVi == "GS.TS." ? "selected" : "")>Giáo sư (GS.TS)</!option>
-                    <!option value="Kỹ sư" @(hocVi == "Kỹ sư" ? "selected" : "")>Kỹ sư</!option>
-                    <!option value="Cử nhân" @(hocVi == "Cử nhân" ? "selected" : "")>Cử nhân</!option>
-                </select>
-            </div>
+                <!-- Degree Filter -->
+                <div class="relative min-w-[180px]">
+                    <select name="hocVi" onchange="this.form.submit()" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
+                        <option value="">Tất cả học vị</option>
+                        <!option value="ThS." @(hocVi == "ThS." ? "selected" : "")>Thạc sĩ (ThS.)</!option>
+                        <!option value="TS." @(hocVi == "TS." ? "selected" : "")>Tiến sĩ (TS.)</!option>
+                        <!option value="PGS.TS." @(hocVi == "PGS.TS." ? "selected" : "")>Phó Giáo sư (PGS.TS)</!option>
+                        <!option value="GS.TS." @(hocVi == "GS.TS." ? "selected" : "")>Giáo sư (GS.TS)</!option>
+                        <!option value="Kỹ sư" @(hocVi == "Kỹ sư" ? "selected" : "")>Kỹ sư</!option>
+                        <!option value="Cử nhân" @(hocVi == "Cử nhân" ? "selected" : "")>Cử nhân</!option>
+                    </select>
+                    <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
+                </div>
 
-            <button type="submit" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-4 py-2 rounded-xl transition-all text-xs cursor-pointer">
-                <span class="material-symbols-outlined text-[16px]">filter_alt</span>
-                <span>Lọc</span>
-            </button>
+                <button type="submit" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-hover text-surface-white font-label-md text-label-md px-4 py-2 rounded-xl transition-all text-xs cursor-pointer shadow-xs active:scale-95">
+                    <span class="material-symbols-outlined text-[16px]">filter_alt</span>
+                    <span>Lọc</span>
+                </button>
+            </div>
 
             @if (!string.IsNullOrEmpty(search) || !string.IsNullOrEmpty(hocVi))
             {
-                <a href="/GiangVien/QuanLy" class="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant text-xs font-medium transition-colors">
+                <a href="/GiangVien/QuanLy" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
                     <span class="material-symbols-outlined text-[16px]">restart_alt</span>
                     <span>Đặt lại</span>
                 </a>
