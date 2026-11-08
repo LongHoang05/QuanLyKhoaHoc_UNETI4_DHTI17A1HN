@@ -11,9 +11,9 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
 
 <div class="flex flex-col gap-y-6">
     <!-- 1. Action Strip (Prep.vn Style with UI/UX Pro Max Tokens) -->
-    <section class="card-pro p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <section class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 card-pro">
         <div class="flex flex-col gap-1">
-            <h1 class="font-headline-lg-mobile lg:font-headline-lg text-brand-deep tracking-tight font-extrabold flex items-center gap-2">
+            <h1 class="text-xl sm:text-2xl text-brand-deep tracking-tight font-extrabold flex items-center gap-2">
                 Xin chào, @(Context.Session.GetString("HoTen") ?? "Quản trị viên")
             </h1>
             <div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm flex-wrap">
@@ -42,7 +42,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
     <!-- 2. 4-Column Stats Bento Grid -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <!-- Card 1: Tổng CTĐT -->
-        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-5 flex flex-col justify-between card-pro card-pro-hover">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-outline font-label-md text-label-md font-medium">Tổng chương trình ĐT</span>
                 <div class="w-10 h-10 rounded-2xl bg-primary-light flex items-center justify-center text-primary">
@@ -61,7 +61,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
         </div>
 
         <!-- Card 2: Sinh viên đăng ký -->
-        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-5 flex flex-col justify-between card-pro card-pro-hover">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md font-medium">Tổng số sinh viên</span>
                 <div class="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center text-primary">
@@ -86,7 +86,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
         </div>
 
         <!-- Card 3: Chờ phê duyệt -->
-        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-5 flex flex-col justify-between card-pro card-pro-hover">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-outline font-label-md text-label-md font-medium">Chờ phê duyệt</span>
                 <div class="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600">
@@ -114,7 +114,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
         </div>
 
         <!-- Card 4: Tỷ lệ hoàn thành khóa học -->
-        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
+        <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-5 flex flex-col justify-between card-pro card-pro-hover">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-outline font-label-md text-label-md font-medium">Kết quả hoàn thành</span>
                 <div class="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
@@ -146,7 +146,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
     <!-- 3. Middle Split Section: Lịch học phần sắp tới (1/2) & Hoạt động đăng ký (1/2) -->
     <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Left: Lịch Lớp Học Phần Sắp Tới (Module 5 BuoiHoc) -->
-        <div class="card-pro p-6 flex flex-col gap-4 h-full">
+        <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-6 flex flex-col gap-4 h-full card-pro">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border-subtle">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">calendar_clock</span>
@@ -226,7 +226,7 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
         </div>
 
         <!-- Right: Hoạt động đăng ký gần đây -->
-        <div class="card-pro p-6 flex flex-col gap-4 h-full">
+        <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-6 flex flex-col gap-4 h-full card-pro">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border-subtle">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">history</span>
@@ -337,7 +337,6 @@ Nội dung thực hiện: Giao diện Dashboard (Module 5) - Phong cách Prep.vn
             </div>
         </div>
     </section>
-</div>
 </div>
 
 @section Scripts {
