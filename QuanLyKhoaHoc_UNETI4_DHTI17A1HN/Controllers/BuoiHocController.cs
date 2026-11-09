@@ -96,12 +96,26 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             ViewBag.SoThi = activeSessions.Count(b => b.NoiDung != null && (b.NoiDung.ToLower().Contains("thi") || b.NoiDung.ToLower().Contains("kiểm tra")));
             ViewBag.SoChinhKhoa = activeSessions.Count(b => b.NoiDung == null || (!b.NoiDung.ToLower().Contains("thi") && !b.NoiDung.ToLower().Contains("kiểm tra")));
 
-            // Danh sách phòng học chuẩn UNETI kết hợp với phòng đã xếp trong CSDL
+            // Danh sách phòng học chuẩn UNETI (HA8, HA9, HA10, HA11 phòng 101 -> 501 và các phòng Lab)
             var phongChuanUneti = new List<string> {
-                "Lab Máy 201", "Lab Máy 202", "Lab CNTT 301", "Lab CNTT 302", "Lab Phần Mềm 401", "Lab Mạng & An Ninh 402",
-                "Studio AI & VR 501", "Studio Thiết Kế UI/UX 502",
-                "P.201", "P.202", "P.301", "P.302", "P.401", "P.402",
-                "Hội trường A1", "Hội trường B2"
+                // Tòa HA8
+                "HA8-101", "HA8-201", "HA8-301", "HA8-401", "HA8-501",
+                // Tòa HA9
+                "HA9-101", "HA9-201", "HA9-301", "HA9-401", "HA9-501",
+                // Tòa HA10
+                "HA10-101", "HA10-201", "HA10-301", "HA10-401", "HA10-501",
+                // Tòa HA11
+                "HA11-101", "HA11-201", "HA11-301", "HA11-401", "HA11-501",
+                // Các phòng Lab chuyên dụng & Hội trường
+                "Lab Máy 201 - HA8",
+                "Lab Máy 202 - HA8",
+                "Lab CNTT 301 - HA9",
+                "Lab CNTT 302 - HA9",
+                "Lab AI & Data 401 - HA10",
+                "Lab Mạng & Cloud 501 - HA11",
+                "Studio Thiết Kế UI/UX 302 - HA9",
+                "Hội trường lớn HA8",
+                "Hội trường HA11"
             };
             var existingPhongs = allSessions.Select(b => b.PhongHoc).Where(p => !string.IsNullOrEmpty(p)).ToList();
             ViewBag.DanhSachPhong = phongChuanUneti.Union(existingPhongs).Distinct().ToList();

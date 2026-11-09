@@ -1,4 +1,4 @@
-﻿@*
+@*
 Họ và tên: Nguyễn Tùng Dương
 Mã sinh viên: 23103100003
 Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biểu dạng tuần kết hợp CRUD chuẩn Prep.vn
@@ -502,6 +502,11 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                                                         rmBadgeClass = "bg-emerald-50 text-emerald-800 border-emerald-200";
                                                         rmIcon = "smart_toy";
                                                     }
+                                                    else if (rm.StartsWith("HA"))
+                                                    {
+                                                        rmBadgeClass = "bg-blue-50 text-blue-800 border-blue-200";
+                                                        rmIcon = "school";
+                                                    }
 
                                                     bool isCardToday = today.DayOfWeek == day;
                                                     string statusText = "Lên lịch";
@@ -874,16 +879,16 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                     </div>
                 </div>
 
-                <!-- Input & Datalist: Phòng học / Phòng máy chuẩn UNETI -->
+                <!-- Input & Datalist: Phòng học / Phòng máy chuẩn UNETI (HA8, HA9, HA10, HA11 & Labs) -->
                 <div class="space-y-1.5">
                     <div class="flex items-center justify-between">
                         <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
                             Phòng học / Phòng máy <span class="text-danger-crimson">*</span>
                         </label>
-                        <span class="text-[11px] text-outline">Gõ hoặc chọn nhanh</span>
+                        <span class="text-[11px] text-outline">Gõ hoặc chọn danh sách</span>
                     </div>
                     <div class="relative">
-                        <input name="PhongHoc" id="drawer-phong" required list="list-phong-chuan" autocomplete="off" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-mono font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary uppercase tracking-wide pr-9" placeholder="Chọn hoặc nhập phòng (ví dụ: Lab Máy 201, P.301)..." type="text" value="Lab Máy 201"/>
+                        <input name="PhongHoc" id="drawer-phong" required list="list-phong-chuan" autocomplete="off" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-mono font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary uppercase tracking-wide pr-9" placeholder="Chọn hoặc nhập phòng (ví dụ: HA8-101, HA9-201, Lab...)..." type="text" value="HA8-101"/>
                         <span class="material-symbols-outlined text-outline absolute right-3 top-1/2 -translate-y-1/2 text-[18px]">meeting_room</span>
                     </div>
                     <datalist id="list-phong-chuan">
@@ -892,26 +897,6 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                             <option value="@p">@p</option>
                         }
                     </datalist>
-
-                    <!-- Chips chọn nhanh các loại phòng thông dụng 1 chạm -->
-                    <div class="flex items-center gap-1.5 flex-wrap pt-0.5">
-                        <span class="text-[10.5px] text-outline font-medium">Gợi ý:</span>
-                        <button type="button" onclick="setDrawerPhong('Lab Máy 201')" class="px-2 py-0.5 rounded-lg bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-cyan-200 text-[10.5px] font-mono font-semibold transition-colors cursor-pointer">
-                            Lab Máy 201
-                        </button>
-                        <button type="button" onclick="setDrawerPhong('Lab CNTT 301')" class="px-2 py-0.5 rounded-lg bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-cyan-200 text-[10.5px] font-mono font-semibold transition-colors cursor-pointer">
-                            Lab CNTT 301
-                        </button>
-                        <button type="button" onclick="setDrawerPhong('Studio AI & VR 501')" class="px-2 py-0.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10.5px] font-mono font-semibold transition-colors cursor-pointer">
-                            Studio AI 501
-                        </button>
-                        <button type="button" onclick="setDrawerPhong('P.301')" class="px-2 py-0.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[10.5px] font-mono font-semibold transition-colors cursor-pointer">
-                            P.301
-                        </button>
-                        <button type="button" onclick="setDrawerPhong('Hội trường A1')" class="px-2 py-0.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 text-[10.5px] font-mono font-semibold transition-colors cursor-pointer">
-                            Hội trường A1
-                        </button>
-                    </div>
                 </div>
 
                 <!-- Select: Giảng viên phụ trách (Liên kết chính thức với bảng GiangVien) -->
@@ -1401,7 +1386,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
             document.getElementById('drawer-lop-info-card')?.classList.add('hidden');
             document.getElementById('drawer-gv-autofill-badge')?.classList.add('hidden');
             document.getElementById('drawer-malop').value = '';
-            document.getElementById('drawer-phong').value = 'Lab Máy 201';
+            document.getElementById('drawer-phong').value = 'HA8-101';
             document.getElementById('drawer-gv').value = '';
             document.getElementById('drawer-noidung').value = '';
             document.getElementById('drawer-ghichu').value = '';
