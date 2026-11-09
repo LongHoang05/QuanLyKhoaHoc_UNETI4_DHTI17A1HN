@@ -271,11 +271,11 @@
     </div>
 
 <!-- ========================================== -->
-<!-- SLIDE-OVER DRAWER THÊM / SỬA GIẢNG VIÊN -->
+<!-- SLIDE-OVER DRAWER THÊM / SỬA GIẢNG VIÊN (Smooth Slide Animation) -->
 <!-- ========================================== -->
-<div id="teacher-drawer-backdrop" class="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 hidden transition-opacity duration-300" onclick="closeTeacherDrawer()"></div>
+<div id="teacher-drawer-backdrop" class="fixed inset-0 bg-brand-deep/40 backdrop-blur-xs z-50 transition-opacity duration-300 opacity-0 pointer-events-none" onclick="closeTeacherDrawer()"></div>
 
-<div id="teacher-drawer" class="fixed inset-y-0 right-0 max-w-lg w-full bg-surface-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col justify-between">
+<div id="teacher-drawer" class="fixed inset-y-0 right-0 max-w-lg w-full bg-surface-white border-l border-border-standard shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-out flex flex-col justify-between">
     <!-- Drawer Header -->
     <div class="p-6 border-b border-border-standard flex items-center justify-between">
         <div class="flex items-center gap-2.5">
@@ -401,7 +401,8 @@
         const btnText = document.getElementById('btnSubmitText');
         const accountSec = document.getElementById('account-section');
 
-        backdrop.classList.remove('hidden');
+        backdrop.classList.remove('opacity-0', 'pointer-events-none');
+        backdrop.classList.add('opacity-100');
         drawer.classList.remove('translate-x-full');
 
         if (mode === 'create') {
@@ -441,7 +442,8 @@
     function closeTeacherDrawer() {
         const backdrop = document.getElementById('teacher-drawer-backdrop');
         const drawer = document.getElementById('teacher-drawer');
-        backdrop.classList.add('hidden');
+        backdrop.classList.remove('opacity-100');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
         drawer.classList.add('translate-x-full');
     }
 

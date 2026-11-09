@@ -1228,30 +1228,28 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         </div>
     </div>
 
-<!-- RIGHT SLIDE-OVER DRAWER (CREATE / UPDATE FORM) -->
-<div class="fixed inset-0 z-50 overflow-hidden hidden transition-all duration-300" id="drawer-container">
-    <!-- Overlay Backdrop -->
-    <div class="absolute inset-0 bg-brand-deep/40 backdrop-blur-xs transition-opacity duration-300" id="drawer-backdrop" onclick="closeDrawer()"></div>
-    <div class="absolute inset-y-0 right-0 max-w-full flex pl-10">
-        <div class="w-screen max-w-md bg-surface-white shadow-2xl border-l border-border-standard flex flex-col justify-between">
-            <!-- Drawer Header -->
-            <div class="p-6 border-b border-border-subtle flex items-start justify-between bg-surface-white">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary text-[22px]">calendar_month</span>
-                        <h2 class="font-headline-sm text-headline-sm text-brand-deep" id="drawer-title">Xếp lịch học mới</h2>
-                    </div>
-                    <p class="font-body-sm text-body-sm text-outline mt-1" id="drawer-subtitle">
-                        Nhập thông tin ca học, phòng máy và phân công giảng viên.
-                    </p>
-                </div>
-                <button onclick="closeDrawer()" class="p-1.5 rounded-xl text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors cursor-pointer">
-                    <span class="material-symbols-outlined text-[20px]">close</span>
-                </button>
-            </div>
+<!-- RIGHT SLIDE-OVER DRAWER (CREATE / UPDATE FORM - Smooth Slide Animation) -->
+<div id="drawer-backdrop" onclick="closeDrawer()" class="fixed inset-0 bg-brand-deep/40 backdrop-blur-xs z-50 transition-opacity duration-300 opacity-0 pointer-events-none"></div>
 
-            <!-- Drawer Form Body -->
-            <form id="drawer-form" method="post" action="/BuoiHoc/Create" class="flex-1 overflow-y-auto p-6 space-y-5">
+<div id="drawer-panel" class="fixed inset-y-0 right-0 w-full max-w-md bg-surface-white border-l border-border-standard shadow-2xl z-50 flex flex-col justify-between transform transition-transform duration-300 ease-out translate-x-full">
+    <!-- Drawer Header -->
+    <div class="p-6 border-b border-border-subtle flex items-start justify-between bg-surface-white">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-[22px]">calendar_month</span>
+                <h2 class="font-headline-sm text-headline-sm text-brand-deep" id="drawer-title">Xếp lịch học mới</h2>
+            </div>
+            <p class="font-body-sm text-body-sm text-outline mt-1" id="drawer-subtitle">
+                Nhập thông tin ca học, phòng máy và phân công giảng viên.
+            </p>
+        </div>
+        <button onclick="closeDrawer()" class="p-1.5 rounded-xl text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors cursor-pointer">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+    </div>
+
+    <!-- Drawer Form Body -->
+    <form id="drawer-form" method="post" action="/BuoiHoc/Create" class="flex-1 overflow-y-auto p-6 space-y-5">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="MaBuoiHoc" id="drawer-mabuoi" value="0"/>
 
@@ -1392,8 +1390,6 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                     </button>
                 </div>
             </form>
-        </div>
-    </div>
 </div>
 
 <script>
@@ -1566,7 +1562,8 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
     }
 
     // Micro-interactions for Drawer and Global Modal
-    const drawer = document.getElementById('drawer-container');
+    const drawerBackdrop = document.getElementById('drawer-backdrop');
+    const drawerPanel = document.getElementById('drawer-panel');
     const drawerForm = document.getElementById('drawer-form');
 
     function updateStatusRadioStyles() {
@@ -1591,7 +1588,11 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
     });
 
     function openDrawer(mode) {
-        drawer.classList.remove('hidden');
+        if (drawerBackdrop && drawerPanel) {
+            drawerBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+            drawerBackdrop.classList.add('opacity-100');
+            drawerPanel.classList.remove('translate-x-full');
+        }
         const statusGroup = document.getElementById('drawer-trangthai-group');
         if (mode === 'create') {
             document.getElementById('drawer-title').innerText = 'Xếp lịch học mới';
@@ -1616,7 +1617,11 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
     }
 
     function closeDrawer() {
-        drawer.classList.add('hidden');
+        if (drawerBackdrop && drawerPanel) {
+            drawerBackdrop.classList.remove('opacity-100');
+            drawerBackdrop.classList.add('opacity-0', 'pointer-events-none');
+            drawerPanel.classList.add('translate-x-full');
+        }
         const box = document.getElementById('drawer-conflict-box');
         if (box) box.classList.add('hidden');
     }
@@ -1679,7 +1684,11 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         }
         updateStatusRadioStyles();
 
-        drawer.classList.remove('hidden');
+        if (drawerBackdrop && drawerPanel) {
+            drawerBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+            drawerBackdrop.classList.add('opacity-100');
+            drawerPanel.classList.remove('translate-x-full');
+        }
         checkScheduleConflictLive();
     }
 

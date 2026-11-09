@@ -213,75 +213,77 @@
     </div>
 </div>
 
-<!-- Right Slide-Over Drawer for Create & Edit CTĐT -->
-<div id="drawer-container" class="fixed inset-0 z-50 overflow-hidden hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
-    <div class="absolute inset-0 bg-brand-deep/30 backdrop-blur-xs transition-opacity" onclick="closeDrawer()"></div>
-    <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div class="w-screen max-w-md bg-surface-white shadow-2xl flex flex-col justify-between">
-            <!-- Header -->
-            <div class="p-6 border-b border-border-subtle flex items-start justify-between">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary text-[22px]">auto_stories</span>
-                        <h2 class="font-headline-sm text-headline-sm text-brand-deep font-bold" id="drawer-title">Thêm chương trình</h2>
-                    </div>
-                    <p class="font-body-sm text-body-sm text-outline mt-1" id="drawer-subtitle">Tạo chương trình đào tạo mới của trung tâm.</p>
-                </div>
-                <button onclick="closeDrawer()" class="p-1.5 rounded-xl text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors cursor-pointer">
-                    <span class="material-symbols-outlined text-[20px]">close</span>
-                </button>
+<!-- Right Slide-Over Drawer for Create & Edit CTĐT (Smooth Slide Animation) -->
+<div id="drawer-backdrop" onclick="closeDrawer()" class="fixed inset-0 bg-brand-deep/40 backdrop-blur-xs z-50 transition-opacity duration-300 opacity-0 pointer-events-none"></div>
+
+<div id="drawer-panel" class="fixed inset-y-0 right-0 w-full max-w-md bg-surface-white border-l border-border-standard shadow-2xl z-50 flex flex-col justify-between transform transition-transform duration-300 ease-out translate-x-full">
+    <!-- Header -->
+    <div class="p-6 border-b border-border-subtle flex items-start justify-between bg-surface-white">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-[22px]">auto_stories</span>
+                <h2 class="font-headline-sm text-headline-sm text-brand-deep font-bold" id="drawer-title">Thêm chương trình</h2>
             </div>
-
-            <!-- Body -->
-            <form id="drawer-form" method="post" action="/ChuongTrinhDaoTao/CreatePost" class="flex-1 overflow-y-auto p-6 space-y-4">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="maChuongTrinh" id="drawer-mactdt" value="0"/>
-
-                <div class="space-y-1.5">
-                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Tên chương trình đào tạo <span class="text-danger-crimson">*</span></label>
-                    <input type="text" name="TenChuongTrinh" id="drawer-ten" required class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Ví dụ: Lập trình ASP.NET Core Chuyên Sâu"/>
-                </div>
-
-                <div class="space-y-1.5">
-                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Email liên hệ</label>
-                    <input type="email" name="EmailLienHe" id="drawer-email" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="contact@uneti.edu.vn"/>
-                </div>
-
-                <div class="space-y-1.5">
-                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Mô tả chương trình</label>
-                    <textarea name="MoTa" id="drawer-mota" rows="4" class="w-full bg-surface-white border border-border-standard rounded-xl p-3 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none" placeholder="Giới thiệu mục tiêu đào tạo, chuẩn đầu ra..."></textarea>
-                </div>
-
-                <div class="space-y-1.5">
-                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Trạng thái tuyển sinh</label>
-                    <select name="TrangThai" id="drawer-trangthai" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:border-primary cursor-pointer">
-                        <option value="Đang hoạt động">Đang hoạt động</option>
-                        <option value="Tạm dừng">Tạm dừng</option>
-                    </select>
-                </div>
-
-                <!-- Footer Buttons inside Form -->
-                <div class="border-t border-border-subtle pt-5 flex items-center justify-end gap-3">
-                    <button type="button" onclick="closeDrawer()" class="border border-border-standard bg-surface-white hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-4 py-2.5 rounded-xl transition-colors cursor-pointer">
-                        Hủy bỏ
-                    </button>
-                    <button type="submit" class="bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-5 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all cursor-pointer">
-                        <span class="material-symbols-outlined text-[18px]">save</span>
-                        <span id="drawer-submit-text">Lưu chương trình</span>
-                    </button>
-                </div>
-            </form>
+            <p class="font-body-sm text-body-sm text-outline mt-1" id="drawer-subtitle">Tạo chương trình đào tạo mới của trung tâm.</p>
         </div>
+        <button onclick="closeDrawer()" class="p-1.5 rounded-xl text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors cursor-pointer">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
     </div>
+
+    <!-- Body -->
+    <form id="drawer-form" method="post" action="/ChuongTrinhDaoTao/CreatePost" class="flex-1 overflow-y-auto p-6 space-y-4">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="maChuongTrinh" id="drawer-mactdt" value="0"/>
+
+        <div class="space-y-1.5">
+            <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Tên chương trình đào tạo <span class="text-danger-crimson">*</span></label>
+            <input type="text" name="TenChuongTrinh" id="drawer-ten" required class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Ví dụ: Lập trình ASP.NET Core Chuyên Sâu"/>
+        </div>
+
+        <div class="space-y-1.5">
+            <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Email liên hệ</label>
+            <input type="email" name="EmailLienHe" id="drawer-email" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="contact@uneti.edu.vn"/>
+        </div>
+
+        <div class="space-y-1.5">
+            <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Mô tả chương trình</label>
+            <textarea name="MoTa" id="drawer-mota" rows="4" class="w-full bg-surface-white border border-border-standard rounded-xl p-3 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none" placeholder="Giới thiệu mục tiêu đào tạo, chuẩn đầu ra..."></textarea>
+        </div>
+
+        <div class="space-y-1.5">
+            <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Trạng thái tuyển sinh</label>
+            <select name="TrangThai" id="drawer-trangthai" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:border-primary cursor-pointer">
+                <option value="Đang hoạt động">Đang hoạt động</option>
+                <option value="Tạm dừng">Tạm dừng</option>
+            </select>
+        </div>
+
+        <!-- Footer Buttons inside Form -->
+        <div class="border-t border-border-subtle pt-5 flex items-center justify-end gap-3">
+            <button type="button" onclick="closeDrawer()" class="border border-border-standard bg-surface-white hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-4 py-2.5 rounded-xl transition-colors cursor-pointer">
+                Hủy bỏ
+            </button>
+            <button type="submit" class="bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-5 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]">save</span>
+                <span id="drawer-submit-text">Lưu chương trình</span>
+            </button>
+        </div>
+    </form>
 </div>
 
 @section Scripts {
 <script>
-    const drawer = document.getElementById('drawer-container');
+    const drawerBackdrop = document.getElementById('drawer-backdrop');
+    const drawerPanel = document.getElementById('drawer-panel');
     const drawerForm = document.getElementById('drawer-form');
 
     function openDrawer(mode) {
-        drawer.classList.remove('hidden');
+        if (drawerBackdrop && drawerPanel) {
+            drawerBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+            drawerBackdrop.classList.add('opacity-100');
+            drawerPanel.classList.remove('translate-x-full');
+        }
         if (mode === 'create') {
             document.getElementById('drawer-title').innerText = 'Thêm chương trình';
             document.getElementById('drawer-subtitle').innerText = 'Tạo chương trình đào tạo mới của trung tâm.';
@@ -297,7 +299,11 @@
     }
 
     function closeDrawer() {
-        drawer.classList.add('hidden');
+        if (drawerBackdrop && drawerPanel) {
+            drawerBackdrop.classList.remove('opacity-100');
+            drawerBackdrop.classList.add('opacity-0', 'pointer-events-none');
+            drawerPanel.classList.add('translate-x-full');
+        }
     }
 
     function openEditDrawerFromRow(btn) {
@@ -313,7 +319,11 @@
         document.getElementById('drawer-mota').value = row.dataset.mota;
         document.getElementById('drawer-trangthai').value = row.dataset.trangthai;
 
-        drawer.classList.remove('hidden');
+        if (drawerBackdrop && drawerPanel) {
+            drawerBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+            drawerBackdrop.classList.add('opacity-100');
+            drawerPanel.classList.remove('translate-x-full');
+        }
     }
 
     function confirmDeleteCtdt(id, tenCtdt, soLop) {
