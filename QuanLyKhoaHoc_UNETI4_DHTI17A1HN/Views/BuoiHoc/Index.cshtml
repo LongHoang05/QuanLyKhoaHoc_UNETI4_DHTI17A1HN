@@ -59,6 +59,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
     var lopHocs = ViewBag.LopHocList as IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>();
     var danhSachPhong = ViewBag.DanhSachPhong as IEnumerable<string> ?? new List<string>();
     var danhSachGV = ViewBag.DanhSachGiangVien as IEnumerable<string> ?? new List<string>();
+    var giangVienList = ViewBag.GiangVienList as IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien>();
 
     int? selectedMaLop = ViewBag.SelectedMaLop;
     string selectedPhong = ViewBag.SelectedPhong as string ?? "";
@@ -825,41 +826,132 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="MaBuoiHoc" id="drawer-mabuoi" value="0"/>
 
-                <!-- Select: Lớp học -->
+                <!-- Select: Lớp học đào tạo kèm tìm kiếm nhanh và gom nhóm theo CTĐT -->
                 <div class="space-y-1.5">
-                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
-                        Lớp học đào tạo <span class="text-danger-crimson">*</span>
-                    </label>
+                    <div class="flex items-center justify-between">
+                        <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                            Lớp học đào tạo <span class="text-danger-crimson">*</span>
+                        </label>
+                        <span id="drawer-lop-count" class="text-[11px] text-outline font-medium">@lopHocs.Count() lớp</span>
+                    </div>
+
+                    <!-- Input tìm kiếm nhanh tên lớp / môn học -->
                     <div class="relative">
-                        <select name="MaLopHoc" id="drawer-malop" required class="w-full appearance-none bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-md text-body-md text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
-                            @foreach (var lop in lopHocs)
+                        <span class="material-symbols-outlined text-outline absolute left-3 top-1/2 -translate-y-1/2 text-[16px]">search</span>
+                        <input type="text" id="drawer-search-lop" oninput="filterDrawerLopHoc(this.value)" placeholder="Gõ tìm nhanh tên lớp, mã lớp hoặc môn học..." 
+                               class="w-full bg-surface-container-low border border-border-subtle rounded-xl pl-9 pr-8 py-1.5 text-xs text-brand-deep focus:outline-none focus:border-primary focus:bg-surface-white transition-all"/>
+                        <button type="button" onclick="clearDrawerLopSearch()" id="drawer-clear-search-lop" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-outline hover:text-brand-deep cursor-pointer">
+                            <span class="material-symbols-outlined text-[15px]">close</span>
+                        </button>
+                    </div>
+
+                    <!-- Dropdown danh sách lớp gom nhóm theo Chương trình đào tạo -->
+                    <div class="relative">
+                        <select name="MaLopHoc" id="drawer-malop" required onchange="onDrawerLopChanged(this)" class="w-full appearance-none bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-md text-body-md text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer">
+                            <option value="">-- Chọn lớp học --</option>
+                            @{
+                                var groupedLop = lopHocs.GroupBy(l => l.ChuongTrinhDaoTao?.TenChuongTrinh ?? "Chương trình đào tạo khác");
+                            }
+                            @foreach (var grp in groupedLop)
                             {
-                                <option value="@lop.MaLopHoc">@lop.TenLop (@(lop.SiSoToiDa) SV)</option>
+                                <optgroup label="📚 @grp.Key">
+                                    @foreach (var lop in grp)
+                                    {
+                                        <option value="@lop.MaLopHoc" data-ten="@lop.TenLop" data-gv="@(lop.TenGiangVien ?? "")" data-siso="@lop.SiSoToiDa" data-sobuoi="@lop.SoBuoiHoc" data-ctdt="@(lop.ChuongTrinhDaoTao?.TenChuongTrinh ?? "")">
+                                            @lop.TenLop (@lop.SiSoToiDa SV) @(!string.IsNullOrEmpty(lop.TenGiangVien) ? $"• GV: {lop.TenGiangVien}" : "")
+                                        </option>
+                                    }
+                                </optgroup>
                             }
                         </select>
-                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">expand_more</span>
+                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px] transition-transform duration-200">expand_more</span>
+                    </div>
+
+                    <!-- Info Box tóm tắt thông tin lớp được chọn -->
+                    <div id="drawer-lop-info-card" class="hidden p-2 rounded-xl bg-primary/[0.04] border border-primary/20 text-xs flex items-center justify-between text-brand-deep">
+                        <span id="drawer-lop-info-text" class="font-medium truncate">...</span>
+                        <span class="text-[10px] text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-full flex-shrink-0">Đã chọn</span>
                     </div>
                 </div>
 
-                <!-- Input: Phòng học -->
+                <!-- Input & Datalist: Phòng học / Phòng máy chuẩn UNETI -->
                 <div class="space-y-1.5">
-                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
-                        Phòng học / Phòng máy <span class="text-danger-crimson">*</span>
-                    </label>
+                    <div class="flex items-center justify-between">
+                        <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                            Phòng học / Phòng máy <span class="text-danger-crimson">*</span>
+                        </label>
+                        <span class="text-[11px] text-outline">Gõ hoặc chọn nhanh</span>
+                    </div>
                     <div class="relative">
-                        <input name="PhongHoc" id="drawer-phong" required class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-mono font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary uppercase" placeholder="Ví dụ: P.301, Lab CNTT 01" type="text" value="P.301"/>
+                        <input name="PhongHoc" id="drawer-phong" required list="list-phong-chuan" autocomplete="off" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-mono font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary uppercase tracking-wide pr-9" placeholder="Chọn hoặc nhập phòng (ví dụ: Lab Máy 201, P.301)..." type="text" value="Lab Máy 201"/>
                         <span class="material-symbols-outlined text-outline absolute right-3 top-1/2 -translate-y-1/2 text-[18px]">meeting_room</span>
                     </div>
+                    <datalist id="list-phong-chuan">
+                        @foreach (var p in danhSachPhong)
+                        {
+                            <option value="@p">@p</option>
+                        }
+                    </datalist>
+
+                    <!-- Chips chọn nhanh các loại phòng thông dụng 1 chạm -->
+                    <div class="flex items-center gap-1.5 flex-wrap pt-0.5">
+                        <span class="text-[10.5px] text-outline font-medium">Gợi ý:</span>
+                        <button type="button" onclick="setDrawerPhong('Lab Máy 201')" class="px-2 py-0.5 rounded-lg bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-cyan-200 text-[10.5px] font-mono font-semibold transition-colors cursor-pointer">
+                            Lab Máy 201
+                        </button>
+                        <button type="button" onclick="setDrawerPhong('Lab CNTT 301')" class="px-2 py-0.5 rounded-lg bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-cyan-200 text-[10.5px] font-mono font-semibold transition-colors cursor-pointer">
+                            Lab CNTT 301
+                        </button>
+                        <button type="button" onclick="setDrawerPhong('Studio AI & VR 501')" class="px-2 py-0.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10.5px] font-mono font-semibold transition-colors cursor-pointer">
+                            Studio AI 501
+                        </button>
+                        <button type="button" onclick="setDrawerPhong('P.301')" class="px-2 py-0.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[10.5px] font-mono font-semibold transition-colors cursor-pointer">
+                            P.301
+                        </button>
+                        <button type="button" onclick="setDrawerPhong('Hội trường A1')" class="px-2 py-0.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 text-[10.5px] font-mono font-semibold transition-colors cursor-pointer">
+                            Hội trường A1
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Input: Giảng viên -->
+                <!-- Select: Giảng viên phụ trách (Liên kết chính thức với bảng GiangVien) -->
                 <div class="space-y-1.5">
-                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
-                        Giảng viên phụ trách <span class="text-danger-crimson">*</span>
-                    </label>
+                    <div class="flex items-center justify-between">
+                        <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                            Giảng viên phụ trách <span class="text-danger-crimson">*</span>
+                        </label>
+                        <span id="drawer-gv-autofill-badge" class="hidden text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.2 rounded-md font-semibold animate-fade-in flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[13px]">check</span> Theo lớp học
+                        </span>
+                    </div>
+
                     <div class="relative">
-                        <input name="GiangVien" id="drawer-gv" required class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-md text-body-md text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Ví dụ: ThS. Nguyễn Văn A" type="text" value="ThS. Nguyễn Văn A"/>
-                        <span class="material-symbols-outlined text-outline absolute right-3 top-1/2 -translate-y-1/2 text-[18px]">person</span>
+                        <select name="GiangVien" id="drawer-gv" required class="w-full appearance-none bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-md text-body-md text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer">
+                            <option value="">-- Chọn giảng viên từ danh sách trung tâm --</option>
+                            @if (giangVienList.Any())
+                            {
+                                <optgroup label="👨‍🏫 Giảng viên trung tâm UNETI (@giangVienList.Count() thầy/cô)">
+                                    @foreach (var gv in giangVienList)
+                                    {
+                                        var gvDisplayName = $"{gv.HocVi} {gv.HoTen}".Trim();
+                                        <option value="@gvDisplayName">@gvDisplayName • @gv.ChuyenNganh</option>
+                                    }
+                                </optgroup>
+                            }
+                            @{
+                                var otherGvs = danhSachGV.Where(name => !giangVienList.Any(g => $"{g.HocVi} {g.HoTen}".Trim().Equals(name, StringComparison.OrdinalIgnoreCase))).ToList();
+                            }
+                            @if (otherGvs.Any())
+                            {
+                                <optgroup label="👤 Giảng viên thỉnh giảng / Đã có lịch">
+                                    @foreach (var name in otherGvs)
+                                    {
+                                        <option value="@name">@name</option>
+                                    }
+                                </optgroup>
+                            }
+                        </select>
+                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px] transition-transform duration-200">expand_more</span>
                     </div>
                 </div>
 
@@ -1159,6 +1251,134 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         r.addEventListener('change', updateStatusRadioStyles);
     });
 
+    // Helper: Tìm kiếm nhanh lớp học trong Drawer
+    function filterDrawerLopHoc(kw) {
+        const q = (kw || '').trim().toLowerCase();
+        const select = document.getElementById('drawer-malop');
+        const clearBtn = document.getElementById('drawer-clear-search-lop');
+        const countEl = document.getElementById('drawer-lop-count');
+        if (!select) return;
+
+        if (clearBtn) {
+            if (q) clearBtn.classList.remove('hidden');
+            else clearBtn.classList.add('hidden');
+        }
+
+        let matchCount = 0;
+        const optgroups = select.querySelectorAll('optgroup');
+        optgroups.forEach(grp => {
+            let grpMatch = 0;
+            const options = grp.querySelectorAll('option');
+            options.forEach(opt => {
+                const text = (opt.text || '').toLowerCase();
+                const gv = (opt.dataset.gv || '').toLowerCase();
+                const ctdt = (opt.dataset.ctdt || '').toLowerCase();
+                if (!q || text.includes(q) || gv.includes(q) || ctdt.includes(q)) {
+                    opt.hidden = false;
+                    grpMatch++;
+                    matchCount++;
+                } else {
+                    opt.hidden = true;
+                }
+            });
+            grp.hidden = (grpMatch === 0);
+        });
+
+        if (countEl) {
+            if (q) countEl.innerText = `${matchCount} lớp khớp`;
+            else countEl.innerText = `${select.querySelectorAll('option:not([value=""])').length} lớp`;
+        }
+    }
+
+    function clearDrawerLopSearch() {
+        const input = document.getElementById('drawer-search-lop');
+        if (input) {
+            input.value = '';
+            filterDrawerLopHoc('');
+        }
+    }
+
+    // Helper: Tự động điền Giảng viên khi chọn Lớp học
+    function onDrawerLopChanged(selectEl, autoSelectGv = true) {
+        if (!selectEl) return;
+        const opt = selectEl.options[selectEl.selectedIndex];
+        const card = document.getElementById('drawer-lop-info-card');
+        const textEl = document.getElementById('drawer-lop-info-text');
+        const badgeGv = document.getElementById('drawer-gv-autofill-badge');
+
+        if (!opt || !opt.value) {
+            if (card) card.classList.add('hidden');
+            if (badgeGv) badgeGv.classList.add('hidden');
+            return;
+        }
+
+        const tenLop = opt.dataset.ten || opt.text;
+        const gvLop = opt.dataset.gv || '';
+        const siso = opt.dataset.siso || '';
+        const sobuoi = opt.dataset.sobuoi || '';
+
+        if (card && textEl) {
+            textEl.innerText = `${tenLop} • Sĩ số: ${siso} SV • Quy định: ${sobuoi} buổi`;
+            card.classList.remove('hidden');
+        }
+
+        if (autoSelectGv && gvLop) {
+            setDrawerGiangVienValue(gvLop);
+            if (badgeGv) {
+                badgeGv.innerText = `✓ Theo lớp: ${gvLop}`;
+                badgeGv.classList.remove('hidden');
+            }
+        } else if (!autoSelectGv && gvLop) {
+            if (badgeGv) {
+                badgeGv.innerText = `✓ GV lớp: ${gvLop}`;
+                badgeGv.classList.remove('hidden');
+            }
+        } else {
+            if (badgeGv) badgeGv.classList.add('hidden');
+        }
+
+        checkScheduleConflictLive();
+    }
+
+    // Helper: Gán giá trị Giảng viên vào Dropdown (Hỗ trợ cả khớp chính xác & thỉnh giảng)
+    function setDrawerGiangVienValue(gvName) {
+        const gvSelect = document.getElementById('drawer-gv');
+        if (!gvSelect || !gvName) return;
+
+        let matched = false;
+        for (let i = 0; i < gvSelect.options.length; i++) {
+            const val = gvSelect.options[i].value;
+            if (val && val.toLowerCase() === gvName.toLowerCase()) {
+                gvSelect.selectedIndex = i;
+                matched = true;
+                break;
+            }
+        }
+        if (!matched) {
+            for (let i = 0; i < gvSelect.options.length; i++) {
+                const val = gvSelect.options[i].value;
+                if (val && (val.toLowerCase().includes(gvName.toLowerCase()) || gvName.toLowerCase().includes(val.toLowerCase()))) {
+                    gvSelect.selectedIndex = i;
+                    matched = true;
+                    break;
+                }
+            }
+        }
+        if (!matched) {
+            const opt = new Option(gvName + ' (Thỉnh giảng)', gvName, true, true);
+            gvSelect.add(opt);
+        }
+    }
+
+    // Helper: Nút chọn nhanh phòng học 1 chạm
+    function setDrawerPhong(phongName) {
+        const el = document.getElementById('drawer-phong');
+        if (el) {
+            el.value = phongName;
+            checkScheduleConflictLive();
+        }
+    }
+
     function openDrawer(mode) {
         if (drawerBackdrop && drawerPanel) {
             drawerBackdrop.classList.remove('opacity-0', 'pointer-events-none');
@@ -1175,6 +1395,16 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
             document.getElementById('radio-trangthai-scheduled').checked = true;
             if (statusGroup) statusGroup.classList.add('hidden');
             updateStatusRadioStyles();
+
+            // Reset form fields & helpers
+            clearDrawerLopSearch();
+            document.getElementById('drawer-lop-info-card')?.classList.add('hidden');
+            document.getElementById('drawer-gv-autofill-badge')?.classList.add('hidden');
+            document.getElementById('drawer-malop').value = '';
+            document.getElementById('drawer-phong').value = 'Lab Máy 201';
+            document.getElementById('drawer-gv').value = '';
+            document.getElementById('drawer-noidung').value = '';
+            document.getElementById('drawer-ghichu').value = '';
             
             // Set default times (Tomorrow 08:00 to 11:30)
             const tomorrow = new Date();
@@ -1234,10 +1464,12 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         document.getElementById('drawer-submit-text').innerText = 'Cập nhật';
         drawerForm.action = '/BuoiHoc/EditPost';
 
+        clearDrawerLopSearch();
         document.getElementById('drawer-mabuoi').value = item.dataset.id;
         document.getElementById('drawer-malop').value = item.dataset.malop;
+        onDrawerLopChanged(document.getElementById('drawer-malop'), false);
         document.getElementById('drawer-phong').value = item.dataset.phong;
-        document.getElementById('drawer-gv').value = item.dataset.gv;
+        setDrawerGiangVienValue(item.dataset.gv);
         document.getElementById('drawer-batdau').value = item.dataset.batdau;
         document.getElementById('drawer-ketthuc').value = item.dataset.ketthuc;
         document.getElementById('drawer-noidung').value = item.dataset.noidung || '';

@@ -95,8 +95,24 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             var activeSessions = allSessions.Where(b => b.TrangThai != "Đã hủy").ToList();
             ViewBag.SoThi = activeSessions.Count(b => b.NoiDung != null && (b.NoiDung.ToLower().Contains("thi") || b.NoiDung.ToLower().Contains("kiểm tra")));
             ViewBag.SoChinhKhoa = activeSessions.Count(b => b.NoiDung == null || (!b.NoiDung.ToLower().Contains("thi") && !b.NoiDung.ToLower().Contains("kiểm tra")));
-            ViewBag.DanhSachPhong = allSessions.Select(b => b.PhongHoc).Where(p => !string.IsNullOrEmpty(p)).Distinct().ToList();
-            ViewBag.DanhSachGiangVien = allSessions.Select(b => b.GiangVien).Where(g => !string.IsNullOrEmpty(g)).Distinct().ToList();
+
+            // Danh sách phòng học chuẩn UNETI kết hợp với phòng đã xếp trong CSDL
+            var phongChuanUneti = new List<string> {
+                "Lab Máy 201", "Lab Máy 202", "Lab CNTT 301", "Lab CNTT 302", "Lab Phần Mềm 401", "Lab Mạng & An Ninh 402",
+                "Studio AI & VR 501", "Studio Thiết Kế UI/UX 502",
+                "P.201", "P.202", "P.301", "P.302", "P.401", "P.402",
+                "Hội trường A1", "Hội trường B2"
+            };
+            var existingPhongs = allSessions.Select(b => b.PhongHoc).Where(p => !string.IsNullOrEmpty(p)).ToList();
+            ViewBag.DanhSachPhong = phongChuanUneti.Union(existingPhongs).Distinct().ToList();
+
+            // Liên kết trực tiếp danh sách Giảng viên từ IGiangVienRepository
+            var allGiangViens = await _giangVienRepo.GetAllAsync();
+            ViewBag.GiangVienList = allGiangViens;
+
+            var gvEntityNames = allGiangViens.Select(g => $"{g.HocVi} {g.HoTen}".Trim()).ToList();
+            var gvSessionNames = allSessions.Select(b => b.GiangVien).Where(g => !string.IsNullOrEmpty(g)).ToList();
+            ViewBag.DanhSachGiangVien = gvEntityNames.Union(gvSessionNames).Distinct().OrderBy(g => g).ToList();
 
             return View(buoiHocs);
         }
