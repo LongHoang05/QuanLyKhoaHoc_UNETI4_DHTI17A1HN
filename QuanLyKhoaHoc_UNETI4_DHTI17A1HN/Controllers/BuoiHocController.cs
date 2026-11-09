@@ -106,27 +106,28 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 "HA10-101", "HA10-201", "HA10-301", "HA10-401", "HA10-501",
                 // Tòa HA11
                 "HA11-101", "HA11-201", "HA11-301", "HA11-401", "HA11-501",
-                // Các phòng Lab chuyên dụng & Hội trường
-                "Lab Máy 201 - HA8",
-                "Lab Máy 202 - HA8",
-                "Lab CNTT 301 - HA9",
-                "Lab CNTT 302 - HA9",
-                "Lab AI & Data 401 - HA10",
-                "Lab Mạng & Cloud 501 - HA11",
-                "Studio Thiết Kế UI/UX 302 - HA9",
-                "Hội trường lớn HA8",
-                "Hội trường HA11"
+                // Các phòng Lab máy tính thực hành
+                "Lab Máy 1", "Lab Máy 2", "Lab CNTT 1", "Lab CNTT 2"
             };
-            var existingPhongs = allSessions.Select(b => b.PhongHoc).Where(p => !string.IsNullOrEmpty(p)).ToList();
-            ViewBag.DanhSachPhong = phongChuanUneti.Union(existingPhongs).Distinct().ToList();
+            ViewBag.DanhSachPhong = phongChuanUneti;
 
-            // Liên kết trực tiếp danh sách Giảng viên từ IGiangVienRepository
+            // Liên kết trực tiếp danh sách Giảng viên từ IGiangVienRepository (chuẩn hóa không trùng học vị)
             var allGiangViens = await _giangVienRepo.GetAllAsync();
             ViewBag.GiangVienList = allGiangViens;
 
-            var gvEntityNames = allGiangViens.Select(g => $"{g.HocVi} {g.HoTen}".Trim()).ToList();
-            var gvSessionNames = allSessions.Select(b => b.GiangVien).Where(g => !string.IsNullOrEmpty(g)).ToList();
-            ViewBag.DanhSachGiangVien = gvEntityNames.Union(gvSessionNames).Distinct().OrderBy(g => g).ToList();
+            var gvEntityNames = allGiangViens
+                .Select(g => {
+                    string hv = (g.HocVi ?? "").Trim();
+                    string ht = (g.HoTen ?? "").Trim();
+                    if (!string.IsNullOrEmpty(hv) && ht.StartsWith(hv, StringComparison.OrdinalIgnoreCase))
+                        return ht;
+                    return string.IsNullOrEmpty(hv) ? ht : $"{hv} {ht}";
+                })
+                .Where(g => !string.IsNullOrEmpty(g))
+                .Distinct()
+                .OrderBy(g => g)
+                .ToList();
+            ViewBag.DanhSachGiangVien = gvEntityNames;
 
             return View(buoiHocs);
         }

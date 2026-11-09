@@ -918,20 +918,12 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                                 <optgroup label="👨‍🏫 Giảng viên trung tâm UNETI (@giangVienList.Count() thầy/cô)">
                                     @foreach (var gv in giangVienList)
                                     {
-                                        var gvDisplayName = $"{gv.HocVi} {gv.HoTen}".Trim();
+                                        var hv = (gv.HocVi ?? "").Trim();
+                                        var ht = (gv.HoTen ?? "").Trim();
+                                        var gvDisplayName = (!string.IsNullOrEmpty(hv) && ht.StartsWith(hv, StringComparison.OrdinalIgnoreCase))
+                                            ? ht
+                                            : (string.IsNullOrEmpty(hv) ? ht : $"{hv} {ht}");
                                         <option value="@gvDisplayName">@gvDisplayName • @gv.ChuyenNganh</option>
-                                    }
-                                </optgroup>
-                            }
-                            @{
-                                var otherGvs = danhSachGV.Where(name => !giangVienList.Any(g => $"{g.HocVi} {g.HoTen}".Trim().Equals(name, StringComparison.OrdinalIgnoreCase))).ToList();
-                            }
-                            @if (otherGvs.Any())
-                            {
-                                <optgroup label="👤 Giảng viên thỉnh giảng / Đã có lịch">
-                                    @foreach (var name in otherGvs)
-                                    {
-                                        <option value="@name">@name</option>
                                     }
                                 </optgroup>
                             }
@@ -1349,8 +1341,8 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                 }
             }
         }
-        if (!matched) {
-            const opt = new Option(gvName + ' (Thỉnh giảng)', gvName, true, true);
+        if (!matched && gvName) {
+            const opt = new Option(gvName, gvName, true, true);
             gvSelect.add(opt);
         }
     }
