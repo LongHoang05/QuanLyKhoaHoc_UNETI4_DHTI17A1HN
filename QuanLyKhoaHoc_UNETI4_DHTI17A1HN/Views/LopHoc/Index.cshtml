@@ -351,22 +351,28 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div class="space-y-1.5">
                         <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Chương trình đào tạo <span class="text-danger-crimson">*</span></label>
-                        <select name="MaChuongTrinh" id="drawer-mact" required class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:border-primary cursor-pointer">
-                            @foreach (var ct in chuongTrinhList)
-                            {
-                                <option value="@ct.MaChuongTrinh">@ct.TenChuongTrinh</option>
-                            }
-                        </select>
+                        <div class="relative">
+                            <select name="MaChuongTrinh" id="drawer-mact" required class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 pr-8 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:border-primary cursor-pointer transition-all">
+                                @foreach (var ct in chuongTrinhList)
+                                {
+                                    <option value="@ct.MaChuongTrinh">@ct.TenChuongTrinh</option>
+                                }
+                            </select>
+                            <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+                        </div>
                     </div>
 
                     <div class="space-y-1.5">
                         <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Trình độ đầu vào</label>
-                        <select name="TrinhDoDauVao" id="drawer-trinhdo" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:border-primary cursor-pointer">
-                            <option value="Cơ bản">Cơ bản</option>
-                            <option value="Trung cấp">Trung cấp</option>
-                            <option value="Nâng cao">Nâng cao</option>
-                            <option value="Chuyên sâu">Chuyên sâu</option>
-                        </select>
+                        <div class="relative">
+                            <select name="TrinhDoDauVao" id="drawer-trinhdo" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 pr-8 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:border-primary cursor-pointer transition-all">
+                                <option value="Cơ bản">Cơ bản</option>
+                                <option value="Trung cấp">Trung cấp</option>
+                                <option value="Nâng cao">Nâng cao</option>
+                                <option value="Chuyên sâu">Chuyên sâu</option>
+                            </select>
+                            <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+                        </div>
                     </div>
                 </div>
 
@@ -430,13 +436,16 @@
 
                 <div class="space-y-1.5">
                     <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Trạng thái lớp</label>
-                    <select name="TrangThai" id="drawer-trangthai" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:border-primary cursor-pointer">
-                        <option value="Chưa mở">Chưa mở</option>
-                        <option value="Đang mở đăng ký">Đang mở đăng ký</option>
-                        <option value="Tạm dừng">Tạm dừng</option>
-                        <option value="Đã đóng đăng ký">Đã đóng đăng ký</option>
-                        <option value="Đã kết thúc">Đã kết thúc</option>
-                    </select>
+                    <div class="relative">
+                        <select name="TrangThai" id="drawer-trangthai" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 pr-8 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:border-primary cursor-pointer transition-all">
+                            <option value="Chưa mở">Chưa mở</option>
+                            <option value="Đang mở đăng ký">Đang mở đăng ký</option>
+                            <option value="Tạm dừng">Tạm dừng</option>
+                            <option value="Đã đóng đăng ký">Đã đóng đăng ký</option>
+                            <option value="Đã kết thúc">Đã kết thúc</option>
+                        </select>
+                        <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+                    </div>
                 </div>
 
                 <div class="space-y-1.5">

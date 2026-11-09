@@ -253,10 +253,13 @@
 
         <div class="space-y-1.5">
             <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Trạng thái tuyển sinh</label>
-            <select name="TrangThai" id="drawer-trangthai" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:border-primary cursor-pointer">
-                <option value="Đang hoạt động">Đang hoạt động</option>
-                <option value="Tạm dừng">Tạm dừng</option>
-            </select>
+            <div class="relative">
+                <select name="TrangThai" id="drawer-trangthai" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 pr-8 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:border-primary cursor-pointer transition-all">
+                    <option value="Đang hoạt động">Đang hoạt động</option>
+                    <option value="Tạm dừng">Tạm dừng</option>
+                </select>
+                <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+            </div>
         </div>
 
         <!-- Footer Buttons inside Form -->

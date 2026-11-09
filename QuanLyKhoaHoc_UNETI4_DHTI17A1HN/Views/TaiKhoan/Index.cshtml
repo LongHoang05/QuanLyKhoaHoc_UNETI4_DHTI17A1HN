@@ -293,19 +293,25 @@
         <div class="grid grid-cols-2 gap-3">
             <div>
                 <label class="block font-bold text-brand-deep uppercase mb-1">Vai trò phân quyền</label>
-                <select id="drawer-role" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep">
-                    <option value="HocVien">Học viên</option>
-                    <option value="GiangVien">Giảng viên</option>
-                    <option value="GiaoVu">Giáo vụ</option>
-                    <option value="Admin">Admin</option>
-                </select>
+                <div class="relative">
+                    <select id="drawer-role" class="w-full px-3.5 py-2.5 pr-8 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep cursor-pointer transition-all">
+                        <option value="HocVien">Học viên</option>
+                        <option value="GiangVien">Giảng viên</option>
+                        <option value="GiaoVu">Giáo vụ</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                    <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+                </div>
             </div>
             <div>
                 <label class="block font-bold text-brand-deep uppercase mb-1">Trạng thái kích hoạt</label>
-                <select id="drawer-status" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep">
-                    <option value="true">Hoạt động</option>
-                    <option value="false">Bị khóa</option>
-                </select>
+                <div class="relative">
+                    <select id="drawer-status" class="w-full px-3.5 py-2.5 pr-8 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep cursor-pointer transition-all">
+                        <option value="true">Hoạt động</option>
+                        <option value="false">Bị khóa</option>
+                    </select>
+                    <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+                </div>
             </div>
         </div>
 
