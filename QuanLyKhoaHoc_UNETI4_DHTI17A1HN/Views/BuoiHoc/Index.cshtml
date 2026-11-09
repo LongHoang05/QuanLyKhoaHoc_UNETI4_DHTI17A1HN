@@ -18,7 +18,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
 
     var days = new DayOfWeek[] {
         DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday,
-        DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday
+        DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday
     };
 
     var dayNames = new Dictionary<DayOfWeek, string> {
@@ -27,7 +27,8 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         { DayOfWeek.Wednesday, "Thứ 4" },
         { DayOfWeek.Thursday, "Thứ 5" },
         { DayOfWeek.Friday, "Thứ 6" },
-        { DayOfWeek.Saturday, "Thứ 7" }
+        { DayOfWeek.Saturday, "Thứ 7" },
+        { DayOfWeek.Sunday, "Chủ Nhật" }
     };
 
     var caNames = new Dictionary<int, (string TenCa, string Gio, string Tiet)> {
@@ -78,7 +79,8 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         { DayOfWeek.Wednesday, mondayDate.AddDays(2) },
         { DayOfWeek.Thursday, mondayDate.AddDays(3) },
         { DayOfWeek.Friday, mondayDate.AddDays(4) },
-        { DayOfWeek.Saturday, mondayDate.AddDays(5) }
+        { DayOfWeek.Saturday, mondayDate.AddDays(5) },
+        { DayOfWeek.Sunday, mondayDate.AddDays(6) }
     };
     int totalRoomsCount = danhSachPhong.Any() ? danhSachPhong.Count() : 12;
 }
@@ -314,9 +316,9 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         <!-- Weekly Timetable Grid Card -->
         <div class="bg-surface-white rounded-2xl border border-border-standard shadow-[0_2px_12px_rgba(13,71,161,0.04)] overflow-hidden w-full relative">
             <div class="w-full overflow-x-auto custom-scrollbar pb-1" id="timetable-scroll-container">
-                <div class="min-w-[1100px] w-full flex flex-col">
-                    <!-- 1. Header: Ngày trong tuần (Thứ 2 -> Thứ 7) -->
-                    <div class="grid grid-cols-[140px_repeat(6,minmax(160px,1fr))] bg-canvas-base border-b border-border-standard text-xs font-bold text-brand-deep sticky top-0 z-20">
+                <div class="min-w-[1200px] w-full flex flex-col">
+                    <!-- 1. Header: Ngày trong tuần (Thứ 2 -> Chủ Nhật) -->
+                    <div class="grid grid-cols-[140px_repeat(7,minmax(150px,1fr))] bg-canvas-base border-b border-border-standard text-xs font-bold text-brand-deep sticky top-0 z-20">
                         <div class="py-3.5 px-3 border-r border-border-standard text-center flex flex-col items-center justify-center bg-surface-container-low/70">
                             <span class="font-extrabold text-[11px] text-brand-deep uppercase tracking-wider flex items-center gap-1.5">
                                 <span class="material-symbols-outlined text-[15px] text-primary">schedule</span>
@@ -398,7 +400,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                         }
 
                         <!-- Hàng Ca Học -->
-                        <div class="grid grid-cols-[140px_repeat(6,minmax(160px,1fr))] min-h-[145px] divide-x divide-border-subtle border-b border-border-subtle hover:bg-canvas-base/15 transition-colors">
+                        <div class="grid grid-cols-[140px_repeat(7,minmax(150px,1fr))] min-h-[145px] divide-x divide-border-subtle border-b border-border-subtle hover:bg-canvas-base/15 transition-colors">
                             <!-- Cột trái: Thông tin Ca & Giờ -->
                             <div class="p-3 bg-canvas-base/50 flex flex-col justify-center items-center text-center select-none border-r border-border-standard gap-1">
                                 <span class="px-2.5 py-0.5 rounded-full bg-surface-white border border-border-standard shadow-2xs text-primary font-bold text-[10px] uppercase tracking-wide">
@@ -993,7 +995,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
             titleEl.innerText = `Tuần ${weekNum} (${mondayStr} - ${sundayStr})`;
         }
 
-        const daysArr = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const daysArr = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
         daysArr.forEach((d, idx) => {
             const dDate = new Date(monday);
             dDate.setDate(dDate.getDate() + idx);
@@ -1201,7 +1203,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         openDrawer('create');
         
         // Calculate date for next dayName
-        const dayMap = { 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6 };
+        const dayMap = { 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6, 'Sunday': 7 };
         const targetDay = dayMap[dayName] || 1;
         const now = new Date();
         const currentDay = now.getDay() || 7;
