@@ -7,6 +7,7 @@
     int currentPage = ViewBag.CurrentPage ?? 1;
     int totalPages = ViewBag.TotalPages ?? 1;
     int totalItems = ViewBag.TotalItems ?? 0;
+    int pageSize = ViewBag.PageSize ?? 8;
     string search = ViewBag.Search ?? "";
     string selectedTrangThai = ViewBag.SelectedTrangThai ?? "";
     var classCounts = ViewBag.ClassCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
@@ -14,12 +15,12 @@
 
 <div id="ctdt-content-area" class="flex flex-col gap-y-6 transition-opacity duration-200">
     <!-- Sub-header Navigation Bar -->
-    <section class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border-standard">
+    <section class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 card-pro">
         <div>
             <div class="flex items-center gap-2 text-outline font-label-sm text-label-sm uppercase tracking-wider mb-1">
-                <span>ĐÀO TẠO</span>
+                <span>ĐÀO TẠO UNETI</span>
                 <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-brand-deep font-semibold">CHƯƠNG TRÌNH ĐÀO TẠO</span>
+                <span class="text-primary font-semibold">CHƯƠNG TRÌNH ĐÀO TẠO</span>
             </div>
             <h1 class="font-headline-md text-headline-md text-brand-deep font-bold tracking-tight">
                 Danh mục Chương trình đào tạo
@@ -27,7 +28,7 @@
         </div>
 
         <div class="flex items-center gap-2.5">
-            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
+            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-hover text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-card transition-all active:scale-95 cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">add_circle</span>
                 <span>Thêm chương trình</span>
             </button>
@@ -36,10 +37,10 @@
 
     <!-- 3 Stat Cards (Top KPI) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Tổng số chương trình</span>
-                <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <span class="text-outline font-label-md text-label-md font-medium">Tổng số chương trình</span>
+                <div class="w-10 h-10 rounded-2xl bg-primary-light flex items-center justify-center text-primary">
                     <span class="material-symbols-outlined text-[20px]">auto_stories</span>
                 </div>
             </div>
@@ -49,23 +50,23 @@
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Đang hoạt động</span>
-                <div class="w-9 h-9 rounded-xl bg-success-emerald/10 flex items-center justify-center text-success-emerald">
+                <span class="text-outline font-label-md text-label-md font-medium">Đang hoạt động</span>
+                <div class="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
                     <span class="material-symbols-outlined text-[20px]">check_circle</span>
                 </div>
             </div>
             <div class="flex items-baseline gap-2">
-                <span class="font-display text-[30px] leading-8 text-success-emerald tracking-tight font-black font-mono">@ViewBag.DangHoatDong</span>
+                <span class="font-display text-[30px] leading-8 text-emerald-700 tracking-tight font-black font-mono">@ViewBag.DangHoatDong</span>
                 <span class="text-xs text-outline font-medium">chương trình tuyển sinh</span>
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Tổng lớp học liên kết</span>
-                <div class="w-9 h-9 rounded-xl bg-secondary-container/10 flex items-center justify-center text-secondary-container">
+                <span class="text-outline font-label-md text-label-md font-medium">Tổng lớp học liên kết</span>
+                <div class="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center text-primary">
                     <span class="material-symbols-outlined text-[20px]">meeting_room</span>
                 </div>
             </div>
@@ -77,15 +78,15 @@
     </div>
 
     <!-- Filter & Operation Toolbar -->
-    <div class="bg-surface-white rounded-2xl p-4 border border-border-subtle shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4">
-        <form method="get" action="/ChuongTrinhDaoTao/Index" class="flex flex-wrap items-center gap-3 w-full lg:w-auto" id="filter-form" onsubmit="event.preventDefault(); filterCtdtAjax();">
-            <div class="relative flex-1 sm:w-80">
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-4 card-pro flex flex-wrap items-center justify-between gap-3">
+        <form method="get" action="/ChuongTrinhDaoTao/Index" class="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]" id="filter-form" onsubmit="event.preventDefault(); filterCtdtAjax();">
+            <div class="relative flex-1 min-w-[240px] sm:max-w-xs">
                 <span class="material-symbols-outlined text-outline absolute left-3 top-1/2 -translate-y-1/2 text-[18px]">search</span>
-                <input name="search" value="@search" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Tìm theo tên chương trình, mô tả..." type="text"/>
+                <input name="search" value="@search" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Tìm theo tên chương trình, mô tả..." type="text"/>
             </div>
 
-            <div class="relative">
-                <select name="trangThai" onchange="filterCtdtAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
+            <div class="relative min-w-[170px]">
+                <select name="trangThai" onchange="filterCtdtAjax()" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
                     <option value="">Tất cả Trạng thái</option>
                     <!option value="Đang hoạt động" @(selectedTrangThai == "Đang hoạt động" ? "selected" : "")>● Đang hoạt động</!option>
                     <!option value="Tạm dừng" @(selectedTrangThai == "Tạm dừng" ? "selected" : "")>○ Tạm dừng</!option>
@@ -94,32 +95,41 @@
             </div>
         </form>
 
-        <div class="flex items-center gap-2 w-full lg:w-auto justify-end">
-            <a href="/ChuongTrinhDaoTao/Index" onclick="event.preventDefault(); loadCtdtPage(this.href);" class="p-2 border border-border-standard rounded-xl text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors cursor-pointer" title="Làm mới">
-                <span class="material-symbols-outlined text-[20px] block">refresh</span>
+        <div class="flex items-center gap-2">
+            <button id="btnBulkDeleteCtdt" class="hidden items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition-all cursor-pointer shadow-xs active:scale-95" title="Xóa các chương trình đã chọn">
+                <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+                <span>Xóa đã chọn (<span id="selectedCtdtCount">0</span>)</span>
+            </button>
+            <a href="/ChuongTrinhDaoTao/Index" onclick="event.preventDefault(); loadCtdtPage(this.href);" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
+                <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                <span>Đặt lại</span>
             </a>
         </div>
     </div>
 
     <!-- Data Table Container -->
-    <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-[0_1px_3px_rgba(0,22,86,0.04)] overflow-hidden">
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm overflow-hidden card-pro">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse" id="crud-table">
                 <thead>
-                    <tr class="bg-surface-container-low/70 border-b border-border-subtle font-label-sm text-label-sm text-outline tracking-wider uppercase">
-                        <th class="py-4 px-6">Chương trình đào tạo</th>
-                        <th class="py-4 px-4">Mô tả tóm tắt</th>
-                        <th class="py-4 px-4">Email liên hệ</th>
-                        <th class="py-4 px-4 text-center">Lớp liên kết</th>
-                        <th class="py-4 px-4 text-center">Trạng thái</th>
-                        <th class="py-4 px-6 text-right">Thao tác</th>
+                    <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
+                        <th class="py-3.5 px-3 w-10 text-center">
+                            <input type="checkbox" id="selectAllCtdt" class="w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" title="Chọn tất cả">
+                        </th>
+                        <th class="py-3.5 px-3 w-10 text-center">#</th>
+                        <th class="py-3.5 px-4">Chương trình đào tạo</th>
+                        <th class="py-3.5 px-4">Mô tả tóm tắt</th>
+                        <th class="py-3.5 px-4">Email liên hệ</th>
+                        <th class="py-3.5 px-4 text-center">Lớp liên kết</th>
+                        <th class="py-3.5 px-4 text-center">Trạng thái</th>
+                        <th class="py-3.5 px-4 pr-6 text-right">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-border-subtle font-body-sm text-body-sm">
+                <tbody class="divide-y divide-border-subtle text-xs text-brand-deep">
                     @if (!Model.Any())
                     {
                         <tr>
-                            <td colspan="6" class="py-12 text-center text-outline">
+                            <td colspan="8" class="py-12 text-center text-outline">
                                 <span class="material-symbols-outlined text-4xl block mb-2 text-outline/50">auto_stories</span>
                                 Không có chương trình đào tạo nào phù hợp.
                             </td>
@@ -127,6 +137,7 @@
                     }
                     else
                     {
+                        int idx = (currentPage - 1) * pageSize + 1;
                         @foreach (var item in Model)
                         {
                             int soLop = classCounts.ContainsKey(item.MaChuongTrinh) ? classCounts[item.MaChuongTrinh] : 0;
@@ -137,7 +148,11 @@
                                 data-email="@item.EmailLienHe"
                                 data-trangthai="@(item.TrangThai ? "Đang hoạt động" : "Tạm dừng")"
                                 data-solop="@soLop">
-                                <td class="py-4 px-6">
+                                <td class="py-3.5 px-3 text-center">
+                                    <input type="checkbox" class="ctdt-cb w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" value="@item.MaChuongTrinh">
+                                </td>
+                                <td class="py-3.5 px-3 text-center text-outline font-mono text-[11px]">@(idx++)</td>
+                                <td class="py-3.5 px-4">
                                     <div class="flex items-center gap-3">
                                         <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary font-bold text-sm flex items-center justify-center flex-shrink-0">
                                             CT
@@ -175,10 +190,13 @@
                                 </td>
                                 <td class="py-4 px-6 text-right">
                                     <div class="inline-flex items-center gap-1">
+                                        <a href="/ChuongTrinhDaoTao/Details/@item.MaChuongTrinh" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container-low transition-colors cursor-pointer" title="Xem chi tiết">
+                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                        </a>
                                         <button onclick="openEditDrawerFromRow(this)" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container-low transition-colors cursor-pointer" title="Chỉnh sửa">
                                             <span class="material-symbols-outlined text-[18px]">edit</span>
                                         </button>
-                                        <button onclick="confirmDeleteCtdt(@item.MaChuongTrinh, '@item.TenChuongTrinh', @soLop)" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50 transition-colors cursor-pointer" title="Xóa chương trình">
+                                        <button onclick="confirmDeleteCtdt(@item.MaChuongTrinh, '@(item.TenChuongTrinh?.Replace("'", "\\'") ?? "")', @soLop)" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50 transition-colors cursor-pointer" title="Xóa chương trình">
                                             <span class="material-symbols-outlined text-[18px]">delete</span>
                                         </button>
                                     </div>
@@ -190,122 +208,97 @@
             </table>
         </div>
 
-        <!-- Pagination Toolbar -->
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border-t border-border-subtle font-body-sm text-body-sm text-outline">
-            <span class="tabular-nums">
-                Trang <strong class="text-brand-deep font-semibold">@currentPage</strong> / <strong class="text-brand-deep font-semibold">@totalPages</strong> (Tổng @totalItems chương trình)
-            </span>
-            <div class="inline-flex items-center gap-1">
-                @if (currentPage > 1)
-                {
-                    <a href="/ChuongTrinhDaoTao/Index?page=@(currentPage - 1)&search=@search&trangThai=@selectedTrangThai" onclick="event.preventDefault(); loadCtdtPage(this.href)" class="px-2.5 py-1 rounded-lg border border-border-standard text-brand-deep hover:bg-canvas-base transition-colors font-label-md text-label-md cursor-pointer">
-                        Trước
-                    </a>
-                }
-                else
-                {
-                    <span class="px-2.5 py-1 rounded-lg border border-border-standard text-outline/40 font-label-md text-label-md cursor-not-allowed">Trước</span>
-                }
-
-                @for (int p = currentPage - 1; p <= currentPage + 1; p++)
-                {
-                    if (p >= 1 && p <= totalPages)
-                    {
-                        if (p == currentPage)
-                        {
-                            <span class="w-8 h-8 rounded-lg bg-primary-container text-surface-white font-label-md text-label-md font-bold flex items-center justify-center font-mono">@p</span>
-                        }
-                        else
-                        {
-                            <a href="/ChuongTrinhDaoTao/Index?page=@p&search=@search&trangThai=@selectedTrangThai" onclick="event.preventDefault(); loadCtdtPage(this.href)" class="w-8 h-8 rounded-lg border border-border-standard text-brand-deep hover:bg-canvas-base transition-colors font-label-md text-label-md flex items-center justify-center font-mono cursor-pointer">@p</a>
-                        }
-                    }
-                }
-
-                @if (currentPage < totalPages)
-                {
-                    <a href="/ChuongTrinhDaoTao/Index?page=@(currentPage + 1)&search=@search&trangThai=@selectedTrangThai" onclick="event.preventDefault(); loadCtdtPage(this.href)" class="px-2.5 py-1 rounded-lg border border-border-standard text-brand-deep hover:bg-canvas-base transition-colors font-label-md text-label-md cursor-pointer">
-                        Sau
-                    </a>
-                }
-                else
-                {
-                    <span class="px-2.5 py-1 rounded-lg border border-border-standard text-outline/40 font-label-md text-label-md cursor-not-allowed">Sau</span>
-                }
-            </div>
-        </div>
+        <!-- Clean Reusable Pagination Component -->
+        @await Html.PartialAsync("_Pagination", new QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels.PaginationModel {
+            CurrentPage = currentPage,
+            TotalPages = totalPages,
+            TotalItems = totalItems,
+            PageSize = pageSize,
+            ItemLabel = "chương trình",
+            BaseUrl = "/ChuongTrinhDaoTao/Index",
+            AjaxFunction = "loadCtdtPage",
+            RouteParams = new Dictionary<string, string?> {
+                { "search", search },
+                { "trangThai", selectedTrangThai }
+            }
+        })
     </div>
 </div>
 
-<!-- Right Slide-Over Drawer for Create & Edit CTĐT -->
-<div id="drawer-container" class="fixed inset-0 z-50 overflow-hidden hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
-    <div class="absolute inset-0 bg-brand-deep/30 backdrop-blur-xs transition-opacity" onclick="closeDrawer()"></div>
-    <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div class="w-screen max-w-md bg-surface-white shadow-2xl flex flex-col justify-between">
-            <!-- Header -->
-            <div class="p-6 border-b border-border-subtle flex items-start justify-between">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary text-[22px]">auto_stories</span>
-                        <h2 class="font-headline-sm text-headline-sm text-brand-deep font-bold" id="drawer-title">Thêm chương trình</h2>
-                    </div>
-                    <p class="font-body-sm text-body-sm text-outline mt-1" id="drawer-subtitle">Tạo chương trình đào tạo mới của trung tâm.</p>
-                </div>
-                <button onclick="closeDrawer()" class="p-1.5 rounded-xl text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors cursor-pointer">
-                    <span class="material-symbols-outlined text-[20px]">close</span>
-                </button>
+<!-- Right Slide-Over Drawer for Create & Edit CTĐT (Smooth Slide Animation) -->
+<div id="drawer-backdrop" onclick="closeDrawer()" class="fixed inset-0 bg-brand-deep/40 backdrop-blur-xs z-50 transition-opacity duration-300 opacity-0 pointer-events-none"></div>
+
+<div id="drawer-panel" class="fixed inset-y-0 right-0 w-full max-w-md bg-surface-white border-l border-border-standard shadow-2xl z-50 flex flex-col justify-between transform transition-transform duration-300 ease-out translate-x-full">
+    <!-- Header -->
+    <div class="p-6 border-b border-border-subtle flex items-start justify-between bg-surface-white">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-[22px]">auto_stories</span>
+                <h2 class="font-headline-sm text-headline-sm text-brand-deep font-bold" id="drawer-title">Thêm chương trình</h2>
             </div>
-
-            <!-- Body -->
-            <form id="drawer-form" method="post" action="/ChuongTrinhDaoTao/CreatePost" class="flex-1 overflow-y-auto p-6 space-y-4">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="maChuongTrinh" id="drawer-mactdt" value="0"/>
-
-                <div class="space-y-1.5">
-                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Tên chương trình đào tạo <span class="text-danger-crimson">*</span></label>
-                    <input type="text" name="TenChuongTrinh" id="drawer-ten" required class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Ví dụ: Lập trình ASP.NET Core Chuyên Sâu"/>
-                </div>
-
-                <div class="space-y-1.5">
-                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Email liên hệ</label>
-                    <input type="email" name="EmailLienHe" id="drawer-email" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="contact@uneti.edu.vn"/>
-                </div>
-
-                <div class="space-y-1.5">
-                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Mô tả chương trình</label>
-                    <textarea name="MoTa" id="drawer-mota" rows="4" class="w-full bg-surface-white border border-border-standard rounded-xl p-3 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none" placeholder="Giới thiệu mục tiêu đào tạo, chuẩn đầu ra..."></textarea>
-                </div>
-
-                <div class="space-y-1.5">
-                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Trạng thái tuyển sinh</label>
-                    <select name="TrangThai" id="drawer-trangthai" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:border-primary cursor-pointer">
-                        <option value="Đang hoạt động">Đang hoạt động</option>
-                        <option value="Tạm dừng">Tạm dừng</option>
-                    </select>
-                </div>
-
-                <!-- Footer Buttons inside Form -->
-                <div class="border-t border-border-subtle pt-5 flex items-center justify-end gap-3">
-                    <button type="button" onclick="closeDrawer()" class="border border-border-standard bg-surface-white hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-4 py-2.5 rounded-xl transition-colors cursor-pointer">
-                        Hủy bỏ
-                    </button>
-                    <button type="submit" class="bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-5 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all cursor-pointer">
-                        <span class="material-symbols-outlined text-[18px]">save</span>
-                        <span id="drawer-submit-text">Lưu chương trình</span>
-                    </button>
-                </div>
-            </form>
+            <p class="font-body-sm text-body-sm text-outline mt-1" id="drawer-subtitle">Tạo chương trình đào tạo mới của trung tâm.</p>
         </div>
+        <button onclick="closeDrawer()" class="p-1.5 rounded-xl text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors cursor-pointer">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
     </div>
+
+    <!-- Body -->
+    <form id="drawer-form" method="post" action="/ChuongTrinhDaoTao/CreatePost" class="flex-1 overflow-y-auto p-6 space-y-4">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="maChuongTrinh" id="drawer-mactdt" value="0"/>
+
+        <div class="space-y-1.5">
+            <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Tên chương trình đào tạo <span class="text-danger-crimson">*</span></label>
+            <input type="text" name="TenChuongTrinh" id="drawer-ten" required class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Ví dụ: Lập trình ASP.NET Core Chuyên Sâu"/>
+        </div>
+
+        <div class="space-y-1.5">
+            <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Email liên hệ</label>
+            <input type="email" name="EmailLienHe" id="drawer-email" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="contact@uneti.edu.vn"/>
+        </div>
+
+        <div class="space-y-1.5">
+            <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Mô tả chương trình</label>
+            <textarea name="MoTa" id="drawer-mota" rows="4" class="w-full bg-surface-white border border-border-standard rounded-xl p-3 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none" placeholder="Giới thiệu mục tiêu đào tạo, chuẩn đầu ra..."></textarea>
+        </div>
+
+        <div class="space-y-1.5">
+            <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Trạng thái tuyển sinh</label>
+            <div class="relative">
+                <select name="TrangThai" id="drawer-trangthai" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 pr-8 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:border-primary cursor-pointer transition-all">
+                    <option value="Đang hoạt động">Đang hoạt động</option>
+                    <option value="Tạm dừng">Tạm dừng</option>
+                </select>
+                <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+            </div>
+        </div>
+
+        <!-- Footer Buttons inside Form -->
+        <div class="border-t border-border-subtle pt-5 flex items-center justify-end gap-3">
+            <button type="button" onclick="closeDrawer()" class="border border-border-standard bg-surface-white hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-4 py-2.5 rounded-xl transition-colors cursor-pointer">
+                Hủy bỏ
+            </button>
+            <button type="submit" class="bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-5 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]">save</span>
+                <span id="drawer-submit-text">Lưu chương trình</span>
+            </button>
+        </div>
+    </form>
 </div>
 
 @section Scripts {
 <script>
-    const drawer = document.getElementById('drawer-container');
+    const drawerBackdrop = document.getElementById('drawer-backdrop');
+    const drawerPanel = document.getElementById('drawer-panel');
     const drawerForm = document.getElementById('drawer-form');
 
     function openDrawer(mode) {
-        drawer.classList.remove('hidden');
+        if (drawerBackdrop && drawerPanel) {
+            drawerBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+            drawerBackdrop.classList.add('opacity-100');
+            drawerPanel.classList.remove('translate-x-full');
+        }
         if (mode === 'create') {
             document.getElementById('drawer-title').innerText = 'Thêm chương trình';
             document.getElementById('drawer-subtitle').innerText = 'Tạo chương trình đào tạo mới của trung tâm.';
@@ -321,7 +314,11 @@
     }
 
     function closeDrawer() {
-        drawer.classList.add('hidden');
+        if (drawerBackdrop && drawerPanel) {
+            drawerBackdrop.classList.remove('opacity-100');
+            drawerBackdrop.classList.add('opacity-0', 'pointer-events-none');
+            drawerPanel.classList.add('translate-x-full');
+        }
     }
 
     function openEditDrawerFromRow(btn) {
@@ -337,7 +334,11 @@
         document.getElementById('drawer-mota').value = row.dataset.mota;
         document.getElementById('drawer-trangthai').value = row.dataset.trangthai;
 
-        drawer.classList.remove('hidden');
+        if (drawerBackdrop && drawerPanel) {
+            drawerBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+            drawerBackdrop.classList.add('opacity-100');
+            drawerPanel.classList.remove('translate-x-full');
+        }
     }
 
     function confirmDeleteCtdt(id, tenCtdt, soLop) {
@@ -349,11 +350,9 @@
                 itemName: tenCtdt,
                 message: `Chương trình <strong class="text-brand-deep">${tenCtdt}</strong> hiện đang có <strong>${soLop} lớp học trực thuộc</strong>. Quy định nghiệp vụ không cho phép xóa chương trình có dữ liệu lớp học đang liên kết.`,
                 warning: 'Vui lòng chuyển hoặc xóa toàn bộ lớp học trước khi xóa chương trình.',
-                submitText: 'Đã hiểu'
+                submitText: 'Đã hiểu',
+                onConfirm: function() {}
             });
-            // Ẩn nút xóa thực tế
-            const btn = document.querySelector('#global-delete-modal button[type="submit"]');
-            if (btn) btn.onclick = (e) => { e.preventDefault(); closeGlobalDeleteModal(); };
             return;
         }
 
@@ -390,6 +389,7 @@
             const newContent = doc.getElementById('ctdt-content-area');
             if (newContent && area) {
                 area.innerHTML = newContent.innerHTML;
+                if (window.ctdtBulk) window.ctdtBulk.updateState();
             }
             if (pushState) window.history.pushState({ url }, '', url);
         } catch (err) {
@@ -435,5 +435,24 @@
             }
         });
     }
+
+    // Tự động mở drawer nếu URL có ?create=true
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('create') === 'true' || urlParams.get('action') === 'create') {
+        openDrawer('create');
+        const cleanUrl = window.location.pathname + window.location.search.replace(/[?&]create=true/, '').replace(/[?&]action=create/, '');
+        window.history.replaceState({}, document.title, cleanUrl || window.location.pathname);
+    }
+
+    // Khởi tạo Bulk Delete cho Chương trình đào tạo
+    window.ctdtBulk = window.initBulkDelete({
+        selectAllId: 'selectAllCtdt',
+        checkboxClass: 'ctdt-cb',
+        btnDeleteId: 'btnBulkDeleteCtdt',
+        countBadgeId: 'selectedCtdtCount',
+        deleteUrl: '/ChuongTrinhDaoTao/DeleteMultiple',
+        itemLabel: 'chương trình',
+        onSuccess: () => loadCtdtPage(window.location.href, false)
+    });
 </script>
 }

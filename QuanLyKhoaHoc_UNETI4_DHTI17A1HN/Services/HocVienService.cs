@@ -1,3 +1,4 @@
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Helpers;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels;
@@ -65,6 +66,18 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
                 return (false, "Học viên phải từ 6 tuổi trở lên.");
             }
 
+            // 3.1. Quy tắc nghiệp vụ: Số điện thoại phải gồm đúng 10 chữ số (bắt đầu bằng số 0)
+            if (string.IsNullOrWhiteSpace(hocVien.SoDienThoai) || !System.Text.RegularExpressions.Regex.IsMatch(hocVien.SoDienThoai.Trim(), @"^0\d{9}$"))
+            {
+                return (false, "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0 (Ví dụ: 0912345678).");
+            }
+
+            // 2.1. Quy tắc nghiệp vụ: Số điện thoại phải gồm đúng 10 chữ số (bắt đầu bằng số 0)
+            if (string.IsNullOrWhiteSpace(hocVien.SoDienThoai) || !System.Text.RegularExpressions.Regex.IsMatch(hocVien.SoDienThoai.Trim(), @"^0\d{9}$"))
+            {
+                return (false, "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0 (Ví dụ: 0912345678).");
+            }
+
             // 3. Chuẩn hóa dữ liệu đầu vào
             hocVien.HoTen = hocVien.HoTen.Trim();
             hocVien.Email = hocVien.Email.Trim().ToLower();
@@ -107,6 +120,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
             if (hocVien.NgaySinh.Value.Date > DateTime.Today.AddYears(-6))
             {
                 return (false, "Học viên phải từ 6 tuổi trở lên.");
+            }
+
+            // 3.1. Quy tắc nghiệp vụ: Số điện thoại phải gồm đúng 10 chữ số (bắt đầu bằng số 0)
+            if (string.IsNullOrWhiteSpace(hocVien.SoDienThoai) || !System.Text.RegularExpressions.Regex.IsMatch(hocVien.SoDienThoai.Trim(), @"^0\d{9}$"))
+            {
+                return (false, "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0 (Ví dụ: 0912345678).");
             }
 
             // 4. Cập nhật các trường thông tin được phép sửa
@@ -193,7 +212,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
             }
 
             var pass = string.IsNullOrWhiteSpace(newPassword) ? "123456" : newPassword.Trim();
-            acc.MatKhau = pass;
+            acc.MatKhau = SecurityHelper.HashPassword(pass);
             await _hocVienRepo.UpdateTaiKhoanAsync(acc);
             return (true, null);
         }
@@ -207,10 +226,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
             }
 
             // 2. Tạo bản ghi TaiKhoan
+            var rawPass = string.IsNullOrWhiteSpace(model.MatKhau) ? "123456" : model.MatKhau.Trim();
             var tk = new TaiKhoan
             {
                 TenDangNhap = model.TenDangNhap.Trim(),
-                MatKhau = string.IsNullOrWhiteSpace(model.MatKhau) ? "123456" : model.MatKhau.Trim(),
+                MatKhau = SecurityHelper.HashPassword(rawPass),
                 HoTen = model.HoTen.Trim(),
                 Email = model.Email.Trim().ToLower(),
                 VaiTro = model.VaiTro,

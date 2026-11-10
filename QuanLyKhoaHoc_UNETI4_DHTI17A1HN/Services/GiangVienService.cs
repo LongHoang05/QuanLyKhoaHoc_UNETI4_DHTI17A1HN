@@ -1,3 +1,4 @@
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Helpers;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 
@@ -125,10 +126,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
                     return (false, $"Tên đăng nhập '{tenDangNhap}' đã tồn tại trong hệ thống.");
                 }
 
+                var rawPass = string.IsNullOrWhiteSpace(matKhau) ? "123456" : matKhau.Trim();
                 var tk = new TaiKhoan
                 {
                     TenDangNhap = tenDangNhap.Trim(),
-                    MatKhau = string.IsNullOrWhiteSpace(matKhau) ? "123456" : matKhau.Trim(),
+                    MatKhau = SecurityHelper.HashPassword(rawPass),
                     HoTen = gv.HoTen.Trim(),
                     Email = gv.Email.Trim(),
                     VaiTro = "GiangVien",

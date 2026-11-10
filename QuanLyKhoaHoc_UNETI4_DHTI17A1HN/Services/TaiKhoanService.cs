@@ -115,6 +115,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
                     NgayTao = DateTime.Now
                 };
             }
+            else if (taiKhoan.VaiTro == "GiangVien" && taiKhoan.GiangVien == null)
+            {
+                taiKhoan.GiangVien = new GiangVien
+                {
+                    HoTen = taiKhoan.HoTen,
+                    Email = taiKhoan.Email,
+                    TrangThai = true,
+                    NgayTao = DateTime.Now
+                };
+            }
 
             await _taiKhoanRepository.AddAsync(taiKhoan);
             return (true, null);
@@ -235,6 +245,14 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
 
             var (items, totalCount) = await _taiKhoanRepository.GetPagedAsync(
                 keyword, vaiTro, trangThai, pageIndex, pageSize);
+
+            int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+            if (totalPages > 0 && pageIndex > totalPages)
+            {
+                pageIndex = totalPages;
+                (items, totalCount) = await _taiKhoanRepository.GetPagedAsync(
+                    keyword, vaiTro, trangThai, pageIndex, pageSize);
+            }
 
             return new TaiKhoanListViewModel
             {

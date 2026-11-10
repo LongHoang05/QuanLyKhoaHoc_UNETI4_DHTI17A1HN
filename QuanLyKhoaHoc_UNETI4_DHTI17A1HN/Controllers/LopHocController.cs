@@ -55,6 +55,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
 
             int pageSize = 6;
+            if (page < 1) page = 1;
 
             // Gọi Repository thực hiện toàn bộ câu lệnh LINQ Skip & Take trên SQL Server
             var (items, totalItems) = await _lopHocRepo.GetPagedAsync(
@@ -73,8 +74,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
             if (totalPages < 1) totalPages = 1;
-            if (page < 1) page = 1;
-            if (page > totalPages) page = totalPages;
+            if (page > totalPages)
+            {
+                page = totalPages;
+                (items, totalItems) = await _lopHocRepo.GetPagedAsync(
+                    search, maChuongTrinh, trinhDo, trangThai, null, hocPhiMin, hocPhiMax, hanDangKyStatus, choTrongStatus, sortBy, page, pageSize);
+            }
 
             var pageLopIds = items.Select(l => l.MaLopHoc).ToList();
             var siSoMap = await _dangKyHocRepo.GetSiSoDaDangKyMapAsync(pageLopIds);
@@ -84,6 +89,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
             ViewBag.TotalItems = totalItems;
+            ViewBag.PageSize = pageSize;
             ViewBag.Search = search;
             ViewBag.SelectedMaChuongTrinh = maChuongTrinh;
             ViewBag.SelectedTrinhDo = trinhDo;
@@ -117,14 +123,21 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             var buoiHocs = await _buoiHocRepo.GetByLopHocIdAsync(id);
             var dangKys = lop.DangKyHocs
-                .Where(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học")
+                .Where(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành")
                 .ToList();
 
             ViewBag.BuoiHocs = buoiHocs;
             ViewBag.DangKys = dangKys;
             ViewBag.SiSoHienTai = dangKys.Count;
+            ViewBag.SoHocVien = dangKys.Count;
 
             return View(lop);
+        }
+
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return RedirectToAction(nameof(Index), new { create = "true" });
         }
 
         // --- CREATE LỚP HỌC (DRAWER AJAX) ---
@@ -250,6 +263,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            if (string.IsNullOrWhiteSpace(tenLop))
+            {
+                if (isAjax) return Json(new { success = false, message = "Tên lớp học bắt buộc nhập." });
+                TempData["Error"] = "Tên lớp học bắt buộc nhập.";
+                return RedirectToAction(nameof(Index));
+            }
+
             lop.TenLop = tenLop.Trim();
             lop.MaChuongTrinh = maChuongTrinh;
             lop.TenGiangVien = tenGiangVien ?? "Chưa xếp";
@@ -258,10 +278,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             {
                 var gvs = await _giangVienRepo.GetAllAsync();
                 var gvMatch = gvs.FirstOrDefault(g => g.HoTen == tenGiangVien || tenGiangVien.Contains(g.HoTen) || g.HoTen.Contains(tenGiangVien));
-                if (gvMatch != null)
-                {
-                    lop.MaGiangVien = gvMatch.MaGiangVien;
-                }
+                lop.MaGiangVien = gvMatch?.MaGiangVien;
             }
             else
             {
@@ -288,18 +305,19 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
         // --- XÓA LỚP HỌC (AN TOÀN KIỂM SOÁT DỮ LIỆU QUA REPOSITORY) ---
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeletePost(int id)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-            var lop = await _lopHocRepo.GetByIdAsync(id);
+            var lop = await _lopHocRepo.GetByIdWithDetailsAsync(id);
             if (lop == null)
             {
                 if (isAjax) return Json(new { success = false, message = "Không tìm thấy lớp học." });
                 return RedirectToAction(nameof(Index));
             }
 
-            // Quy định nghiệp vụ Mục 6.2: Khi lớp đã có đăng ký, việc xóa phải được kiểm soát
-            int soDangKy = await _dangKyHocRepo.CountEnrolledInLopAsync(id);
+            // Quy định nghiệp vụ Mục 6.2: Khi lớp đã có đăng ký (kể cả chờ duyệt/đã hủy), việc xóa phải được kiểm soát tránh lỗi khóa ngoại
+            int soDangKy = lop.DangKyHocs?.Count ?? 0;
             if (soDangKy > 0)
             {
                 string msg = $"Không thể xóa lớp '{lop.TenLop}' vì đã có {soDangKy} hồ sơ đăng ký của học viên liên quan. Bạn có thể chuyển trạng thái lớp sang 'Đã đóng đăng ký'.";
@@ -308,11 +326,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Kiểm tra các buổi học đã xếp
-            int soBuoi = await _buoiHocRepo.CountBuoiHocChuaHuyAsync(id);
+            // Kiểm tra các buổi học đã xếp (kể cả buổi đã hủy do ràng buộc khóa ngoại)
+            int soBuoi = lop.BuoiHocs?.Count ?? 0;
             if (soBuoi > 0)
             {
-                string msg = $"Không thể xóa lớp '{lop.TenLop}' vì đang có {soBuoi} buổi học trong lịch học. Vui lòng hủy các buổi học trước.";
+                string msg = $"Không thể xóa lớp '{lop.TenLop}' vì đang có {soBuoi} buổi học liên kết trong lịch học. Vui lòng xóa các buổi học trước.";
                 if (isAjax) return Json(new { success = false, message = msg });
                 TempData["Error"] = msg;
                 return RedirectToAction(nameof(Index));
@@ -323,6 +341,49 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             if (isAjax) return Json(new { success = true, message = $"Đã xóa lớp học '{lop.TenLop}' thành công." });
             TempData["Success"] = "Đã xóa lớp học thành công.";
             return RedirectToAction(nameof(Index));
+        }
+
+        // ========================================================
+        // ACTION DELETE MULTIPLE: XÓA NHIỀU LỚP HỌC
+        // ========================================================
+        [HttpPost]
+        public async Task<IActionResult> DeleteMultiple([FromBody] List<int>? ids)
+        {
+            if (ids == null || !ids.Any())
+                return Json(new { success = false, message = "Vui lòng chọn ít nhất 1 lớp học để xóa." });
+
+            int deleted = 0;
+            int skipped = 0;
+
+            foreach (var id in ids)
+            {
+                var lop = await _lopHocRepo.GetByIdWithDetailsAsync(id);
+                if (lop == null) continue;
+
+                int soDangKy = lop.DangKyHocs?.Count ?? 0;
+                int soBuoi = lop.BuoiHocs?.Count ?? 0;
+
+                if (soDangKy > 0 || soBuoi > 0)
+                {
+                    skipped++;
+                    continue;
+                }
+
+                await _lopHocRepo.DeleteAsync(id);
+                deleted++;
+            }
+
+            if (deleted == 0 && skipped > 0)
+            {
+                return Json(new { success = false, message = $"Không thể xóa {skipped} lớp học đã chọn vì đã có hồ sơ đăng ký hoặc lịch học liên kết." });
+            }
+
+            string msg = $"Đã xóa thành công {deleted} lớp học.";
+            if (skipped > 0)
+            {
+                msg += $" Bỏ qua {skipped} lớp học có dữ liệu đăng ký/buổi học liên kết.";
+            }
+            return Json(new { success = true, message = msg, deletedCount = deleted, skippedCount = skipped });
         }
 
         // ========================================================

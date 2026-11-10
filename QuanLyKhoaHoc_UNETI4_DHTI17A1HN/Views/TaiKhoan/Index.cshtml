@@ -2,8 +2,9 @@
 @{
     ViewData["Title"] = "Quản lý Tài khoản & Phân quyền";
     var totalCount = Model.TotalCount;
-    var activeCount = Model.Items.Count(t => t.TrangThai);
-    var lockedCount = Model.Items.Count(t => !t.TrangThai);
+    int totalSysAccounts = ViewBag.TotalSysAccounts ?? Model.TotalCount;
+    int activeCount = ViewBag.ActiveSysAccounts ?? Model.Items.Count(t => t.TrangThai);
+    int lockedCount = ViewBag.LockedSysAccounts ?? Model.Items.Count(t => !t.TrangThai);
     int currentPage = Model.PageIndex;
     int totalPages = Math.Max(1, Model.TotalPages);
     int pageSize = Model.PageSize;
@@ -21,12 +22,12 @@
 
 <div id="taikhoan-content-area" class="flex flex-col gap-y-6 transition-opacity duration-200">
     <!-- Sub-header Navigation Bar -->
-    <section class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border-standard">
+    <section class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 card-pro">
         <div>
             <div class="flex items-center gap-2 text-outline font-label-sm text-label-sm uppercase tracking-wider mb-1">
-                <span>MODULE 1 • VŨ ĐÌNH TRƯỜNG</span>
+                <span>QUẢN TRỊ HỆ THỐNG</span>
                 <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-brand-deep font-semibold">TÀI KHOẢN & PHÂN QUYỀN</span>
+                <span class="text-primary font-semibold">TÀI KHOẢN &amp; PHÂN QUYỀN</span>
             </div>
             <h1 class="font-headline-md text-headline-md text-brand-deep font-bold tracking-tight">
                 Quản lý Người dùng & Tài khoản Hệ thống
@@ -55,7 +56,7 @@
                 </div>
             </div>
             <div class="flex items-baseline gap-2">
-                <span class="font-display text-[30px] leading-8 text-brand-deep tracking-tight font-black font-mono">@totalCount</span>
+                <span class="font-display text-[30px] leading-8 text-brand-deep tracking-tight font-black font-mono">@totalSysAccounts</span>
                 <span class="text-xs text-outline font-medium">người dùng hệ thống</span>
             </div>
         </div>
@@ -88,16 +89,16 @@
     </div>
 
     <!-- Filter Toolbar -->
-    <div class="bg-surface-white rounded-2xl p-4 border border-border-subtle shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto flex-1">
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-4 card-pro flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
             <div class="relative flex-1 min-w-[240px]">
                 <span class="material-symbols-outlined text-outline absolute left-3 top-1/2 -translate-y-1/2 text-[18px]">search</span>
-                <input id="tkSearchInput" onkeyup="filterTkTable()" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep font-body-sm text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Tìm theo username, họ tên, email..." type="text" value="@Model.Keyword">
+                <input id="tkSearchInput" onkeyup="filterTkTable()" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep font-body-sm text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Tìm theo username, họ tên, email..." type="text" value="@Model.Keyword">
             </div>
 
             <!-- Role Filter -->
-            <div class="relative">
-                <select id="filterRole" onchange="filterTkTable()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary">
+            <div class="relative min-w-[170px]">
+                <select id="filterRole" onchange="filterTkTable()" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
                     <option value="">Tất cả vai trò</option>
                     <option value="Admin" selected="@(Model.VaiTro == "Admin")">Quản trị viên (Admin)</option>
                     <option value="GiaoVu" selected="@(Model.VaiTro == "GiaoVu")">Giáo vụ đào tạo</option>
@@ -108,24 +109,37 @@
             </div>
 
             <!-- Status Filter -->
-            <div class="relative">
-                <select id="filterStatus" onchange="filterTkTable()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary">
+            <div class="relative min-w-[160px]">
+                <select id="filterStatus" onchange="filterTkTable()" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
                     <option value="">Tất cả trạng thái</option>
-                    <option value="Hoạt động" selected="@(Model.TrangThai == true)">Đang hoạt động</option>
-                    <option value="Bị khóa" selected="@(Model.TrangThai == false)">Bị khóa</option>
+                    <option value="true" selected="@(Model.TrangThai == true)">Đang hoạt động</option>
+                    <option value="false" selected="@(Model.TrangThai == false)">Bị khóa</option>
                 </select>
                 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
             </div>
         </div>
+        <div class="flex items-center gap-2">
+            <button id="btnBulkDeleteTk" type="button" class="hidden items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition-all cursor-pointer shadow-xs active:scale-95" title="Xóa các tài khoản đã chọn">
+                <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+                <span>Xóa đã chọn (<span id="selectedTkCount">0</span>)</span>
+            </button>
+            <button type="button" onclick="resetTkFilter()" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
+                <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                <span>Đặt lại</span>
+            </button>
+        </div>
     </div>
 
     <!-- Data Table Card -->
-    <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-sm overflow-hidden">
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm overflow-hidden card-pro">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse min-w-[880px]" id="tkTable">
                 <thead>
-                    <tr class="bg-surface-container-lowest border-b border-border-standard text-[11px] font-bold text-outline uppercase tracking-wider">
-                        <th class="py-3.5 px-4 w-12 text-center">#</th>
+                    <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
+                        <th class="py-3.5 px-3 w-10 text-center">
+                            <input type="checkbox" id="selectAllTk" class="w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" title="Chọn tất cả">
+                        </th>
+                        <th class="py-3.5 px-3 w-10 text-center">#</th>
                         <th class="py-3.5 px-4">Tài Khoản</th>
                         <th class="py-3.5 px-4">Họ Và Tên</th>
                         <th class="py-3.5 px-4">Email Liên Hệ</th>
@@ -139,7 +153,7 @@
                     @if (Model.Items == null || !Model.Items.Any())
                     {
                         <tr>
-                            <td colspan="8" class="text-center py-12 text-outline">
+                            <td colspan="9" class="text-center py-12 text-outline">
                                 <span class="material-symbols-outlined text-4xl block mb-2 text-outline/50">manage_accounts</span>
                                 <span class="font-semibold">Chưa có tài khoản nào phù hợp bộ lọc.</span>
                             </td>
@@ -154,6 +168,7 @@
                             {
                                 "Admin" => "bg-purple-100 text-purple-800",
                                 "GiaoVu" => "bg-blue-100 text-primary",
+                                "GiangVien" => "bg-amber-100 text-amber-800",
                                 _ => "bg-emerald-100 text-emerald-800"
                             };
 
@@ -161,13 +176,17 @@
                             {
                                 "Admin" => "Admin",
                                 "GiaoVu" => "Giáo vụ",
+                                "GiangVien" => "Giảng viên",
                                 _ => "Học viên"
                             };
 
                             string statusText = item.TrangThai ? "Hoạt động" : "Bị khóa";
 
                             <tr class="tk-row hover:bg-canvas-base/60 transition-colors" data-id="@item.MaTaiKhoan" data-user="@item.TenDangNhap" data-name="@item.HoTen" data-email="@item.Email" data-role="@item.VaiTro" data-status="@statusText">
-                                <td class="py-3.5 px-4 text-center font-mono text-outline">@(idx++)</td>
+                                <td class="py-3.5 px-3 text-center">
+                                    <input type="checkbox" class="tk-cb w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" value="@item.MaTaiKhoan">
+                                </td>
+                                <td class="py-3.5 px-3 text-center font-mono text-outline">@(idx++)</td>
                                 <td class="py-3.5 px-4 font-mono font-bold text-primary">
                                     @item.TenDangNhap
                                 </td>
@@ -221,30 +240,28 @@
             </table>
         </div>
 
-        <!-- Pagination -->
-        <div class="px-5 py-4 border-t border-border-standard flex flex-col sm:flex-row items-center justify-between gap-3 bg-surface-container-lowest/50 text-xs">
-            <span class="text-outline">
-                Hiển thị trang <strong class="text-brand-deep">@currentPage</strong> / <strong class="text-brand-deep">@totalPages</strong> (Tổng <strong class="text-brand-deep">@totalCount</strong> tài khoản)
-            </span>
-            <div class="flex items-center gap-1.5">
-                <a href="@(Model.HasPreviousPage ? Url.Action("Index", new { page = currentPage - 1, keyword = Model.Keyword, vaiTro = Model.VaiTro, trangThai = Model.TrangThai }) : "javascript:void(0)")"
-                   class="px-3 py-1.5 rounded-lg border border-border-standard @(Model.HasPreviousPage ? "hover:bg-surface-container-low text-brand-deep cursor-pointer" : "opacity-40 pointer-events-none text-outline")">
-                    Trang trước
-                </a>
-                <span class="px-3 py-1.5 font-bold text-primary bg-primary/10 rounded-lg">@currentPage</span>
-                <a href="@(Model.HasNextPage ? Url.Action("Index", new { page = currentPage + 1, keyword = Model.Keyword, vaiTro = Model.VaiTro, trangThai = Model.TrangThai }) : "javascript:void(0)")"
-                   class="px-3 py-1.5 rounded-lg border border-border-standard @(Model.HasNextPage ? "hover:bg-surface-container-low text-brand-deep cursor-pointer" : "opacity-40 pointer-events-none text-outline")">
-                    Trang sau
-                </a>
-            </div>
-        </div>
+        <!-- Clean Reusable Pagination Component -->
+        @await Html.PartialAsync("_Pagination", new QuanLyKhoaHoc_UNETI4_DHTI17A1HN.ViewModels.PaginationModel {
+            CurrentPage = currentPage,
+            TotalPages = totalPages,
+            TotalItems = totalCount,
+            PageSize = pageSize,
+            ItemLabel = "tài khoản",
+            BaseUrl = "/TaiKhoan/Index",
+            AjaxFunction = "loadTaiKhoanPage",
+            RouteParams = new Dictionary<string, string?> {
+                { "keyword", Model.Keyword },
+                { "vaiTro", Model.VaiTro },
+                { "trangThai", Model.TrangThai?.ToString().ToLower() }
+            }
+        })
     </div>
 </div>
 
 <!-- ================= RIGHT SLIDE-OVER DRAWER (CREATE / EDIT ACCOUNT) ================= -->
 <div id="drawer-backdrop" onclick="closeDrawer()" class="fixed inset-0 bg-brand-deep/40 backdrop-blur-xs z-50 transition-opacity duration-300 opacity-0 pointer-events-none"></div>
 
-<aside id="drawer" class="fixed top-0 right-0 h-full w-full max-w-lg bg-surface-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+<aside id="drawer" class="fixed top-0 right-0 h-full w-full max-w-lg bg-surface-white border-l border-border-standard shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
     <div class="p-6 border-b border-border-standard flex items-center justify-between bg-surface-container-lowest">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
@@ -288,18 +305,25 @@
         <div class="grid grid-cols-2 gap-3">
             <div>
                 <label class="block font-bold text-brand-deep uppercase mb-1">Vai trò phân quyền</label>
-                <select id="drawer-role" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep">
-                    <option value="HocVien">Học viên</option>
-                    <option value="GiaoVu">Giáo vụ</option>
-                    <option value="Admin">Admin</option>
-                </select>
+                <div class="relative">
+                    <select id="drawer-role" class="w-full px-3.5 py-2.5 pr-8 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep cursor-pointer transition-all">
+                        <option value="HocVien">Học viên</option>
+                        <option value="GiangVien">Giảng viên</option>
+                        <option value="GiaoVu">Giáo vụ</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                    <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+                </div>
             </div>
             <div>
                 <label class="block font-bold text-brand-deep uppercase mb-1">Trạng thái kích hoạt</label>
-                <select id="drawer-status" class="w-full px-3.5 py-2.5 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep">
-                    <option value="true">Hoạt động</option>
-                    <option value="false">Bị khóa</option>
-                </select>
+                <div class="relative">
+                    <select id="drawer-status" class="w-full px-3.5 py-2.5 pr-8 rounded-xl border border-border-standard bg-surface-white focus:outline-none focus:border-primary text-brand-deep cursor-pointer transition-all">
+                        <option value="true">Hoạt động</option>
+                        <option value="false">Bị khóa</option>
+                    </select>
+                    <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+                </div>
             </div>
         </div>
 
@@ -555,25 +579,66 @@
         });
     }
 
+    let tkDebounceTimer = null;
     function filterTkTable() {
-        const query = document.getElementById('tkSearchInput').value.toLowerCase().trim();
-        const role = document.getElementById('filterRole').value;
-        const status = document.getElementById('filterStatus').value;
-
-        const rows = document.querySelectorAll('#tkTableBody tr.tk-row');
-        rows.forEach(row => {
-            const user = row.dataset.user.toLowerCase();
-            const name = row.dataset.name.toLowerCase();
-            const email = row.dataset.email.toLowerCase();
-            const rowRole = row.dataset.role;
-            const rowStatus = row.dataset.status;
-
-            const matchQuery = (!query || user.includes(query) || name.includes(query) || email.includes(query));
-            const matchRole = (!role || rowRole === role);
-            const matchStatus = (!status || rowStatus === status);
-
-            row.style.display = (matchQuery && matchRole && matchStatus) ? '' : 'none';
-        });
+        clearTimeout(tkDebounceTimer);
+        tkDebounceTimer = setTimeout(() => {
+            const keyword = document.getElementById('tkSearchInput')?.value.trim() || '';
+            const vaiTro = document.getElementById('filterRole')?.value || '';
+            const trangThai = document.getElementById('filterStatus')?.value || '';
+            const params = new URLSearchParams();
+            if (keyword) params.set('keyword', keyword);
+            if (vaiTro) params.set('vaiTro', vaiTro);
+            if (trangThai) params.set('trangThai', trangThai);
+            params.set('page', '1');
+            loadTaiKhoanPage(`/TaiKhoan/Index?${params.toString()}`);
+        }, 300);
     }
+
+    function resetTkFilter() {
+        if (document.getElementById('tkSearchInput')) document.getElementById('tkSearchInput').value = '';
+        if (document.getElementById('filterRole')) document.getElementById('filterRole').value = '';
+        if (document.getElementById('filterStatus')) document.getElementById('filterStatus').value = '';
+        loadTaiKhoanPage('/TaiKhoan/Index');
+    }
+
+    async function loadTaiKhoanPage(url, pushState = true) {
+        const area = document.getElementById('taikhoan-content-area');
+        if (area) area.classList.add('opacity-50', 'pointer-events-none');
+        try {
+            const res = await fetch(url);
+            const html = await res.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const newContent = doc.getElementById('taikhoan-content-area');
+            if (newContent && area) {
+                area.innerHTML = newContent.innerHTML;
+                if (window.tkBulk) window.tkBulk.updateState();
+            }
+            if (pushState) window.history.pushState({ url }, '', url);
+        } catch (err) {
+            window.location.href = url;
+        } finally {
+            if (area) area.classList.remove('opacity-50', 'pointer-events-none');
+        }
+    }
+
+    // Tự động mở drawer nếu URL có ?create=true
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('create') === 'true' || urlParams.get('action') === 'create') {
+        openDrawer('create');
+        const cleanUrl = window.location.pathname + window.location.search.replace(/[?&]create=true/, '').replace(/[?&]action=create/, '');
+        window.history.replaceState({}, document.title, cleanUrl || window.location.pathname);
+    }
+
+    // Khởi tạo Bulk Delete cho Tài khoản
+    window.tkBulk = window.initBulkDelete({
+        selectAllId: 'selectAllTk',
+        checkboxClass: 'tk-cb',
+        btnDeleteId: 'btnBulkDeleteTk',
+        countBadgeId: 'selectedTkCount',
+        deleteUrl: '/TaiKhoan/DeleteMultiple',
+        itemLabel: 'tài khoản',
+        onSuccess: () => loadTaiKhoanPage(window.location.href, false)
+    });
 </script>
 }

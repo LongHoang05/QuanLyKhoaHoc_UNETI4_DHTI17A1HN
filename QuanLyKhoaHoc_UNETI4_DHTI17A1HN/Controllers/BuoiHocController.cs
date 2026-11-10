@@ -33,7 +33,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             _giangVienRepo = giangVienRepo;
         }
 
-        public async Task<IActionResult> Index(int? maLop, string? phong, string? trangThai, string? search, int page = 1)
+        public async Task<IActionResult> Index(int? maLop, int? MaLopHoc, string? phong, string? trangThai, string? search, int page = 1)
         {
             var vaiTro = HttpContext.Session.GetString("VaiTro");
             if (string.Equals(vaiTro, "HocVien", StringComparison.OrdinalIgnoreCase))
@@ -41,7 +41,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction("TienTrinh", "CongHocVien", new { tab = "tkb" });
             }
 
+            int? targetMaLop = maLop ?? MaLopHoc;
             int pageSize = 8;
+            if (page < 1) page = 1;
 
             // 1. Kiểm tra xung đột trùng lịch qua Repository
             var (conflictIds, soLoiTrung) = await _buoiHocRepo.GetConflictSessionsAsync();
@@ -58,7 +60,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             // 3. Phân trang & Lọc LINQ qua Repository
             var (buoiHocs, totalRecords) = await _buoiHocRepo.GetPagedAsync(
                 search,
-                maLop,
+                targetMaLop,
                 phong,
                 trangThai,
                 null,
@@ -68,13 +70,19 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 pageSize);
 
             int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
-            if (page < 1) page = 1;
-            if (page > totalPages && totalPages > 0) page = totalPages;
+            if (totalPages < 1) totalPages = 1;
+            if (page > totalPages)
+            {
+                page = totalPages;
+                (buoiHocs, totalRecords) = await _buoiHocRepo.GetPagedAsync(
+                    search, targetMaLop, phong, trangThai, null, null, "thoigian_desc", page, pageSize);
+            }
 
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
             ViewBag.TotalRecords = totalRecords;
-            ViewBag.SelectedMaLop = maLop;
+            ViewBag.PageSize = pageSize;
+            ViewBag.SelectedMaLop = targetMaLop;
             ViewBag.SelectedPhong = phong;
             ViewBag.SelectedTrangThai = trangThai;
             ViewBag.Search = search;
@@ -87,8 +95,39 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             var activeSessions = allSessions.Where(b => b.TrangThai != "Đã hủy").ToList();
             ViewBag.SoThi = activeSessions.Count(b => b.NoiDung != null && (b.NoiDung.ToLower().Contains("thi") || b.NoiDung.ToLower().Contains("kiểm tra")));
             ViewBag.SoChinhKhoa = activeSessions.Count(b => b.NoiDung == null || (!b.NoiDung.ToLower().Contains("thi") && !b.NoiDung.ToLower().Contains("kiểm tra")));
-            ViewBag.DanhSachPhong = allSessions.Select(b => b.PhongHoc).Where(p => !string.IsNullOrEmpty(p)).Distinct().ToList();
-            ViewBag.DanhSachGiangVien = allSessions.Select(b => b.GiangVien).Where(g => !string.IsNullOrEmpty(g)).Distinct().ToList();
+
+            // Danh sách phòng học chuẩn UNETI (HA8, HA9, HA10, HA11 phòng 101 -> 501 và các phòng Lab)
+            var phongChuanUneti = new List<string> {
+                // Tòa HA8
+                "HA8-101", "HA8-201", "HA8-301", "HA8-401", "HA8-501",
+                // Tòa HA9
+                "HA9-101", "HA9-201", "HA9-301", "HA9-401", "HA9-501",
+                // Tòa HA10
+                "HA10-101", "HA10-201", "HA10-301", "HA10-401", "HA10-501",
+                // Tòa HA11
+                "HA11-101", "HA11-201", "HA11-301", "HA11-401", "HA11-501",
+                // Các phòng Lab máy tính thực hành
+                "Lab Máy 1", "Lab Máy 2", "Lab CNTT 1", "Lab CNTT 2"
+            };
+            ViewBag.DanhSachPhong = phongChuanUneti;
+
+            // Liên kết trực tiếp danh sách Giảng viên từ IGiangVienRepository (chuẩn hóa không trùng học vị)
+            var allGiangViens = await _giangVienRepo.GetAllAsync();
+            ViewBag.GiangVienList = allGiangViens;
+
+            var gvEntityNames = allGiangViens
+                .Select(g => {
+                    string hv = (g.HocVi ?? "").Trim();
+                    string ht = (g.HoTen ?? "").Trim();
+                    if (!string.IsNullOrEmpty(hv) && ht.StartsWith(hv, StringComparison.OrdinalIgnoreCase))
+                        return ht;
+                    return string.IsNullOrEmpty(hv) ? ht : $"{hv} {ht}";
+                })
+                .Where(g => !string.IsNullOrEmpty(g))
+                .Distinct()
+                .OrderBy(g => g)
+                .ToList();
+            ViewBag.DanhSachGiangVien = gvEntityNames;
 
             return View(buoiHocs);
         }
@@ -135,7 +174,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
 
             // 4. KIỂM TRA TRÙNG LỊCH BẰNG REPOSITORY (Lớp, Phòng, Giảng viên - Mục 9.2)
-            bool isTrungLich = await _buoiHocRepo.KiemTraTrungLichBuoiHocAsync(
+            var (isTrungLich, conflictMsg, _) = await _buoiHocRepo.KiemTraTrungLichChiTietAsync(
                 buoiHoc.MaLopHoc,
                 buoiHoc.PhongHoc,
                 buoiHoc.GiangVien,
@@ -144,12 +183,18 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             if (isTrungLich)
             {
-                ModelState.AddModelError("", "Lịch bị trùng! Kiểm tra lại Giảng viên, Phòng học hoặc Lớp đã có lịch trong khung giờ này.");
+                ModelState.AddModelError("", conflictMsg ?? "Lịch bị trùng! Kiểm tra lại Giảng viên, Phòng học hoặc Lớp đã có lịch trong khung giờ này.");
             }
 
             if (ModelState.IsValid)
             {
                 if (string.IsNullOrEmpty(buoiHoc.TrangThai)) buoiHoc.TrangThai = "Đã lên lịch";
+                if (!string.IsNullOrWhiteSpace(buoiHoc.GiangVien))
+                {
+                    var gvs = await _giangVienRepo.GetAllAsync();
+                    var gvMatch = gvs.FirstOrDefault(g => g.HoTen == buoiHoc.GiangVien || buoiHoc.GiangVien.Contains(g.HoTen) || g.HoTen.Contains(buoiHoc.GiangVien));
+                    buoiHoc.MaGiangVien = gvMatch?.MaGiangVien ?? (lopHoc?.TenGiangVien == buoiHoc.GiangVien ? lopHoc.MaGiangVien : null);
+                }
                 await _buoiHocRepo.AddAsync(buoiHoc);
 
                 if (isAjax)
@@ -193,7 +238,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
 
             // Kiểm tra trùng lịch ngoại trừ chính buổi học này qua Repository (Mục 9.2)
-            bool isTrungLich = await _buoiHocRepo.KiemTraTrungLichBuoiHocAsync(
+            var (isTrungLich, conflictMsg, _) = await _buoiHocRepo.KiemTraTrungLichChiTietAsync(
                 buoiHoc.MaLopHoc,
                 buoiHoc.PhongHoc,
                 buoiHoc.GiangVien,
@@ -203,14 +248,24 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             if (isTrungLich)
             {
-                if (isAjax) return Json(new { success = false, message = "Cập nhật thất bại: Trùng lịch với ca học khác (trùng phòng, giảng viên hoặc lớp)!" });
-                TempData["Error"] = "Cập nhật thất bại: Trùng lịch với ca học khác (trùng phòng, giảng viên hoặc lớp)!";
+                if (isAjax) return Json(new { success = false, message = $"Cập nhật thất bại: {conflictMsg}" });
+                TempData["Error"] = $"Cập nhật thất bại: {conflictMsg}";
                 return RedirectToAction(nameof(Index));
             }
 
             existing.MaLopHoc = buoiHoc.MaLopHoc;
             existing.PhongHoc = buoiHoc.PhongHoc;
             existing.GiangVien = buoiHoc.GiangVien;
+            if (!string.IsNullOrWhiteSpace(buoiHoc.GiangVien))
+            {
+                var gvs = await _giangVienRepo.GetAllAsync();
+                var gvMatch = gvs.FirstOrDefault(g => g.HoTen == buoiHoc.GiangVien || buoiHoc.GiangVien.Contains(g.HoTen) || g.HoTen.Contains(buoiHoc.GiangVien));
+                existing.MaGiangVien = gvMatch?.MaGiangVien;
+            }
+            else
+            {
+                existing.MaGiangVien = null;
+            }
             existing.ThoiGianBatDau = buoiHoc.ThoiGianBatDau;
             existing.ThoiGianKetThuc = buoiHoc.ThoiGianKetThuc;
             existing.NoiDung = buoiHoc.NoiDung;
@@ -243,6 +298,29 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             if (isAjax) return Json(new { success = true, message = "Đã xóa vĩnh viễn buổi học khỏi hệ thống." });
             TempData["Success"] = "Đã xóa vĩnh viễn buổi học khỏi hệ thống.";
             return RedirectToAction(nameof(Index));
+        }
+
+        // ========================================================
+        // ACTION DELETE MULTIPLE: XÓA NHIỀU BUỔI HỌC
+        // ========================================================
+        [HttpPost]
+        public async Task<IActionResult> DeleteMultiple([FromBody] List<int>? ids)
+        {
+            if (ids == null || !ids.Any())
+                return Json(new { success = false, message = "Vui lòng chọn ít nhất 1 buổi học để xóa." });
+
+            int deleted = 0;
+            foreach (var id in ids)
+            {
+                var buoiHoc = await _buoiHocRepo.GetByIdAsync(id);
+                if (buoiHoc != null)
+                {
+                    await _buoiHocRepo.DeleteAsync(id);
+                    deleted++;
+                }
+            }
+
+            return Json(new { success = true, message = $"Đã xóa thành công {deleted} buổi học khỏi lịch đào tạo.", deletedCount = deleted });
         }
 
         // --- CẬP NHẬT HOÀN THÀNH SAU BUỔI HỌC (Yêu cầu 9.3) ---
@@ -295,6 +373,41 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             if (isAjax) return Json(new { success = true, message = "Đã hủy ca học thành công." });
             TempData["Success"] = "Đã hủy ca học thành công.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // --- API KIỂM TRA TRÙNG LỊCH REALTIME TRÊN FORM / DRAWER ---
+        [HttpGet]
+        public async Task<IActionResult> KiemTraTrungLich(int? maBuoiHoc, int maLopHoc, string phongHoc, string? giangVien, DateTime? batDau, DateTime? ketThuc)
+        {
+            if (maLopHoc <= 0 || string.IsNullOrWhiteSpace(phongHoc) || !batDau.HasValue || !ketThuc.HasValue)
+            {
+                return Json(new { hasConflict = false, message = "Chưa đủ thông tin kiểm tra." });
+            }
+
+            if (ketThuc.Value <= batDau.Value)
+            {
+                return Json(new { hasConflict = true, message = "Thời gian kết thúc phải sau thời gian bắt đầu." });
+            }
+
+            var (hasConflict, conflictMsg, _) = await _buoiHocRepo.KiemTraTrungLichChiTietAsync(
+                maLopHoc,
+                phongHoc.Trim(),
+                giangVien?.Trim(),
+                batDau.Value,
+                ketThuc.Value,
+                maBuoiHoc > 0 ? maBuoiHoc : null);
+
+            return Json(new { hasConflict = hasConflict, message = conflictMsg ?? "Khung giờ và phòng học hoàn toàn trống!" });
+        }
+
+        // --- TỰ ĐỘNG XỬ LÝ DỌN DẸP CÁC CA TRÙNG LỊCH TRONG DB ---
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> XuLyTrungLich()
+        {
+            int soCaDaXuLy = await _buoiHocRepo.XuLyCaTrungLichTuDongAsync();
+            TempData["Success"] = $"Đã tự động tối ưu và giải phóng {soCaDaXuLy} ca học trùng lịch thành công!";
             return RedirectToAction(nameof(Index));
         }
     }

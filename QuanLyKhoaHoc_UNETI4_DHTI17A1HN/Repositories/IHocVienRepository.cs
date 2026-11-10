@@ -39,9 +39,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         // Tìm kiếm và Lọc học viên đa tiêu chí: Từ khóa (Tên, Email, SĐT), Trạng thái, và LỌC THEO LỚP HỌC
         Task<List<HocVien>> SearchHocVienAsync(string? keyword, bool? trangThai = null, int? maLopHoc = null);
 
-        // Phân trang LINQ Skip/Take
+        // Phân trang LINQ Skip/Take kết hợp Lọc & Sắp xếp
         Task<(IEnumerable<HocVien> Items, int TotalCount)> GetPagedAsync(
-            string? keyword, bool? trangThai, int pageIndex, int pageSize);
+            string? keyword, bool? trangThai, int pageIndex, int pageSize, string? trinhDo = null, string? sortBy = null);
 
         Task<int> CountTotalStudentsAsync();
         #endregion

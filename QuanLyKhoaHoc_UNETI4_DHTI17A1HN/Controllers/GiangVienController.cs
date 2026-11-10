@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services;
@@ -11,6 +12,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
     // Áp dụng chuẩn kiến trúc Repository & Service Pattern
     // Phụ trách: Lịch giảng dạy, Phân công lớp & Cho điểm học viên
     // ========================================================
+    [SessionAuthorize("Admin", "GiaoVu", "GiangVien")]
     public class GiangVienController : Controller
     {
         private readonly IGiangVienService _giangVienService;
@@ -23,13 +25,23 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         }
 
         #region Helper xác định Giảng viên hiện tại từ Session
-        private async Task<GiangVien?> GetCurrentGiangVienAsync()
+        private async Task<GiangVien?> GetCurrentGiangVienAsync(int? overrideMaGiangVien = null)
         {
-            int? maGiangVien = HttpContext.Session.GetInt32("MaGiangVien");
-            int? maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
+            string? vaiTro = HttpContext.Session.GetString("VaiTro");
+            bool isLecturerRole = string.Equals(vaiTro, "GiangVien", StringComparison.OrdinalIgnoreCase);
+
+            // Nếu Admin/Giáo vụ truyền maGiangVien trên URL (ví dụ: bấm "Xem lịch dạy" từ Quản lý Giảng viên)
+            if (!isLecturerRole && overrideMaGiangVien.HasValue && overrideMaGiangVien.Value > 0)
+            {
+                var targetGv = await _giangVienService.GetGiangVienByIdAsync(overrideMaGiangVien.Value);
+                if (targetGv != null) return targetGv;
+            }
+
+            int? maGiangVien = isLecturerRole ? HttpContext.Session.GetInt32("MaGiangVien") : null;
+            int? maTaiKhoan = isLecturerRole ? HttpContext.Session.GetInt32("MaTaiKhoan") : null;
 
             var gv = await _giangVienService.GetCurrentGiangVienAsync(maGiangVien, maTaiKhoan);
-            if (gv != null)
+            if (gv != null && isLecturerRole)
             {
                 if (!maGiangVien.HasValue)
                 {
@@ -44,9 +56,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         // ========================================================
         // 1. DASHBOARD CỔNG GIẢNG VIÊN (Trang chủ giảng viên)
         // ========================================================
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? maGiangVien = null)
         {
-            var gv = await GetCurrentGiangVienAsync();
+            var gv = await GetCurrentGiangVienAsync(maGiangVien);
             if (gv == null)
             {
                 TempData["Error"] = "Chưa có thông tin giảng viên trong hệ thống.";
@@ -59,7 +71,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             var upcomingSessions = await _giangVienService.GetUpcomingSessionsAsync(gv, 6);
 
             // Tổng học viên đang dạy
-            int totalStudents = myClasses.Sum(l => l.DangKyHocs.Count(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"));
+            int totalStudents = myClasses.Sum(l => l.DangKyHocs.Count(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành"));
 
             // Số lượt học viên đã có điểm tổng kết
             int gradedCount = await _giangVienService.GetGradedCountAsync(myClassIds);
@@ -76,9 +88,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         // ========================================================
         // 2. XEM LỊCH DẠY / THỜI KHÓA BIỂU CỦA GIẢNG VIÊN
         // ========================================================
-        public async Task<IActionResult> LichDay(int? maLop, DateTime? weekStart)
+        public async Task<IActionResult> LichDay(int? maLop, DateTime? weekStart, int? maGiangVien = null)
         {
-            var gv = await GetCurrentGiangVienAsync();
+            var gv = await GetCurrentGiangVienAsync(maGiangVien);
             if (gv == null)
             {
                 TempData["Error"] = "Không tìm thấy hồ sơ giảng viên.";
@@ -87,7 +99,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             var myClasses = await _giangVienService.GetClassesForTeacherAsync(gv);
 
-            DateTime selectedWeek = weekStart ?? DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek + 1);
+            int diff = (7 + (DateTime.Today.DayOfWeek - DayOfWeek.Monday)) % 7;
+            DateTime selectedWeek = weekStart ?? DateTime.Today.AddDays(-diff);
 
             // Gọi qua Service Layer
             var weekSessions = await _giangVienService.GetWeeklyTimetableAsync(gv, maLop, selectedWeek);
@@ -104,9 +117,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         // ========================================================
         // 3. CHẤM ĐIỂM & ĐÁNH GIÁ HỌC VIÊN THEO LỚP
         // ========================================================
-        public async Task<IActionResult> ChamDiem(int? maLop)
+        public async Task<IActionResult> ChamDiem(int? maLop, int? maGiangVien = null)
         {
-            var gv = await GetCurrentGiangVienAsync();
+            var gv = await GetCurrentGiangVienAsync(maGiangVien);
             if (gv == null)
             {
                 TempData["Error"] = "Không tìm thấy hồ sơ giảng viên.";
@@ -169,6 +182,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         // ========================================================
         // 5. QUẢN LÝ GIẢNG VIÊN (Dành cho Admin & Giáo vụ)
         // ========================================================
+        [SessionAuthorize("Admin", "GiaoVu")]
         public async Task<IActionResult> QuanLy(string? search, string? hocVi, int page = 1)
         {
             var vaiTro = HttpContext.Session.GetString("VaiTro");
@@ -205,6 +219,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
         // --- AJAX CRUD CHO QUẢN LÝ GIẢNG VIÊN QUA SERVICE ---
         [HttpGet]
+        [SessionAuthorize("Admin", "GiaoVu")]
         public async Task<IActionResult> GetGiangVienJson(int id)
         {
             var gv = await _giangVienService.GetGiangVienByIdAsync(id);
@@ -228,8 +243,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             });
         }
 
+        [HttpGet]
+        [SessionAuthorize("Admin", "GiaoVu")]
+        public IActionResult Create()
+        {
+            return RedirectToAction(nameof(QuanLy), new { create = "true" });
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SessionAuthorize("Admin", "GiaoVu")]
         public async Task<IActionResult> CreatePost(GiangVien gv, string? tenDangNhap, string? matKhau)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
@@ -246,6 +269,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SessionAuthorize("Admin", "GiaoVu")]
         public async Task<IActionResult> EditPost(int maGiangVien, GiangVien gv)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
@@ -262,6 +286,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SessionAuthorize("Admin", "GiaoVu")]
         public async Task<IActionResult> DeletePost(int id)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
@@ -274,6 +299,39 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             else TempData["Error"] = message;
 
             return RedirectToAction(nameof(QuanLy));
+        }
+
+        // ========================================================
+        // ACTION DELETE MULTIPLE: XÓA NHIỀU GIẢNG VIÊN
+        // ========================================================
+        [HttpPost]
+        [SessionAuthorize("Admin", "GiaoVu")]
+        public async Task<IActionResult> DeleteMultiple([FromBody] List<int>? ids)
+        {
+            if (ids == null || !ids.Any())
+                return Json(new { success = false, message = "Vui lòng chọn ít nhất 1 giảng viên để xóa." });
+
+            int deleted = 0;
+            int skipped = 0;
+
+            foreach (var id in ids)
+            {
+                var (success, _) = await _giangVienService.XoaGiangVienAsync(id);
+                if (success) deleted++;
+                else skipped++;
+            }
+
+            if (deleted == 0 && skipped > 0)
+            {
+                return Json(new { success = false, message = $"Không thể xóa {skipped} giảng viên đã chọn do đang phụ trách lớp học." });
+            }
+
+            string msg = $"Đã xóa thành công {deleted} giảng viên.";
+            if (skipped > 0)
+            {
+                msg += $" Bỏ qua {skipped} giảng viên do đang phụ trách lớp học.";
+            }
+            return Json(new { success = true, message = msg, deletedCount = deleted, skippedCount = skipped });
         }
     }
 }

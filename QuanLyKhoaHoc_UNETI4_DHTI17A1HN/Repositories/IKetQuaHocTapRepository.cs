@@ -28,7 +28,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             string? xepLoai,
             string? ketQua,
             int page,
-            int pageSize);
+            int pageSize,
+            string? sortBy = null);
 
         // 3. Thống kê phân phối điểm & tỷ lệ đạt/trượt
         Task<(int TongSoDiem, int SoDat, int SoKhongDat, double DiemTrungBinh)> GetThongKePhoiDiemAsync();

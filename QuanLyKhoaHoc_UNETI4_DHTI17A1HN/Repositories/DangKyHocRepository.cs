@@ -153,6 +153,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 case "ten_asc":
                     query = query.OrderBy(d => d.HocVien != null ? d.HocVien.HoTen : "");
                     break;
+                case "ten_desc":
+                    query = query.OrderByDescending(d => d.HocVien != null ? d.HocVien.HoTen : "");
+                    break;
                 default:
                     query = query.OrderByDescending(d => d.MaDangKy);
                     break;
@@ -167,7 +170,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         public async Task<(int ChoDuyetCount, int DaDuyetCount, double TongDoanhThu)> GetThongKeNhanhAsync()
         {
             int choDuyet = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Chờ duyệt");
-            int daDuyet = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học");
+            int daDuyet = await _context.DangKyHocs.CountAsync(d =>
+                d.TrangThai == "Đã duyệt" ||
+                d.TrangThai == "Đã đóng học phí" ||
+                d.TrangThai == "Đang học" ||
+                d.TrangThai == "Hoàn thành" ||
+                d.TrangThai == "Không hoàn thành");
             double doanhThu = await _context.DangKyHocs.SumAsync(d => (double?)d.SoTienDaDong) ?? 0;
 
             return (choDuyet, daDuyet, doanhThu);
@@ -177,7 +185,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         {
             return await _context.DangKyHocs.CountAsync(d =>
                 d.MaLopHoc == maLop &&
-                (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"));
+                (d.TrangThai == "Đã duyệt" ||
+                 d.TrangThai == "Đã đóng học phí" ||
+                 d.TrangThai == "Đang học" ||
+                 d.TrangThai == "Hoàn thành" ||
+                 d.TrangThai == "Không hoàn thành"));
         }
 
         public async Task<bool> HasEnrolledAsync(int maHocVien, int maLop)
@@ -224,7 +236,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         {
             return await _context.DangKyHocs
                 .Where(d => maLopList.Contains(d.MaLopHoc) &&
-                            (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"))
+                            (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành"))
                 .GroupBy(d => d.MaLopHoc)
                 .Select(g => new { MaLop = g.Key, Count = g.Count() })
                 .ToDictionaryAsync(g => g.MaLop, g => g.Count);
@@ -233,7 +245,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         public async Task<Dictionary<int, int>> GetAllSiSoMapAsync()
         {
             return await _context.DangKyHocs
-                .Where(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học")
+                .Where(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành")
                 .GroupBy(d => d.MaLopHoc)
                 .Select(g => new { MaLop = g.Key, Count = g.Count() })
                 .ToDictionaryAsync(g => g.MaLop, g => g.Count);

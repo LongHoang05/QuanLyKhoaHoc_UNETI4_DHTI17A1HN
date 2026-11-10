@@ -31,13 +31,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             int tongHocVien = await _context.HocViens.CountAsync();
             int tongDangKy = await _context.DangKyHocs.CountAsync();
             int dangKyChoDuyet = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Chờ duyệt");
-            int dangKyDaDuyet = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học");
+            int dangKyDaDuyet = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành");
             int buoiHocSapToi = await _context.BuoiHocs.CountAsync(b => b.ThoiGianBatDau > now && b.TrangThai == "Đã lên lịch");
             int tongBuoiHoc = await _context.BuoiHocs.CountAsync();
 
             int totalCoDiem = await _context.KetQuaHocTaps.CountAsync();
-            int soHoanThanh = await _context.KetQuaHocTaps.CountAsync(k => k.KetQua == "Hoàn thành");
-            double tyLeHoanThanh = totalCoDiem > 0 ? ((double)soHoanThanh / totalCoDiem * 100) : 0;
+            int soHoanThanh = await _context.KetQuaHocTaps.CountAsync(k => k.KetQua == "Hoàn thành" || k.KetQua == "Đạt");
+            double tyLeHoanThanh = totalCoDiem > 0 ? Math.Round((double)soHoanThanh / totalCoDiem * 100, 1) : 0;
 
             decimal tongDoanhThu = await _context.DangKyHocs
                 .Where(d => d.NgayDongHocPhi != null)
@@ -105,12 +105,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             return await _context.DangKyHocs
                 .Where(d => d.NgayDongHocPhi != null)
                 .GroupBy(d => new { d.NgayDongHocPhi!.Value.Year, d.NgayDongHocPhi!.Value.Month })
+                .OrderBy(g => g.Key.Year)
+                .ThenBy(g => g.Key.Month)
                 .Select(g => new ThongKeDoanhThuVM
                 {
                     Thang = g.Key.Month + "/" + g.Key.Year,
                     TongDoanhThu = g.Sum(d => d.SoTienDaDong)
                 })
-                .OrderBy(r => r.Thang)
                 .ToListAsync();
         }
 
@@ -127,6 +128,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         {
             return await _context.DangKyHocs
                 .GroupBy(d => new { d.NgayDangKy.Year, d.NgayDangKy.Month })
+                .OrderBy(g => g.Key.Year)
+                .ThenBy(g => g.Key.Month)
                 .Select(g => (dynamic)new { Thang = g.Key.Month + "/" + g.Key.Year, SoLuong = g.Count() })
                 .ToListAsync();
         }
@@ -135,6 +138,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         {
             return await _context.BuoiHocs
                 .GroupBy(b => new { b.ThoiGianBatDau.Year, b.ThoiGianBatDau.Month })
+                .OrderBy(g => g.Key.Year)
+                .ThenBy(g => g.Key.Month)
                 .Select(g => (dynamic)new { Thang = g.Key.Month + "/" + g.Key.Year, SoLuong = g.Count() })
                 .ToListAsync();
         }
@@ -144,7 +149,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             return await _context.KetQuaHocTaps
                 .Where(k => k.DangKyHoc != null && k.DangKyHoc.LopHoc != null)
                 .GroupBy(k => k.DangKyHoc!.LopHoc!.TenLop)
-                .Select(g => (dynamic)new { Ten = g.Key, DiemTB = g.Average(k => k.DiemTongKet) })
+                .Select(g => (dynamic)new { Ten = g.Key, DiemTB = Math.Round(g.Average(k => k.DiemTongKet), 2) })
                 .ToListAsync();
         }
 
@@ -153,8 +158,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             int total = await _context.KetQuaHocTaps.CountAsync();
             if (total == 0) return 0;
 
-            int passed = await _context.KetQuaHocTaps.CountAsync(k => k.KetQua == "Hoàn thành");
-            return (double)passed / total * 100;
+            int passed = await _context.KetQuaHocTaps.CountAsync(k => k.KetQua == "Hoàn thành" || k.KetQua == "Đạt");
+            return Math.Round((double)passed / total * 100, 1);
         }
 
         public async Task<List<TyLeLapDayVM>> GetTyLeLapDayAsync()
@@ -165,10 +170,10 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                     TenLop = l.TenLop,
                     SiSoToiDa = l.SiSoToiDa,
                     SiSoHienTai = _context.DangKyHocs.Count(dk => dk.MaLopHoc == l.MaLopHoc && 
-                                  (dk.TrangThai == "Đã duyệt" || dk.TrangThai == "Đã đóng học phí" || dk.TrangThai == "Đang học")),
+                                  (dk.TrangThai == "Đã duyệt" || dk.TrangThai == "Đã đóng học phí" || dk.TrangThai == "Đang học" || dk.TrangThai == "Hoàn thành" || dk.TrangThai == "Không hoàn thành")),
                     TyLe = l.SiSoToiDa > 0 
                         ? (double)_context.DangKyHocs.Count(dk => dk.MaLopHoc == l.MaLopHoc && 
-                          (dk.TrangThai == "Đã duyệt" || dk.TrangThai == "Đã đóng học phí" || dk.TrangThai == "Đang học")) / l.SiSoToiDa * 100 
+                          (dk.TrangThai == "Đã duyệt" || dk.TrangThai == "Đã đóng học phí" || dk.TrangThai == "Đang học" || dk.TrangThai == "Hoàn thành" || dk.TrangThai == "Không hoàn thành")) / l.SiSoToiDa * 100 
                         : 0
                 })
                 .ToListAsync();
@@ -185,7 +190,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 .GroupBy(l => l.TenGiangVien!)
                 .Select(g => {
                     var maLops = g.Select(x => x.MaLopHoc).ToList();
-                    var svCount = dkList.Count(d => maLops.Contains(d.MaLopHoc) && (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"));
+                    var svCount = dkList.Count(d => maLops.Contains(d.MaLopHoc) && (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành"));
                     var scores = kqList.Where(k => k.DangKyHoc != null && maLops.Contains(k.DangKyHoc.MaLopHoc)).Select(k => k.DiemTongKet).ToList();
                     return (dynamic)new {
                         GiangVien = g.Key,

@@ -1,4 +1,4 @@
-﻿@*
+@*
 Họ và tên: Nguyễn Tùng Dương
 Mã sinh viên: 23103100003
 Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biểu dạng tuần kết hợp CRUD chuẩn Prep.vn
@@ -18,7 +18,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
 
     var days = new DayOfWeek[] {
         DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday,
-        DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday
+        DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday
     };
 
     var dayNames = new Dictionary<DayOfWeek, string> {
@@ -27,7 +27,8 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         { DayOfWeek.Wednesday, "Thứ 4" },
         { DayOfWeek.Thursday, "Thứ 5" },
         { DayOfWeek.Friday, "Thứ 6" },
-        { DayOfWeek.Saturday, "Thứ 7" }
+        { DayOfWeek.Saturday, "Thứ 7" },
+        { DayOfWeek.Sunday, "Chủ Nhật" }
     };
 
     var caNames = new Dictionary<int, (string TenCa, string Gio, string Tiet)> {
@@ -51,13 +52,14 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
     int currentPage = ViewBag.CurrentPage ?? 1;
     int totalPages = ViewBag.TotalPages ?? 1;
     int totalRecords = ViewBag.TotalRecords ?? 0;
-    int pageSize = 8;
+    int pageSize = ViewBag.PageSize ?? 8;
     int startRecord = totalRecords == 0 ? 0 : (currentPage - 1) * pageSize + 1;
     int endRecord = Math.Min(currentPage * pageSize, totalRecords);
 
     var lopHocs = ViewBag.LopHocList as IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>();
     var danhSachPhong = ViewBag.DanhSachPhong as IEnumerable<string> ?? new List<string>();
     var danhSachGV = ViewBag.DanhSachGiangVien as IEnumerable<string> ?? new List<string>();
+    var giangVienList = ViewBag.GiangVienList as IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien>();
 
     int? selectedMaLop = ViewBag.SelectedMaLop;
     string selectedPhong = ViewBag.SelectedPhong as string ?? "";
@@ -65,6 +67,23 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
     string search = ViewBag.Search as string ?? "";
 
     double completionRate = totalSessions > 0 ? Math.Round((double)completedSessions / totalSessions * 100, 1) : 0;
+
+    DateTime today = DateTime.Today;
+    int diffToMonday = (7 + (int)today.DayOfWeek - (int)DayOfWeek.Monday) % 7;
+    DateTime mondayDate = today.AddDays(-diffToMonday);
+    DateTime sundayDate = mondayDate.AddDays(6);
+    int weekOfYear = System.Globalization.ISOWeek.GetWeekOfYear(today);
+
+    var dayDates = new Dictionary<DayOfWeek, DateTime> {
+        { DayOfWeek.Monday, mondayDate },
+        { DayOfWeek.Tuesday, mondayDate.AddDays(1) },
+        { DayOfWeek.Wednesday, mondayDate.AddDays(2) },
+        { DayOfWeek.Thursday, mondayDate.AddDays(3) },
+        { DayOfWeek.Friday, mondayDate.AddDays(4) },
+        { DayOfWeek.Saturday, mondayDate.AddDays(5) },
+        { DayOfWeek.Sunday, mondayDate.AddDays(6) }
+    };
+    int totalRoomsCount = danhSachPhong.Any() ? danhSachPhong.Count() : 12;
 }
 
 <!-- Flash Notifications -->
@@ -95,13 +114,13 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
 
 <div id="buoihoc-content-area" class="flex flex-col gap-y-6 transition-opacity duration-200">
     <!-- Contextual Sub-Header & Controls -->
-    <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-surface-white p-5 rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)]">
+    <section class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 card-pro">
         <div class="flex items-center gap-space-sm min-w-0">
             <div class="flex flex-col">
-                <div class="flex items-center gap-1.5 text-outline font-label-sm text-label-sm tracking-wide">
+                <div class="flex items-center gap-2 text-outline font-label-sm text-label-sm uppercase tracking-wider mb-1">
                     <span>ĐÀO TẠO UNETI</span>
-                    <span class="material-symbols-outlined text-[13px]">chevron_right</span>
-                    <span class="text-primary-container font-semibold">LỊCH HỌC & PHÒNG MÁY</span>
+                    <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                    <span class="text-primary font-semibold">LỊCH HỌC &amp; PHÒNG MÁY</span>
                 </div>
                 <h1 class="font-headline-md text-headline-md text-brand-deep tracking-tight truncate font-extrabold mt-0.5">
                     Quản lý lịch học
@@ -112,21 +131,17 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         <div class="flex items-center flex-wrap gap-2.5">
             <!-- View Mode Switcher -->
             <div class="flex p-1 bg-surface-container-low rounded-xl border border-border-subtle text-xs font-semibold">
-                <button type="button" id="tab-btn-timetable" onclick="switchView('timetable')" class="px-3.5 py-1.5 rounded-lg bg-surface-white text-primary-container font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer">
+                <button type="button" id="tab-btn-timetable" onclick="switchView('timetable')" class="px-3.5 py-1.5 rounded-lg bg-surface-white text-primary font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95">
                     <span class="material-symbols-outlined text-[16px]">calendar_view_week</span>
                     <span>Thời khóa biểu tuần</span>
                 </button>
-                <button type="button" id="tab-btn-table" onclick="switchView('table')" class="px-3.5 py-1.5 rounded-lg text-outline hover:text-brand-deep transition-all flex items-center gap-1.5 cursor-pointer">
+                <button type="button" id="tab-btn-table" onclick="switchView('table')" class="px-3.5 py-1.5 rounded-lg text-outline hover:text-brand-deep transition-all flex items-center gap-1.5 cursor-pointer active:scale-95">
                     <span class="material-symbols-outlined text-[16px]">table_rows</span>
                     <span>Danh sách chi tiết</span>
                 </button>
             </div>
 
-            @* <button onclick="exportTableToCSV('danh-sach-lich-hoc.csv')" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-3.5 py-2 rounded-xl transition-all shadow-xs cursor-pointer">
-                <span class="material-symbols-outlined text-[18px] text-primary">file_download</span>
-                <span class="hidden sm:inline">Xuất Excel</span>
-            </button> *@
-            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-secondary-container hover:bg-secondary text-surface-white font-label-md text-label-md px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition-transform active:scale-95 cursor-pointer">
+            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-hover text-surface-white font-label-md text-label-md px-4 py-2 rounded-xl shadow-sm hover:shadow-card transition-all active:scale-95 cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">add_circle</span>
                 <span> Xếp lịch học</span>
             </button>
@@ -136,7 +151,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
     <!-- Quick Analytics Stats Row (3 Cards) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         <!-- Stat 1 -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_1px_3px_rgba(13, 71, 161,0.04),0_8px_24px_-4px_rgba(13, 71, 161,0.06)] flex items-center justify-between">
+        <div class="card-pro card-pro-hover p-5 flex items-center justify-between">
             <div>
                 <span class="font-label-sm text-label-sm text-outline tracking-wider uppercase block mb-1">Tổng số buổi học</span>
                 <div class="flex items-baseline gap-2">
@@ -157,7 +172,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         </div>
 
         <!-- Stat 2 -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_1px_3px_rgba(13, 71, 161,0.04),0_8px_24px_-4px_rgba(13, 71, 161,0.06)] flex items-center justify-between">
+        <div class="card-pro card-pro-hover p-5 flex items-center justify-between">
             <div>
                 <span class="font-label-sm text-label-sm text-outline tracking-wider uppercase block mb-1">Buổi học đã hoàn thành</span>
                 <div class="flex items-baseline gap-2">
@@ -169,23 +184,27 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                     <span class="font-body-sm text-body-sm text-on-surface-variant">tiến độ hoàn tất</span>
                 </div>
             </div>
-            <div class="w-12 h-12 rounded-2xl bg-secondary-container/10 flex items-center justify-center text-secondary-container">
+            <div class="w-12 h-12 rounded-2xl bg-primary-light flex items-center justify-center text-primary">
                 <span class="material-symbols-outlined text-[26px]">fact_check</span>
             </div>
         </div>
 
         <!-- Stat 3 -->
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_1px_3px_rgba(13, 71, 161,0.04),0_8px_24px_-4px_rgba(13, 71, 161,0.06)] flex items-center justify-between">
+        <div class="card-pro card-pro-hover p-5 flex items-center justify-between">
             <div class="min-w-0 pr-2">
                 <span class="font-label-sm text-label-sm text-outline tracking-wider uppercase block mb-1">Cảnh báo trùng lịch</span>
                 <p class="font-headline-sm text-headline-sm text-brand-deep truncate">
                     @(conflictCount > 0 ? $"{conflictCount} ca học xung đột" : "An toàn - 0 xung đột")
                 </p>
-                <div class="flex items-center gap-2 mt-2">
+                <div class="flex items-center gap-2 mt-2 flex-wrap">
                     @if (conflictCount > 0)
                     {
                         <span class="font-label-md text-label-md text-danger-crimson font-bold tabular-nums">Cần xếp lại</span>
                         <span class="font-body-sm text-body-sm text-outline">(Trùng phòng / GV)</span>
+                        <button type="button" onclick="confirmCleanupConflicts()" class="px-2 py-0.5 bg-danger-crimson hover:bg-red-700 text-surface-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer inline-flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px]">auto_fix_high</span>
+                            Dọn dẹp ca trùng
+                        </button>
                     }
                     else
                     {
@@ -200,138 +219,320 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         </div>
     </div>
 
-    <!-- ==================== VIEW 1: THỜI KHÓA BIỂU DẠNG TUẦN (MẶC ĐỊNH) ==================== -->
+        <!-- ==================== VIEW 1: THỜI KHÓA BIỂU DẠNG TUẦN (MẪU CHUẨN ĐÀO TẠO MỚI) ==================== -->
     <div id="view-timetable" class="flex flex-col gap-5 min-w-0 w-full">
-        <!-- Timetable Summary Strip -->
-        <div class="bg-surface-white p-4 rounded-2xl border border-border-subtle shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div class="flex items-center gap-4 text-xs font-semibold flex-wrap">
-                <div class="flex items-center gap-1.5 text-on-surface-variant">
-                    <span class="w-2.5 h-2.5 rounded-md bg-primary-container"></span>
-                    <span>Chính khóa: <strong class="text-brand-deep font-mono">@soChinhKhoa</strong> ca</span>
+        <!-- Top Toolbar: Navigation Tuần & Bộ lọc trực quan -->
+        <div class="bg-surface-white p-4 rounded-2xl border border-border-standard shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-3">
+            <!-- Left: Điều hướng tuần -->
+            <div class="flex items-center gap-2.5 flex-wrap">
+                <button type="button" onclick="goToToday()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border-standard bg-surface-white hover:bg-surface-container-low text-brand-deep font-label-sm text-xs font-bold transition-all shadow-2xs hover:shadow-xs cursor-pointer active:scale-95">
+                    <span class="material-symbols-outlined text-[16px] text-primary">today</span>
+                    <span>Hôm nay</span>
+                </button>
+                <div class="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl border border-border-subtle">
+                    <button type="button" onclick="changeWeek(-1)" class="w-7 h-7 rounded-lg bg-surface-white text-outline hover:text-brand-deep hover:bg-surface-container flex items-center justify-center transition-all shadow-2xs cursor-pointer active:scale-95" title="Tuần trước">
+                        <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+                    </button>
+                    <button type="button" onclick="changeWeek(1)" class="w-7 h-7 rounded-lg bg-surface-white text-outline hover:text-brand-deep hover:bg-surface-container flex items-center justify-center transition-all shadow-2xs cursor-pointer active:scale-95" title="Tuần tiếp theo">
+                        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                    </button>
                 </div>
-                <div class="flex items-center gap-1.5 text-on-surface-variant">
-                    <span class="w-2.5 h-2.5 rounded-md bg-warning-amber"></span>
-                    <span>Thi / KT: <strong class="text-brand-deep font-mono">@soThi</strong> ca</span>
-                </div>
-                <div class="flex items-center gap-1.5 text-on-surface-variant">
-                    <span class="w-2.5 h-2.5 rounded-md bg-danger-crimson"></span>
-                    <span>Xung đột phòng: <strong class="@(conflictCount > 0 ? "text-danger-crimson font-bold" : "text-brand-deep") font-mono">@conflictCount lỗi</strong></span>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="font-bold text-sm text-brand-deep" id="week-display-title">
+                        Tuần @(weekOfYear) (@mondayDate.ToString("dd/MM") - @sundayDate.ToString("dd/MM/yyyy"))
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/70 text-xs font-semibold">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span id="week-sessions-count">@(allBuoiHocs.Count(b => b.TrangThai != "Đã hủy")) buổi học phân bổ</span>
+                    </span>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <!-- Nút điều hướng cuộn ngang Thời khóa biểu -->
-                <div class="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl border border-border-subtle text-xs">
-                    <button type="button" onclick="scrollTimetable(-260)" class="w-7 h-7 rounded-lg bg-surface-white text-outline hover:text-brand-deep hover:bg-surface-container flex items-center justify-center transition-all shadow-2xs cursor-pointer" title="Cuộn sang trái (Các thứ đầu tuần)">
-                        <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+
+            <!-- Right: Bộ lọc nhanh Phòng máy, Giảng viên, Trạng thái & Cuộn ma trận -->
+            <div class="flex items-center gap-2 flex-wrap">
+                <!-- Dropdown lọc phòng -->
+                <div class="relative">
+                    <select id="filter-timetable-phong" onchange="applyTimetableFilters()" class="appearance-none bg-surface-container-low border border-border-standard text-brand-deep font-label-sm text-xs px-3 py-1.5 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-white transition-colors">
+                        <option value="">Tất cả phòng học (@totalRoomsCount phòng)</option>
+                        @foreach (var p in danhSachPhong)
+                        {
+                            <option value="@p">@p</option>
+                        }
+                    </select>
+                    <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[15px] transition-transform duration-200">expand_more</span>
+                </div>
+
+                <!-- Dropdown lọc giảng viên -->
+                <div class="relative">
+                    <select id="filter-timetable-gv" onchange="applyTimetableFilters()" class="appearance-none bg-surface-container-low border border-border-standard text-brand-deep font-label-sm text-xs px-3 py-1.5 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-white transition-colors">
+                        <option value="">Tất cả giảng viên</option>
+                        @foreach (var gv in danhSachGV)
+                        {
+                            <option value="@gv">@gv</option>
+                        }
+                    </select>
+                    <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[15px] transition-transform duration-200">expand_more</span>
+                </div>
+
+                <!-- Dropdown lọc trạng thái -->
+                <div class="relative">
+                    <select id="filter-timetable-trangthai" onchange="applyTimetableFilters()" class="appearance-none bg-surface-container-low border border-border-standard text-brand-deep font-label-sm text-xs px-3 py-1.5 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-white transition-colors">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="Đã lên lịch">Đã lên lịch</option>
+                        <option value="Đã hoàn thành">Đã hoàn thành</option>
+                        <option value="Đã hủy">Đã hủy</option>
+                    </select>
+                    <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[15px] transition-transform duration-200">expand_more</span>
+                </div>
+
+                @if (conflictCount > 0)
+                {
+                    <button type="button" onclick="confirmCleanupConflicts()" class="px-2.5 py-1.5 bg-danger-crimson hover:bg-red-700 text-surface-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer inline-flex items-center gap-1 active:scale-95" title="Tự động hủy các ca trùng lặp">
+                        <span class="material-symbols-outlined text-[14px]">auto_fix_high</span>
+                        <span>Dọn dẹp ca trùng</span>
                     </button>
-                    <span class="text-[11px] font-semibold text-outline px-1.5 select-none">Trượt xem tuần</span>
-                    <button type="button" onclick="scrollTimetable(260)" class="w-7 h-7 rounded-lg bg-surface-white text-outline hover:text-brand-deep hover:bg-surface-container flex items-center justify-center transition-all shadow-2xs cursor-pointer" title="Cuộn sang phải (Các thứ cuối tuần)">
-                        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                }
+
+                <!-- Nút cuộn ma trận ngang -->
+                <div class="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl border border-border-subtle text-xs">
+                    <button type="button" onclick="scrollTimetable(-260)" class="w-6.5 h-6.5 rounded-lg bg-surface-white text-outline hover:text-brand-deep flex items-center justify-center transition-all shadow-2xs cursor-pointer active:scale-95" title="Cuộn sang trái">
+                        <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+                    </button>
+                    <button type="button" onclick="scrollTimetable(260)" class="w-6.5 h-6.5 rounded-lg bg-surface-white text-outline hover:text-brand-deep flex items-center justify-center transition-all shadow-2xs cursor-pointer active:scale-95" title="Cuộn sang phải">
+                        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
                     </button>
                 </div>
-                <span class="inline-flex items-center gap-1 text-success-emerald bg-success-emerald/10 px-2.5 py-1 rounded-full font-semibold text-[11px] hidden md:inline-flex">
-                    <span class="w-1.5 h-1.5 rounded-full bg-success-emerald animate-pulse"></span> Ma trận tuần tự động từ DB
-                </span>
             </div>
         </div>
 
+        @{
+            var shiftSchedule = new[] {
+                new { Ca = 1, Name = "Ca 1", Tiet = "Tiết 1 – 3", Time = "07:00 – 09:15" },
+                new { Ca = 2, Name = "Ca 2", Tiet = "Tiết 4 – 6", Time = "09:30 – 11:45" },
+                new { Ca = 3, Name = "Ca 3", Tiet = "Tiết 7 – 9", Time = "13:30 – 15:45" },
+                new { Ca = 4, Name = "Ca 4", Tiet = "Tiết 10 – 12", Time = "16:00 – 18:15" }
+            };
+        }
+
         <!-- Weekly Timetable Grid Card -->
-        <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] overflow-hidden w-full relative">
-            <div class="w-full overflow-x-auto custom-scrollbar pb-2.5" id="timetable-scroll-container">
-                <div class="min-w-[960px] w-full flex flex-col">
-                    <!-- 1. Header: Days of Week (Thứ 2 -> Thứ 7) -->
-                    <div class="grid grid-cols-[100px_repeat(6,minmax(140px,1fr))] bg-canvas-base border-b border-border-standard text-xs font-bold text-brand-deep sticky top-0 z-10">
-                        <div class="py-3 px-2 border-r border-border-standard text-outline text-center font-mono uppercase text-[10.5px] flex items-center justify-center">
-                            Ca / Giờ
+        <div class="bg-surface-white rounded-2xl border border-border-standard shadow-[0_2px_12px_rgba(13,71,161,0.04)] overflow-hidden w-full relative">
+            <div class="w-full overflow-x-auto custom-scrollbar pb-1" id="timetable-scroll-container">
+                <div class="min-w-[1200px] w-full flex flex-col">
+                    <!-- 1. Header: Ngày trong tuần (Thứ 2 -> Chủ Nhật) -->
+                    <div class="grid grid-cols-[140px_repeat(7,minmax(150px,1fr))] bg-canvas-base border-b border-border-standard text-xs font-bold text-brand-deep sticky top-0 z-20">
+                        <div class="py-3.5 px-3 border-r border-border-standard text-center flex flex-col items-center justify-center bg-surface-container-low/70">
+                            <span class="font-extrabold text-[11px] text-brand-deep uppercase tracking-wider flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[15px] text-primary">schedule</span>
+                                KHUNG GIỜ
+                            </span>
+                            <span class="text-[10px] text-outline font-normal mt-0.5">Ca học song song</span>
                         </div>
                         @foreach (var day in days)
                         {
-                            var isToday = DateTime.Now.DayOfWeek == day;
-                            <div class="py-2.5 px-2 border-r border-border-standard text-center min-w-0 @(isToday ? "bg-primary-container/10 border-b-2 border-b-primary-container" : "")">
-                                <div class="@(isToday ? "text-primary-container font-extrabold" : "text-brand-deep") text-[12.5px] truncate">
-                                    @dayNames[day]
-                                </div>
-                                <span class="text-[9.5px] text-outline font-normal block mt-0.5 truncate">
-                                    @(isToday ? "• Hôm nay" : "Trong tuần")
-                                </span>
+                            var isToday = today.DayOfWeek == day;
+                            var dDate = dayDates[day];
+                            var countInDay = allBuoiHocs.Count(b => b.ThoiGianBatDau.DayOfWeek == day && b.TrangThai != "Đã hủy");
+
+                            <div class="py-3 px-3 border-r border-border-standard text-center min-w-0 transition-colors @(isToday ? "bg-primary/[0.04] relative" : "hover:bg-surface-container-low/40")">
+                                @if (isToday)
+                                {
+                                    <div class="absolute top-0 left-0 right-0 h-1 bg-primary"></div>
+                                    <div class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary text-surface-white font-bold text-xs shadow-xs tracking-tight">
+                                        <span class="material-symbols-outlined text-[13px]">calendar_today</span>
+                                        <span>@dayNames[day]</span>
+                                    </div>
+                                    <div class="text-[11px] font-semibold text-primary mt-1.5 flex items-center justify-center gap-1 truncate">
+                                        <span id="day-date-@day" class="font-bold">@dDate.ToString("dd/MM")</span>
+                                        <span class="text-outline/40">•</span>
+                                        <span class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">Hôm nay (@countInDay ca)</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="font-bold text-brand-deep text-sm tracking-tight truncate">
+                                        @dayNames[day]
+                                    </div>
+                                    <div class="text-[11px] text-outline font-medium mt-1 flex items-center justify-center gap-1 truncate">
+                                        <span id="day-date-@day" class="font-semibold text-brand-deep">@dDate.ToString("dd/MM")</span>
+                                        <span class="text-outline/40">•</span>
+                                        <span class="text-[10.5px] text-outline">@countInDay ca</span>
+                                    </div>
+                                }
                             </div>
                         }
                     </div>
 
-                    <!-- 2. Grid Body: 4 Ca (Ca 1 -> Ca 4) -->
-                    <div class="flex flex-col divide-y divide-border-subtle">
-                        @for (int ca = 1; ca <= 4; ca++)
+                    <!-- 2. VÒNG LẶP CÁC CA HỌC (CA 1 -> CA 4) -->
+                    @foreach (var shift in shiftSchedule)
+                    {
+                        @if (shift.Ca == 1)
                         {
-                            var caInfo = caNames[ca];
-                            <div class="grid grid-cols-[100px_repeat(6,minmax(140px,1fr))] min-h-[140px] divide-x divide-border-subtle hover:bg-canvas-base/15 transition-colors">
-                                <!-- Shift Label Column -->
-                                <div class="p-2 bg-canvas-base/60 flex flex-col justify-center items-center text-center select-none border-r border-border-standard/80">
-                                    <span class="text-[11.5px] font-bold text-brand-deep">@caInfo.TenCa</span>
-                                    <span class="text-[10px] font-mono text-primary font-bold mt-1">@caInfo.Gio</span>
-                                    <span class="text-[9px] font-medium text-outline bg-surface-container-high px-1.5 py-0.2 rounded-full mt-1.5">@caInfo.Tiet</span>
+                            <!-- Dải phân cách Buổi Sáng -->
+                            <div class="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-y border-amber-200/80 px-4 py-2 flex items-center justify-between sticky left-0 z-10">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="w-6 h-6 rounded-lg bg-amber-500/15 text-amber-700 flex items-center justify-center shadow-2xs">
+                                        <span class="material-symbols-outlined text-[15px]">wb_sunny</span>
+                                    </span>
+                                    <span class="font-extrabold text-xs text-amber-950 uppercase tracking-wider">BUỔI SÁNG</span>
+                                    <span class="font-mono text-[11px] text-amber-800 bg-amber-100/70 border border-amber-200 px-2.5 py-0.5 rounded-full font-semibold">07:00 – 11:45</span>
                                 </div>
+                                <span class="text-[11px] text-amber-800/80 font-medium hidden sm:inline flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[13px]">school</span>
+                                    Tiết 1 đến Tiết 6 (Ca 1 &amp; Ca 2)
+                                </span>
+                            </div>
+                        }
+                        else if (shift.Ca == 3)
+                        {
+                            <!-- Dải phân cách Buổi Chiều -->
+                            <div class="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-t-2 border-b border-primary/20 px-4 py-2 flex items-center justify-between sticky left-0 z-10">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="w-6 h-6 rounded-lg bg-primary/15 text-primary flex items-center justify-center shadow-2xs">
+                                        <span class="material-symbols-outlined text-[15px]">routine</span>
+                                    </span>
+                                    <span class="font-extrabold text-xs text-primary uppercase tracking-wider">BUỔI CHIỀU</span>
+                                    <span class="font-mono text-[11px] text-primary bg-primary/10 border border-primary/20 px-2.5 py-0.5 rounded-full font-semibold">13:30 – 18:15</span>
+                                </div>
+                                <span class="text-[11px] text-outline font-medium hidden sm:inline flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[13px]">school</span>
+                                    Tiết 7 đến Tiết 12 (Ca 3 &amp; Ca 4)
+                                </span>
+                            </div>
+                        }
 
-                                <!-- 6 Days Columns -->
-                                @foreach (var day in days)
-                                {
-                                    var classesInSlot = allBuoiHocs
-                                        .Where(b => b.ThoiGianBatDau.DayOfWeek == day && getCa(b.ThoiGianBatDau) == ca && b.TrangThai != "Đã hủy")
-                                        .ToList();
+                        <!-- Hàng Ca Học -->
+                        <div class="grid grid-cols-[140px_repeat(7,minmax(150px,1fr))] min-h-[145px] divide-x divide-border-subtle border-b border-border-subtle hover:bg-canvas-base/15 transition-colors">
+                            <!-- Cột trái: Thông tin Ca & Giờ -->
+                            <div class="p-3 bg-canvas-base/50 flex flex-col justify-center items-center text-center select-none border-r border-border-standard gap-1">
+                                <span class="px-2.5 py-0.5 rounded-full bg-surface-white border border-border-standard shadow-2xs text-primary font-bold text-[10px] uppercase tracking-wide">
+                                    @shift.Name
+                                </span>
+                                <span class="text-[12px] font-bold text-brand-deep">@shift.Tiet</span>
+                                <span class="text-[10.5px] font-mono text-outline font-semibold flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[13px] text-outline">schedule</span>
+                                    @shift.Time
+                                </span>
+                            </div>
 
-                                    var isConflict = classesInSlot.Count > 1 && classesInSlot.Any(b1 => classesInSlot.Any(b2 => b1 != b2 && (b1.PhongHoc == b2.PhongHoc || b1.GiangVien == b2.GiangVien)));
-                                    var isToday = DateTime.Now.DayOfWeek == day;
+                            @foreach (var day in days)
+                            {
+                                var classesInSlot = allBuoiHocs
+                                    .Where(b => b.ThoiGianBatDau.DayOfWeek == day && getCa(b.ThoiGianBatDau) == shift.Ca && b.TrangThai != "Đã hủy")
+                                    .ToList();
+                                int occupiedRooms = classesInSlot.Select(c => c.PhongHoc).Where(p => !string.IsNullOrEmpty(p)).Distinct().Count();
+                                int emptyRooms = Math.Max(0, totalRoomsCount - occupiedRooms);
+                                bool isConflict = classesInSlot.Count > 1 && classesInSlot.Any(b1 => classesInSlot.Any(b2 => b1 != b2 && (b1.PhongHoc == b2.PhongHoc || b1.GiangVien == b2.GiangVien)));
+                                bool isToday = today.DayOfWeek == day;
 
-                                    <div class="p-1.5 relative min-w-0 overflow-hidden @(isToday ? "bg-primary/5" : "")">
-                                        @if (classesInSlot.Count == 0)
-                                        {
-                                            <!-- EMPTY SLOT -->
-                                            <div onclick="quickAddScheduleSlot('@day', @ca)" class="h-full min-h-[135px] flex flex-col items-center justify-center border-2 border-dashed border-border-standard/70 hover:border-primary rounded-xl bg-canvas-base/30 hover:bg-primary/5 p-2 transition-all cursor-pointer group select-none" title="Nhấp để xếp lịch vào @dayNames[day] @caInfo.TenCa">
-                                                <div class="w-6 h-6 rounded-full bg-surface-white border border-border-standard group-hover:border-primary group-hover:bg-primary group-hover:text-surface-white flex items-center justify-center text-outline/60 transition-all shadow-2xs group-hover:scale-105">
-                                                    <span class="material-symbols-outlined text-[15px]">add</span>
-                                                </div>
-                                                <span class="text-[10.5px] font-semibold text-outline/70 group-hover:text-primary mt-1 transition-colors">+ Xếp lịch</span>
-                                                <span class="text-[9px] text-outline/40 font-mono">Ca trống</span>
+                                <div class="p-2 relative min-w-0 overflow-hidden flex flex-col justify-between @(isToday ? "bg-primary/[0.03]" : "")">
+                                    @if (classesInSlot.Count == 0)
+                                    {
+                                        <!-- Ô Trống Lịch -->
+                                        <div onclick="quickAddScheduleSlot('@day', @shift.Ca)" 
+                                             class="h-full min-h-[135px] flex flex-col items-center justify-center border-2 border-dashed border-border-standard/70 hover:border-primary/80 rounded-xl bg-canvas-base/20 hover:bg-primary/[0.04] p-3 transition-all duration-200 cursor-pointer group select-none text-center" 
+                                             title="Xếp lớp vào @dayNames[day] @shift.Name">
+                                            <div class="w-7 h-7 rounded-full bg-surface-white border border-border-standard group-hover:border-primary group-hover:bg-primary group-hover:text-surface-white flex items-center justify-center text-outline/70 transition-all duration-200 shadow-2xs group-hover:scale-110">
+                                                <span class="material-symbols-outlined text-[16px]">add</span>
                                             </div>
-                                        }
-                                        else if (isConflict)
-                                        {
-                                            <!-- CONFLICT CARD -->
-                                            <div class="h-full min-h-[135px] bg-red-50/90 border-2 border-danger-crimson/60 text-red-950 rounded-xl p-2 text-xs shadow-xs flex flex-col justify-between gap-1.5 animate-pulse min-w-0">
-                                                <div class="min-w-0">
-                                                    <div class="flex items-center justify-between mb-1 gap-1">
-                                                        <span class="inline-flex items-center gap-1 font-bold text-danger-crimson text-[9.5px] truncate">
-                                                            <span class="material-symbols-outlined text-[12px] flex-shrink-0">warning</span>
-                                                            TRÙNG LỊCH
-                                                        </span>
-                                                        <span class="bg-red-200 text-danger-crimson font-bold text-[8.5px] px-1 py-0.2 rounded flex-shrink-0">Sửa</span>
-                                                    </div>
-                                                    <div class="font-bold text-danger-crimson text-[10.5px] leading-tight truncate">
-                                                        Phòng @classesInSlot.First().PhongHoc!
-                                                    </div>
-                                                    <div class="text-[9.5px] text-outline mt-1 truncate">
-                                                        @string.Join(", ", classesInSlot.Select(c => c.LopHoc?.TenLop ?? $"Lớp #{c.MaLopHoc}"))
-                                                    </div>
-                                                </div>
-                                                <div class="pt-1 border-t border-red-200 flex items-center justify-between">
-                                                    <button type="button" onclick="openEditDrawerById(@classesInSlot.First().MaBuoiHoc)" class="text-[10px] text-primary font-bold hover:underline cursor-pointer">
-                                                        Đổi ca
-                                                    </button>
-                                                    <button type="button" onclick="confirmDelete(@classesInSlot.Last().MaBuoiHoc, 'Ca học trùng tại @classesInSlot.First().PhongHoc')" class="px-1.5 py-0.5 bg-danger-crimson hover:bg-red-700 text-surface-white font-bold rounded text-[9.5px] transition-colors shadow-xs cursor-pointer">
-                                                        Hủy bớt
-                                                    </button>
-                                                </div>
+                                            <span class="text-[11px] font-semibold text-outline group-hover:text-primary mt-2 transition-colors">
+                                                Trống lịch
+                                            </span>
+                                            <span class="text-[9.5px] text-outline/60 mt-0.5 group-hover:text-brand-deep">
+                                                @emptyRooms phòng khả dụng
+                                            </span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flex flex-col gap-1.5 h-full">
+                                            <!-- Micro Header: Số lớp & Trạng thái -->
+                                            <div class="flex items-center justify-between pb-1 border-b border-border-subtle/70 text-[9.5px]">
+                                                @if (classesInSlot.Count == 1)
+                                                {
+                                                    <span class="px-2 py-0.5 rounded-md bg-surface-container-high text-outline font-semibold">1 lớp học</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 font-bold border border-purple-200/60 flex items-center gap-1">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                                                        @classesInSlot.Count lớp song song
+                                                    </span>
+                                                }
+                                                @if (classesInSlot.All(c => c.TrangThai == "Đã hoàn thành"))
+                                                {
+                                                    <span class="text-success-emerald font-bold flex items-center gap-0.5">
+                                                        <span class="material-symbols-outlined text-[12px]">check_circle</span> Đã xong
+                                                    </span>
+                                                }
                                             </div>
-                                        }
-                                        else
-                                        {
-                                            <!-- NORMAL SCHEDULE CARD (HARMONIZED WITH BOTH STATS) -->
-                                            <div class="flex flex-col gap-2 h-full min-w-0">
+
+                                            @if (isConflict)
+                                            {
+                                                <!-- Cảnh báo Trùng Phòng / Giảng Viên -->
+                                                <div class="bg-red-50 border border-danger-crimson/50 rounded-xl p-2 text-danger-crimson text-xs shadow-2xs flex items-center justify-between gap-1">
+                                                    <span class="font-bold text-[10px] flex items-center gap-1 text-danger-crimson truncate">
+                                                        <span class="material-symbols-outlined text-[13px] text-danger-crimson flex-shrink-0">warning</span>
+                                                        TRÙNG: @classesInSlot.First().PhongHoc
+                                                    </span>
+                                                    <button type="button" onclick="openEditDrawerById(@classesInSlot.First().MaBuoiHoc)" class="text-[10px] font-bold text-danger-crimson hover:text-red-900 underline flex-shrink-0 cursor-pointer">
+                                                        Sửa
+                                                    </button>
+                                                </div>
+                                            }
+
+                                            <!-- Danh Sách Thẻ Buổi Học -->
+                                            <div class="flex flex-col gap-1.5 flex-1">
                                                 @foreach (var b in classesInSlot)
                                                 {
-                                                    bool isThi = b.NoiDung != null && (b.NoiDung.ToLower().Contains("thi") || b.NoiDung.ToLower().Contains("kiểm tra"));
-                                                    bool isCompleted = b.TrangThai == "Đã hoàn thành";
+                                                    var rm = b.PhongHoc ?? "P.---";
+                                                    string rmBadgeClass = "bg-amber-50 text-amber-800 border-amber-200";
+                                                    string rmIcon = "meeting_room";
+                                                    if (rm.Contains("Lab") || rm.Contains("Máy"))
+                                                    {
+                                                        rmBadgeClass = "bg-cyan-50 text-cyan-800 border-cyan-200";
+                                                        rmIcon = "desktop_windows";
+                                                    }
+                                                    else if (rm.Contains("Hội trường"))
+                                                    {
+                                                        rmBadgeClass = "bg-purple-50 text-purple-800 border-purple-200";
+                                                        rmIcon = "apartment";
+                                                    }
+                                                    else if (rm.Contains("AI") || rm.Contains("Studio"))
+                                                    {
+                                                        rmBadgeClass = "bg-emerald-50 text-emerald-800 border-emerald-200";
+                                                        rmIcon = "smart_toy";
+                                                    }
+                                                    else if (rm.StartsWith("HA"))
+                                                    {
+                                                        rmBadgeClass = "bg-blue-50 text-blue-800 border-blue-200";
+                                                        rmIcon = "school";
+                                                    }
 
-                                                    <div class="schedule-card h-full min-h-[135px] bg-surface-white border @(isThi ? "border-amber-300 border-l-[3.5px] border-l-amber-500 bg-amber-50/15" : isCompleted ? "border-emerald-200 border-l-[3.5px] border-l-success-emerald bg-emerald-50/15" : "border-border-standard border-l-[3.5px] border-l-primary bg-surface-white") rounded-xl p-2 shadow-xs hover:shadow-md transition-all flex flex-col justify-between gap-1 group min-w-0"
+                                                    bool isCardToday = today.DayOfWeek == day;
+                                                    string statusText = "Lên lịch";
+                                                    string statusColor = "text-outline";
+                                                    string statusDot = "bg-outline/40";
+
+                                                    if (b.TrangThai == "Đã hoàn thành")
+                                                    {
+                                                        statusText = "Đã xong";
+                                                        statusColor = "text-success-emerald font-semibold";
+                                                        statusDot = "bg-success-emerald";
+                                                    }
+                                                    else if (isCardToday)
+                                                    {
+                                                        statusText = "Hôm nay";
+                                                        statusColor = "text-primary font-bold";
+                                                        statusDot = "bg-primary animate-pulse";
+                                                    }
+                                                    else if (b.ThoiGianBatDau < DateTime.Now)
+                                                    {
+                                                        statusText = "Đang học";
+                                                        statusColor = "text-amber-600 font-semibold";
+                                                        statusDot = "bg-amber-500 animate-ping";
+                                                    }
+
+                                                    <div class="timetable-card group relative bg-surface-white border rounded-xl p-2.5 transition-all duration-200 cursor-pointer flex flex-col justify-between gap-1.5 hover:-translate-y-0.5 @(isCardToday ? "border-primary/40 shadow-xs hover:border-primary hover:shadow-md ring-1 ring-primary/20" : "border-border-standard/90 shadow-2xs hover:border-primary/60 hover:shadow-md")"
                                                          data-id="@b.MaBuoiHoc"
                                                          data-malop="@b.MaLopHoc"
                                                          data-tenlop="@(b.LopHoc?.TenLop ?? "")"
@@ -341,83 +542,63 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                                                          data-ketthuc="@b.ThoiGianKetThuc.ToString("yyyy-MM-ddTHH:mm")"
                                                          data-noidung="@b.NoiDung"
                                                          data-ghichu="@b.GhiChu"
-                                                         data-trangthai="@b.TrangThai">
+                                                         data-trangthai="@b.TrangThai"
+                                                         onclick="openEditDrawerFromElement(this)">
                                                         
-                                                        <!-- Top Row: Mã ca + Loại thống kê 2 (Thi/KT vs Khóa) & Trạng thái thống kê 1 (Xong vs Lên lịch) -->
-                                                        <div class="flex items-center justify-between gap-1 min-w-0">
-                                                            <span class="font-mono text-[9px] font-bold text-outline truncate flex-shrink-0">@($"#BH{b.MaBuoiHoc:D2}")</span>
-                                                            <div class="flex items-center gap-1 min-w-0 flex-shrink-0">
-                                                                @if (isThi)
-                                                                {
-                                                                    <span class="inline-flex items-center gap-0.5 font-bold text-[8.5px] px-1 py-0.2 rounded bg-amber-100 text-amber-800 border border-amber-200/80" title="Dạng 2: Thi / Kiểm tra">
-                                                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Thi
-                                                                    </span>
-                                                                }
-                                                                else
-                                                                {
-                                                                    <span class="inline-flex items-center gap-0.5 font-bold text-[8.5px] px-1 py-0.2 rounded bg-primary/10 text-primary border border-primary/20" title="Dạng 2: Chính khóa">
-                                                                        <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>Khóa
-                                                                    </span>
-                                                                }
-                                                                @if (isCompleted)
-                                                                {
-                                                                    <span class="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[8.5px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200/80" title="Dạng 1: Đã hoàn thành">
-                                                                        <span class="material-symbols-outlined text-[10px]">check</span>Xong
-                                                                    </span>
-                                                                }
-                                                                else
-                                                                {
-                                                                    <span class="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[8.5px] font-semibold bg-surface-container-high text-outline border border-border-standard" title="Dạng 1: Đã lên lịch">
-                                                                        <span class="w-1 h-1 rounded-full bg-primary animate-pulse"></span>Lên lịch
-                                                                    </span>
-                                                                }
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- Middle: Tên lớp học & Nội dung tóm tắt -->
-                                                        <div class="min-w-0 my-0.5">
-                                                            <div onclick="openEditDrawerFromElement(this)" class="font-bold text-brand-deep text-[11px] leading-tight line-clamp-2 hover:text-primary transition-colors block break-words cursor-pointer" title="@(b.LopHoc?.TenLop ?? $"Lớp #{b.MaLopHoc}")">
-                                                                @(b.LopHoc?.TenLop ?? $"Lớp #{b.MaLopHoc}")
-                                                            </div>
-                                                            
-                                                            @if (!string.IsNullOrEmpty(b.NoiDung))
-                                                            {
-                                                                <div class="text-[9px] @(isThi ? "text-amber-900 bg-amber-50/80 font-medium px-1 py-0.5 rounded border border-amber-200/60" : "text-outline") truncate mt-1 flex items-center gap-1" title="@b.NoiDung">
-                                                                    <span class="material-symbols-outlined text-[10px] @(isThi ? "text-amber-600" : "text-outline/70") flex-shrink-0">@(isThi ? "assignment" : "menu_book")</span>
-                                                                    <span class="truncate">@b.NoiDung</span>
-                                                                </div>
-                                                            }
-
-                                                            <div class="flex items-center gap-1 text-[9.5px] text-outline mt-1 truncate">
-                                                                <span class="material-symbols-outlined text-[11px] text-outline/80 flex-shrink-0">person</span>
-                                                                <span class="truncate font-medium">@b.GiangVien</span>
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- Bottom Footer: Phòng học + Nút thao tác nhanh -->
-                                                        <div class="pt-1.5 border-t border-border-subtle/80 flex items-center justify-between gap-1 min-w-0">
-                                                            <span class="inline-flex items-center gap-0.5 bg-surface-container text-brand-deep font-mono font-bold text-[9px] px-1.5 py-0.5 rounded border border-border-standard/80 truncate max-w-[68px]" title="Phòng học: @b.PhongHoc">
-                                                                <span class="material-symbols-outlined text-[10px] text-primary flex-shrink-0">meeting_room</span>
+                                                        <!-- Top: Mã Buổi Học & Tag Phòng Học -->
+                                                        <div class="flex items-center justify-between gap-1">
+                                                            <span class="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-surface-container text-primary border border-border-subtle truncate">
+                                                                @($"#BH{b.MaBuoiHoc:D2}")
+                                                            </span>
+                                                            <span class="inline-flex items-center gap-1 font-bold font-mono text-[9.5px] px-2 py-0.5 rounded-md border @rmBadgeClass truncate max-w-[105px]" title="Phòng học: @b.PhongHoc">
+                                                                <span class="material-symbols-outlined text-[11px]">@rmIcon</span>
                                                                 <span class="truncate">@b.PhongHoc</span>
                                                             </span>
-                                                            <div class="flex items-center gap-0.5 flex-shrink-0">
-                                                                <button type="button" onclick="openEditDrawerFromElement(this)" class="w-5.5 h-5.5 rounded text-outline hover:text-primary hover:bg-primary/10 flex items-center justify-center transition-colors cursor-pointer" title="Chỉnh sửa ca học">
-                                                                    <span class="material-symbols-outlined text-[13px]">edit</span>
-                                                                </button>
-                                                                <button type="button" onclick="confirmDelete(@b.MaBuoiHoc, '@($"#BH{b.MaBuoiHoc:D2}") - @(b.LopHoc?.TenLop ?? "") (@b.PhongHoc)')" class="w-5.5 h-5.5 rounded text-outline hover:text-danger-crimson hover:bg-red-50 flex items-center justify-center transition-colors cursor-pointer" title="Xóa ca học">
-                                                                    <span class="material-symbols-outlined text-[13px]">delete</span>
-                                                                </button>
+                                                        </div>
+
+                                                        <!-- Mid: Tên Lớp Học & Bài Học -->
+                                                        <div class="min-w-0 my-0.5">
+                                                            <div class="font-extrabold text-brand-deep text-[11.5px] leading-snug truncate group-hover:text-primary transition-colors flex items-center gap-1" title="@(b.LopHoc?.TenLop ?? $"Lớp #{b.MaLopHoc}")">
+                                                                <span class="truncate">@(b.LopHoc?.TenLop ?? $"Lớp #{b.MaLopHoc}")</span>
                                                             </div>
+                                                            <div class="text-[10px] text-outline truncate leading-tight mt-0.5 flex items-center gap-1" title="@(b.NoiDung ?? "Chương trình chuẩn UNETI")">
+                                                                <span class="material-symbols-outlined text-[11px] text-outline/70 flex-shrink-0">menu_book</span>
+                                                                <span class="truncate">@(b.NoiDung ?? "Chương trình chuẩn UNETI")</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Bot: Giảng Viên & Trạng Thái -->
+                                                        <div class="pt-1.5 border-t border-border-subtle/70 flex items-center justify-between text-[10px] text-outline gap-1">
+                                                            <span class="truncate max-w-[90px] font-medium text-brand-deep flex items-center gap-1" title="@b.GiangVien">
+                                                                <span class="material-symbols-outlined text-[12px] text-outline">person</span>
+                                                                <span class="truncate">@b.GiangVien</span>
+                                                            </span>
+                                                            <span class="@statusColor truncate font-medium flex items-center gap-1">
+                                                                <span class="w-1.5 h-1.5 rounded-full @statusDot"></span>
+                                                                <span>@statusText</span>
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 }
+
+                                                <!-- Nút Xếp Thêm Lớp (Dạng thanh tinh gọn, thanh thoát) -->
+                                                <button type="button" onclick="quickAddScheduleSlot('@day', @shift.Ca)" 
+                                                        class="w-full py-1.5 border border-dashed border-border-standard hover:border-primary/70 hover:bg-primary/[0.04] text-outline hover:text-primary rounded-lg text-[10px] font-semibold transition-all duration-150 flex items-center justify-center gap-1 cursor-pointer group mt-0.5" 
+                                                        title="Xếp thêm lớp vào @dayNames[day] @shift.Name">
+                                                    <span class="material-symbols-outlined text-[13px] group-hover:scale-110 transition-transform">add</span>
+                                                    <span>+ Thêm lớp</span>
+                                                    @if (emptyRooms > 0)
+                                                    {
+                                                        <span class="text-[9px] text-outline/60 group-hover:text-primary/70">(@emptyRooms phòng)</span>
+                                                    }
+                                                </button>
                                             </div>
-                                        }
-                                    </div>
-                                }
-                            </div>
-                        }
-                    </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
                 </div>
             </div>
         </div>
@@ -426,23 +607,17 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
     <!-- ==================== VIEW 2: BẢNG DANH SÁCH CHI TIẾT (CRUD TABLE) ==================== -->
     <div id="view-table" class="hidden flex flex-col gap-6">
         <!-- Filter & Operation Toolbar -->
-        <div class="bg-surface-white rounded-2xl p-4 border border-border-subtle shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4">
-            <form method="get" action="/BuoiHoc/Index" class="flex flex-wrap items-center gap-3 w-full lg:w-auto" id="filter-form" onsubmit="event.preventDefault(); filterBuoiHocAjax();">
+        <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-4 card-pro flex flex-wrap items-center justify-between gap-3">
+            <form method="get" action="/BuoiHoc/Index" class="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]" id="filter-form" onsubmit="event.preventDefault(); filterBuoiHocAjax();">
                 <!-- Search Field -->
-                @* <div class="relative flex-1 sm:w-72">
+                <div class="relative min-w-[220px] max-w-xs flex-1">
                     <span class="material-symbols-outlined text-outline absolute left-3 top-1/2 -translate-y-1/2 text-[18px]">search</span>
-                    <input name="search" value="@search" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-8 py-2 rounded-xl text-on-surface font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" id="table-search" placeholder="Tìm theo giảng viên, phòng, lớp..." type="text"/>
-                    @if (!string.IsNullOrEmpty(search))
-                    {
-                        <a href="/BuoiHoc/Index" onclick="event.preventDefault(); loadBuoiHocPage('/BuoiHoc/Index');" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface cursor-pointer">
-                            <span class="material-symbols-outlined text-[16px]">cancel</span>
-                        </a>
-                    }
-                </div> *@
+                    <input name="search" value="@search" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" id="table-search" placeholder="Tìm theo giảng viên, phòng, lớp..." type="text"/>
+                </div>
 
                 <!-- Filter Dropdown: Lớp học -->
-                <div class="relative">
-                    <select name="MaLopHoc" onchange="filterBuoiHocAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
+                <div class="relative min-w-[170px]">
+                    <select name="maLop" onchange="filterBuoiHocAjax()" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
                         <option value="">Tất cả Lớp học</option>
                         @foreach (var lop in lopHocs)
                         {
@@ -453,8 +628,8 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                 </div>
 
                 <!-- Filter Dropdown: Phòng học -->
-                <div class="relative">
-                    <select name="phong" onchange="filterBuoiHocAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
+                <div class="relative min-w-[150px]">
+                    <select name="phong" onchange="filterBuoiHocAjax()" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
                         <option value="">Tất cả Phòng học</option>
                         @foreach (var p in danhSachPhong)
                         {
@@ -465,8 +640,8 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                 </div>
 
                 <!-- Filter Dropdown: Trạng thái -->
-                <div class="relative">
-                    <select name="trangThai" onchange="filterBuoiHocAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
+                <div class="relative min-w-[160px]">
+                    <select name="trangThai" onchange="filterBuoiHocAjax()" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
                         <option value="">Trạng thái: Tất cả</option>
                         <!option value="Đã lên lịch" @(selectedTrangThai == "Đã lên lịch" ? "selected" : "")>● Đã lên lịch</!option>
                         <!option value="Đã hoàn thành" @(selectedTrangThai == "Đã hoàn thành" ? "selected" : "")>● Đã hoàn thành</!option>
@@ -476,40 +651,42 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                 </div>
             </form>
 
-            <div class="flex items-center gap-2 w-full lg:w-auto justify-end">
-                <a href="/BuoiHoc/Index" onclick="event.preventDefault(); loadBuoiHocPage(this.href);" class="p-2 border border-border-standard rounded-xl text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors cursor-pointer" title="Làm mới bảng">
-                    <span class="material-symbols-outlined text-[20px] block">refresh</span>
+            <div class="flex items-center gap-2">
+                <button id="btnBulkDeleteBuoiHoc" class="hidden items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition-all cursor-pointer shadow-xs active:scale-95" title="Xóa các buổi học đã chọn">
+                    <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+                    <span>Xóa đã chọn (<span id="selectedBuoiHocCount">0</span>)</span>
+                </button>
+                <a href="/BuoiHoc/Index" onclick="event.preventDefault(); document.getElementById('filter-form').reset(); loadBuoiHocPage('/BuoiHoc/Index');" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
+                    <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                    <span>Đặt lại</span>
                 </a>
-                @* <button onclick="openDrawer('create')" class="bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all cursor-pointer">
-                    <span class="material-symbols-outlined text-[18px]">add</span>
-                    <span>Tạo buổi mới</span>
-                </button> *@
             </div>
         </div>
 
         <!-- Data Table Container -->
-        <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-[0_1px_3px_rgba(13, 71, 161,0.04),0_8px_24px_-4px_rgba(13, 71, 161,0.06)] overflow-hidden">
+        <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm overflow-hidden card-pro">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse" id="crud-table">
                     <thead>
-                        <tr class="bg-surface-container-low/70 border-b border-border-subtle font-label-sm text-label-sm text-outline tracking-wider uppercase">
-                            <th class="p-4 pl-6 w-12 text-center">
-                                <input class="rounded border-border-standard text-primary focus:ring-primary h-4 w-4 cursor-pointer" type="checkbox" id="select-all"/>
+                        <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
+                            <th class="py-3.5 pl-6 w-12 text-center">
+                                <input class="rounded border-border-standard text-primary focus:ring-primary h-4 w-4 cursor-pointer" type="checkbox" id="selectAllBuoiHoc"/>
                             </th>
-                            <th class="py-4 px-4">Mã ca</th>
-                            <th class="py-4 px-4 min-w-[200px]">Lớp học</th>
-                            <th class="py-4 px-4">Thời gian học</th>
-                            <th class="py-4 px-3 text-center">Phòng</th>
-                            <th class="py-4 px-4">Giảng viên</th>
-                            <th class="py-4 px-4">Trạng thái</th>
-                            <th class="py-4 px-6 text-right">Thao tác</th>
+                            <th class="py-3.5 px-3 w-10 text-center">#</th>
+                            <th class="py-3.5 px-4">Mã ca</th>
+                            <th class="py-3.5 px-4 min-w-[200px]">Lớp học</th>
+                            <th class="py-3.5 px-4">Thời gian học</th>
+                            <th class="py-3.5 px-3 text-center">Phòng</th>
+                            <th class="py-3.5 px-4">Giảng viên</th>
+                            <th class="py-3.5 px-4">Trạng thái</th>
+                            <th class="py-3.5 px-4 pr-6 text-right">Thao tác</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-border-subtle font-body-sm text-body-sm">
+                    <tbody class="divide-y divide-border-subtle text-xs text-brand-deep">
                         @if (!Model.Any())
                         {
                             <tr>
-                                <td colspan="8" class="py-12 text-center text-outline">
+                                <td colspan="9" class="py-12 text-center text-outline">
                                     <span class="material-symbols-outlined text-4xl block mb-2 text-outline/50">event_busy</span>
                                     Chưa có buổi học nào phù hợp với bộ lọc hiện tại.
                                 </td>
@@ -517,6 +694,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                         }
                         else
                         {
+                            int idx = (currentPage - 1) * pageSize + 1;
                             @foreach (var item in Model)
                             {
                                 bool isConflict = conflictIds.Contains(item.MaBuoiHoc);
@@ -532,8 +710,9 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                                     data-ghichu="@item.GhiChu"
                                     data-trangthai="@item.TrangThai">
                                     <td class="p-4 pl-6 text-center">
-                                        <input class="rounded border-border-standard text-primary focus:ring-primary h-4 w-4 row-checkbox cursor-pointer" type="checkbox"/>
+                                        <input class="rounded border-border-standard text-primary focus:ring-primary h-4 w-4 buoihoc-cb cursor-pointer" type="checkbox" value="@item.MaBuoiHoc"/>
                                     </td>
+                                    <td class="py-3.5 px-3 text-center text-outline font-mono text-[11px]">@(idx++)</td>
                                     <td class="py-4 px-4 font-mono font-semibold text-primary">
                                         @($"#BH{item.MaBuoiHoc:D3}")
                                     </td>
@@ -599,7 +778,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                                             <button onclick="openEditDrawerFromRow(this)" class="p-1.5 rounded-lg text-outline hover:text-secondary-container hover:bg-surface-container-low transition-colors cursor-pointer" title="Chỉnh sửa">
                                                 <span class="material-symbols-outlined text-[18px]">edit</span>
                                             </button>
-                                            <button onclick="confirmDelete(@item.MaBuoiHoc, '@($"#BH{item.MaBuoiHoc:D3}") - @(item.LopHoc?.TenLop ?? "") (@item.PhongHoc)')" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50 transition-colors cursor-pointer" title="Xóa buổi học">
+                                            <button onclick="confirmDelete(@item.MaBuoiHoc, '@($"#BH{item.MaBuoiHoc:D3}") - @((item.LopHoc?.TenLop ?? "").Replace("'", "\\'")) (@((item.PhongHoc ?? "").Replace("'", "\\'")))')" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50 transition-colors cursor-pointer" title="Xóa buổi học">
                                                 <span class="material-symbols-outlined text-[18px]">delete</span>
                                             </button>
                                         </div>
@@ -616,6 +795,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                 CurrentPage = currentPage,
                 TotalPages = totalPages,
                 TotalItems = totalRecords,
+                PageSize = pageSize,
                 ItemLabel = "buổi học",
                 BaseUrl = "/BuoiHoc/Index",
                 AjaxFunction = "loadBuoiHocPage",
@@ -630,68 +810,129 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         </div>
     </div>
 
-<!-- RIGHT SLIDE-OVER DRAWER (CREATE / UPDATE FORM) -->
-<div class="fixed inset-0 z-50 overflow-hidden hidden transition-all duration-300" id="drawer-container">
-    <!-- Overlay Backdrop -->
-    <div class="absolute inset-0 bg-brand-deep/40 backdrop-blur-xs transition-opacity duration-300" id="drawer-backdrop" onclick="closeDrawer()"></div>
-    <div class="absolute inset-y-0 right-0 max-w-full flex pl-10">
-        <div class="w-screen max-w-md bg-surface-white shadow-2xl border-l border-border-standard flex flex-col justify-between">
-            <!-- Drawer Header -->
-            <div class="p-6 border-b border-border-subtle flex items-start justify-between bg-surface-white">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary text-[22px]">calendar_month</span>
-                        <h2 class="font-headline-sm text-headline-sm text-brand-deep" id="drawer-title">Xếp lịch học mới</h2>
-                    </div>
-                    <p class="font-body-sm text-body-sm text-outline mt-1" id="drawer-subtitle">
-                        Nhập thông tin ca học, phòng máy và phân công giảng viên.
-                    </p>
-                </div>
-                <button onclick="closeDrawer()" class="p-1.5 rounded-xl text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors cursor-pointer">
-                    <span class="material-symbols-outlined text-[20px]">close</span>
-                </button>
-            </div>
+<!-- RIGHT SLIDE-OVER DRAWER (CREATE / UPDATE FORM - Smooth Slide Animation) -->
+<div id="drawer-backdrop" onclick="closeDrawer()" class="fixed inset-0 bg-brand-deep/40 backdrop-blur-xs z-50 transition-opacity duration-300 opacity-0 pointer-events-none"></div>
 
-            <!-- Drawer Form Body -->
-            <form id="drawer-form" method="post" action="/BuoiHoc/Create" class="flex-1 overflow-y-auto p-6 space-y-5">
+<div id="drawer-panel" class="fixed inset-y-0 right-0 w-full max-w-md bg-surface-white border-l border-border-standard shadow-2xl z-50 flex flex-col justify-between transform transition-transform duration-300 ease-out translate-x-full">
+    <!-- Drawer Header -->
+    <div class="p-6 border-b border-border-subtle flex items-start justify-between bg-surface-white">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-[22px]">calendar_month</span>
+                <h2 class="font-headline-sm text-headline-sm text-brand-deep" id="drawer-title">Xếp lịch học mới</h2>
+            </div>
+            <p class="font-body-sm text-body-sm text-outline mt-1" id="drawer-subtitle">
+                Nhập thông tin ca học, phòng máy và phân công giảng viên.
+            </p>
+        </div>
+        <button onclick="closeDrawer()" class="p-1.5 rounded-xl text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors cursor-pointer">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+    </div>
+
+    <!-- Drawer Form Body -->
+    <form id="drawer-form" method="post" action="/BuoiHoc/Create" class="flex-1 overflow-y-auto p-6 space-y-5">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="MaBuoiHoc" id="drawer-mabuoi" value="0"/>
 
-                <!-- Select: Lớp học -->
+                <!-- Select: Lớp học đào tạo kèm tìm kiếm nhanh và gom nhóm theo CTĐT -->
                 <div class="space-y-1.5">
-                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
-                        Lớp học đào tạo <span class="text-danger-crimson">*</span>
-                    </label>
+                    <div class="flex items-center justify-between">
+                        <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                            Lớp học đào tạo <span class="text-danger-crimson">*</span>
+                        </label>
+                        <span id="drawer-lop-count" class="text-[11px] text-outline font-medium">@lopHocs.Count() lớp</span>
+                    </div>
+
+                    <!-- Input tìm kiếm nhanh tên lớp / môn học -->
                     <div class="relative">
-                        <select name="MaLopHoc" id="drawer-malop" required class="w-full appearance-none bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-md text-body-md text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
-                            @foreach (var lop in lopHocs)
+                        <span class="material-symbols-outlined text-outline absolute left-3 top-1/2 -translate-y-1/2 text-[16px]">search</span>
+                        <input type="text" id="drawer-search-lop" oninput="filterDrawerLopHoc(this.value)" placeholder="Gõ tìm nhanh tên lớp, mã lớp hoặc môn học..." 
+                               class="w-full bg-surface-container-low border border-border-subtle rounded-xl pl-9 pr-8 py-1.5 text-xs text-brand-deep focus:outline-none focus:border-primary focus:bg-surface-white transition-all"/>
+                        <button type="button" onclick="clearDrawerLopSearch()" id="drawer-clear-search-lop" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-outline hover:text-brand-deep cursor-pointer">
+                            <span class="material-symbols-outlined text-[15px]">close</span>
+                        </button>
+                    </div>
+
+                    <!-- Dropdown danh sách lớp gom nhóm theo Chương trình đào tạo -->
+                    <div class="relative">
+                        <select name="MaLopHoc" id="drawer-malop" required onchange="onDrawerLopChanged(this)" class="w-full appearance-none bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-md text-body-md text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer">
+                            <option value="">-- Chọn lớp học --</option>
+                            @{
+                                var groupedLop = lopHocs.GroupBy(l => l.ChuongTrinhDaoTao?.TenChuongTrinh ?? "Chương trình đào tạo khác");
+                            }
+                            @foreach (var grp in groupedLop)
                             {
-                                <option value="@lop.MaLopHoc">@lop.TenLop (@(lop.SiSoToiDa) SV)</option>
+                                <optgroup label="📚 @grp.Key">
+                                    @foreach (var lop in grp)
+                                    {
+                                        <option value="@lop.MaLopHoc" data-ten="@lop.TenLop" data-gv="@(lop.TenGiangVien ?? "")" data-siso="@lop.SiSoToiDa" data-sobuoi="@lop.SoBuoiHoc" data-ctdt="@(lop.ChuongTrinhDaoTao?.TenChuongTrinh ?? "")">
+                                            @lop.TenLop (@lop.SiSoToiDa SV) @(!string.IsNullOrEmpty(lop.TenGiangVien) ? $"• GV: {lop.TenGiangVien}" : "")
+                                        </option>
+                                    }
+                                </optgroup>
                             }
                         </select>
-                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">expand_more</span>
+                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px] transition-transform duration-200">expand_more</span>
+                    </div>
+
+                    <!-- Info Box tóm tắt thông tin lớp được chọn -->
+                    <div id="drawer-lop-info-card" class="hidden p-2 rounded-xl bg-primary/[0.04] border border-primary/20 text-xs flex items-center justify-between text-brand-deep">
+                        <span id="drawer-lop-info-text" class="font-medium truncate">...</span>
+                        <span class="text-[10px] text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-full flex-shrink-0">Đã chọn</span>
                     </div>
                 </div>
 
-                <!-- Input: Phòng học -->
+                <!-- Input & Datalist: Phòng học / Phòng máy chuẩn UNETI (HA8, HA9, HA10, HA11 & Labs) -->
                 <div class="space-y-1.5">
-                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
-                        Phòng học / Phòng máy <span class="text-danger-crimson">*</span>
-                    </label>
+                    <div class="flex items-center justify-between">
+                        <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                            Phòng học / Phòng máy <span class="text-danger-crimson">*</span>
+                        </label>
+                        <span class="text-[11px] text-outline">Gõ hoặc chọn danh sách</span>
+                    </div>
                     <div class="relative">
-                        <input name="PhongHoc" id="drawer-phong" required class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-mono font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary uppercase" placeholder="Ví dụ: P.301, Lab CNTT 01" type="text" value="P.301"/>
+                        <input name="PhongHoc" id="drawer-phong" required list="list-phong-chuan" autocomplete="off" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-mono font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary uppercase tracking-wide pr-9" placeholder="Chọn hoặc nhập phòng (ví dụ: HA8-101, HA9-201, Lab...)..." type="text" value="HA8-101"/>
                         <span class="material-symbols-outlined text-outline absolute right-3 top-1/2 -translate-y-1/2 text-[18px]">meeting_room</span>
                     </div>
+                    <datalist id="list-phong-chuan">
+                        @foreach (var p in danhSachPhong)
+                        {
+                            <option value="@p">@p</option>
+                        }
+                    </datalist>
                 </div>
 
-                <!-- Input: Giảng viên -->
+                <!-- Select: Giảng viên phụ trách (Liên kết chính thức với bảng GiangVien) -->
                 <div class="space-y-1.5">
-                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
-                        Giảng viên phụ trách <span class="text-danger-crimson">*</span>
-                    </label>
+                    <div class="flex items-center justify-between">
+                        <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                            Giảng viên phụ trách <span class="text-danger-crimson">*</span>
+                        </label>
+                        <span id="drawer-gv-autofill-badge" class="hidden text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.2 rounded-md font-semibold animate-fade-in flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[13px]">check</span> Theo lớp học
+                        </span>
+                    </div>
+
                     <div class="relative">
-                        <input name="GiangVien" id="drawer-gv" required class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-md text-body-md text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Ví dụ: ThS. Nguyễn Văn A" type="text" value="ThS. Nguyễn Văn A"/>
-                        <span class="material-symbols-outlined text-outline absolute right-3 top-1/2 -translate-y-1/2 text-[18px]">person</span>
+                        <select name="GiangVien" id="drawer-gv" required class="w-full appearance-none bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-md text-body-md text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer">
+                            <option value="">-- Chọn giảng viên từ danh sách trung tâm --</option>
+                            @if (giangVienList.Any())
+                            {
+                                <optgroup label="👨‍🏫 Giảng viên trung tâm UNETI (@giangVienList.Count() thầy/cô)">
+                                    @foreach (var gv in giangVienList)
+                                    {
+                                        var hv = (gv.HocVi ?? "").Trim();
+                                        var ht = (gv.HoTen ?? "").Trim();
+                                        var gvDisplayName = (!string.IsNullOrEmpty(hv) && ht.StartsWith(hv, StringComparison.OrdinalIgnoreCase))
+                                            ? ht
+                                            : (string.IsNullOrEmpty(hv) ? ht : $"{hv} {ht}");
+                                        <option value="@gvDisplayName">@gvDisplayName • @gv.ChuyenNganh</option>
+                                    }
+                                </optgroup>
+                            }
+                        </select>
+                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px] transition-transform duration-200">expand_more</span>
                     </div>
                 </div>
 
@@ -708,6 +949,34 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                             Thời gian kết thúc <span class="text-danger-crimson">*</span>
                         </label>
                         <input name="ThoiGianKetThuc" id="drawer-ketthuc" required type="datetime-local" class="w-full bg-surface-white border border-border-standard rounded-xl px-3 py-2 font-mono text-xs text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"/>
+                    </div>
+                </div>
+
+                <!-- CẢNH BÁO TRÙNG LỊCH TRỰC TIẾP (REALTIME CONFLICT WARNING) -->
+                <div id="drawer-conflict-box" class="hidden transition-all duration-300">
+                    <!-- Red Alert khi phát hiện trùng lịch -->
+                    <div id="drawer-conflict-alert" class="hidden bg-rose-50 border-2 border-danger-crimson/80 rounded-2xl p-4 text-rose-950 shadow-sm animate-fade-in">
+                        <div class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-danger-crimson text-[24px] flex-shrink-0 animate-bounce">warning</span>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-bold text-danger-crimson text-xs uppercase tracking-wide flex items-center gap-1.5">
+                                    <span>Phát hiện xung đột / Trùng lịch học!</span>
+                                </h4>
+                                <p id="drawer-conflict-msg" class="text-xs text-rose-900 font-semibold mt-1 leading-relaxed">
+                                </p>
+                                <div class="mt-2.5 pt-2 border-t border-rose-200/90 flex items-center gap-1 text-[11px] text-danger-crimson font-medium">
+                                    <span class="material-symbols-outlined text-[15px]">block</span>
+                                    <span>Hệ thống đã khóa nút lưu. Vui lòng đổi giờ học, phòng học hoặc giảng viên khác để tránh trùng.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Green Alert khi khung giờ hoàn toàn an toàn -->
+                    <div id="drawer-valid-alert" class="hidden bg-emerald-50 border border-emerald-300 rounded-xl p-3 text-emerald-900 shadow-2xs">
+                        <div class="flex items-center gap-2 text-xs font-semibold text-emerald-800">
+                            <span class="material-symbols-outlined text-success-emerald text-[18px]">verified</span>
+                            <span>Khung giờ & phòng học hoàn toàn hợp lệ - Không bị trùng lịch.</span>
+                        </div>
                     </div>
                 </div>
 
@@ -760,17 +1029,97 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                     <button type="button" onclick="closeDrawer()" class="border border-border-standard bg-surface-white hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-4 py-2.5 rounded-xl transition-colors cursor-pointer">
                         Hủy bỏ
                     </button>
-                    <button type="submit" class="bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-5 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all cursor-pointer">
+                    <button type="submit" id="drawer-submit-btn" class="bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-5 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all cursor-pointer">
                         <span class="material-symbols-outlined text-[18px]">save</span>
                         <span id="drawer-submit-text">Lưu buổi học</span>
                     </button>
                 </div>
             </form>
-        </div>
-    </div>
 </div>
 
 <script>
+    // Weekly Timetable Week Navigation & Realtime Filters
+    let currentWeekOffset = 0;
+    const baseMondayDate = new Date('@mondayDate.ToString("yyyy-MM-ddTHH:mm:ss")');
+
+    function updateWeekDisplay() {
+        const monday = new Date(baseMondayDate);
+        monday.setDate(monday.getDate() + (currentWeekOffset * 7));
+        const sunday = new Date(monday);
+        sunday.setDate(sunday.getDate() + 6);
+
+        const pad = (n) => String(n).padStart(2, '0');
+        const mondayStr = `${pad(monday.getDate())}/${pad(monday.getMonth() + 1)}`;
+        const sundayStr = `${pad(sunday.getDate())}/${pad(sunday.getMonth() + 1)}/${sunday.getFullYear()}`;
+
+        // Tính số tuần ISO
+        const target = new Date(monday.valueOf());
+        const dayNr = (monday.getDay() + 6) % 7;
+        target.setDate(target.getDate() - dayNr + 3);
+        const firstThursday = target.valueOf();
+        target.setMonth(0, 1);
+        if (target.getDay() !== 4) {
+            target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+        }
+        const weekNum = 1 + Math.ceil((firstThursday - target) / 604800000);
+
+        const titleEl = document.getElementById('week-display-title');
+        if (titleEl) {
+            titleEl.innerText = `Tuần ${weekNum} (${mondayStr} - ${sundayStr})`;
+        }
+
+        const daysArr = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        daysArr.forEach((d, idx) => {
+            const dDate = new Date(monday);
+            dDate.setDate(dDate.getDate() + idx);
+            const dStr = `${pad(dDate.getDate())}/${pad(dDate.getMonth() + 1)}`;
+            const el = document.getElementById(`day-date-${d}`);
+            if (el) el.innerText = dStr;
+        });
+    }
+
+    function changeWeek(delta) {
+        currentWeekOffset += delta;
+        updateWeekDisplay();
+    }
+
+    function goToToday() {
+        currentWeekOffset = 0;
+        updateWeekDisplay();
+    }
+
+    function applyTimetableFilters() {
+        const filterPhong = document.getElementById('filter-timetable-phong')?.value?.toLowerCase() || '';
+        const filterGv = document.getElementById('filter-timetable-gv')?.value?.toLowerCase() || '';
+        const filterStatus = document.getElementById('filter-timetable-trangthai')?.value?.toLowerCase() || '';
+
+        const cards = document.querySelectorAll('.timetable-card');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const phong = (card.dataset.phong || '').toLowerCase();
+            const gv = (card.dataset.gv || '').toLowerCase();
+            const status = (card.dataset.trangthai || '').toLowerCase();
+
+            let match = true;
+            if (filterPhong && !phong.includes(filterPhong)) match = false;
+            if (filterGv && !gv.includes(filterGv)) match = false;
+            if (filterStatus && status !== filterStatus) match = false;
+
+            if (match) {
+                card.classList.remove('hidden');
+                visibleCount++;
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+
+        const countEl = document.getElementById('week-sessions-count');
+        if (countEl) {
+            countEl.innerText = `${visibleCount} buổi học phân bổ`;
+        }
+    }
+
     // Tab View Switcher (Timetable vs Table)
     window.currentViewMode = 'timetable';
     function switchView(mode) {
@@ -825,6 +1174,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                 area.innerHTML = newContent.innerHTML;
                 switchView(window.currentViewMode || 'timetable');
                 bindSelectAll();
+                if (window.buoiHocBulk) window.buoiHocBulk.updateState();
             }
 
             if (pushState) {
@@ -858,17 +1208,185 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
     }
 
     // Micro-interactions for Drawer and Global Modal
-    const drawer = document.getElementById('drawer-container');
+    const drawerBackdrop = document.getElementById('drawer-backdrop');
+    const drawerPanel = document.getElementById('drawer-panel');
     const drawerForm = document.getElementById('drawer-form');
 
+    function updateStatusRadioStyles() {
+        const map = [
+            { radio: 'radio-trangthai-scheduled', label: 'label-trangthai-scheduled', active: ['border-primary', 'bg-primary/10', 'ring-1', 'ring-primary'] },
+            { radio: 'radio-trangthai-completed', label: 'label-trangthai-completed', active: ['border-emerald-500', 'bg-emerald-50', 'ring-1', 'ring-emerald-500'] },
+            { radio: 'radio-trangthai-canceled', label: 'label-trangthai-canceled', active: ['border-rose-500', 'bg-rose-50', 'ring-1', 'ring-rose-500'] }
+        ];
+        map.forEach(m => {
+            const r = document.getElementById(m.radio);
+            const l = document.getElementById(m.label);
+            if (!r || !l) return;
+            m.active.forEach(cls => l.classList.remove(cls));
+            if (r.checked) {
+                m.active.forEach(cls => l.classList.add(cls));
+            }
+        });
+    }
+
+    document.querySelectorAll('input[name="TrangThai"]').forEach(r => {
+        r.addEventListener('change', updateStatusRadioStyles);
+    });
+
+    // Helper: Tìm kiếm nhanh lớp học trong Drawer
+    function filterDrawerLopHoc(kw) {
+        const q = (kw || '').trim().toLowerCase();
+        const select = document.getElementById('drawer-malop');
+        const clearBtn = document.getElementById('drawer-clear-search-lop');
+        const countEl = document.getElementById('drawer-lop-count');
+        if (!select) return;
+
+        if (clearBtn) {
+            if (q) clearBtn.classList.remove('hidden');
+            else clearBtn.classList.add('hidden');
+        }
+
+        let matchCount = 0;
+        const optgroups = select.querySelectorAll('optgroup');
+        optgroups.forEach(grp => {
+            let grpMatch = 0;
+            const options = grp.querySelectorAll('option');
+            options.forEach(opt => {
+                const text = (opt.text || '').toLowerCase();
+                const gv = (opt.dataset.gv || '').toLowerCase();
+                const ctdt = (opt.dataset.ctdt || '').toLowerCase();
+                if (!q || text.includes(q) || gv.includes(q) || ctdt.includes(q)) {
+                    opt.hidden = false;
+                    grpMatch++;
+                    matchCount++;
+                } else {
+                    opt.hidden = true;
+                }
+            });
+            grp.hidden = (grpMatch === 0);
+        });
+
+        if (countEl) {
+            if (q) countEl.innerText = `${matchCount} lớp khớp`;
+            else countEl.innerText = `${select.querySelectorAll('option:not([value=""])').length} lớp`;
+        }
+    }
+
+    function clearDrawerLopSearch() {
+        const input = document.getElementById('drawer-search-lop');
+        if (input) {
+            input.value = '';
+            filterDrawerLopHoc('');
+        }
+    }
+
+    // Helper: Tự động điền Giảng viên khi chọn Lớp học
+    function onDrawerLopChanged(selectEl, autoSelectGv = true) {
+        if (!selectEl) return;
+        const opt = selectEl.options[selectEl.selectedIndex];
+        const card = document.getElementById('drawer-lop-info-card');
+        const textEl = document.getElementById('drawer-lop-info-text');
+        const badgeGv = document.getElementById('drawer-gv-autofill-badge');
+
+        if (!opt || !opt.value) {
+            if (card) card.classList.add('hidden');
+            if (badgeGv) badgeGv.classList.add('hidden');
+            return;
+        }
+
+        const tenLop = opt.dataset.ten || opt.text;
+        const gvLop = opt.dataset.gv || '';
+        const siso = opt.dataset.siso || '';
+        const sobuoi = opt.dataset.sobuoi || '';
+
+        if (card && textEl) {
+            textEl.innerText = `${tenLop} • Sĩ số: ${siso} SV • Quy định: ${sobuoi} buổi`;
+            card.classList.remove('hidden');
+        }
+
+        if (autoSelectGv && gvLop) {
+            setDrawerGiangVienValue(gvLop);
+            if (badgeGv) {
+                badgeGv.innerText = `✓ Theo lớp: ${gvLop}`;
+                badgeGv.classList.remove('hidden');
+            }
+        } else if (!autoSelectGv && gvLop) {
+            if (badgeGv) {
+                badgeGv.innerText = `✓ GV lớp: ${gvLop}`;
+                badgeGv.classList.remove('hidden');
+            }
+        } else {
+            if (badgeGv) badgeGv.classList.add('hidden');
+        }
+
+        checkScheduleConflictLive();
+    }
+
+    // Helper: Gán giá trị Giảng viên vào Dropdown (Hỗ trợ cả khớp chính xác & thỉnh giảng)
+    function setDrawerGiangVienValue(gvName) {
+        const gvSelect = document.getElementById('drawer-gv');
+        if (!gvSelect || !gvName) return;
+
+        let matched = false;
+        for (let i = 0; i < gvSelect.options.length; i++) {
+            const val = gvSelect.options[i].value;
+            if (val && val.toLowerCase() === gvName.toLowerCase()) {
+                gvSelect.selectedIndex = i;
+                matched = true;
+                break;
+            }
+        }
+        if (!matched) {
+            for (let i = 0; i < gvSelect.options.length; i++) {
+                const val = gvSelect.options[i].value;
+                if (val && (val.toLowerCase().includes(gvName.toLowerCase()) || gvName.toLowerCase().includes(val.toLowerCase()))) {
+                    gvSelect.selectedIndex = i;
+                    matched = true;
+                    break;
+                }
+            }
+        }
+        if (!matched && gvName) {
+            const opt = new Option(gvName, gvName, true, true);
+            gvSelect.add(opt);
+        }
+    }
+
+    // Helper: Nút chọn nhanh phòng học 1 chạm
+    function setDrawerPhong(phongName) {
+        const el = document.getElementById('drawer-phong');
+        if (el) {
+            el.value = phongName;
+            checkScheduleConflictLive();
+        }
+    }
+
     function openDrawer(mode) {
-        drawer.classList.remove('hidden');
+        if (drawerBackdrop && drawerPanel) {
+            drawerBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+            drawerBackdrop.classList.add('opacity-100');
+            drawerPanel.classList.remove('translate-x-full');
+        }
+        const statusGroup = document.getElementById('drawer-trangthai-group');
         if (mode === 'create') {
             document.getElementById('drawer-title').innerText = 'Xếp lịch học mới';
             document.getElementById('drawer-subtitle').innerText = 'Nhập thông tin ca học, phòng máy và phân công giảng viên.';
             document.getElementById('drawer-submit-text').innerText = 'Lưu buổi học';
             drawerForm.action = '/BuoiHoc/Create';
             document.getElementById('drawer-mabuoi').value = '0';
+            document.getElementById('radio-trangthai-scheduled').checked = true;
+            if (statusGroup) statusGroup.classList.add('hidden');
+            updateStatusRadioStyles();
+
+            // Reset form fields & helpers
+            clearDrawerLopSearch();
+            document.getElementById('drawer-lop-info-card')?.classList.add('hidden');
+            document.getElementById('drawer-gv-autofill-badge')?.classList.add('hidden');
+            document.getElementById('drawer-malop').value = '';
+            document.getElementById('drawer-phong').value = 'HA8-101';
+            document.getElementById('drawer-gv').value = '';
+            document.getElementById('drawer-noidung').value = '';
+            document.getElementById('drawer-ghichu').value = '';
             
             // Set default times (Tomorrow 08:00 to 11:30)
             const tomorrow = new Date();
@@ -878,11 +1396,18 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
             const dd = String(tomorrow.getDate()).padStart(2, '0');
             document.getElementById('drawer-batdau').value = `${yyyy}-${mm}-${dd}T08:00`;
             document.getElementById('drawer-ketthuc').value = `${yyyy}-${mm}-${dd}T11:30`;
+            checkScheduleConflictLive();
         }
     }
 
     function closeDrawer() {
-        drawer.classList.add('hidden');
+        if (drawerBackdrop && drawerPanel) {
+            drawerBackdrop.classList.remove('opacity-100');
+            drawerBackdrop.classList.add('opacity-0', 'pointer-events-none');
+            drawerPanel.classList.add('translate-x-full');
+        }
+        const box = document.getElementById('drawer-conflict-box');
+        if (box) box.classList.add('hidden');
     }
 
     // Quick Add Schedule into a specific Day and Shift from Timetable Grid
@@ -890,7 +1415,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         openDrawer('create');
         
         // Calculate date for next dayName
-        const dayMap = { 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6 };
+        const dayMap = { 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6, 'Sunday': 7 };
         const targetDay = dayMap[dayName] || 1;
         const now = new Date();
         const currentDay = now.getDay() || 7;
@@ -909,6 +1434,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
 
         document.getElementById('drawer-batdau').value = `${yyyy}-${mm}-${dd}T${startH}`;
         document.getElementById('drawer-ketthuc').value = `${yyyy}-${mm}-${dd}T${endH}`;
+        checkScheduleConflictLive();
     }
 
     function openEditDrawerFromElement(btnOrEl) {
@@ -920,14 +1446,19 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         document.getElementById('drawer-submit-text').innerText = 'Cập nhật';
         drawerForm.action = '/BuoiHoc/EditPost';
 
+        clearDrawerLopSearch();
         document.getElementById('drawer-mabuoi').value = item.dataset.id;
-        document.getElementById('drawer-malop').value = item.dataset.MaLopHoc;
+        document.getElementById('drawer-malop').value = item.dataset.malop;
+        onDrawerLopChanged(document.getElementById('drawer-malop'), false);
         document.getElementById('drawer-phong').value = item.dataset.phong;
-        document.getElementById('drawer-gv').value = item.dataset.gv;
+        setDrawerGiangVienValue(item.dataset.gv);
         document.getElementById('drawer-batdau').value = item.dataset.batdau;
         document.getElementById('drawer-ketthuc').value = item.dataset.ketthuc;
         document.getElementById('drawer-noidung').value = item.dataset.noidung || '';
         document.getElementById('drawer-ghichu').value = item.dataset.ghichu || '';
+
+        const statusGroup = document.getElementById('drawer-trangthai-group');
+        if (statusGroup) statusGroup.classList.remove('hidden');
 
         const status = item.dataset.trangthai;
         if (status === 'Đã hoàn thành') {
@@ -937,8 +1468,14 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         } else {
             document.getElementById('radio-trangthai-scheduled').checked = true;
         }
+        updateStatusRadioStyles();
 
-        drawer.classList.remove('hidden');
+        if (drawerBackdrop && drawerPanel) {
+            drawerBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+            drawerBackdrop.classList.add('opacity-100');
+            drawerPanel.classList.remove('translate-x-full');
+        }
+        checkScheduleConflictLive();
     }
 
     function openEditDrawerFromRow(btn) {
@@ -971,11 +1508,98 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         loadBuoiHocPage(window.location.href, false);
     };
 
+    // Realtime Schedule Conflict Checker
+    let conflictCheckTimeout = null;
+    let isCurrentFormConflicted = false;
+
+    async function checkScheduleConflictLive() {
+        clearTimeout(conflictCheckTimeout);
+        conflictCheckTimeout = setTimeout(async () => {
+            const maBuoi = document.getElementById('drawer-mabuoi')?.value || '0';
+            const maLop = document.getElementById('drawer-malop')?.value;
+            const phong = document.getElementById('drawer-phong')?.value?.trim();
+            const gv = document.getElementById('drawer-gv')?.value?.trim();
+            const batdau = document.getElementById('drawer-batdau')?.value;
+            const ketthuc = document.getElementById('drawer-ketthuc')?.value;
+
+            const box = document.getElementById('drawer-conflict-box');
+            const conflictAlert = document.getElementById('drawer-conflict-alert');
+            const validAlert = document.getElementById('drawer-valid-alert');
+            const conflictMsg = document.getElementById('drawer-conflict-msg');
+            const submitBtn = document.getElementById('drawer-submit-btn') || drawerForm?.querySelector('button[type="submit"]');
+
+            if (!maLop || !phong || !batdau || !ketthuc) {
+                if (box) box.classList.add('hidden');
+                isCurrentFormConflicted = false;
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+                return;
+            }
+
+            try {
+                const params = new URLSearchParams({
+                    maBuoiHoc: maBuoi,
+                    maLopHoc: maLop,
+                    phongHoc: phong,
+                    giangVien: gv || '',
+                    batDau: batdau,
+                    ketThuc: ketthuc
+                });
+
+                const res = await fetch(`/BuoiHoc/KiemTraTrungLich?${params.toString()}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (box) box.classList.remove('hidden');
+
+                    if (data.hasConflict) {
+                        isCurrentFormConflicted = true;
+                        if (conflictAlert) conflictAlert.classList.remove('hidden');
+                        if (validAlert) validAlert.classList.add('hidden');
+                        if (conflictMsg) conflictMsg.innerText = data.message;
+                        if (submitBtn) {
+                            submitBtn.disabled = true;
+                            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                        }
+                    } else {
+                        isCurrentFormConflicted = false;
+                        if (conflictAlert) conflictAlert.classList.add('hidden');
+                        if (validAlert) validAlert.classList.remove('hidden');
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error('Lỗi khi kiểm tra trùng lịch:', err);
+            }
+        }, 250);
+    }
+
+    ['drawer-malop', 'drawer-phong', 'drawer-gv', 'drawer-batdau', 'drawer-ketthuc'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', checkScheduleConflictLive);
+            el.addEventListener('change', checkScheduleConflictLive);
+        }
+    });
+
     // AJAX Form Submission for Right Drawer (Create & Edit)
     if (drawerForm) {
         drawerForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            const submitBtn = drawerForm.querySelector('button[type="submit"]');
+            if (isCurrentFormConflicted) {
+                if (window.showToast) {
+                    window.showToast('Không thể lưu do lịch học đang bị trùng! Vui lòng chọn giờ hoặc phòng khác.', 'error');
+                } else {
+                    alert('Không thể lưu do lịch học đang bị trùng! Vui lòng chọn giờ hoặc phòng khác.');
+                }
+                return;
+            }
+
+            const submitBtn = document.getElementById('drawer-submit-btn') || drawerForm.querySelector('button[type="submit"]');
             const submitText = document.getElementById('drawer-submit-text');
             const originalText = submitText ? submitText.innerText : 'Lưu buổi học';
             if (submitBtn) submitBtn.disabled = true;
@@ -1007,7 +1631,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                 console.error('Lỗi khi gửi form buổi học:', err);
                 if (window.showToast) window.showToast('Có lỗi xảy ra khi lưu buổi học.', 'error');
             } finally {
-                if (submitBtn) submitBtn.disabled = false;
+                if (submitBtn && !isCurrentFormConflicted) submitBtn.disabled = false;
                 if (submitText) submitText.innerText = originalText;
             }
         });
@@ -1046,7 +1670,29 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         downloadLink.click();
         document.body.removeChild(downloadLink);
     }
-// Tự động mở ngăn kéo Xếp lịch học nếu URL có tham số create=true
+    function confirmCleanupConflicts() {
+        if (window.openGlobalDeleteModal) {
+            window.openGlobalDeleteModal({
+                title: 'Dọn dẹp ca học trùng lặp?',
+                action: '/BuoiHoc/XuLyTrungLich',
+                id: 0,
+                itemName: 'Các ca học bị trùng lịch',
+                message: 'Hệ thống sẽ tự động quét toàn bộ lịch học, hủy các ca lặp và giữ lại 1 ca chuẩn cho mỗi phòng/giảng viên.',
+                warning: 'Thao tác này sẽ chuyển các ca trùng sang trạng thái "Đã hủy" và không thể hoàn tác.',
+                submitText: 'Tiến hành dọn dẹp'
+            });
+        } else {
+            if (confirm('Bạn có chắc muốn tự động dọn dẹp các ca học bị trùng lặp?')) {
+                const form = document.createElement('form');
+                form.method = 'post';
+                form.action = '/BuoiHoc/XuLyTrungLich';
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    }
+
+    // Tự động mở ngăn kéo Xếp lịch học nếu URL có tham số create=true
     (function checkUrlForCreate() {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('create') === 'true' || urlParams.get('action') === 'create') {
@@ -1057,4 +1703,15 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
             }, 150);
         }
     })();
+
+    // Khởi tạo Bulk Delete cho Buổi học
+    window.buoiHocBulk = window.initBulkDelete({
+        selectAllId: 'selectAllBuoiHoc',
+        checkboxClass: 'buoihoc-cb',
+        btnDeleteId: 'btnBulkDeleteBuoiHoc',
+        countBadgeId: 'selectedBuoiHocCount',
+        deleteUrl: '/BuoiHoc/DeleteMultiple',
+        itemLabel: 'buổi học',
+        onSuccess: () => loadBuoiHocPage(window.location.href, false)
+    });
 </script>

@@ -64,28 +64,68 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         // ========================================================
         // 1. ACTION INDEX: HIỂN THỊ GIAO DIỆN CHÍNH 2 TAB (TaiKhoan & HocVien)
         // ========================================================
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(
+            string? search = null,
+            string? trangThai = null,
+            string? trinhDo = null,
+            string? sortBy = null,
+            int page = 1)
         {
             if (!CoQuyenQuanTri(out var redirectResult))
             {
                 return redirectResult!;
             }
 
+            int pageSize = 8;
+            if (page < 1) page = 1;
+
+            bool? filterTrangThai = null;
+            if (!string.IsNullOrWhiteSpace(trangThai))
+            {
+                if (trangThai == "Đang học" || trangThai == "active" || trangThai.ToLower() == "true")
+                    filterTrangThai = true;
+                else if (trangThai == "Tạm khóa" || trangThai == "locked" || trangThai.ToLower() == "false")
+                    filterTrangThai = false;
+            }
+
+            var (pagedStudents, totalItems) = await _hocVienRepo.GetPagedAsync(
+                search, filterTrangThai, page, pageSize, trinhDo, sortBy);
+
+            int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            if (totalPages < 1) totalPages = 1;
+            if (page > totalPages)
+            {
+                page = totalPages;
+                (pagedStudents, totalItems) = await _hocVienRepo.GetPagedAsync(
+                    search, filterTrangThai, page, pageSize, trinhDo, sortBy);
+            }
+
+            var allStudents = await _hocVienService.GetDanhSachHocVienAsync();
             var accounts = await _hocVienService.GetDanhSachTaiKhoanAsync();
-            var students = await _hocVienService.GetDanhSachHocVienAsync();
             var classes = await _hocVienService.GetDanhSachLopHocAsync();
             var (tongHocVien, soGiaoVu, soAdmin, soBiKhoa) = await _hocVienService.GetThongKeAsync();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalItems = totalItems;
+            ViewBag.PageSize = pageSize;
+            ViewBag.DangHocCount = allStudents.Count(h => h.TrangThai);
+            ViewBag.TamKhoaCount = allStudents.Count(h => !h.TrangThai);
+            ViewBag.Search = search;
+            ViewBag.SelectedTrangThai = trangThai;
+            ViewBag.SelectedTrinhDo = trinhDo;
+            ViewBag.SortBy = sortBy;
 
             var viewModel = new HocVienIndexViewModel
             {
                 DanhSachTaiKhoan = accounts,
-                DanhSachHocVien = students,
+                DanhSachHocVien = pagedStudents.ToList(),
                 DanhSachLopHoc = classes,
                 TongSoHocVien = tongHocVien,
                 SoGiaoVu = soGiaoVu,
                 SoAdmin = soAdmin,
                 SoBiKhoa = soBiKhoa,
-                CurrentTab = "accounts"
+                CurrentTab = "profiles"
             };
 
             return View(viewModel);
@@ -97,6 +137,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         [HttpGet]
         public async Task<IActionResult> FilterHocVienAjax(string? keyword, string? status, int? maLopHoc)
         {
+            if (!CoQuyenQuanTri(out _))
+            {
+                return Unauthorized();
+            }
+
             bool? trangThai = null;
             if (status == "active") trangThai = true;
             else if (status == "locked") trangThai = false;
@@ -111,6 +156,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         [HttpGet]
         public async Task<IActionResult> FilterTaiKhoanAjax(string? keyword, string? role, string? status)
         {
+            if (!CoQuyenQuanTri(out _))
+            {
+                return Unauthorized();
+            }
+
             bool? trangThai = null;
             if (status == "active") trangThai = true;
             else if (status == "locked") trangThai = false;
@@ -118,6 +168,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             string? vaiTro = null;
             if (role == "Admin") vaiTro = "Admin";
             else if (role == "Giáo vụ" || role == "GiaoVu") vaiTro = "GiaoVu";
+            else if (role == "Giảng viên" || role == "GiangVien") vaiTro = "GiangVien";
             else if (role == "Học viên" || role == "HocVien") vaiTro = "HocVien";
 
             var danhSach = await _hocVienService.TimKiemTaiKhoanAsync(keyword, vaiTro, trangThai);
@@ -130,6 +181,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         [HttpGet]
         public async Task<IActionResult> GetChiTietHocVienJson(int id)
         {
+            if (!CoQuyenQuanTri(out _))
+            {
+                return Json(new { success = false, message = "Bạn không có quyền xem thông tin học viên." });
+            }
+
             var hv = await _hocVienService.GetChiTietHocVienAsync(id);
             if (hv == null)
             {
@@ -240,9 +296,51 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             return Json(new { success, message = error ?? "Đã xóa học viên thành công!" });
         }
 
+        // ========================================================
+        // ACTION DELETE MULTIPLE: XÓA NHIỀU HỌC VIÊN
+        // ========================================================
+        [HttpPost]
+        public async Task<IActionResult> DeleteMultiple([FromBody] List<int>? ids)
+        {
+            if (!CoQuyenQuanTri(out _))
+            {
+                return Json(new { success = false, message = "Bạn không có quyền quản trị." });
+            }
+
+            if (ids == null || !ids.Any())
+                return Json(new { success = false, message = "Vui lòng chọn ít nhất 1 học viên để xóa." });
+
+            int deleted = 0;
+            int skipped = 0;
+
+            foreach (var id in ids)
+            {
+                var (success, _) = await _hocVienService.XoaHocVienAsync(id);
+                if (success) deleted++;
+                else skipped++;
+            }
+
+            if (deleted == 0 && skipped > 0)
+            {
+                return Json(new { success = false, message = $"Không thể xóa {skipped} học viên đã chọn do đang có lịch sử đăng ký học hoặc kết quả đào tạo." });
+            }
+
+            string msg = $"Đã xóa thành công {deleted} học viên.";
+            if (skipped > 0)
+            {
+                msg += $" Bỏ qua {skipped} học viên đang có dữ liệu đăng ký/kết quả học tập liên quan.";
+            }
+            return Json(new { success = true, message = msg, deletedCount = deleted, skippedCount = skipped });
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetHocVienJson(int id)
         {
+            if (!CoQuyenQuanTri(out _))
+            {
+                return Json(new { success = false, message = "Bạn không có quyền quản trị." });
+            }
+
             var hv = await _hocVienRepo.GetByIdWithDetailsAsync(id);
 
             if (hv == null) return Json(new { success = false, message = "Không tìm thấy học viên." });
@@ -282,6 +380,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             if (!hocVien.NgaySinh.HasValue)
             {
                 ModelState.AddModelError(nameof(HocVien.NgaySinh), "Ngày tháng năm sinh không được để trống.");
+            }
+
+            if (string.IsNullOrWhiteSpace(hocVien.SoDienThoai) || !System.Text.RegularExpressions.Regex.IsMatch(hocVien.SoDienThoai.Trim(), @"^0\d{9}$"))
+            {
+                ModelState.AddModelError(nameof(HocVien.SoDienThoai), "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0 (Ví dụ: 0912345678).");
             }
 
             if (!ModelState.IsValid)
@@ -324,6 +427,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             if (!hocVien.NgaySinh.HasValue)
             {
                 ModelState.AddModelError(nameof(HocVien.NgaySinh), "Ngày tháng năm sinh không được để trống.");
+            }
+
+            if (string.IsNullOrWhiteSpace(hocVien.SoDienThoai) || !System.Text.RegularExpressions.Regex.IsMatch(hocVien.SoDienThoai.Trim(), @"^0\d{9}$"))
+            {
+                ModelState.AddModelError(nameof(HocVien.SoDienThoai), "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0 (Ví dụ: 0912345678).");
             }
 
             if (!ModelState.IsValid)
@@ -404,7 +512,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return redirectResult!;
             }
 
-            return View(new HocVien { TrangThai = true });
+            return RedirectToAction(nameof(Index), new { create = "true" });
         }
 
         [HttpPost]
@@ -419,6 +527,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             if (!hocVien.NgaySinh.HasValue)
             {
                 ModelState.AddModelError(nameof(HocVien.NgaySinh), "Ngày tháng năm sinh không được để trống.");
+            }
+
+            if (string.IsNullOrWhiteSpace(hocVien.SoDienThoai) || !System.Text.RegularExpressions.Regex.IsMatch(hocVien.SoDienThoai.Trim(), @"^0\d{9}$"))
+            {
+                ModelState.AddModelError(nameof(HocVien.SoDienThoai), "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0 (Ví dụ: 0912345678).");
             }
 
             if (!ModelState.IsValid)
@@ -469,6 +582,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             if (!hocVien.NgaySinh.HasValue)
             {
                 ModelState.AddModelError(nameof(HocVien.NgaySinh), "Ngày tháng năm sinh không được để trống.");
+            }
+
+            if (string.IsNullOrWhiteSpace(hocVien.SoDienThoai) || !System.Text.RegularExpressions.Regex.IsMatch(hocVien.SoDienThoai.Trim(), @"^0\d{9}$"))
+            {
+                ModelState.AddModelError(nameof(HocVien.SoDienThoai), "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0 (Ví dụ: 0912345678).");
             }
 
             if (!ModelState.IsValid)

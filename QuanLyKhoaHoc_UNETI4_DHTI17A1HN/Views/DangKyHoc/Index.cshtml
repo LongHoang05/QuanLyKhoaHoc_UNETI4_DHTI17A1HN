@@ -1,4 +1,4 @@
-﻿@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc>
+@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc>
 @{
     // Họ và tên: Nguyễn Hoàng Long
     // Mã sinh viên: 23103100046
@@ -20,12 +20,12 @@
 
 <div id="dangky-content-area" class="flex flex-col gap-y-6 transition-opacity duration-200">
     <!-- Sub-header Navigation Bar -->
-    <section class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border-standard">
+    <section class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 card-pro">
         <div>
             <div class="flex items-center gap-2 text-outline font-label-sm text-label-sm uppercase tracking-wider mb-1">
-                <span>QUẢN LÝ ĐÀO TẠO</span>
+                <span>ĐÀO TẠO UNETI</span>
                 <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-brand-deep font-semibold">XÉT DUYỆT & THU HỌC PHÍ</span>
+                <span class="text-primary font-semibold">XÉT DUYỆT &amp; THU HỌC PHÍ</span>
             </div>
             <h1 class="font-headline-md text-headline-md text-brand-deep font-bold tracking-tight">
                 Tiếp Nhận & Xử Lý Đơn Đăng Ký
@@ -42,41 +42,41 @@
 
     <!-- 3 Stat Cards (Top KPI) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Hồ sơ chờ xét duyệt</span>
-                <div class="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                <span class="text-outline font-label-md text-label-md font-medium">Hồ sơ chờ xét duyệt</span>
+                <div class="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600">
                     <span class="material-symbols-outlined text-[20px]">pending_actions</span>
                 </div>
             </div>
             <div class="flex items-baseline gap-2">
-                <span class="font-display text-[30px] leading-8 text-amber-700 tracking-tight font-black font-mono">@ViewBag.ChoDuyetCount</span>
+                <span id="kpi-choduyet" class="font-display text-[30px] leading-8 text-amber-700 tracking-tight font-black font-mono">@ViewBag.ChoDuyetCount</span>
                 <span class="text-xs text-amber-600 font-medium">cần xử lý</span>
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Đã phê duyệt nhập học</span>
-                <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                <span class="text-outline font-label-md text-label-md font-medium">Đã phê duyệt nhập học</span>
+                <div class="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center text-primary">
                     <span class="material-symbols-outlined text-[20px]">how_to_reg</span>
                 </div>
             </div>
             <div class="flex items-baseline gap-2">
-                <span class="font-display text-[30px] leading-8 text-blue-700 tracking-tight font-black font-mono">@ViewBag.DaDuyetCount</span>
+                <span id="kpi-daduyet" class="font-display text-[30px] leading-8 text-blue-700 tracking-tight font-black font-mono">@ViewBag.DaDuyetCount</span>
                 <span class="text-xs text-blue-600 font-medium font-mono">học viên đủ điều kiện</span>
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Tổng học phí đã thu</span>
-                <div class="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                <span class="text-outline font-label-md text-label-md font-medium">Tổng học phí đã thu</span>
+                <div class="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
                     <span class="material-symbols-outlined text-[20px]">payments</span>
                 </div>
             </div>
             <div class="flex items-baseline gap-2">
-                <span class="font-display text-[26px] leading-8 text-emerald-700 tracking-tight font-black font-mono">
+                <span id="kpi-doanhthu" class="font-display text-[26px] leading-8 text-emerald-700 tracking-tight font-black font-mono">
                     @(((double)ViewBag.TongDoanhThu).ToString("N0")) đ
                 </span>
             </div>
@@ -84,40 +84,18 @@
     </div>
 
     <!-- Filters & Search Toolbar -->
-    <div class="bg-surface-white rounded-2xl p-4 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-wrap items-center justify-between gap-3">
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-4 card-pro flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
             <!-- Search Input -->
-            <div class="relative flex-1 min-w-[220px]">
+            <div class="relative flex-1 min-w-[240px]">
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span>
                 <input type="text" id="searchInput" value="@search" placeholder="Tìm kiếm theo học viên, email, SĐT, lớp..." 
-                       class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep placeholder:text-outline/60" />
-            </div>
-
-            <!-- Filter Chương trình đào tạo (Mục 8.1) -->
-            <div class="hidden">
-                <select id="filterMaCT" class="w-full px-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep">
-                    <option value="">Tất cả CTĐT</option>
-                    @foreach (var ct in chuongTrinhList)
-                    {
-                        <!option value="@ct.MaChuongTrinh" @(selectedMaCT == ct.MaChuongTrinh ? "selected" : "")>@ct.TenChuongTrinh</!option>
-                    }
-                </select>
-            </div>
-
-            <!-- Filter Lớp học -->
-            <div class="min-w-[170px]">
-                <select id="filterMaLop" class="w-full px-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep">
-                    <option value="">Tất cả lớp học</option>
-                    @foreach (var lop in lopHocList)
-                    {
-                        <!option value="@lop.MaLopHoc" @(selectedMaLop == lop.MaLopHoc ? "selected" : "")>@lop.TenLop</!option>
-                    }
-                </select>
+                       class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
             </div>
 
             <!-- Filter Trạng thái duyệt -->
-            <div class="min-w-[150px]">
-                <select id="filterTrangThai" class="w-full px-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep">
+            <div class="relative min-w-[160px]">
+                <select id="filterTrangThai" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
                     <option value="">Tất cả trạng thái</option>
                     <!option value="Chờ duyệt" @(selectedTrangThai == "Chờ duyệt" ? "selected" : "")>Chờ duyệt</!option>
                     <!option value="Đã duyệt" @(selectedTrangThai == "Đã duyệt" ? "selected" : "")>Đã duyệt</!option>
@@ -127,31 +105,32 @@
                     <!option value="Từ chối" @(selectedTrangThai == "Từ chối" ? "selected" : "")>Từ chối</!option>
                     <!option value="Đã hủy" @(selectedTrangThai == "Đã hủy" ? "selected" : "")>Đã hủy</!option>
                 </select>
+                <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
             </div>
 
             <!-- Sắp xếp (Mục 8.1) -->
-            <div class="hidden">
-                <select id="filterSortBy" class="w-full px-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep">
+            <div class="relative min-w-[165px]">
+                <select id="filterSortBy" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors font-medium">
                     <!option value="" @(sortBy == "" ? "selected" : "")>Mới nhất trước</!option>
                     <!option value="ngay_asc" @(sortBy == "ngay_asc" ? "selected" : "")>Cũ nhất trước</!option>
                     <!option value="ten_asc" @(sortBy == "ten_asc" ? "selected" : "")>Tên học viên A-Z</!option>
                     <!option value="ten_desc" @(sortBy == "ten_desc" ? "selected" : "")>Tên học viên Z-A</!option>
+                    <!option value="tien_desc" @(sortBy == "tien_desc" ? "selected" : "")>Học phí đã thu cao nhất</!option>
                 </select>
-            </div>
-
-            <!-- Date Range Filters -->
-            <div class="hidden">
-                <span>Từ:</span>
-                <input type="date" id="filterTuNgay" value="@tuNgay" class="px-2 py-1.5 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white font-mono" />
-                <span>Đến:</span>
-                <input type="date" id="filterDenNgay" value="@denNgay" class="px-2 py-1.5 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white font-mono" />
+                <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">sort</span>
             </div>
         </div>
 
-        <button type="button" onclick="resetFilters()" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1 px-3 py-2 rounded-xl hover:bg-surface-container-low transition-colors">
-            <span class="material-symbols-outlined text-[16px]">restart_alt</span>
-            <span>Đặt lại</span>
-        </button>
+        <div class="flex items-center gap-2">
+            <button id="btnBulkDeleteDk" type="button" class="hidden items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition-all cursor-pointer shadow-xs active:scale-95" title="Xóa các hồ sơ đã chọn">
+                <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+                <span>Xóa đã chọn (<span id="selectedDkCount">0</span>)</span>
+            </button>
+            <button type="button" onclick="resetFilters()" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
+                <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                <span>Đặt lại</span>
+            </button>
+        </div>
     </div>
 
     <!-- Table Section (SPA Ajax Replace Target) -->
@@ -315,21 +294,19 @@
         searchDebounceTimer = setTimeout(() => { currentPage = 1; loadTableData(); }, 350);
     });
 
-    document.getElementById('filterMaCT').addEventListener('change', () => { currentPage = 1; loadTableData(); });
-    document.getElementById('filterMaLop').addEventListener('change', () => { currentPage = 1; loadTableData(); });
-    document.getElementById('filterTrangThai').addEventListener('change', () => { currentPage = 1; loadTableData(); });
-    document.getElementById('filterSortBy').addEventListener('change', () => { currentPage = 1; loadTableData(); });
-    document.getElementById('filterTuNgay').addEventListener('change', () => { currentPage = 1; loadTableData(); });
-    document.getElementById('filterDenNgay').addEventListener('change', () => { currentPage = 1; loadTableData(); });
+    document.getElementById('filterMaCT')?.addEventListener('change', () => { currentPage = 1; loadTableData(); });
+    document.getElementById('filterTrangThai')?.addEventListener('change', () => { currentPage = 1; loadTableData(); });
+    document.getElementById('filterSortBy')?.addEventListener('change', () => { currentPage = 1; loadTableData(); });
+    document.getElementById('filterTuNgay')?.addEventListener('change', () => { currentPage = 1; loadTableData(); });
+    document.getElementById('filterDenNgay')?.addEventListener('change', () => { currentPage = 1; loadTableData(); });
 
     function resetFilters() {
-        document.getElementById('searchInput').value = '';
-        document.getElementById('filterMaCT').value = '';
-        document.getElementById('filterMaLop').value = '';
-        document.getElementById('filterTrangThai').value = '';
-        document.getElementById('filterSortBy').value = '';
-        document.getElementById('filterTuNgay').value = '';
-        document.getElementById('filterDenNgay').value = '';
+        if (document.getElementById('searchInput')) document.getElementById('searchInput').value = '';
+        if (document.getElementById('filterMaCT')) document.getElementById('filterMaCT').value = '';
+        if (document.getElementById('filterTrangThai')) document.getElementById('filterTrangThai').value = '';
+        if (document.getElementById('filterSortBy')) document.getElementById('filterSortBy').value = '';
+        if (document.getElementById('filterTuNgay')) document.getElementById('filterTuNgay').value = '';
+        if (document.getElementById('filterDenNgay')) document.getElementById('filterDenNgay').value = '';
         currentPage = 1;
         loadTableData();
     }
@@ -340,18 +317,16 @@
     }
 
     function loadTableData() {
-        const search = document.getElementById('searchInput').value.trim();
-        const maChuongTrinh = document.getElementById('filterMaCT').value;
-        const maLop = document.getElementById('filterMaLop').value;
-        const trangThai = document.getElementById('filterTrangThai').value;
-        const sortBy = document.getElementById('filterSortBy').value;
-        const tuNgay = document.getElementById('filterTuNgay').value;
-        const denNgay = document.getElementById('filterDenNgay').value;
+        const search = document.getElementById('searchInput')?.value.trim() || '';
+        const maChuongTrinh = document.getElementById('filterMaCT')?.value || '';
+        const trangThai = document.getElementById('filterTrangThai')?.value || '';
+        const sortBy = document.getElementById('filterSortBy')?.value || '';
+        const tuNgay = document.getElementById('filterTuNgay')?.value || '';
+        const denNgay = document.getElementById('filterDenNgay')?.value || '';
 
         const params = new URLSearchParams({
             search: search,
             maChuongTrinh: maChuongTrinh,
-            maLop: maLop,
             trangThai: trangThai,
             sortBy: sortBy,
             tuNgay: tuNgay,
@@ -369,6 +344,7 @@
         .then(html => {
             wrapper.innerHTML = html;
             wrapper.classList.remove('opacity-50');
+            if (window.dkBulk) window.dkBulk.updateState();
         })
         .catch(err => {
             console.error(err);
@@ -398,6 +374,16 @@
         content.classList.add('scale-95');
     }
 
+    function updateKpiStats(stats) {
+        if (!stats) return;
+        const elChoDuyet = document.getElementById('kpi-choduyet');
+        const elDaDuyet = document.getElementById('kpi-daduyet');
+        const elDoanhThu = document.getElementById('kpi-doanhthu');
+        if (elChoDuyet && stats.choDuyetCount !== undefined) elChoDuyet.innerText = stats.choDuyetCount;
+        if (elDaDuyet && stats.daDuyetCount !== undefined) elDaDuyet.innerText = stats.daDuyetCount;
+        if (elDoanhThu && stats.tongDoanhThuFormatted) elDoanhThu.innerText = stats.tongDoanhThuFormatted;
+    }
+
     function submitDuyet(e) {
         e.preventDefault();
         const formData = new FormData(document.getElementById('duyetForm'));
@@ -412,11 +398,13 @@
             if (res.success) {
                 closeDuyetModal();
                 if (window.showToast) window.showToast(res.message, 'success');
+                updateKpiStats(res.stats);
                 loadTableData();
             } else {
                 if (window.showToast) window.showToast(res.message, 'error');
             }
-        });
+        })
+        .catch(() => { if (window.showToast) window.showToast('Có lỗi xảy ra khi phê duyệt hồ sơ.', 'error'); });
     }
 
     // Modal Từ Chối
@@ -454,11 +442,13 @@
             if (res.success) {
                 closeTuChoiModal();
                 if (window.showToast) window.showToast(res.message, 'success');
+                updateKpiStats(res.stats);
                 loadTableData();
             } else {
                 if (window.showToast) window.showToast(res.message, 'error');
             }
-        });
+        })
+        .catch(() => { if (window.showToast) window.showToast('Có lỗi xảy ra khi từ chối hồ sơ.', 'error'); });
     }
 
     // Modal Thu Học Phí
@@ -471,11 +461,12 @@
                     document.getElementById('thuphi-MaDangKy').value = d.maDangKy;
                     document.getElementById('thuphi-tenHV').innerText = d.tenHocVien;
                     document.getElementById('thuphi-tenLop').innerText = d.tenLop;
-                    document.getElementById('thuphi-hocPhiGoc').innerText = d.hocPhi.toLocaleString() + ' đ';
-                    document.getElementById('thuphi-daDong').innerText = d.soTienDaDong.toLocaleString() + ' đ';
+                    document.getElementById('thuphi-hocPhiGoc').innerText = Number(d.hocPhi).toLocaleString('vi-VN') + ' đ';
+                    document.getElementById('thuphi-daDong').innerText = Number(d.soTienDaDong).toLocaleString('vi-VN') + ' đ';
                     
-                    currentHocPhiGoc = d.hocPhi;
-                    document.getElementById('thuphi-SoTien').value = d.hocPhi; // default fill full tuition
+                    const conLai = Math.max(0, Number(d.hocPhi) - Number(d.soTienDaDong));
+                    currentHocPhiGoc = conLai > 0 ? conLai : Number(d.hocPhi);
+                    document.getElementById('thuphi-SoTien').value = currentHocPhiGoc;
                     document.getElementById('thuphi-GhiChu').value = '';
 
                     const modal = document.getElementById('thuphi-modal');
@@ -486,7 +477,8 @@
                 } else {
                     if (window.showToast) window.showToast(res.message, 'error');
                 }
-            });
+            })
+            .catch(() => { if (window.showToast) window.showToast('Không thể tải thông tin học phí.', 'error'); });
     }
 
     function fillFullTuition() {
@@ -515,11 +507,13 @@
             if (res.success) {
                 closeThuPhiModal();
                 if (window.showToast) window.showToast(res.message, 'success');
+                updateKpiStats(res.stats);
                 loadTableData();
             } else {
                 if (window.showToast) window.showToast(res.message, 'error');
             }
-        });
+        })
+        .catch(() => { if (window.showToast) window.showToast('Có lỗi xảy ra khi thu học phí.', 'error'); });
     }
 
     // Bắt đầu học
@@ -537,9 +531,13 @@
         .then(res => {
             if (res.success) {
                 if (window.showToast) window.showToast(res.message, 'success');
+                updateKpiStats(res.stats);
                 loadTableData();
+            } else {
+                if (window.showToast) window.showToast(res.message, 'error');
             }
-        });
+        })
+        .catch(() => { if (window.showToast) window.showToast('Có lỗi xảy ra khi cập nhật trạng thái học.', 'error'); });
     }
 
     // Xóa đơn đăng ký
@@ -547,10 +545,14 @@
         if (typeof openGlobalDeleteModal === 'function') {
             openGlobalDeleteModal({
                 title: 'Xóa đơn đăng ký',
-                message: `Bạn có chắc muốn xóa đơn đăng ký #${id} của học viên "${name}"? Thao tác này không thể hoàn tác nếu học viên đã đóng học phí.`,
-                confirmUrl: '/DangKyHoc/DeletePost',
-                itemId: id,
-                onSuccess: function() { loadTableData(); }
+                message: `Bạn có chắc muốn xóa đơn đăng ký #DK${String(id).padStart(3, '0')} của học viên "${name}"?`,
+                warning: 'Chỉ xóa được đơn ở trạng thái Chờ duyệt, Từ chối hoặc Đã hủy.',
+                action: '/DangKyHoc/DeletePost',
+                id: id,
+                onSuccess: function(data) {
+                    if (data && data.stats) updateKpiStats(data.stats);
+                    loadTableData();
+                }
             });
         }
     }
@@ -574,5 +576,19 @@
         document.body.appendChild(downloadLink);
         downloadLink.click();
     }
+
+    // Khởi tạo Bulk Delete cho Đăng ký học
+    window.dkBulk = window.initBulkDelete({
+        selectAllId: 'selectAllDk',
+        checkboxClass: 'dk-cb',
+        btnDeleteId: 'btnBulkDeleteDk',
+        countBadgeId: 'selectedDkCount',
+        deleteUrl: '/DangKyHoc/DeleteMultiple',
+        itemLabel: 'hồ sơ đăng ký',
+        onSuccess: (data) => {
+            if (data && data.stats) updateKpiStats(data.stats);
+            loadTableData();
+        }
+    });
 </script>
 }

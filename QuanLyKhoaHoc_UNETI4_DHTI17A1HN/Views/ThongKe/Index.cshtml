@@ -1,4 +1,4 @@
-﻿@*
+@*
 Họ và tên: Nguyễn Tùng Dương
 Mã sinh viên: 23103100003
 Nội dung thực hiện: Module 5 - Báo cáo Thống kê LINQ - Phong cách Prep.vn
@@ -23,12 +23,12 @@ Nội dung thực hiện: Module 5 - Báo cáo Thống kê LINQ - Phong cách Pr
 
 <div class="flex flex-col gap-y-6">
     <!-- Top Header Bar -->
-    <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-surface-white p-5 rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)]">
+    <section class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 card-pro">
         <div class="flex flex-col gap-1">
-            <div class="flex items-center gap-2 text-outline font-body-sm text-body-sm">
-                <span>Đào tạo UNETI</span>
+            <div class="flex items-center gap-2 text-outline font-label-sm text-label-sm uppercase tracking-wider mb-1">
+                <span>BÁO CÁO &amp; THỐNG KÊ</span>
                 <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-primary-container font-label-md text-label-md">Thống kê tổng hợp</span>
+                <span class="text-primary font-semibold">THỐNG KÊ TỔNG HỢP</span>
             </div>
             <h1 class="font-headline-lg-mobile lg:font-headline-lg text-brand-deep tracking-tight font-extrabold">
                 Báo cáo thống kê
@@ -200,7 +200,7 @@ Nội dung thực hiện: Module 5 - Báo cáo Thống kê LINQ - Phong cách Pr
                         if ((int)item.SoLuong > maxCount) maxCount = (int)item.SoLuong;
                     }
 
-                    <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4 items-end min-h-[180px] pt-4 px-2">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4 items-end h-[195px] pt-4 px-2">
                         @foreach (var item in dkTheoThang)
                         {
                             int heightPct = (int)Math.Max(15, ((double)item.SoLuong / maxCount) * 100);
@@ -305,14 +305,14 @@ Nội dung thực hiện: Module 5 - Báo cáo Thống kê LINQ - Phong cách Pr
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs">
                     <thead>
-                        <tr class="text-outline font-label-sm text-label-sm border-b border-border-subtle uppercase">
-                            <th class="py-2.5 pr-3 font-bold">Giảng viên</th>
-                            <th class="py-2.5 px-3 font-bold">Lớp phụ trách</th>
-                            <th class="py-2.5 px-3 font-bold text-center">Số SV</th>
-                            <th class="py-2.5 pl-3 font-bold text-right">Điểm TB</th>
+                        <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
+                            <th class="py-3 px-3 font-bold">Giảng viên</th>
+                            <th class="py-3 px-3 font-bold">Lớp phụ trách</th>
+                            <th class="py-3 px-3 font-bold text-center">Số SV</th>
+                            <th class="py-3 px-3 font-bold text-right">Điểm TB</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-border-subtle">
+                    <tbody class="divide-y divide-border-subtle text-xs text-brand-deep">
                         @if (topGiangVien.Any())
                         {
                             foreach (var gv in topGiangVien)

@@ -5,26 +5,26 @@
 
 <!-- GLOBAL DELETE CONFIRMATION MODAL -->
 <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs hidden transition-all duration-300" id="global-delete-modal">
-    <div class="bg-white max-w-md w-full rounded-2xl shadow-2xl border border-gray-100 p-6 space-y-4" onclick="event.stopPropagation()">
+    <div class="bg-white max-w-md w-full rounded-2xl shadow-elevated border border-slate-200/80 p-6 space-y-4" onclick="event.stopPropagation()">
         <!-- Icon Container -->
-        <div class="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center">
+        <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center">
             <span class="material-symbols-outlined text-[28px]" id="global-delete-icon">delete_forever</span>
         </div>
 
         <!-- Title & Description -->
         <div class="space-y-1.5">
-            <h3 class="text-lg text-gray-900 font-bold" id="global-delete-title">
+            <h3 class="text-lg text-brand-deep font-bold" id="global-delete-title">
                 Xác nhận xóa?
             </h3>
-            <p class="text-sm text-gray-500 leading-relaxed" id="global-delete-msg">
+            <p class="text-sm text-slate-600 leading-relaxed" id="global-delete-msg">
                 Bạn có chắc chắn muốn xóa bản ghi này?
             </p>
         </div>
 
         <!-- Warning Alert Box -->
-        <div class="bg-red-50 border border-red-200 rounded-xl p-3 flex items-start gap-2.5">
-            <span class="material-symbols-outlined text-red-600 text-[18px] flex-shrink-0 mt-0.5">warning</span>
-            <span class="text-xs text-red-700 font-medium" id="global-delete-warning">
+        <div class="bg-rose-50 border border-rose-200/80 rounded-xl p-3 flex items-start gap-2.5">
+            <span class="material-symbols-outlined text-rose-600 text-[18px] flex-shrink-0 mt-0.5">warning</span>
+            <span class="text-xs text-rose-700 font-medium" id="global-delete-warning">
                 Hành động này mang tính vĩnh viễn và không thể hoàn tác sau khi xác nhận.
             </span>
         </div>
@@ -35,10 +35,10 @@
             <input type="hidden" name="id" id="global-delete-id" value="0"/>
 
             <div class="flex items-center justify-end gap-3 pt-2">
-                <button type="button" class="border border-gray-300 text-gray-700 px-4 py-2 rounded-xl text-sm hover:bg-gray-50 transition-colors cursor-pointer" onclick="closeGlobalDeleteModal()">
+                <button type="button" class="border border-border-standard text-slate-700 px-4 py-2 rounded-xl text-sm hover:bg-slate-50 transition-colors cursor-pointer active:scale-95" onclick="closeGlobalDeleteModal()">
                     Hủy bỏ
                 </button>
-                <button type="submit" id="global-delete-submit-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-sm shadow-sm flex items-center gap-1.5 transition-colors cursor-pointer">
+                <button type="submit" id="global-delete-submit-btn" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-sm shadow-xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-95">
                     <span class="material-symbols-outlined text-[18px]">delete</span>
                     <span id="global-delete-btn-text">Xóa vĩnh viễn</span>
                 </button>
@@ -48,8 +48,11 @@
 </div>
 
 <script>
+    window._currentDeleteOptions = null;
+
     window.openGlobalDeleteModal = function(options) {
         options = options || {};
+        window._currentDeleteOptions = options;
         const modal = document.getElementById('global-delete-modal');
         if (!modal) return;
 
@@ -60,10 +63,20 @@
         const warningEl = document.getElementById('global-delete-warning');
         const btnTextEl = document.getElementById('global-delete-btn-text');
         const iconEl = document.getElementById('global-delete-icon');
+        const submitBtn = document.getElementById('global-delete-submit-btn');
 
-        if (options.action) form.action = options.action;
-        if (options.id !== undefined) idInput.value = options.id;
-        if (options.title) titleEl.innerText = options.title;
+        // Reset custom onclick handlers from previous modal invocations
+        if (submitBtn) {
+            submitBtn.onclick = null;
+            submitBtn.disabled = false;
+        }
+
+        const actionUrl = options.action || options.confirmUrl || '';
+        const targetId = options.id !== undefined ? options.id : options.itemId;
+
+        form.action = actionUrl;
+        idInput.value = targetId !== undefined ? targetId : 0;
+        titleEl.innerText = options.title || 'Xác nhận xóa?';
 
         if (options.message) {
             msgEl.innerHTML = options.message;
@@ -73,9 +86,9 @@
             msgEl.innerText = 'Bạn có chắc chắn muốn xóa bản ghi này?';
         }
 
-        if (options.warning) warningEl.innerText = options.warning;
-        if (options.submitText) btnTextEl.innerText = options.submitText;
-        if (options.icon) iconEl.innerText = options.icon;
+        warningEl.innerText = options.warning || 'Hành động này mang tính vĩnh viễn và không thể hoàn tác sau khi xác nhận.';
+        btnTextEl.innerText = options.submitText || 'Xóa vĩnh viễn';
+        iconEl.innerText = options.icon || 'delete_forever';
 
         modal.classList.remove('hidden');
     };
@@ -115,7 +128,20 @@
         const deleteForm = document.getElementById('global-delete-form');
         if (deleteForm) {
             deleteForm.addEventListener('submit', async function(e) {
-                if (typeof window.onDeleteSuccess === 'function') {
+                const opts = window._currentDeleteOptions || {};
+
+                if (typeof opts.onConfirm === 'function') {
+                    e.preventDefault();
+                    closeGlobalDeleteModal();
+                    opts.onConfirm();
+                    return;
+                }
+
+                const successCallback = typeof opts.onSuccess === 'function'
+                    ? opts.onSuccess
+                    : (typeof window.onDeleteSuccess === 'function' ? window.onDeleteSuccess : null);
+
+                if (successCallback) {
                     e.preventDefault();
                     const submitBtn = document.getElementById('global-delete-submit-btn');
                     const btnText = document.getElementById('global-delete-btn-text');
@@ -137,7 +163,7 @@
                             closeGlobalDeleteModal();
                             if (data.success) {
                                 if (window.showToast) window.showToast(data.message, 'success');
-                                window.onDeleteSuccess(data);
+                                successCallback(data);
                             } else {
                                 if (window.showToast) window.showToast(data.message, 'error');
                             }
@@ -156,4 +182,130 @@
             });
         }
     });
+
+    // ========================================================
+    // UNIVERSAL BULK / BATCH DELETE HELPER (CHO TẤT CẢ CÁC BẢNG)
+    // ========================================================
+    window.initBulkDelete = function(config) {
+        const {
+            selectAllId = 'selectAll',
+            checkboxClass = 'row-checkbox',
+            btnDeleteId = 'btnBulkDelete',
+            countBadgeId = 'selectedCount',
+            deleteUrl = '',
+            itemLabel = 'mục',
+            onSuccess = null
+        } = config;
+
+        function getCheckboxes() {
+            return document.querySelectorAll('.' + checkboxClass);
+        }
+
+        function getSelectedIds() {
+            const checked = document.querySelectorAll('.' + checkboxClass + ':checked');
+            return Array.from(checked).map(cb => parseInt(cb.value, 10)).filter(id => !isNaN(id) && id > 0);
+        }
+
+        function updateState() {
+            const selectAllEl = document.getElementById(selectAllId);
+            const btnDelete = document.getElementById(btnDeleteId);
+            const countBadge = document.getElementById(countBadgeId);
+            const checkboxes = getCheckboxes();
+            const selected = getSelectedIds();
+            const total = checkboxes.length;
+
+            if (countBadge) countBadge.innerText = selected.length;
+
+            if (btnDelete) {
+                if (selected.length > 0) {
+                    btnDelete.classList.remove('hidden');
+                    btnDelete.classList.add('inline-flex');
+                } else {
+                    btnDelete.classList.add('hidden');
+                    btnDelete.classList.remove('inline-flex');
+                }
+            }
+
+            if (selectAllEl) {
+                selectAllEl.checked = total > 0 && selected.length === total;
+                selectAllEl.indeterminate = selected.length > 0 && selected.length < total;
+            }
+
+            checkboxes.forEach(cb => {
+                const tr = cb.closest('tr');
+                if (tr) {
+                    if (cb.checked) {
+                        tr.classList.add('bg-blue-50/50');
+                    } else {
+                        tr.classList.remove('bg-blue-50/50');
+                    }
+                }
+            });
+        }
+
+        // Delegate SelectAll & Row checkboxes
+        document.addEventListener('change', function(e) {
+            if (e.target && e.target.id === selectAllId) {
+                const checkboxes = getCheckboxes();
+                checkboxes.forEach(cb => {
+                    cb.checked = e.target.checked;
+                });
+                updateState();
+            } else if (e.target && e.target.classList && e.target.classList.contains(checkboxClass)) {
+                updateState();
+            }
+        });
+
+        // Delegate Delete Button
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('#' + btnDeleteId);
+            if (btn) {
+                e.preventDefault();
+                const ids = getSelectedIds();
+                if (ids.length === 0) {
+                    if (window.showToast) window.showToast('Vui lòng chọn ít nhất 1 ' + itemLabel + ' để xóa.', 'warning');
+                    return;
+                }
+
+                openGlobalDeleteModal({
+                    title: 'Xóa nhiều ' + itemLabel + '?',
+                    message: `Bạn có chắc chắn muốn xóa <strong class="text-rose-600 font-bold">${ids.length}</strong> ${itemLabel} đã chọn?`,
+                    warning: 'Hành động này mang tính vĩnh viễn và không thể hoàn tác sau khi xác nhận.',
+                    submitText: `Xóa ${ids.length} ${itemLabel}`,
+                    icon: 'delete_sweep',
+                    onConfirm: async function() {
+                        const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                        try {
+                            const res = await fetch(deleteUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'RequestVerificationToken': csrfToken
+                                },
+                                body: JSON.stringify(ids)
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                if (window.showToast) window.showToast(data.message, 'success');
+                                if (typeof onSuccess === 'function') {
+                                    onSuccess(data);
+                                } else {
+                                    window.location.reload();
+                                }
+                            } else {
+                                if (window.showToast) window.showToast(data.message, 'error');
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            if (window.showToast) window.showToast('Đã xảy ra lỗi khi thực hiện xóa.', 'error');
+                        }
+                    }
+                });
+            }
+        });
+
+        updateState();
+        return { updateState, getSelectedIds };
+    };
 </script>

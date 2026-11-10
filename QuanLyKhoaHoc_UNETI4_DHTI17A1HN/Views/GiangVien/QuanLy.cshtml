@@ -1,4 +1,4 @@
-﻿@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien>
+@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien>
 @{
     // ========================================================
     // Bổ sung theo yêu cầu giảng viên hướng dẫn:
@@ -16,12 +16,12 @@
 
 <div id="quanly-giangvien-area" class="flex flex-col gap-y-6 transition-opacity duration-200">
     <!-- Sub-header Navigation Bar -->
-    <section class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border-standard">
+    <section class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 card-pro">
         <div>
             <div class="flex items-center gap-2 text-outline font-label-sm text-label-sm uppercase tracking-wider mb-1">
-                <span>QUẢN TRỊ ĐÀO TẠO</span>
+                <span>ĐÀO TẠO UNETI</span>
                 <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-brand-deep font-semibold">ĐỘI NGŨ GIẢNG VIÊN</span>
+                <span class="text-primary font-semibold">ĐỘI NGŨ GIẢNG VIÊN</span>
             </div>
             <h1 class="font-headline-md text-headline-md text-brand-deep font-bold tracking-tight">
                 Danh Sách Hồ Sơ Giảng Viên
@@ -33,7 +33,7 @@
                 <span class="material-symbols-outlined text-[18px] text-primary">file_download</span>
                 <span class="hidden sm:inline">Xuất Excel</span>
             </button>
-            <button onclick="openTeacherDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
+            <button onclick="openTeacherDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-hover text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-card transition-all active:scale-95 cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">person_add</span>
                 <span>Thêm giảng viên</span>
             </button>
@@ -42,10 +42,10 @@
 
     <!-- 3 Stat Cards (Top KPI) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Tổng số giảng viên</span>
-                <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <span class="text-outline font-label-md text-label-md font-medium">Tổng số giảng viên</span>
+                <div class="w-10 h-10 rounded-2xl bg-primary-light flex items-center justify-center text-primary">
                     <span class="material-symbols-outlined text-[20px]">badge</span>
                 </div>
             </div>
@@ -55,23 +55,23 @@
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Đang tham gia giảng dạy</span>
-                <div class="w-9 h-9 rounded-xl bg-success-emerald/10 flex items-center justify-center text-success-emerald">
+                <span class="text-outline font-label-md text-label-md font-medium">Đang tham gia giảng dạy</span>
+                <div class="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
                     <span class="material-symbols-outlined text-[20px]">how_to_reg</span>
                 </div>
             </div>
             <div class="flex items-baseline gap-2">
-                <span class="font-display text-[30px] leading-8 text-success-emerald tracking-tight font-black font-mono">@activeTeachers</span>
+                <span class="font-display text-[30px] leading-8 text-emerald-700 tracking-tight font-black font-mono">@activeTeachers</span>
                 <span class="text-xs text-outline font-medium">hồ sơ hoạt động</span>
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Lớp học phần phân công</span>
-                <div class="w-9 h-9 rounded-xl bg-secondary-container/10 flex items-center justify-center text-secondary-container">
+                <span class="text-outline font-label-md text-label-md font-medium">Lớp học phần phân công</span>
+                <div class="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center text-primary">
                     <span class="material-symbols-outlined text-[20px]">meeting_room</span>
                 </div>
             </div>
@@ -83,35 +83,42 @@
     </div>
 
     <!-- Filters & Search Toolbar -->
-    <div class="bg-surface-white rounded-2xl p-4 border border-border-subtle shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
-        <form method="get" action="/GiangVien/QuanLy" class="flex flex-wrap items-center gap-3 w-full">
-            <!-- Search Field -->
-            <div class="relative flex-1 min-w-[240px]">
-                <span class="material-symbols-outlined text-outline absolute left-3 top-1/2 -translate-y-1/2 text-[18px]">search</span>
-                <input name="search" value="@search" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-xs" placeholder="Tìm theo họ tên, email, số điện thoại..." type="text"/>
-            </div>
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-4 card-pro">
+        <form method="get" action="/GiangVien/QuanLy" class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
+                <!-- Search Field -->
+                <div class="relative flex-1 min-w-[240px] max-w-md">
+                    <span class="material-symbols-outlined text-outline absolute left-3 top-1/2 -translate-y-1/2 text-[18px]">search</span>
+                    <input name="search" value="@search" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-xs" placeholder="Tìm theo họ tên, email, số điện thoại..." type="text"/>
+                </div>
 
-            <!-- Degree Filter -->
-            <div class="min-w-[160px]">
-                <select name="hocVi" class="w-full bg-surface-container-low border border-border-standard px-3 py-2 rounded-xl text-brand-deep font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-xs">
-                    <option value="">Tất cả học vị</option>
-                    <!option value="ThS." @(hocVi == "ThS." ? "selected" : "")>Thạc sĩ (ThS.)</!option>
-                    <!option value="TS." @(hocVi == "TS." ? "selected" : "")>Tiến sĩ (TS.)</!option>
-                    <!option value="PGS.TS." @(hocVi == "PGS.TS." ? "selected" : "")>Phó Giáo sư (PGS.TS)</!option>
-                    <!option value="GS.TS." @(hocVi == "GS.TS." ? "selected" : "")>Giáo sư (GS.TS)</!option>
-                    <!option value="Kỹ sư" @(hocVi == "Kỹ sư" ? "selected" : "")>Kỹ sư</!option>
-                    <!option value="Cử nhân" @(hocVi == "Cử nhân" ? "selected" : "")>Cử nhân</!option>
-                </select>
-            </div>
+                <!-- Degree Filter -->
+                <div class="relative min-w-[180px]">
+                    <select name="hocVi" onchange="this.form.submit()" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
+                        <option value="">Tất cả học vị</option>
+                        <!option value="ThS." @(hocVi == "ThS." ? "selected" : "")>Thạc sĩ (ThS.)</!option>
+                        <!option value="TS." @(hocVi == "TS." ? "selected" : "")>Tiến sĩ (TS.)</!option>
+                        <!option value="PGS.TS." @(hocVi == "PGS.TS." ? "selected" : "")>Phó Giáo sư (PGS.TS)</!option>
+                        <!option value="GS.TS." @(hocVi == "GS.TS." ? "selected" : "")>Giáo sư (GS.TS)</!option>
+                        <!option value="Kỹ sư" @(hocVi == "Kỹ sư" ? "selected" : "")>Kỹ sư</!option>
+                        <!option value="Cử nhân" @(hocVi == "Cử nhân" ? "selected" : "")>Cử nhân</!option>
+                    </select>
+                    <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
+                </div>
 
-            <button type="submit" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-4 py-2 rounded-xl transition-all text-xs cursor-pointer">
-                <span class="material-symbols-outlined text-[16px]">filter_alt</span>
-                <span>Lọc</span>
-            </button>
+                <button type="submit" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-hover text-surface-white font-label-md text-label-md px-4 py-2 rounded-xl transition-all text-xs cursor-pointer shadow-xs active:scale-95">
+                    <span class="material-symbols-outlined text-[16px]">filter_alt</span>
+                    <span>Lọc</span>
+                </button>
+                <button id="btnBulkDeleteGv" type="button" class="hidden items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition-all cursor-pointer shadow-xs active:scale-95" title="Xóa các giảng viên đã chọn">
+                    <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+                    <span>Xóa đã chọn (<span id="selectedGvCount">0</span>)</span>
+                </button>
+            </div>
 
             @if (!string.IsNullOrEmpty(search) || !string.IsNullOrEmpty(hocVi))
             {
-                <a href="/GiangVien/QuanLy" class="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant text-xs font-medium transition-colors">
+                <a href="/GiangVien/QuanLy" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
                     <span class="material-symbols-outlined text-[16px]">restart_alt</span>
                     <span>Đặt lại</span>
                 </a>
@@ -120,13 +127,17 @@
     </div>
 
     <!-- Teacher Table -->
-    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-[0_4px_20px_rgba(13, 71, 161,0.03)] overflow-hidden">
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm overflow-hidden card-pro">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse" id="teacherTable">
                 <thead>
-                    <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-[11px] uppercase tracking-wider border-b border-border-standard">
-                        <th class="py-3.5 px-3 text-center w-12">Mã</th>
-                        <th class="py-3.5 px-4 min-w-[220px]">Giảng viên</th>
+                    <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
+                        <th class="py-3.5 px-3 w-10 text-center">
+                            <input type="checkbox" id="selectAllGv" class="w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" title="Chọn tất cả">
+                        </th>
+                        <th class="py-3.5 px-3 w-10 text-center">#</th>
+                        <th class="py-3.5 px-4">Mã GV</th>
+                        <th class="py-3.5 px-4 min-w-[200px]">Giảng viên</th>
                         <th class="py-3.5 px-3 min-w-[140px]">Học vị &amp; Chuyên ngành</th>
                         <th class="py-3.5 px-3 min-w-[180px]">Thông tin liên hệ</th>
                         <th class="py-3.5 px-3 text-center min-w-[130px]">Tài khoản</th>
@@ -135,9 +146,10 @@
                         <th class="py-3.5 px-4 text-center w-36">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-border-subtle font-body-sm text-xs">
+                <tbody class="divide-y divide-border-subtle text-xs text-brand-deep">
                     @if (Model != null && Model.Any())
                     {
+                        int idx = 1;
                         foreach (var gv in Model)
                         {
                             var hoTenGv = gv.HoTen ?? "";
@@ -148,8 +160,12 @@
                             var initialLetter = string.IsNullOrWhiteSpace(hoTenGv) ? "T" : (hoTenGv.Trim().Contains(' ') ? hoTenGv.Trim().Substring(hoTenGv.Trim().LastIndexOf(' ') + 1).Substring(0, 1).ToUpper() : hoTenGv.Substring(0, 1).ToUpper());
 
                             <tr class="hover:bg-surface-container-low/40 transition-colors">
-                                <td class="py-3.5 px-3 text-center font-mono font-bold text-outline">
-                                    GV-@(gv.MaGiangVien.ToString("D3"))
+                                <td class="py-3.5 px-3 text-center">
+                                    <input type="checkbox" class="gv-cb w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" value="@gv.MaGiangVien">
+                                </td>
+                                <td class="py-3.5 px-3 text-center text-outline font-mono text-[11px]">@(idx++)</td>
+                                <td class="py-3.5 px-4 font-mono font-semibold text-primary">
+                                    #GV@(gv.MaGiangVien.ToString("D3"))
                                 </td>
                                 <td class="py-3.5 px-4">
                                     <div class="flex items-center gap-3">
@@ -221,7 +237,7 @@
                                 </td>
                                 <td class="py-3.5 px-4 text-center">
                                     <div class="flex items-center justify-center gap-1">
-                                        <a href="/GiangVien/LichDay" title="Xem lịch dạy" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container transition-colors">
+                                        <a href="/GiangVien/LichDay?maGiangVien=@gv.MaGiangVien" title="Xem lịch dạy" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container transition-colors">
                                             <span class="material-symbols-outlined text-[18px]">calendar_month</span>
                                         </a>
                                         <button type="button" onclick="editTeacher(@gv.MaGiangVien)" title="Chỉnh sửa hồ sơ" class="p-1.5 rounded-lg text-outline hover:text-primary hover:bg-surface-container transition-colors cursor-pointer">
@@ -253,6 +269,7 @@
             CurrentPage = (int)(ViewBag.CurrentPage ?? 1),
             TotalPages = (int)(ViewBag.TotalPages ?? 1),
             TotalItems = (int)(ViewBag.TotalItems ?? 0),
+            PageSize = (int)(ViewBag.PageSize ?? 6),
             ItemLabel = "giảng viên",
             BaseUrl = "/GiangVien/QuanLy",
             RouteParams = new Dictionary<string, string?> {
@@ -264,11 +281,11 @@
     </div>
 
 <!-- ========================================== -->
-<!-- SLIDE-OVER DRAWER THÊM / SỬA GIẢNG VIÊN -->
+<!-- SLIDE-OVER DRAWER THÊM / SỬA GIẢNG VIÊN (Smooth Slide Animation) -->
 <!-- ========================================== -->
-<div id="teacher-drawer-backdrop" class="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 hidden transition-opacity duration-300" onclick="closeTeacherDrawer()"></div>
+<div id="teacher-drawer-backdrop" class="fixed inset-0 bg-brand-deep/40 backdrop-blur-xs z-50 transition-opacity duration-300 opacity-0 pointer-events-none" onclick="closeTeacherDrawer()"></div>
 
-<div id="teacher-drawer" class="fixed inset-y-0 right-0 max-w-lg w-full bg-surface-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col justify-between">
+<div id="teacher-drawer" class="fixed inset-y-0 right-0 max-w-lg w-full bg-surface-white border-l border-border-standard shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-out flex flex-col justify-between">
     <!-- Drawer Header -->
     <div class="p-6 border-b border-border-standard flex items-center justify-between">
         <div class="flex items-center gap-2.5">
@@ -301,14 +318,20 @@
         <div class="grid grid-cols-2 gap-3">
             <div>
                 <label class="block text-xs font-bold text-brand-deep uppercase tracking-wider mb-1">Học vị</label>
-                <select id="gv-hocVi" name="HocVi" class="w-full px-3 py-2.5 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep">
-                    <option value="ThS.">Thạc sĩ (ThS.)</option>
-                    <option value="TS.">Tiến sĩ (TS.)</option>
-                    <option value="PGS.TS.">Phó Giáo sư (PGS.TS.)</option>
-                    <option value="GS.TS.">Giáo sư (GS.TS.)</option>
-                    <option value="Kỹ sư">Kỹ sư</option>
-                    <option value="Cử nhân">Cử nhân</option>
-                </select>
+                <div class="relative">
+                    <select id="gv-hocVi" name="HocVi" class="w-full px-3 py-2.5 pr-8 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep cursor-pointer transition-all">
+                        <option value="ThS.">Thạc sĩ (ThS.)</option>
+                        <option value="Thạc sĩ">Thạc sĩ</option>
+                        <option value="TS.">Tiến sĩ (TS.)</option>
+                        <option value="Tiến sĩ">Tiến sĩ</option>
+                        <option value="PGS.TS.">Phó Giáo sư (PGS.TS.)</option>
+                        <option value="PGS. Tiến sĩ">Phó Giáo sư (PGS. Tiến sĩ)</option>
+                        <option value="GS.TS.">Giáo sư (GS.TS.)</option>
+                        <option value="Kỹ sư">Kỹ sư</option>
+                        <option value="Cử nhân">Cử nhân</option>
+                    </select>
+                    <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+                </div>
             </div>
             <div>
                 <label class="block text-xs font-bold text-brand-deep uppercase tracking-wider mb-1">Chuyên ngành</label>
@@ -391,7 +414,8 @@
         const btnText = document.getElementById('btnSubmitText');
         const accountSec = document.getElementById('account-section');
 
-        backdrop.classList.remove('hidden');
+        backdrop.classList.remove('opacity-0', 'pointer-events-none');
+        backdrop.classList.add('opacity-100');
         drawer.classList.remove('translate-x-full');
 
         if (mode === 'create') {
@@ -431,7 +455,8 @@
     function closeTeacherDrawer() {
         const backdrop = document.getElementById('teacher-drawer-backdrop');
         const drawer = document.getElementById('teacher-drawer');
-        backdrop.classList.add('hidden');
+        backdrop.classList.remove('opacity-100');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
         drawer.classList.add('translate-x-full');
     }
 
@@ -495,4 +520,23 @@
         downloadLink.click();
         document.body.removeChild(downloadLink);
     }
+
+    // Tự động mở drawer nếu URL có ?create=true
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('create') === 'true' || urlParams.get('action') === 'create') {
+        openTeacherDrawer('create');
+        const cleanUrl = window.location.pathname + window.location.search.replace(/[?&]create=true/, '').replace(/[?&]action=create/, '');
+        window.history.replaceState({}, document.title, cleanUrl || window.location.pathname);
+    }
+
+    // Khởi tạo Bulk Delete cho Giảng viên
+    window.gvBulk = window.initBulkDelete({
+        selectAllId: 'selectAllGv',
+        checkboxClass: 'gv-cb',
+        btnDeleteId: 'btnBulkDeleteGv',
+        countBadgeId: 'selectedGvCount',
+        deleteUrl: '/GiangVien/DeleteMultiple',
+        itemLabel: 'giảng viên',
+        onSuccess: () => window.location.reload()
+    });
 </script>

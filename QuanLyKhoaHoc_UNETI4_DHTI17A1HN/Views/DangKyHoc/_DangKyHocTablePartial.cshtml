@@ -1,4 +1,4 @@
-﻿@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc>
+@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.DangKyHoc>
 @{
     // Họ và tên: Nguyễn Hoàng Long
     // Mã sinh viên: 23103100046
@@ -6,21 +6,24 @@
     int currentPage = ViewBag.CurrentPage ?? 1;
     int totalPages = ViewBag.TotalPages ?? 1;
     int totalItems = ViewBag.TotalItems ?? 0;
-    int pageSize = ViewBag.PageSize ?? 10;
+    int pageSize = ViewBag.PageSize ?? 6;
 }
 
 <!-- Table Container -->
-<div class="bg-surface-white rounded-2xl border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] overflow-hidden">
+<div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm overflow-hidden card-pro">
     <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse" id="dangky-table">
             <thead>
-                <tr class="bg-surface-container-lowest border-b border-border-standard text-[11px] font-bold text-outline uppercase tracking-wider">
-                    <th class="py-3.5 px-4 w-12 text-center">#</th>
+                <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
+                    <th class="py-3.5 px-3 w-10 text-center">
+                        <input type="checkbox" id="selectAllDk" class="w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" title="Chọn tất cả">
+                    </th>
+                    <th class="py-3.5 px-3 w-10 text-center">#</th>
                     <th class="py-3.5 px-4">Mã ĐK</th>
                     <th class="py-3.5 px-4">Học Viên</th>
                     <th class="py-3.5 px-4">Lớp Học Phần</th>
                     <th class="py-3.5 px-4">Thời Gian</th>
-                    <th class="py-3.5 px-4">Học Phí & Đã Thu</th>
+                    <th class="py-3.5 px-4">Học Phí &amp; Đã Thu</th>
                     <th class="py-3.5 px-4 text-center">Trạng Thái</th>
                     <th class="py-3.5 px-4 text-right">Thao Tác</th>
                 </tr>
@@ -29,7 +32,7 @@
                 @if (!Model.Any())
                 {
                     <tr>
-                        <td colspan="8" class="text-center py-12 text-outline">
+                        <td colspan="9" class="text-center py-12 text-outline">
                             <span class="material-symbols-outlined text-[40px] mb-2 opacity-40">assignment_late</span>
                             <p class="font-medium">Không tìm thấy đơn đăng ký nào theo tiêu chí lọc.</p>
                         </td>
@@ -45,7 +48,10 @@
                         double percent = hocPhiLop > 0 ? (double)Math.Min(100m, Math.Round(daDong / hocPhiLop * 100m, 1)) : 0;
 
                         <tr class="hover:bg-surface-container-lowest/60 transition-colors">
-                            <td class="py-3.5 px-4 text-center text-outline font-mono text-[11px]">@(idx++)</td>
+                            <td class="py-3.5 px-3 text-center">
+                                <input type="checkbox" class="dk-cb w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" value="@item.MaDangKy">
+                            </td>
+                            <td class="py-3.5 px-3 text-center text-outline font-mono text-[11px]">@(idx++)</td>
                             <td class="py-3.5 px-4 font-mono font-semibold text-primary">
                                 #DK@(item.MaDangKy.ToString("D3"))
                             </td>
@@ -124,18 +130,22 @@
                                     }
                                     else if (item.TrangThai == "Đã duyệt" || item.TrangThai == "Đã đóng học phí")
                                     {
-                                        <!-- Thu học phí -->
-                                        <button type="button" onclick="openThuPhiModal(@item.MaDangKy)"
-                                                title="Ghi nhận học phí" class="px-2.5 py-1 bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 rounded-lg font-semibold text-[11px] flex items-center gap-1 transition-colors">
-                                            <span class="material-symbols-outlined text-[15px]">payments</span>
-                                            <span>Thu phí</span>
-                                        </button>
+                                        @if (item.TrangThai == "Đã duyệt" || (hocPhiLop > 0 && daDong < hocPhiLop))
+                                        {
+                                            <!-- Thu học phí -->
+                                            <button type="button" onclick="openThuPhiModal(@item.MaDangKy)"
+                                                    title="Ghi nhận học phí" class="px-2.5 py-1 bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 rounded-lg font-semibold text-[11px] flex items-center gap-1 transition-colors">
+                                                <span class="material-symbols-outlined text-[15px]">payments</span>
+                                                <span>Thu phí</span>
+                                            </button>
+                                        }
 
-                                        @if (item.TrangThai == "Đã đóng học phí")
+                                        @if (item.TrangThai == "Đã đóng học phí" || (hocPhiLop > 0 && daDong >= hocPhiLop))
                                         {
                                             <button type="button" onclick="batDauHoc(@item.MaDangKy)"
-                                                    title="Chuyển sang Đang học" class="px-2 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg font-semibold text-[11px] transition-colors">
+                                                    title="Chuyển sang Đang học" class="px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg font-semibold text-[11px] flex items-center gap-1 transition-colors">
                                                 <span class="material-symbols-outlined text-[15px]">play_arrow</span>
+                                                <span>Bắt đầu học</span>
                                             </button>
                                         }
                                     }

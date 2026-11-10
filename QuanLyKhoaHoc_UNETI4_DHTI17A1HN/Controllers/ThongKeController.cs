@@ -54,6 +54,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
 
             int pageSize = 5;
+            if (page < 1) page = 1;
             status = string.IsNullOrWhiteSpace(status) ? "all" : status.Trim();
             search = string.IsNullOrWhiteSpace(search) ? "" : search.Trim();
 
@@ -74,11 +75,27 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             int totalPages = (int)Math.Ceiling(totalActivities / (double)pageSize);
             if (totalPages < 1) totalPages = 1;
-            if (page < 1) page = 1;
-            if (page > totalPages) page = totalPages;
+            if (page > totalPages)
+            {
+                page = totalPages;
+                (recentActivities, totalActivities) = await _dangKyHocRepo.GetPagedAsync(
+                    search, null, null, filterTrangThai, null, null, "ngay_desc", page, pageSize);
+            }
 
-            var allBuoiHocs = await _buoiHocRepo.GetAllAsync();
-            var danhSachBuoiHoc = allBuoiHocs.OrderBy(b => b.ThoiGianBatDau).Take(5).ToList();
+            var allBuoiHocs = (await _buoiHocRepo.GetAllAsync()).ToList();
+            var danhSachBuoiHoc = allBuoiHocs
+                .Where(b => b.TrangThai != "Đã hủy" && b.ThoiGianBatDau >= DateTime.Today)
+                .OrderBy(b => b.ThoiGianBatDau)
+                .Take(5)
+                .ToList();
+            if (!danhSachBuoiHoc.Any())
+            {
+                danhSachBuoiHoc = allBuoiHocs
+                    .Where(b => b.TrangThai != "Đã hủy")
+                    .OrderByDescending(b => b.ThoiGianBatDau)
+                    .Take(5)
+                    .ToList();
+            }
 
             var (tongSoDiem, soDat, _, _) = await _ketQuaRepo.GetThongKePhoiDiemAsync();
             double tyLeHT = tongSoDiem > 0 ? Math.Round((double)soDat / tongSoDiem * 100, 1) : 0;
@@ -101,6 +118,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 HoatDongGanDay = recentActivities.ToList(),
                 CurrentPage = page,
                 TotalPages = totalPages,
+                TotalActivities = totalActivities,
+                PageSize = pageSize,
                 SelectedStatus = status,
                 Search = search
             };
@@ -115,6 +134,14 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             var dangKy = await _dangKyHocRepo.GetByIdWithDetailsAsync(id);
             if (dangKy != null)
             {
+                if (dangKy.TrangThai != "Chờ duyệt")
+                {
+                    string statusMsg = $"Hồ sơ này đang ở trạng thái '{dangKy.TrangThai}', không thể duyệt nhanh lại.";
+                    if (isAjax) return Json(new { success = false, message = statusMsg });
+                    TempData["Error"] = statusMsg;
+                    return RedirectToAction(nameof(Dashboard));
+                }
+
                 if (dangKy.LopHoc != null)
                 {
                     int currentEnrolled = await _dangKyHocRepo.CountEnrolledInLopAsync(dangKy.MaLopHoc);

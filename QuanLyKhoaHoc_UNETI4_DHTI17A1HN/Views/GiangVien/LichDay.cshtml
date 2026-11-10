@@ -4,8 +4,11 @@
     var gv = ViewBag.CurrentGiangVien as QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien;
     var myClasses = ViewBag.MyClasses as List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>();
     int? selectedMaLop = ViewBag.SelectedMaLop;
-    DateTime selectedWeek = ViewBag.SelectedWeek != null ? (DateTime)ViewBag.SelectedWeek : DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek + 1);
+    int diffWeek = (7 + (DateTime.Today.DayOfWeek - DayOfWeek.Monday)) % 7;
+    DateTime selectedWeek = ViewBag.SelectedWeek != null ? (DateTime)ViewBag.SelectedWeek : DateTime.Today.AddDays(-diffWeek);
     int totalSessions = ViewBag.TotalWeekSessions ?? Model.Count;
+    string? qsMaGv = Context.Request.Query["maGiangVien"];
+    string gvParam = !string.IsNullOrEmpty(qsMaGv) ? $"&maGiangVien={qsMaGv}" : "";
 
     var days = new DayOfWeek[] {
         DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday,
@@ -32,12 +35,12 @@
 
 <div class="flex flex-col gap-y-6">
     <!-- Sub-header Navigation Bar -->
-    <section class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border-standard">
+    <section class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 card-pro">
         <div>
             <div class="flex items-center gap-2 text-outline font-label-sm text-label-sm uppercase tracking-wider mb-1">
                 <span>CỔNG GIẢNG VIÊN</span>
                 <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-brand-deep font-semibold">LỊCH GIẢNG DẠY</span>
+                <span class="text-primary font-semibold">LỊCH GIẢNG DẠY</span>
             </div>
             <h1 class="font-headline-md text-headline-md text-brand-deep font-bold tracking-tight flex items-center gap-2">
                 Thời Khóa Biểu Giảng Dạy
@@ -50,7 +53,7 @@
                 <span class="material-symbols-outlined text-[18px] text-primary">print</span>
                 <span class="hidden sm:inline">In Thời Khóa Biểu</span>
             </button>
-            <a href="/GiangVien/ChamDiem" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-surface-white font-label-md text-xs px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
+            <a href="/GiangVien/ChamDiem@(!string.IsNullOrEmpty(qsMaGv) ? $"?maGiangVien={qsMaGv}" : "")" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-surface-white font-label-md text-xs px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">edit_note</span>
                 <span>Chấm điểm lớp học</span>
             </a>
@@ -74,20 +77,24 @@
 
             <!-- Tuần hiện tại -->
             <input type="hidden" name="weekStart" value="@selectedWeek.ToString("yyyy-MM-dd")" />
+            @if (!string.IsNullOrEmpty(qsMaGv))
+            {
+                <input type="hidden" name="maGiangVien" value="@qsMaGv" />
+            }
         </form>
 
         <!-- Week Navigator -->
         <div class="flex items-center gap-2">
-            <a href="/GiangVien/LichDay?weekStart=@selectedWeek.AddDays(-7).ToString("yyyy-MM-dd")&maLop=@selectedMaLop" class="p-2 rounded-xl border border-border-standard hover:bg-surface-container-low text-outline hover:text-brand-deep cursor-pointer" title="Tuần trước">
+            <a href="/GiangVien/LichDay?weekStart=@selectedWeek.AddDays(-7).ToString("yyyy-MM-dd")&maLop=@selectedMaLop@gvParam" class="p-2 rounded-xl border border-border-standard hover:bg-surface-container-low text-outline hover:text-brand-deep cursor-pointer" title="Tuần trước">
                 <span class="material-symbols-outlined text-[18px]">chevron_left</span>
             </a>
             <div class="px-4 py-1.5 rounded-xl bg-surface-container-low text-xs font-bold text-brand-deep text-center">
                 <span>Tuần từ @selectedWeek.ToString("dd/MM") đến @selectedWeek.AddDays(6).ToString("dd/MM/yyyy")</span>
             </div>
-            <a href="/GiangVien/LichDay?weekStart=@selectedWeek.AddDays(7).ToString("yyyy-MM-dd")&maLop=@selectedMaLop" class="p-2 rounded-xl border border-border-standard hover:bg-surface-container-low text-outline hover:text-brand-deep cursor-pointer" title="Tuần sau">
+            <a href="/GiangVien/LichDay?weekStart=@selectedWeek.AddDays(7).ToString("yyyy-MM-dd")&maLop=@selectedMaLop@gvParam" class="p-2 rounded-xl border border-border-standard hover:bg-surface-container-low text-outline hover:text-brand-deep cursor-pointer" title="Tuần sau">
                 <span class="material-symbols-outlined text-[18px]">chevron_right</span>
             </a>
-            <a href="/GiangVien/LichDay?maLop=@selectedMaLop" class="px-3 py-1.5 text-xs font-semibold text-primary hover:underline">
+            <a href="/GiangVien/LichDay?maLop=@selectedMaLop@gvParam" class="px-3 py-1.5 text-xs font-semibold text-primary hover:underline">
                 Tuần này
             </a>
         </div>

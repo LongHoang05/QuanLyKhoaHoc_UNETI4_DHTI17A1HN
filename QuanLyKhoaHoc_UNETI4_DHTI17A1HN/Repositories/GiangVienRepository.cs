@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 
@@ -66,7 +66,17 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
 
             if (!string.IsNullOrWhiteSpace(hocVi))
             {
-                query = query.Where(g => g.HocVi == hocVi);
+                string hv = hocVi.Trim();
+                if (hv == "ThS." || hv == "Thạc sĩ")
+                    query = query.Where(g => g.HocVi == "ThS." || g.HocVi == "Thạc sĩ");
+                else if (hv == "TS." || hv == "Tiến sĩ")
+                    query = query.Where(g => g.HocVi == "TS." || g.HocVi == "Tiến sĩ");
+                else if (hv == "PGS.TS." || hv == "PGS.TS" || hv == "PGS. Tiến sĩ")
+                    query = query.Where(g => g.HocVi == "PGS.TS." || g.HocVi == "PGS.TS" || g.HocVi == "PGS. Tiến sĩ");
+                else if (hv == "GS.TS." || hv == "GS.TS" || hv == "GS. Tiến sĩ")
+                    query = query.Where(g => g.HocVi == "GS.TS." || g.HocVi == "GS.TS" || g.HocVi == "GS. Tiến sĩ");
+                else
+                    query = query.Where(g => g.HocVi == hv);
             }
 
             return await query.OrderByDescending(g => g.MaGiangVien).ToListAsync();
@@ -121,7 +131,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         {
             return await _context.BuoiHocs
                 .Include(b => b.LopHoc)
-                .Where(b => (b.MaGiangVien == maGiangVien || classIds.Contains(b.MaLopHoc)) && b.ThoiGianBatDau >= DateTime.Today.AddDays(-1))
+                .Where(b => (b.MaGiangVien == maGiangVien || classIds.Contains(b.MaLopHoc)) 
+                            && b.ThoiGianBatDau >= DateTime.Today.AddDays(-1) 
+                            && b.TrangThai != "Đã hủy")
                 .OrderBy(b => b.ThoiGianBatDau)
                 .Take(count)
                 .ToListAsync();
@@ -153,7 +165,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             return await _context.DangKyHocs
                 .Include(d => d.HocVien)
                 .Include(d => d.KetQuaHocTap)
-                .Where(d => d.MaLopHoc == maLop)
+                .Where(d => d.MaLopHoc == maLop &&
+                            (d.TrangThai == "Đã duyệt" ||
+                             d.TrangThai == "Đã đóng học phí" ||
+                             d.TrangThai == "Đang học" ||
+                             d.TrangThai == "Hoàn thành" ||
+                             d.TrangThai == "Không hoàn thành"))
                 .OrderBy(d => d.HocVien != null ? d.HocVien.HoTen : "")
                 .ToListAsync();
         }
@@ -170,11 +187,17 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             }
 
             if (diemCC.HasValue && (diemCC.Value < 0 || diemCC.Value > 10))
-                return (false, "Điểm chuyên cần phải từ 0 đến 10.", null);
+                return (false, "Điểm quá trình phải từ 0 đến 10.", null);
             if (diemGK.HasValue && (diemGK.Value < 0 || diemGK.Value > 10))
                 return (false, "Điểm giữa kỳ phải từ 0 đến 10.", null);
             if (diemCK.HasValue && (diemCK.Value < 0 || diemCK.Value > 10))
                 return (false, "Điểm cuối kỳ phải từ 0 đến 10.", null);
+
+            double? diemQuaTrinh = diemCC ?? diemGK;
+            if (!diemQuaTrinh.HasValue || !diemCK.HasValue)
+            {
+                return (false, "Vui lòng nhập đầy đủ Điểm quá trình (40%) và Điểm thi cuối kỳ (60%).", null);
+            }
 
             var ketQua = dk.KetQuaHocTap;
             if (ketQua == null)
@@ -187,36 +210,28 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 _context.KetQuaHocTaps.Add(ketQua);
             }
 
-            ketQua.DiemChuyenCan = diemCC ?? 0;
-            ketQua.DiemGiuaKy = diemGK;
-            ketQua.DiemCuoiKy = diemCK ?? 0;
-            ketQua.GhiChu = ghiChu;
-            ketQua.NgayDanhGia = DateTime.Now;
+            ketQua.DiemChuyenCan = diemQuaTrinh.Value;
+            ketQua.DiemCuoiKhoa = diemCK.Value;
+            ketQua.NhanXet = ghiChu;
+            ketQua.NgayCapNhat = DateTime.Now;
 
-            // Tính điểm tổng kết theo quy chế UNETI: CC 10% + GK 40% + CK 50%
-            if (diemCC.HasValue && diemGK.HasValue && diemCK.HasValue)
-            {
-                double tk = Math.Round(diemCC.Value * 0.1 + diemGK.Value * 0.4 + diemCK.Value * 0.5, 2);
-                ketQua.DiemTongKet = tk;
+            // Tính điểm tổng kết thống nhất toàn hệ thống: 40% Quá trình + 60% Cuối kỳ (hoặc 10% CC + 40% GK + 50% CK nếu truyền đủ 3 cột)
+            double tk = (diemCC.HasValue && diemGK.HasValue)
+                ? Math.Round(diemCC.Value * 0.1 + diemGK.Value * 0.4 + diemCK.Value * 0.5, 2)
+                : Math.Round(diemQuaTrinh.Value * 0.4 + diemCK.Value * 0.6, 2);
 
-                if (tk >= 8.5) { ketQua.DiemChu = "A"; ketQua.DiemHe4 = 4.0; ketQua.XepLoai = "Xuất sắc"; ketQua.KetQua = "Đạt"; }
-                else if (tk >= 8.0) { ketQua.DiemChu = "B+"; ketQua.DiemHe4 = 3.5; ketQua.XepLoai = "Giỏi"; ketQua.KetQua = "Đạt"; }
-                else if (tk >= 7.0) { ketQua.DiemChu = "B"; ketQua.DiemHe4 = 3.0; ketQua.XepLoai = "Khá"; ketQua.KetQua = "Đạt"; }
-                else if (tk >= 6.5) { ketQua.DiemChu = "C+"; ketQua.DiemHe4 = 2.5; ketQua.XepLoai = "Trung bình khá"; ketQua.KetQua = "Đạt"; }
-                else if (tk >= 5.5) { ketQua.DiemChu = "C"; ketQua.DiemHe4 = 2.0; ketQua.XepLoai = "Trung bình"; ketQua.KetQua = "Đạt"; }
-                else if (tk >= 5.0) { ketQua.DiemChu = "D+"; ketQua.DiemHe4 = 1.5; ketQua.XepLoai = "Trung bình yếu"; ketQua.KetQua = "Đạt"; }
-                else if (tk >= 4.0) { ketQua.DiemChu = "D"; ketQua.DiemHe4 = 1.0; ketQua.XepLoai = "Yếu"; ketQua.KetQua = "Đạt"; }
-                else { ketQua.DiemChu = "F"; ketQua.DiemHe4 = 0.0; ketQua.XepLoai = "Kém"; ketQua.KetQua = "Không đạt"; }
+            ketQua.DiemTongKet = tk;
 
-                if (ketQua.KetQua == "Đạt" || ketQua.KetQua == "Hoàn thành")
-                {
-                    dk.TrangThai = "Hoàn thành";
-                }
-                else
-                {
-                    dk.TrangThai = "Không hoàn thành";
-                }
-            }
+            if (tk >= 8.5) { ketQua.DiemChu = "A"; ketQua.DiemHe4 = 4.0; ketQua.XepLoai = "Xuất sắc"; ketQua.KetQua = "Hoàn thành"; }
+            else if (tk >= 8.0) { ketQua.DiemChu = "B+"; ketQua.DiemHe4 = 3.5; ketQua.XepLoai = "Giỏi"; ketQua.KetQua = "Hoàn thành"; }
+            else if (tk >= 7.0) { ketQua.DiemChu = "B"; ketQua.DiemHe4 = 3.0; ketQua.XepLoai = "Khá"; ketQua.KetQua = "Hoàn thành"; }
+            else if (tk >= 6.5) { ketQua.DiemChu = "C+"; ketQua.DiemHe4 = 2.5; ketQua.XepLoai = "Trung bình khá"; ketQua.KetQua = "Hoàn thành"; }
+            else if (tk >= 5.5) { ketQua.DiemChu = "C"; ketQua.DiemHe4 = 2.0; ketQua.XepLoai = "Trung bình"; ketQua.KetQua = "Hoàn thành"; }
+            else if (tk >= 5.0) { ketQua.DiemChu = "D+"; ketQua.DiemHe4 = 1.5; ketQua.XepLoai = "Trung bình yếu"; ketQua.KetQua = "Hoàn thành"; }
+            else if (tk >= 4.0) { ketQua.DiemChu = "D"; ketQua.DiemHe4 = 1.0; ketQua.XepLoai = "Yếu"; ketQua.KetQua = "Không hoàn thành"; }
+            else { ketQua.DiemChu = "F"; ketQua.DiemHe4 = 0.0; ketQua.XepLoai = "Kém"; ketQua.KetQua = "Không hoàn thành"; }
+
+            dk.TrangThai = ketQua.KetQua;
 
             await _context.SaveChangesAsync();
             return (true, "Cập nhật điểm thành công!", ketQua);

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>
+@model IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>
 @{
     // Họ và tên: Nguyễn Đình Kiên
     // Mã sinh viên: 23103100020
@@ -7,6 +7,7 @@
     int currentPage = ViewBag.CurrentPage ?? 1;
     int totalPages = ViewBag.TotalPages ?? 1;
     int totalItems = ViewBag.TotalItems ?? 0;
+    int pageSize = ViewBag.PageSize ?? 6;
     string search = ViewBag.Search ?? "";
     int? selectedMaCT = ViewBag.SelectedMaChuongTrinh;
     string selectedTrinhDo = ViewBag.SelectedTrinhDo ?? "";
@@ -22,12 +23,12 @@
 
 <div id="lophoc-content-area" class="flex flex-col gap-y-6 transition-opacity duration-200">
     <!-- Sub-header Navigation Bar -->
-    <section class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border-standard">
+    <section class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 card-pro">
         <div>
             <div class="flex items-center gap-2 text-outline font-label-sm text-label-sm uppercase tracking-wider mb-1">
-                <span>ĐÀO TẠO</span>
+                <span>ĐÀO TẠO UNETI</span>
                 <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-brand-deep font-semibold">QUẢN LÝ LỚP HỌC</span>
+                <span class="text-primary font-semibold">QUẢN LÝ LỚP HỌC</span>
             </div>
             <h1 class="font-headline-md text-headline-md text-brand-deep font-bold tracking-tight">
                 Danh sách Lớp học phần
@@ -39,7 +40,7 @@
                 <span class="material-symbols-outlined text-[18px] text-primary">file_download</span>
                 <span class="hidden sm:inline">Xuất Excel</span>
             </button>
-            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
+            <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-hover text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-card transition-all active:scale-95 cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">add_circle</span>
                 <span>Thêm lớp học</span>
             </button>
@@ -48,10 +49,10 @@
 
     <!-- 3 Stat Cards (Top KPI) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Tổng số lớp học</span>
-                <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <span class="text-outline font-label-md text-label-md font-medium">Tổng số lớp học</span>
+                <div class="w-10 h-10 rounded-2xl bg-primary-light flex items-center justify-center text-primary">
                     <span class="material-symbols-outlined text-[20px]">meeting_room</span>
                 </div>
             </div>
@@ -61,23 +62,23 @@
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Đang mở đăng ký</span>
-                <div class="w-9 h-9 rounded-xl bg-success-emerald/10 flex items-center justify-center text-success-emerald">
+                <span class="text-outline font-label-md text-label-md font-medium">Đang mở đăng ký</span>
+                <div class="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
                     <span class="material-symbols-outlined text-[20px]">how_to_reg</span>
                 </div>
             </div>
             <div class="flex items-baseline gap-2">
-                <span class="font-display text-[30px] leading-8 text-success-emerald tracking-tight font-black font-mono">@ViewBag.LopDangMo</span>
+                <span class="font-display text-[30px] leading-8 text-emerald-700 tracking-tight font-black font-mono">@ViewBag.LopDangMo</span>
                 <span class="text-xs text-outline font-medium">lớp tiếp nhận hồ sơ</span>
             </div>
         </div>
 
-        <div class="bg-surface-white rounded-2xl p-5 border border-border-subtle shadow-[0_2px_12px_rgba(13, 71, 161,0.03)] flex flex-col justify-between">
+        <div class="card-pro card-pro-hover p-5 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-outline font-label-md text-label-md">Học viên đang theo học</span>
-                <div class="w-9 h-9 rounded-xl bg-secondary-container/10 flex items-center justify-center text-secondary-container">
+                <span class="text-outline font-label-md text-label-md font-medium">Học viên đang theo học</span>
+                <div class="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center text-primary">
                     <span class="material-symbols-outlined text-[20px]">person_pin</span>
                 </div>
             </div>
@@ -89,17 +90,17 @@
     </div>
 
     <!-- Multi-criteria Filter Toolbar (Mục 6.3 - 6.5) -->
-    <div class="bg-surface-white rounded-2xl p-4 border border-border-subtle shadow-sm flex flex-col gap-3">
-        <form method="get" action="/LopHoc/Index" class="flex flex-wrap items-center gap-3 w-full" id="filter-form" onsubmit="event.preventDefault(); filterLopHocAjax();">
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm p-4 card-pro flex flex-wrap items-center justify-between gap-3">
+        <form method="get" action="/LopHoc/Index" class="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]" id="filter-form" onsubmit="event.preventDefault(); filterLopHocAjax();">
             <!-- Search Field -->
             <div class="relative flex-1 min-w-[240px]">
                 <span class="material-symbols-outlined text-outline absolute left-3 top-1/2 -translate-y-1/2 text-[18px]">search</span>
-                <input name="search" value="@search" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Tìm theo tên lớp, CTĐT, giảng viên..." type="text"/>
+                <input name="search" value="@search" class="w-full bg-surface-container-low border border-border-standard pl-9 pr-3 py-2 rounded-xl text-brand-deep text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Tìm theo tên lớp, CTĐT, giảng viên..." type="text"/>
             </div>
 
             <!-- Program Filter -->
-            <div class="relative">
-                <select name="maChuongTrinh" onchange="filterLopHocAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
+            <div class="relative min-w-[170px]">
+                <select name="maChuongTrinh" onchange="filterLopHocAjax()" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
                     <option value="">Tất cả Chương trình</option>
                     @foreach (var ct in chuongTrinhList)
                     {
@@ -109,52 +110,22 @@
                 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
             </div>
 
-            <!-- Level Filter -->
-            <div class="hidden">
-                <select name="trinhDo" onchange="filterLopHocAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
-                    <option value="">Trình độ: Tất cả</option>
-                    <!option value="Cơ bản" @(selectedTrinhDo == "Cơ bản" ? "selected" : "")>Cơ bản</!option>
-                    <!option value="Nâng cao" @(selectedTrinhDo == "Nâng cao" ? "selected" : "")>Nâng cao</!option>
-                    <!option value="Chuyên sâu" @(selectedTrinhDo == "Chuyên sâu" ? "selected" : "")>Chuyên sâu</!option>
-                </select>
-                <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
-            </div>
-
             <!-- Status Filter -->
-            <div class="relative">
-                <select name="trangThai" onchange="filterLopHocAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
+            <div class="relative min-w-[160px]">
+                <select name="trangThai" onchange="filterLopHocAjax()" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
                     <option value="">Trạng thái: Tất cả</option>
                     <!option value="Đang mở đăng ký" @(selectedTrangThai == "Đang mở đăng ký" ? "selected" : "")>● Đang mở đăng ký</!option>
                     <!option value="Chưa mở" @(selectedTrangThai == "Chưa mở" ? "selected" : "")>○ Chưa mở</!option>
                     <!option value="Đã đóng đăng ký" @(selectedTrangThai == "Đã đóng đăng ký" ? "selected" : "")>✕ Đã đóng đăng ký</!option>
+                    <!option value="Đã kết thúc" @(selectedTrangThai == "Đã kết thúc" ? "selected" : "")>✓ Đã kết thúc</!option>
                     <!option value="Tạm dừng" @(selectedTrangThai == "Tạm dừng" ? "selected" : "")>⏸ Tạm dừng</!option>
                 </select>
                 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
             </div>
 
-            <!-- Deadline Filter -->
-            <div class="hidden">
-                <select name="hanDangKyStatus" onchange="filterLopHocAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
-                    <option value="">Hạn ĐK: Tất cả</option>
-                    <!option value="con_han" @(hanDangKyStatus == "con_han" ? "selected" : "")>Còn hạn đăng ký</!option>
-                    <!option value="het_han" @(hanDangKyStatus == "het_han" ? "selected" : "")>Hết hạn đăng ký</!option>
-                </select>
-                <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
-            </div>
-
-            <!-- Capacity Filter -->
-            <div class="hidden">
-                <select name="choTrongStatus" onchange="filterLopHocAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors">
-                    <option value="">Sĩ số: Tất cả</option>
-                    <!option value="con_cho" @(choTrongStatus == "con_cho" ? "selected" : "")>Còn chỗ trống</!option>
-                    <!option value="het_cho" @(choTrongStatus == "het_cho" ? "selected" : "")>Đã đầy chỗ</!option>
-                </select>
-                <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
-            </div>
-
             <!-- Sort By -->
-            <div class="relative">
-                <select name="sortBy" onchange="filterLopHocAjax()" class="appearance-none bg-surface-white border border-border-standard text-brand-deep font-body-sm text-body-sm px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors font-medium">
+            <div class="relative min-w-[165px]">
+                <select name="sortBy" onchange="filterLopHocAjax()" class="w-full appearance-none bg-surface-white border border-border-standard text-brand-deep text-xs px-3.5 py-2 pr-8 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-low transition-colors font-medium">
                     <option value="">Sắp xếp mặc định</option>
                     <!option value="ten_asc" @(sortBy == "ten_asc" ? "selected" : "")>Tên lớp: A → Z</!option>
                     <!option value="ten_desc" @(sortBy == "ten_desc" ? "selected" : "")>Tên lớp: Z → A</!option>
@@ -166,34 +137,45 @@
                 </select>
                 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">sort</span>
             </div>
-
-            <a href="/LopHoc/Index" onclick="event.preventDefault(); loadLopHocPage(this.href);" class="p-2 border border-border-standard rounded-xl text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors cursor-pointer" title="Làm mới bộ lọc">
-                <span class="material-symbols-outlined text-[20px] block">refresh</span>
-            </a>
         </form>
+
+        <div class="flex items-center gap-2">
+            <button id="btnBulkDeleteLopHoc" class="hidden items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition-all cursor-pointer shadow-xs active:scale-95" title="Xóa các lớp học đã chọn">
+                <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+                <span>Xóa đã chọn (<span id="selectedLopHocCount">0</span>)</span>
+            </button>
+            <a href="/LopHoc/Index" onclick="event.preventDefault(); loadLopHocPage(this.href);" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
+                <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                <span>Đặt lại</span>
+            </a>
+        </div>
     </div>
 
     <!-- Data Table Container -->
-    <div class="bg-surface-white rounded-2xl border border-border-subtle shadow-[0_1px_3px_rgba(13, 71, 161,0.04)] overflow-hidden">
+    <div class="bg-surface-white rounded-2xl border border-border-standard shadow-sm overflow-hidden card-pro">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse" id="crud-table">
                 <thead>
-                    <tr class="bg-surface-container-low/70 border-b border-border-subtle font-label-sm text-label-sm text-outline tracking-wider uppercase">
-                        <th class="py-4 px-6">Thông tin lớp học</th>
-                        <th class="py-4 px-4">Giảng viên / Trình độ</th>
-                        <th class="py-4 px-4 text-center">Sĩ số (Đã duyệt)</th>
-                        <th class="py-4 px-4 text-center">Số buổi (Đã lên lịch)</th>
-                        <th class="py-4 px-4">Học phí</th>
-                        <th class="py-4 px-4">Hạn ĐK / Khai giảng</th>
-                        <th class="py-4 px-4 text-center">Trạng thái</th>
-                        <th class="py-4 px-6 text-right">Thao tác</th>
+                    <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
+                        <th class="py-3.5 px-3 w-10 text-center">
+                            <input type="checkbox" id="selectAllLopHoc" class="w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" title="Chọn tất cả">
+                        </th>
+                        <th class="py-3.5 px-3 w-10 text-center">#</th>
+                        <th class="py-3.5 px-4">Thông tin lớp học</th>
+                        <th class="py-3.5 px-4">Giảng viên / Trình độ</th>
+                        <th class="py-3.5 px-4 text-center">Sĩ số (Đã duyệt)</th>
+                        <th class="py-3.5 px-4 text-center">Số buổi (Đã lên lịch)</th>
+                        <th class="py-3.5 px-4">Học phí</th>
+                        <th class="py-3.5 px-4">Hạn ĐK / Khai giảng</th>
+                        <th class="py-3.5 px-4 text-center">Trạng thái</th>
+                        <th class="py-3.5 px-4 pr-6 text-right">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-border-subtle font-body-sm text-body-sm">
+                <tbody class="divide-y divide-border-subtle text-xs text-brand-deep">
                     @if (!Model.Any())
                     {
                         <tr>
-                            <td colspan="8" class="py-12 text-center text-outline">
+                            <td colspan="10" class="py-12 text-center text-outline">
                                 <span class="material-symbols-outlined text-4xl block mb-2 text-outline/50">search_off</span>
                                 Không có lớp học nào phù hợp với bộ lọc hiện tại.
                             </td>
@@ -201,6 +183,7 @@
                     }
                     else
                     {
+                        int idx = (currentPage - 1) * pageSize + 1;
                         @foreach (var item in Model)
                         {
                             int siSo = siSoMap.ContainsKey(item.MaLopHoc) ? siSoMap[item.MaLopHoc] : 0;
@@ -224,14 +207,18 @@
                                 data-mota="@item.MoTa"
                                 data-yeucau="@item.YeuCauHocVien"
                                 data-trangthai="@item.TrangThai">
-                                <td class="py-4 px-6">
+                                <td class="py-3.5 px-3 text-center">
+                                    <input type="checkbox" class="lophoc-cb w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" value="@item.MaLopHoc">
+                                </td>
+                                <td class="py-3.5 px-3 text-center text-outline font-mono text-[11px]">@(idx++)</td>
+                                <td class="py-3.5 px-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary font-bold text-xs flex items-center justify-center flex-shrink-0 font-mono">
-                                            #@item.MaLopHoc
+                                        <div class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                                            <span class="material-symbols-outlined text-[18px]">school</span>
                                         </div>
                                         <div>
-                                            <a href="/LopHoc/Details/@item.MaLopHoc" class="font-semibold text-brand-deep hover:text-primary transition-colors">@item.TenLop</a>
-                                            <div class="text-xs text-outline font-medium">@(item.ChuongTrinhDaoTao?.TenChuongTrinh ?? "N/A")</div>
+                                            <a href="/LopHoc/Details/@item.MaLopHoc" class="font-bold text-brand-deep hover:text-primary transition-colors">@item.TenLop</a>
+                                            <div class="text-[11px] text-outline font-medium">@(item.ChuongTrinhDaoTao?.TenChuongTrinh ?? "N/A") • <span class="font-mono text-primary font-semibold">#LH@(item.MaLopHoc.ToString("D2"))</span></div>
                                         </div>
                                     </div>
                                 </td>
@@ -290,10 +277,16 @@
                                             <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Tạm dừng
                                         </span>
                                     }
+                                    else if (item.TrangThai == "Đã kết thúc")
+                                    {
+                                        <span class="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-slate-700 bg-slate-100 px-2.5 py-1 rounded-full font-semibold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>Đã kết thúc
+                                        </span>
+                                    }
                                     else
                                     {
                                         <span class="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full font-semibold">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Chưa mở
+                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>@item.TrangThai
                                         </span>
                                     }
                                 </td>
@@ -305,7 +298,7 @@
                                         <button onclick="openEditDrawerFromRow(this)" class="p-1.5 rounded-lg text-outline hover:text-secondary-container hover:bg-surface-container-low transition-colors cursor-pointer" title="Chỉnh sửa lớp">
                                             <span class="material-symbols-outlined text-[18px]">edit</span>
                                         </button>
-                                        <button onclick="confirmDeleteLop(@item.MaLopHoc, '@item.TenLop', @siSo)" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50 transition-colors cursor-pointer" title="Xóa lớp">
+                                        <button onclick="confirmDeleteLop(@item.MaLopHoc, '@(item.TenLop?.Replace("'", "\\'") ?? "")', @(item.DangKyHocs?.Count ?? siSo))" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50 transition-colors cursor-pointer" title="Xóa lớp">
                                             <span class="material-symbols-outlined text-[18px]">delete</span>
                                         </button>
                                     </div>
@@ -322,6 +315,7 @@
             CurrentPage = currentPage,
             TotalPages = totalPages,
             TotalItems = totalItems,
+            PageSize = pageSize,
             ItemLabel = "lớp học",
             BaseUrl = "/LopHoc/Index",
             AjaxFunction = "loadLopHocPage",
@@ -338,29 +332,28 @@
         </div>
     </div>
 
-<!-- Right Slide-Over Drawer for Create & Edit LopHoc -->
-<div id="drawer-container" class="fixed inset-0 z-50 overflow-hidden hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
-    <div class="absolute inset-0 bg-brand-deep/30 backdrop-blur-xs transition-opacity" onclick="closeDrawer()"></div>
-    <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div class="w-screen max-w-lg bg-surface-white shadow-2xl flex flex-col justify-between">
-            <!-- Header -->
-            <div class="p-6 border-b border-border-subtle flex items-start justify-between">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary text-[22px]">meeting_room</span>
-                        <h2 class="font-headline-sm text-headline-sm text-brand-deep font-bold" id="drawer-title">Thêm lớp học phần</h2>
-                    </div>
-                    <p class="font-body-sm text-body-sm text-outline mt-1" id="drawer-subtitle">Tạo lớp học mới và thiết lập kế hoạch tuyển sinh.</p>
-                </div>
-                <button onclick="closeDrawer()" class="p-1.5 rounded-xl text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors cursor-pointer">
-                    <span class="material-symbols-outlined text-[20px]">close</span>
-                </button>
-            </div>
+<!-- Right Slide-Over Drawer for Create & Edit LopHoc (Smooth Slide Animation) -->
+<div id="drawer-backdrop" onclick="closeDrawer()" class="fixed inset-0 bg-brand-deep/40 backdrop-blur-xs z-50 transition-opacity duration-300 opacity-0 pointer-events-none"></div>
 
-            <!-- Body -->
-            <form id="drawer-form" method="post" action="/LopHoc/CreatePost" class="flex-1 overflow-y-auto p-6 space-y-4">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="maLop" id="drawer-malop" value="0"/>
+<div id="drawer-panel" class="fixed inset-y-0 right-0 w-full max-w-lg bg-surface-white border-l border-border-standard shadow-2xl z-50 flex flex-col justify-between transform transition-transform duration-300 ease-out translate-x-full">
+    <!-- Header -->
+    <div class="p-6 border-b border-border-subtle flex items-start justify-between bg-surface-white">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-[22px]">meeting_room</span>
+                <h2 class="font-headline-sm text-headline-sm text-brand-deep font-bold" id="drawer-title">Thêm lớp học phần</h2>
+            </div>
+            <p class="font-body-sm text-body-sm text-outline mt-1" id="drawer-subtitle">Tạo lớp học mới và thiết lập kế hoạch tuyển sinh.</p>
+        </div>
+        <button onclick="closeDrawer()" class="p-1.5 rounded-xl text-outline hover:text-brand-deep hover:bg-surface-container-low transition-colors cursor-pointer">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+    </div>
+
+    <!-- Body -->
+    <form id="drawer-form" method="post" action="/LopHoc/CreatePost" class="flex-1 overflow-y-auto p-6 space-y-4">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="maLop" id="drawer-malop" value="0"/>
 
                 <div class="space-y-1.5">
                     <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Tên lớp học <span class="text-danger-crimson">*</span></label>
@@ -370,21 +363,28 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div class="space-y-1.5">
                         <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Chương trình đào tạo <span class="text-danger-crimson">*</span></label>
-                        <select name="MaChuongTrinh" id="drawer-mact" required class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:border-primary cursor-pointer">
-                            @foreach (var ct in chuongTrinhList)
-                            {
-                                <option value="@ct.MaChuongTrinh">@ct.TenChuongTrinh</option>
-                            }
-                        </select>
+                        <div class="relative">
+                            <select name="MaChuongTrinh" id="drawer-mact" required class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 pr-8 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:border-primary cursor-pointer transition-all">
+                                @foreach (var ct in chuongTrinhList)
+                                {
+                                    <option value="@ct.MaChuongTrinh">@ct.TenChuongTrinh</option>
+                                }
+                            </select>
+                            <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+                        </div>
                     </div>
 
                     <div class="space-y-1.5">
                         <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Trình độ đầu vào</label>
-                        <select name="TrinhDoDauVao" id="drawer-trinhdo" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:border-primary cursor-pointer">
-                            <option value="Cơ bản">Cơ bản</option>
-                            <option value="Nâng cao">Nâng cao</option>
-                            <option value="Chuyên sâu">Chuyên sâu</option>
-                        </select>
+                        <div class="relative">
+                            <select name="TrinhDoDauVao" id="drawer-trinhdo" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 pr-8 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:border-primary cursor-pointer transition-all">
+                                <option value="Cơ bản">Cơ bản</option>
+                                <option value="Trung cấp">Trung cấp</option>
+                                <option value="Nâng cao">Nâng cao</option>
+                                <option value="Chuyên sâu">Chuyên sâu</option>
+                            </select>
+                            <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+                        </div>
                     </div>
                 </div>
 
@@ -397,7 +397,15 @@
                             {
                                 foreach (var gv in (IEnumerable<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien>)ViewBag.GiangVienList)
                                 {
-                                    <option value="@gv.HocVi @gv.HoTen">@gv.ChuyenNganh</option>
+                                    var gvNameTrim = (gv.HoTen ?? "").Trim();
+                                    var hasPrefix = gvNameTrim.StartsWith("ThS", StringComparison.OrdinalIgnoreCase)
+                                        || gvNameTrim.StartsWith("TS", StringComparison.OrdinalIgnoreCase)
+                                        || gvNameTrim.StartsWith("PGS", StringComparison.OrdinalIgnoreCase)
+                                        || gvNameTrim.StartsWith("GS", StringComparison.OrdinalIgnoreCase)
+                                        || gvNameTrim.StartsWith("Kỹ sư", StringComparison.OrdinalIgnoreCase)
+                                        || gvNameTrim.StartsWith("Cử nhân", StringComparison.OrdinalIgnoreCase);
+                                    var displayGvOption = hasPrefix || string.IsNullOrWhiteSpace(gv.HocVi) ? gvNameTrim : $"{gv.HocVi} {gvNameTrim}";
+                                    <option value="@displayGvOption">@gv.ChuyenNganh</option>
                                 }
                             }
                         </datalist>
@@ -405,7 +413,7 @@
 
                     <div class="space-y-1.5">
                         <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Học phí (VNĐ) <span class="text-danger-crimson">*</span></label>
-                        <input type="number" step="100000" min="0" name="HocPhi" id="drawer-hocphi" required class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="5000000"/>
+                        <input type="number" step="any" min="0" name="HocPhi" id="drawer-hocphi" required class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="5000000"/>
                     </div>
                 </div>
 
@@ -440,12 +448,16 @@
 
                 <div class="space-y-1.5">
                     <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">Trạng thái lớp</label>
-                    <select name="TrangThai" id="drawer-trangthai" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:border-primary cursor-pointer">
-                        <option value="Chưa mở">Chưa mở</option>
-                        <option value="Đang mở đăng ký">Đang mở đăng ký</option>
-                        <option value="Tạm dừng">Tạm dừng</option>
-                        <option value="Đã đóng đăng ký">Đã đóng đăng ký</option>
-                    </select>
+                    <div class="relative">
+                        <select name="TrangThai" id="drawer-trangthai" class="w-full bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 pr-8 font-body-sm text-body-sm text-brand-deep focus:outline-none focus:border-primary cursor-pointer transition-all">
+                            <option value="Chưa mở">Chưa mở</option>
+                            <option value="Đang mở đăng ký">Đang mở đăng ký</option>
+                            <option value="Tạm dừng">Tạm dừng</option>
+                            <option value="Đã đóng đăng ký">Đã đóng đăng ký</option>
+                            <option value="Đã kết thúc">Đã kết thúc</option>
+                        </select>
+                        <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+                    </div>
                 </div>
 
                 <div class="space-y-1.5">
@@ -469,17 +481,20 @@
                     </button>
                 </div>
             </form>
-        </div>
-    </div>
 </div>
 
 @section Scripts {
 <script>
-    const drawer = document.getElementById('drawer-container');
+    const drawerBackdrop = document.getElementById('drawer-backdrop');
+    const drawerPanel = document.getElementById('drawer-panel');
     const drawerForm = document.getElementById('drawer-form');
 
     function openDrawer(mode) {
-        drawer.classList.remove('hidden');
+        if (drawerBackdrop && drawerPanel) {
+            drawerBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+            drawerBackdrop.classList.add('opacity-100');
+            drawerPanel.classList.remove('translate-x-full');
+        }
         if (mode === 'create') {
             document.getElementById('drawer-title').innerText = 'Thêm lớp học phần';
             document.getElementById('drawer-subtitle').innerText = 'Tạo lớp học mới và thiết lập kế hoạch tuyển sinh.';
@@ -509,7 +524,11 @@
     }
 
     function closeDrawer() {
-        drawer.classList.add('hidden');
+        if (drawerBackdrop && drawerPanel) {
+            drawerBackdrop.classList.remove('opacity-100');
+            drawerBackdrop.classList.add('opacity-0', 'pointer-events-none');
+            drawerPanel.classList.add('translate-x-full');
+        }
     }
 
     function openEditDrawerFromRow(btn) {
@@ -534,7 +553,11 @@
         document.getElementById('drawer-mota').value = row.dataset.mota;
         document.getElementById('drawer-yeucau').value = row.dataset.yeucau;
 
-        drawer.classList.remove('hidden');
+        if (drawerBackdrop && drawerPanel) {
+            drawerBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+            drawerBackdrop.classList.add('opacity-100');
+            drawerPanel.classList.remove('translate-x-full');
+        }
     }
 
     function confirmDeleteLop(id, tenLop, soHocVien) {
@@ -544,12 +567,11 @@
                 id: id,
                 title: 'Không thể xóa lớp học!',
                 itemName: tenLop,
-                message: `Lớp học <strong class="text-brand-deep">${tenLop}</strong> hiện đã có <strong>${soHocVien} học viên đăng ký</strong>. Quy định nghiệp vụ không cho phép xóa lớp học đã có hồ sơ lịch sử.`,
+                message: `Lớp học <strong class="text-brand-deep">${tenLop}</strong> hiện đã có <strong>${soHocVien} hồ sơ đăng ký</strong>. Quy định nghiệp vụ không cho phép xóa lớp học đã có hồ sơ lịch sử.`,
                 warning: 'Bạn có thể chuyển trạng thái lớp sang "Đã đóng đăng ký" hoặc "Tạm dừng".',
-                submitText: 'Đã hiểu'
+                submitText: 'Đã hiểu',
+                onConfirm: function() {}
             });
-            const btn = document.querySelector('#global-delete-modal button[type="submit"]');
-            if (btn) btn.onclick = (e) => { e.preventDefault(); closeGlobalDeleteModal(); };
             return;
         }
 
@@ -586,6 +608,7 @@
             const newContent = doc.getElementById('lophoc-content-area');
             if (newContent && area) {
                 area.innerHTML = newContent.innerHTML;
+                if (window.lopHocBulk) window.lopHocBulk.updateState();
             }
             if (pushState) window.history.pushState({ url }, '', url);
         } catch (err) {
@@ -653,5 +676,24 @@
         downloadLink.click();
         document.body.removeChild(downloadLink);
     }
+
+    // Tự động mở drawer nếu URL có ?create=true
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('create') === 'true' || urlParams.get('action') === 'create') {
+        openDrawer('create');
+        const cleanUrl = window.location.pathname + window.location.search.replace(/[?&]create=true/, '').replace(/[?&]action=create/, '');
+        window.history.replaceState({}, document.title, cleanUrl || window.location.pathname);
+    }
+
+    // Khởi tạo Bulk Delete cho Lớp học
+    window.lopHocBulk = window.initBulkDelete({
+        selectAllId: 'selectAllLopHoc',
+        checkboxClass: 'lophoc-cb',
+        btnDeleteId: 'btnBulkDeleteLopHoc',
+        countBadgeId: 'selectedLopHocCount',
+        deleteUrl: '/LopHoc/DeleteMultiple',
+        itemLabel: 'lớp học',
+        onSuccess: () => loadLopHocPage(window.location.href, false)
+    });
 </script>
 }

@@ -1,4 +1,4 @@
-﻿@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien
+@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.GiangVien
 @{
     ViewData["Title"] = "Cổng Giảng Viên - UNETI EDU";
     var myClasses = ViewBag.MyClasses as List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.LopHoc>();
@@ -6,10 +6,17 @@
     int totalStudents = ViewBag.TotalStudents ?? 0;
     int gradedCount = ViewBag.GradedCount ?? 0;
 
-    string gvHoTen = Model?.HoTen ?? "ThS. Trần Văn Hùng";
-    string gvHocVi = Model?.HocVi ?? "Thạc sĩ";
+    string gvHoTen = (Model?.HoTen ?? "ThS. Trần Văn Hùng").Trim();
+    string gvHocVi = (Model?.HocVi ?? "Thạc sĩ").Trim();
     string gvChuyenNganh = Model?.ChuyenNganh ?? "Khoa học máy tính & Công nghệ Web";
     if (string.IsNullOrWhiteSpace(gvHoTen)) gvHoTen = "ThS. Trần Văn Hùng";
+    bool hasTitlePrefix = gvHoTen.StartsWith("ThS", StringComparison.OrdinalIgnoreCase)
+        || gvHoTen.StartsWith("TS", StringComparison.OrdinalIgnoreCase)
+        || gvHoTen.StartsWith("PGS", StringComparison.OrdinalIgnoreCase)
+        || gvHoTen.StartsWith("GS", StringComparison.OrdinalIgnoreCase)
+        || gvHoTen.StartsWith("Kỹ sư", StringComparison.OrdinalIgnoreCase)
+        || gvHoTen.StartsWith("Cử nhân", StringComparison.OrdinalIgnoreCase);
+    string gvDisplayFull = hasTitlePrefix || string.IsNullOrWhiteSpace(gvHocVi) ? gvHoTen : $"{gvHocVi} {gvHoTen}";
 }
 
 <!--
@@ -27,7 +34,7 @@
             <div class="space-y-2">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-semibold text-blue-200">
                     <span class="material-symbols-outlined text-[16px] text-amber-300">verified</span>
-                    <span>Cổng Giảng Viên UNETI • @gvHocVi @gvHoTen</span>
+                    <span>Cổng Giảng Viên UNETI • @gvDisplayFull</span>
                 </div>
                 <h1 class="text-2xl md:text-3xl font-black tracking-tight">
                     Xin chào Thầy/Cô, @gvHoTen 👋

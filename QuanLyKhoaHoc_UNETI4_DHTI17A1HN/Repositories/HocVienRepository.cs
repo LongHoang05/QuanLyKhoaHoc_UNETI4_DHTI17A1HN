@@ -156,7 +156,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         }
 
         public async Task<(IEnumerable<HocVien> Items, int TotalCount)> GetPagedAsync(
-            string? keyword, bool? trangThai, int pageIndex, int pageSize)
+            string? keyword, bool? trangThai, int pageIndex, int pageSize, string? trinhDo = null, string? sortBy = null)
         {
             var query = _context.HocViens
                 .Include(h => h.DangKyHocs)
@@ -166,11 +166,17 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             if (!string.IsNullOrWhiteSpace(keyword))
             {
                 var kw = keyword.Trim().ToLower();
+                var codeKw = kw.StartsWith("#hv") ? kw.Substring(3).TrimStart('0')
+                           : kw.StartsWith("hv") ? kw.Substring(2).TrimStart('0')
+                           : kw;
+
                 query = query.Where(h =>
                     h.HoTen.ToLower().Contains(kw) ||
                     h.Email.ToLower().Contains(kw) ||
                     (h.SoDienThoai != null && h.SoDienThoai.Contains(kw)) ||
-                    (h.DiaChi != null && h.DiaChi.ToLower().Contains(kw)));
+                    (h.DiaChi != null && h.DiaChi.ToLower().Contains(kw)) ||
+                    (h.TaiKhoan != null && h.TaiKhoan.TenDangNhap.ToLower().Contains(kw)) ||
+                    (!string.IsNullOrEmpty(codeKw) && h.MaHocVien.ToString().Contains(codeKw)));
             }
 
             if (trangThai.HasValue)
@@ -178,8 +184,22 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 query = query.Where(h => h.TrangThai == trangThai.Value);
             }
 
-            query = query.OrderByDescending(h => h.NgayTao);
+            if (!string.IsNullOrWhiteSpace(trinhDo))
+            {
+                query = query.Where(h => h.TrinhDoHocVan == trinhDo);
+            }
+
             int totalCount = await query.CountAsync();
+
+            query = sortBy switch
+            {
+                "ten_asc" => query.OrderBy(h => h.HoTen),
+                "ten_desc" => query.OrderByDescending(h => h.HoTen),
+                "mahv_asc" => query.OrderBy(h => h.MaHocVien),
+                "mahv_desc" => query.OrderByDescending(h => h.MaHocVien),
+                "ngaysinh_asc" => query.OrderBy(h => h.NgaySinh),
+                _ => query.OrderByDescending(h => h.NgayTao).ThenByDescending(h => h.MaHocVien)
+            };
 
             var items = await query
                 .Skip((pageIndex - 1) * pageSize)

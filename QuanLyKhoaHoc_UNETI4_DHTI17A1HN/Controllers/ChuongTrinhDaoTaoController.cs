@@ -36,6 +36,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
 
             int pageSize = 8;
+            if (page < 1) page = 1;
             bool? filterTrangThai = null;
             if (!string.IsNullOrWhiteSpace(trangThai))
             {
@@ -53,8 +54,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
             if (totalPages < 1) totalPages = 1;
-            if (page < 1) page = 1;
-            if (page > totalPages) page = totalPages;
+            if (page > totalPages)
+            {
+                page = totalPages;
+                (items, totalItems) = await _ctdtRepository.GetPagedAsync(search, filterTrangThai, page, pageSize);
+            }
 
             var ctdtIds = items.Select(c => c.MaChuongTrinh).ToList();
             var classCounts = await _ctdtRepository.GetClassCountsByProgramAsync(ctdtIds);
@@ -63,6 +67,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
             ViewBag.TotalItems = totalItems;
+            ViewBag.PageSize = pageSize;
             ViewBag.Search = search;
             ViewBag.SelectedTrangThai = trangThai;
 
@@ -75,9 +80,15 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             return View(items);
         }
 
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return RedirectToAction(nameof(Index), new { create = "true" });
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreatePost(ChuongTrinhDaoTao ctdt)
+        public async Task<IActionResult> CreatePost([Bind("TenChuongTrinh,MoTa,EmailLienHe")] ChuongTrinhDaoTao ctdt, string? TrangThai)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
 
@@ -97,7 +108,10 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ctdt.TrangThai = true;
+            ctdt.TrangThai = string.IsNullOrEmpty(TrangThai) ||
+                             TrangThai == "Đang hoạt động" ||
+                             TrangThai == "1" ||
+                             TrangThai.Equals("true", StringComparison.OrdinalIgnoreCase);
             if (string.IsNullOrEmpty(ctdt.EmailLienHe)) ctdt.EmailLienHe = "contact@uneti.edu.vn";
 
             await _ctdtRepository.AddAsync(ctdt);
@@ -109,7 +123,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditPost(int maChuongTrinh, string tenChuongTrinh, string? moTa, string? emailLienHe, string trangThai)
+        public async Task<IActionResult> EditPost(int maChuongTrinh, string? tenChuongTrinh, string? moTa, string? emailLienHe, string? trangThai)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
             var ctdt = await _ctdtRepository.GetByIdAsync(maChuongTrinh);
@@ -117,6 +131,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             {
                 if (isAjax) return Json(new { success = false, message = "Không tìm thấy chương trình đào tạo cần sửa." });
                 TempData["Error"] = "Không tìm thấy chương trình đào tạo.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (string.IsNullOrWhiteSpace(tenChuongTrinh))
+            {
+                if (isAjax) return Json(new { success = false, message = "Tên chương trình đào tạo bắt buộc nhập." });
+                TempData["Error"] = "Tên chương trình đào tạo bắt buộc nhập.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -131,8 +152,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             ctdt.TenChuongTrinh = tenChuongTrinh;
             ctdt.MoTa = moTa ?? "";
-            ctdt.EmailLienHe = emailLienHe ?? "contact@uneti.edu.vn";
-            ctdt.TrangThai = trangThai == "Đang hoạt động" || trangThai == "1" || trangThai.ToLower() == "true";
+            ctdt.EmailLienHe = string.IsNullOrWhiteSpace(emailLienHe) ? "contact@uneti.edu.vn" : emailLienHe.Trim();
+            ctdt.TrangThai = string.IsNullOrEmpty(trangThai) ||
+                             trangThai == "Đang hoạt động" ||
+                             trangThai == "1" ||
+                             trangThai.Equals("true", StringComparison.OrdinalIgnoreCase);
 
             await _ctdtRepository.UpdateAsync(ctdt);
 
@@ -142,6 +166,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeletePost(int id)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
@@ -167,6 +192,47 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             if (isAjax) return Json(new { success = true, message = $"Đã xóa chương trình đào tạo '{ctdt.TenChuongTrinh}' thành công." });
             TempData["Success"] = "Đã xóa chương trình đào tạo thành công.";
             return RedirectToAction(nameof(Index));
+        }
+
+        // ========================================================
+        // ACTION DELETE MULTIPLE: XÓA NHIỀU CHƯƠNG TRÌNH ĐÀO TẠO
+        // ========================================================
+        [HttpPost]
+        public async Task<IActionResult> DeleteMultiple([FromBody] List<int>? ids)
+        {
+            if (ids == null || !ids.Any())
+                return Json(new { success = false, message = "Vui lòng chọn ít nhất 1 chương trình đào tạo để xóa." });
+
+            int deleted = 0;
+            int skipped = 0;
+
+            foreach (var id in ids)
+            {
+                var ctdt = await _ctdtRepository.GetByIdAsync(id);
+                if (ctdt == null) continue;
+
+                int countLop = await _ctdtRepository.CountLopHocByChuongTrinhAsync(id);
+                if (countLop > 0)
+                {
+                    skipped++;
+                    continue;
+                }
+
+                await _ctdtRepository.DeleteAsync(id);
+                deleted++;
+            }
+
+            if (deleted == 0 && skipped > 0)
+            {
+                return Json(new { success = false, message = $"Không thể xóa {skipped} chương trình đã chọn vì đang có lớp học trực thuộc." });
+            }
+
+            string msg = $"Đã xóa thành công {deleted} chương trình đào tạo.";
+            if (skipped > 0)
+            {
+                msg += $" Bỏ qua {skipped} chương trình do đang có lớp học liên kết.";
+            }
+            return Json(new { success = true, message = msg, deletedCount = deleted, skippedCount = skipped });
         }
     }
 }

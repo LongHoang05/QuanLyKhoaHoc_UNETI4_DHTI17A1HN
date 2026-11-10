@@ -1,4 +1,4 @@
-﻿@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.HocVien
+@model QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.HocVien
 @{
     // Họ và tên: Nguyễn Đức Linh
     // Mã sinh viên: 23103100042
@@ -32,28 +32,64 @@
         </div>
     </div>
 
-    <!-- Student Info Card -->
-    <div class="bg-white rounded-3xl p-6 sm:p-8 border border-border-standard shadow-xs space-y-6">
-        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 pb-6 border-b border-border-standard text-center sm:text-left">
-            <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-brand-deep to-primary text-white font-black text-3xl flex items-center justify-center shrink-0 shadow-lg">
-                @(string.IsNullOrWhiteSpace(Model.HoTen) ? "HV" : Model.HoTen.Substring(0, 1).ToUpper())
-            </div>
-            <div class="flex-1 space-y-1.5">
-                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
-                    <h2 class="text-xl font-bold text-brand-deep">@Model.HoTen</h2>
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        @Model.TrangThai
+    <!-- Digital Student ID Card + Profile Info Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Digital Student Card -->
+        <div class="lg:col-span-5 space-y-4">
+            <div class="bg-gradient-to-tr from-[#0D47A1] via-[#1565C0] to-[#1E88E5] text-white rounded-3xl p-6 shadow-xl relative overflow-hidden border border-white/20">
+                <div class="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-white/10 blur-xl pointer-events-none"></div>
+                <div class="flex items-center justify-between pb-4 border-b border-white/20">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-10 h-10 rounded-xl bg-white text-brand-deep flex items-center justify-center font-bold shadow-xs">
+                            <span class="material-symbols-outlined text-[24px]">school</span>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-black tracking-wide uppercase">TRƯỜNG ĐH KT-KT CÔNG NGHIỆP</h4>
+                            <p class="text-[10px] text-sky-200">THẺ HỌC VIÊN ĐIỆN TỬ - UNETI EDUSPACE</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-amber-300 text-[26px]">contactless</span>
+                </div>
+                <div class="pt-5 flex items-center gap-4">
+                    <div class="w-20 h-24 rounded-2xl bg-white/20 border-2 border-white/40 flex items-center justify-center font-black text-3xl text-white shadow-inner shrink-0">
+                        @(string.IsNullOrWhiteSpace(Model.HoTen) ? "HV" : Model.HoTen.Substring(0, 1).ToUpper())
+                    </div>
+                    <div class="space-y-1 min-w-0">
+                        <span class="text-[10px] text-sky-200 uppercase font-semibold">Họ và tên học viên</span>
+                        <h3 class="text-base font-black text-white truncate">@Model.HoTen</h3>
+                        <p class="text-xs font-mono text-amber-300 font-bold">Mã HV: #HV@(Model.MaHocVien.ToString("D3"))</p>
+                        <p class="text-[11px] text-slate-200">Ngày sinh: @(Model.NgaySinh?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật") • @(Model.GioiTinh ?? "Nam")</p>
+                        <p class="text-[11px] text-slate-200 truncate">Trình độ: @(Model.TrinhDoHocVan ?? "Đại học")</p>
+                    </div>
+                </div>
+                <div class="pt-5 mt-4 border-t border-white/20 flex items-center justify-between">
+                    <div class="font-mono text-[9px] tracking-[4px] text-sky-200">|||| ||| ||||| || ||||</div>
+                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 text-[10px] font-bold border border-emerald-400/30">
+                        @(Model.TrangThai ? "Thẻ Đang Hiệu Lực" : "Tạm Khóa")
                     </span>
                 </div>
-                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs text-outline font-mono">
-                    <span>Mã HV: <strong class="text-brand-deep">#HV@Model.MaHocVien.ToString("D3")</strong></span>
-                    <span>•</span>
-                    <span>Tài khoản: <strong class="text-brand-deep">@(taiKhoan?.TenDangNhap ?? "hocvien")</strong></span>
-                    <span>•</span>
-                    <span>Email: <strong class="text-brand-deep">@Model.Email</strong></span>
-                </div>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-sky-50 border border-sky-200 text-xs text-sky-900 space-y-1">
+                <p class="font-bold flex items-center gap-1.5 text-brand-deep">
+                    <span class="material-symbols-outlined text-[16px] text-primary">badge</span>
+                    <span>Định danh học viên UNETI</span>
+                </p>
+                <p class="text-slate-600">Tài khoản: <strong class="font-mono text-brand-deep">@(taiKhoan?.TenDangNhap ?? "hocvien")</strong> • Email: <strong class="font-mono text-brand-deep">@Model.Email</strong></p>
             </div>
         </div>
+
+        <!-- Student Info Form Card -->
+        <div class="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-border-standard shadow-xs space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-2.5 pb-4 border-b border-border-standard">
+                <div>
+                    <h2 class="text-lg font-bold text-brand-deep">Thông Tin Cá Nhân Học Viên</h2>
+                    <p class="text-xs text-outline">Mã HV: <strong class="text-brand-deep font-mono">#HV@(Model.MaHocVien.ToString("D3"))</strong></p>
+                </div>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold @(Model.TrangThai ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-rose-50 text-rose-700 border border-rose-200")">
+                    @(Model.TrangThai ? "Đang học (Hoạt động)" : "Tạm khóa")
+                </span>
+            </div>
 
         <!-- Form Update Profile -->
         <form id="hosoForm" onsubmit="submitHoSo(event)" class="space-y-6">
@@ -106,6 +142,8 @@
                     <label class="block text-xs font-bold text-brand-deep uppercase mb-1.5">Trình độ học vấn</label>
                     <select name="TrinhDoHocVan" class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-border-standard bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-brand-deep">
                         <!option value="Đại học" @(Model.TrinhDoHocVan == "Đại học" ? "selected" : "")>Đại học</!option>
+                        <!option value="Kỹ sư" @(Model.TrinhDoHocVan == "Kỹ sư" ? "selected" : "")>Kỹ sư</!option>
+                        <!option value="Thạc sĩ" @(Model.TrinhDoHocVan == "Thạc sĩ" ? "selected" : "")>Thạc sĩ</!option>
                         <!option value="Cao đẳng" @(Model.TrinhDoHocVan == "Cao đẳng" ? "selected" : "")>Cao đẳng</!option>
                         <!option value="Trung cấp" @(Model.TrinhDoHocVan == "Trung cấp" ? "selected" : "")>Trung cấp</!option>
                         <!option value="THPT" @(Model.TrinhDoHocVan == "THPT" ? "selected" : "")>THPT</!option>
@@ -135,6 +173,7 @@
                 </button>
             </div>
         </form>
+        </div>
     </div>
 
     <!-- Payment Receipts & Transaction History -->
@@ -177,7 +216,7 @@
                         {
                             <tr class="hover:bg-slate-50/70 transition-colors">
                                 <td class="py-3.5 px-4 font-mono font-bold text-primary">
-                                    #DK@p.MaDangKy.ToString("D3")
+                                    #DK@(p.MaDangKy.ToString("D3"))
                                 </td>
                                 <td class="py-3.5 px-4">
                                     <div class="font-bold text-brand-deep">@(p.LopHoc?.TenLop ?? $"Lớp #{p.MaLopHoc}")</div>

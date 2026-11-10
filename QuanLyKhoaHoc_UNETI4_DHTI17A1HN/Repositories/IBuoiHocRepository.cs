@@ -42,7 +42,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         Task<bool> KiemTraTrungLichPhongAsync(string phongHoc, DateTime batDau, DateTime ketThuc, int? excludeId = null);
         Task<bool> KiemTraTrungLichGiangVienAsync(int maGiangVien, DateTime batDau, DateTime ketThuc, int? excludeId = null);
         Task<bool> KiemTraTrungLichBuoiHocAsync(int maLopHoc, string phongHoc, string? tenGiangVien, DateTime batDau, DateTime ketThuc, int? excludeId = null);
+        Task<(bool HasConflict, string? ConflictMessage, BuoiHoc? ConflictingSession)> KiemTraTrungLichChiTietAsync(int maLopHoc, string phongHoc, string? tenGiangVien, DateTime batDau, DateTime ketThuc, int? excludeId = null);
         Task<(HashSet<int> ConflictIds, int SoLoiTrung)> GetConflictSessionsAsync();
+        Task<int> XuLyCaTrungLichTuDongAsync();
         Task<bool> HasLichHocLopChuaHuyAsync(int maLopHoc);
 
         // 5. Truy vấn theo lớp học & học viên
