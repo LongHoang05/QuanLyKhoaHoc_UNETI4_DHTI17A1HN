@@ -80,6 +80,31 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             return View(items);
         }
 
+        // --- CHI TIẾT CHƯƠNG TRÌNH ĐÀO TẠO ---
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var vaiTro = HttpContext.Session.GetString("VaiTro");
+            if (string.Equals(vaiTro, "GiangVien", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Error"] = "Giảng viên không có quyền quản lý Chương trình đào tạo.";
+                return RedirectToAction("Index", "GiangVien");
+            }
+            if (string.Equals(vaiTro, "HocVien", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction("DangKy", "CongHocVien");
+            }
+
+            var ctdt = await _ctdtRepository.GetByIdWithLopHocsAsync(id);
+            if (ctdt == null)
+            {
+                TempData["Error"] = $"Không tìm thấy chương trình đào tạo #{id:D3}.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(ctdt);
+        }
+
         [HttpGet]
         public IActionResult Create()
         {
