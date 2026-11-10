@@ -264,5 +264,33 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             TempData["Success"] = "Đã xóa bản ghi kết quả học tập và hoàn lại trạng thái Đang học cho học viên!";
             return RedirectToAction(nameof(Index));
         }
+
+        // ========================================================
+        // ACTION DELETE MULTIPLE: XÓA NHIỀU KẾT QUẢ HỌC TẬP
+        // ========================================================
+        [HttpPost]
+        public async Task<IActionResult> DeleteMultiple([FromBody] List<int>? ids)
+        {
+            if (ids == null || !ids.Any())
+                return Json(new { success = false, message = "Vui lòng chọn ít nhất 1 kết quả học tập để xóa." });
+
+            int deleted = 0;
+            foreach (var id in ids)
+            {
+                var kq = await _ketQuaRepo.GetByIdWithDetailsAsync(id);
+                if (kq != null)
+                {
+                    if (kq.DangKyHoc != null)
+                    {
+                        kq.DangKyHoc.TrangThai = "Đang học";
+                        await _dangKyHocRepo.UpdateAsync(kq.DangKyHoc);
+                    }
+                    await _ketQuaRepo.DeleteAsync(id);
+                    deleted++;
+                }
+            }
+
+            return Json(new { success = true, message = $"Đã xóa thành công {deleted} kết quả học tập và hoàn lại trạng thái cho học viên.", deletedCount = deleted });
+        }
     }
 }

@@ -458,6 +458,27 @@
             setTimeout(removeToast, isSuccess ? 4000 : 6000);
         };
 
+        @if (TempData["Success"] != null)
+        {
+            <text>
+            document.addEventListener('DOMContentLoaded', () => {
+                if (window.showToast) {
+                    window.showToast('@Html.Raw(TempData["Success"]!.ToString()!.Replace("'", "\\'"))', 'success');
+                }
+            });
+            </text>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <text>
+            document.addEventListener('DOMContentLoaded', () => {
+                if (window.showToast) {
+                    window.showToast('@Html.Raw(TempData["Error"]!.ToString()!.Replace("'", "\\'"))', 'error');
+                }
+            });
+            </text>
+        }
+
         window.toggleMobileSidebar = function() {
             const sidebar = document.getElementById('adminSidebar');
             const backdrop = document.getElementById('sidebarBackdrop');

@@ -493,6 +493,27 @@
 
             setTimeout(removeToast, isSuccess ? 4000 : 6000);
         };
+
+        @if (TempData["Success"] != null)
+        {
+            <text>
+            document.addEventListener('DOMContentLoaded', () => {
+                if (window.showToast) {
+                    window.showToast('@Html.Raw(TempData["Success"]!.ToString()!.Replace("'", "\\'"))', 'success');
+                }
+            });
+            </text>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <text>
+            document.addEventListener('DOMContentLoaded', () => {
+                if (window.showToast) {
+                    window.showToast('@Html.Raw(TempData["Error"]!.ToString()!.Replace("'", "\\'"))', 'error');
+                }
+            });
+            </text>
+        }
     </script>
 
     <!-- Global Delete Confirmation Modal for all pages -->

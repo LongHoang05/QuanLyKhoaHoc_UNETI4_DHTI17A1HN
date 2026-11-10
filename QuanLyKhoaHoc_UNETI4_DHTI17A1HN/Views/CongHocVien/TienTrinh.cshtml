@@ -211,7 +211,26 @@
                                         <span>Xem Lịch & Đề Cương</span>
                                     </a>
                                 }
-                                else if (dk.TrangThai == "Chờ duyệt" || (dk.TrangThai == "Đã duyệt" && dk.SoTienDaDong == 0))
+                                else if (dk.TrangThai == "Đã duyệt" && (dk.SoTienDaDong < (lop?.HocPhi ?? 0) || (lop?.HocPhi ?? 0) == 0))
+                                {
+                                    <div class="space-y-1.5">
+                                        <button type="button" onclick="openPaymentModal(@dk.MaDangKy, '@(lop?.TenLop?.Replace("'", "\\'") ?? "")', @(lop?.HocPhi ?? 0), @(dk.SoTienDaDong))"
+                                                class="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold text-center flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer">
+                                            <span class="material-symbols-outlined text-[16px]">qr_code_2</span>
+                                            <span>Đóng Học Phí (VietQR / CK)</span>
+                                        </button>
+                                        <div class="flex items-center gap-2">
+                                            <a asp-action="ChiTiet" asp-route-id="@maLop" class="flex-1 py-1.5 px-2 rounded-xl border border-border-standard text-brand-deep text-xs font-semibold text-center hover:bg-slate-50 transition-colors">
+                                                Chi tiết
+                                            </a>
+                                            <button type="button" onclick="confirmHuyDangKy(@dk.MaDangKy, '@(lop?.TenLop?.Replace("'", "\\'") ?? "")')"
+                                                    class="py-1.5 px-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold transition-colors">
+                                                Hủy đơn
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                                else if (dk.TrangThai == "Chờ duyệt")
                                 {
                                     <div class="flex items-center gap-2">
                                         <a asp-action="ChiTiet" asp-route-id="@maLop" class="flex-1 py-2 px-2 rounded-xl border border-border-standard text-brand-deep text-xs font-bold text-center hover:bg-slate-50 transition-colors">
@@ -766,6 +785,105 @@
     </div>
 </div>
 
+<!-- Modal Hướng Dẫn Thanh Toán Học Phí (VietQR & Trực tiếp) -->
+<div id="payment-modal" class="fixed inset-0 bg-brand-deep/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 transition-opacity duration-200 opacity-0 pointer-events-none">
+    <div class="bg-surface-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl transform scale-95 transition-transform duration-200 border border-border-standard max-h-[90vh] overflow-y-auto" id="payment-modal-content">
+        <div class="flex items-center justify-between pb-4 border-b border-border-standard">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[24px]">payments</span>
+                </div>
+                <div>
+                    <h3 class="font-bold text-base text-brand-deep">Thanh Toán Học Phí</h3>
+                    <p class="text-xs text-outline">Quét VietQR chuyển khoản hoặc nộp trực tiếp</p>
+                </div>
+            </div>
+            <button type="button" onclick="closePaymentModal()" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-outline hover:text-brand-deep transition-colors">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+
+        <div class="py-4 space-y-4">
+            <!-- Thông tin khóa học & số tiền -->
+            <div class="p-4 rounded-2xl bg-surface-container-lowest border border-border-subtle text-xs space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-outline">Mã hồ sơ:</span>
+                    <strong class="text-brand-deep font-mono text-sm" id="pay-modal-maDK">#DK000</strong>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-outline">Lớp học:</span>
+                    <strong class="text-brand-deep text-right max-w-[240px] truncate" id="pay-modal-tenLop">—</strong>
+                </div>
+                <div class="flex justify-between items-center border-t border-border-standard pt-2">
+                    <span class="text-outline">Số tiền cần thanh toán:</span>
+                    <strong class="text-emerald-700 font-mono text-lg font-black" id="pay-modal-soTien">0 đ</strong>
+                </div>
+            </div>
+
+            <!-- Mã VietQR -->
+            <div class="text-center bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                <p class="text-xs font-bold text-slate-700 mb-2 flex items-center justify-center gap-1">
+                    <span class="material-symbols-outlined text-[16px] text-emerald-600">qr_code_scanner</span>
+                    <span>Quét mã VietQR bằng bất kỳ App Ngân hàng nào</span>
+                </p>
+                <div class="bg-white p-2.5 rounded-2xl inline-block shadow-sm border border-slate-200">
+                    <img id="pay-modal-qr-img" src="" alt="Mã VietQR Thanh Toán" class="w-48 h-48 mx-auto object-contain" />
+                </div>
+                <p class="text-[11px] text-slate-500 mt-2 italic">Mã QR tự động điền sẵn số tiền và nội dung chuyển khoản</p>
+            </div>
+
+            <!-- Thông tin tài khoản chi tiết -->
+            <div class="space-y-2 text-xs">
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <span class="text-slate-500">Ngân hàng:</span>
+                    <strong class="text-slate-800">MB Bank (Ngân hàng TMCP Quân Đội)</strong>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <span class="text-slate-500">Số tài khoản:</span>
+                    <div class="flex items-center gap-1.5">
+                        <strong class="text-slate-800 font-mono text-sm" id="pay-modal-stk">0381000556688</strong>
+                        <button type="button" onclick="copyPaymentText('0381000556688', 'Đã sao chép số tài khoản!')" class="text-primary hover:text-primary-hover p-1 rounded hover:bg-primary/10 transition-colors" title="Sao chép">
+                            <span class="material-symbols-outlined text-[15px]">content_copy</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <span class="text-slate-500">Chủ tài khoản:</span>
+                    <strong class="text-slate-800 uppercase">TRUNG TAM DAO TAO UNETI</strong>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-amber-50 border border-amber-200">
+                    <span class="text-amber-800 font-medium">Nội dung chuyển khoản:</span>
+                    <div class="flex items-center gap-1.5">
+                        <strong class="text-amber-900 font-mono text-xs font-bold" id="pay-modal-syntax">UNETI DK000</strong>
+                        <button type="button" onclick="copyPaymentText(document.getElementById('pay-modal-syntax').innerText, 'Đã sao chép nội dung chuyển khoản!')" class="text-amber-800 hover:text-amber-950 p-1 rounded hover:bg-amber-200/50 transition-colors" title="Sao chép">
+                            <span class="material-symbols-outlined text-[15px]">content_copy</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nộp trực tiếp -->
+            <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-start gap-2.5">
+                <span class="material-symbols-outlined text-[20px] text-primary shrink-0 mt-0.5">location_on</span>
+                <div>
+                    <strong class="text-brand-deep block mb-0.5">Hoặc nộp trực tiếp tại Văn phòng Tuyển sinh UNETI:</strong>
+                    <span>Phòng 101, Nhà HA8, Số 218 Đường Lĩnh Nam, Hoàng Mai, Hà Nội (Giờ hành chính Thứ 2 - Thứ 7).</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-border-standard">
+            <button type="button" onclick="closePaymentModal()" class="px-4 py-2.5 text-xs font-semibold text-outline hover:text-brand-deep border border-border-standard rounded-xl hover:bg-slate-50 transition-colors">
+                Đóng
+            </button>
+            <button type="button" onclick="confirmPaymentSent()" class="px-5 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                <span>Tôi Đã Chuyển Khoản</span>
+            </button>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
 <script>
     const tabParamMap = {
@@ -882,6 +1000,54 @@
                 console.error(err);
                 if (window.showToast) window.showToast('Có lỗi xảy ra khi hủy đăng ký!', 'error');
             });
+        }
+    }
+
+    // Modal Thanh Toán Học Phí (VietQR & Trực tiếp)
+    function openPaymentModal(maDangKy, tenLop, hocPhiGoc, daDong) {
+        const conLai = Math.max(0, Number(hocPhiGoc) - Number(daDong));
+        const amountToPay = conLai > 0 ? conLai : Number(hocPhiGoc);
+        const syntax = `UNETI DK${maDangKy}`;
+
+        document.getElementById('pay-modal-maDK').innerText = `#DK${String(maDangKy).padStart(3, '0')}`;
+        document.getElementById('pay-modal-tenLop').innerText = tenLop;
+        document.getElementById('pay-modal-soTien').innerText = Number(amountToPay).toLocaleString('vi-VN') + ' đ';
+        document.getElementById('pay-modal-syntax').innerText = syntax;
+
+        // Sinh link ảnh VietQR động chuẩn ngân hàng MB Bank
+        const qrUrl = `https://img.vietqr.io/image/MB-0381000556688-compact2.png?amount=${amountToPay}&addInfo=${encodeURIComponent(syntax)}&accountName=TRUNG%20TAM%20DAO%20TAO%20UNETI`;
+        document.getElementById('pay-modal-qr-img').src = qrUrl;
+
+        const modal = document.getElementById('payment-modal');
+        const content = document.getElementById('payment-modal-content');
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        content.classList.remove('scale-95');
+        content.classList.add('scale-100');
+    }
+
+    function closePaymentModal() {
+        const modal = document.getElementById('payment-modal');
+        const content = document.getElementById('payment-modal-content');
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        content.classList.add('scale-95');
+        content.classList.remove('scale-100');
+    }
+
+    function copyPaymentText(text, successMsg) {
+        navigator.clipboard.writeText(text).then(() => {
+            if (window.showToast) window.showToast(successMsg, 'success');
+            else alert(successMsg);
+        }).catch(() => {
+            if (window.showToast) window.showToast('Không thể sao chép tự động!', 'warning');
+        });
+    }
+
+    function confirmPaymentSent() {
+        closePaymentModal();
+        if (window.showToast) {
+            window.showToast('Đã ghi nhận! Ban Giáo vụ sẽ đối soát sao kê và cập nhật trạng thái "Đã đóng học phí" cho bạn trong ít phút.', 'success');
+        } else {
+            alert('Đã ghi nhận! Ban Giáo vụ sẽ đối soát sao kê và cập nhật trạng thái "Đã đóng học phí" cho bạn trong ít phút.');
         }
     }
 </script>

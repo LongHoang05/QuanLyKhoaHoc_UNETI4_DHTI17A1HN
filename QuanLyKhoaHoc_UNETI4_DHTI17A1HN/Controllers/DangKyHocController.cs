@@ -435,5 +435,45 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             TempData["Success"] = $"Đã xóa hồ sơ đăng ký #{id:D3} khỏi hệ thống.";
             return RedirectToAction(nameof(Index));
         }
+
+        // ========================================================
+        // ACTION DELETE MULTIPLE: XÓA NHIỀU HỒ SƠ ĐĂNG KÝ HỌC
+        // ========================================================
+        [HttpPost]
+        public async Task<IActionResult> DeleteMultiple([FromBody] List<int>? ids)
+        {
+            if (ids == null || !ids.Any())
+                return Json(new { success = false, message = "Vui lòng chọn ít nhất 1 hồ sơ đăng ký để xóa." });
+
+            int deleted = 0;
+            int skipped = 0;
+
+            foreach (var id in ids)
+            {
+                var dk = await _dangKyHocRepo.GetByIdAsync(id);
+                if (dk == null) continue;
+
+                if (dk.TrangThai != "Chờ duyệt" && dk.TrangThai != "Từ chối" && dk.TrangThai != "Đã hủy")
+                {
+                    skipped++;
+                    continue;
+                }
+
+                await _dangKyHocRepo.DeleteAsync(id);
+                deleted++;
+            }
+
+            if (deleted == 0 && skipped > 0)
+            {
+                return Json(new { success = false, message = $"Không thể xóa {skipped} hồ sơ đã chọn do đang ở trạng thái đã duyệt/đang học. Vui lòng chuyển sang 'Đã hủy' trước." });
+            }
+
+            string msg = $"Đã xóa thành công {deleted} hồ sơ đăng ký học.";
+            if (skipped > 0)
+            {
+                msg += $" Bỏ qua {skipped} hồ sơ đang ở trạng thái Đã duyệt/Đang học.";
+            }
+            return Json(new { success = true, message = msg, deletedCount = deleted, skippedCount = skipped, stats = await GetStatsJsonAsync() });
+        }
     }
 }

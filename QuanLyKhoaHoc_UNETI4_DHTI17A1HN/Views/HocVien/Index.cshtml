@@ -140,10 +140,16 @@
             </div>
         </div>
 
-        <button type="button" onclick="resetHvFilters()" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
-            <span class="material-symbols-outlined text-[16px]">restart_alt</span>
-            <span>Đặt lại</span>
-        </button>
+        <div class="flex items-center gap-2">
+            <button id="btnBulkDeleteHv" class="hidden items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition-all cursor-pointer shadow-xs active:scale-95" title="Xóa các học viên đã chọn">
+                <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+                <span>Xóa đã chọn (<span id="selectedHvCount">0</span>)</span>
+            </button>
+            <button type="button" onclick="resetHvFilters()" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
+                <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                <span>Đặt lại</span>
+            </button>
+        </div>
     </div>
 
     <!-- Table Section -->
@@ -152,7 +158,10 @@
             <table class="w-full text-left border-collapse min-w-[960px]" id="hvTable">
                 <thead>
                     <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
-                        <th class="py-3.5 px-4 w-12 text-center">#</th>
+                        <th class="py-3.5 px-3 w-10 text-center">
+                            <input type="checkbox" id="selectAllHv" class="w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" title="Chọn tất cả">
+                        </th>
+                        <th class="py-3.5 px-3 w-10 text-center">#</th>
                         <th class="py-3.5 px-4">Mã HV</th>
                         <th class="py-3.5 px-4">Họ và Tên</th>
                         <th class="py-3.5 px-4">Liên hệ</th>
@@ -166,7 +175,7 @@
                     @if (Model.DanhSachHocVien == null || !Model.DanhSachHocVien.Any())
                     {
                         <tr>
-                            <td colspan="8" class="text-center py-12 text-outline">
+                            <td colspan="9" class="text-center py-12 text-outline">
                                 <span class="material-symbols-outlined text-4xl block mb-2 text-outline/50">person_off</span>
                                 <span class="font-semibold">Chưa có hồ sơ học viên nào.</span>
                             </td>
@@ -181,7 +190,10 @@
                             string statusText = item.TrangThai ? "Đang học" : "Tạm khóa";
 
                             <tr class="hv-row hover:bg-canvas-base/60 transition-colors" data-id="@item.MaHocVien" data-mahv="HV@(item.MaHocVien.ToString("D3"))" data-name="@item.HoTen" data-email="@item.Email" data-phone="@item.SoDienThoai" data-birth="@(item.NgaySinh?.ToString("dd/MM/yyyy") ?? "")" data-gender="@(item.GioiTinh ?? "Nam")" data-address="@(item.DiaChi ?? "")" data-level="@(item.TrinhDoHocVan ?? "Đại học")" data-job="@(item.NgheNghiep ?? "")" data-status="@statusText">
-                                <td class="py-3.5 px-4 text-center text-outline font-mono text-[11px]">@(idx++)</td>
+                                <td class="py-3.5 px-3 text-center">
+                                    <input type="checkbox" class="hv-cb w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" value="@item.MaHocVien">
+                                </td>
+                                <td class="py-3.5 px-3 text-center text-outline font-mono text-[11px]">@(idx++)</td>
                                 <td class="py-3.5 px-4 font-mono font-semibold text-primary">#HV@(item.MaHocVien.ToString("D3"))</td>
                                 <td class="py-3.5 px-4">
                                     <div class="flex items-center gap-3">
@@ -679,6 +691,7 @@
             const newContent = doc.getElementById('hocvien-content-area');
             if (newContent && area) {
                 area.innerHTML = newContent.innerHTML;
+                if (window.hvBulk) window.hvBulk.updateState();
             }
             if (pushState) window.history.pushState({ url }, '', url);
         } catch (err) {
@@ -724,5 +737,16 @@
         const cleanUrl = window.location.pathname + window.location.search.replace(/[?&]create=true/, '').replace(/[?&]action=create/, '');
         window.history.replaceState({}, document.title, cleanUrl || window.location.pathname);
     }
+
+    // Khởi tạo Bulk Delete cho Học viên
+    window.hvBulk = window.initBulkDelete({
+        selectAllId: 'selectAllHv',
+        checkboxClass: 'hv-cb',
+        btnDeleteId: 'btnBulkDeleteHv',
+        countBadgeId: 'selectedHvCount',
+        deleteUrl: '/HocVien/DeleteMultiple',
+        itemLabel: 'học viên',
+        onSuccess: () => loadHocVienPage(window.location.href, false)
+    });
 </script>
 }

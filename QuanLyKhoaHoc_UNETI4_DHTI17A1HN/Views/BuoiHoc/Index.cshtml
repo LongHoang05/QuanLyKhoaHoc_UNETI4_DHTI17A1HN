@@ -652,6 +652,10 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
             </form>
 
             <div class="flex items-center gap-2">
+                <button id="btnBulkDeleteBuoiHoc" class="hidden items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition-all cursor-pointer shadow-xs active:scale-95" title="Xóa các buổi học đã chọn">
+                    <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+                    <span>Xóa đã chọn (<span id="selectedBuoiHocCount">0</span>)</span>
+                </button>
                 <a href="/BuoiHoc/Index" onclick="event.preventDefault(); document.getElementById('filter-form').reset(); loadBuoiHocPage('/BuoiHoc/Index');" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
                     <span class="material-symbols-outlined text-[16px]">restart_alt</span>
                     <span>Đặt lại</span>
@@ -666,7 +670,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                     <thead>
                         <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
                             <th class="py-3.5 pl-6 w-12 text-center">
-                                <input class="rounded border-border-standard text-primary focus:ring-primary h-4 w-4 cursor-pointer" type="checkbox" id="select-all"/>
+                                <input class="rounded border-border-standard text-primary focus:ring-primary h-4 w-4 cursor-pointer" type="checkbox" id="selectAllBuoiHoc"/>
                             </th>
                             <th class="py-3.5 px-3 w-10 text-center">#</th>
                             <th class="py-3.5 px-4">Mã ca</th>
@@ -706,7 +710,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                                     data-ghichu="@item.GhiChu"
                                     data-trangthai="@item.TrangThai">
                                     <td class="p-4 pl-6 text-center">
-                                        <input class="rounded border-border-standard text-primary focus:ring-primary h-4 w-4 row-checkbox cursor-pointer" type="checkbox"/>
+                                        <input class="rounded border-border-standard text-primary focus:ring-primary h-4 w-4 buoihoc-cb cursor-pointer" type="checkbox" value="@item.MaBuoiHoc"/>
                                     </td>
                                     <td class="py-3.5 px-3 text-center text-outline font-mono text-[11px]">@(idx++)</td>
                                     <td class="py-4 px-4 font-mono font-semibold text-primary">
@@ -1170,6 +1174,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                 area.innerHTML = newContent.innerHTML;
                 switchView(window.currentViewMode || 'timetable');
                 bindSelectAll();
+                if (window.buoiHocBulk) window.buoiHocBulk.updateState();
             }
 
             if (pushState) {
@@ -1698,4 +1703,15 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
             }, 150);
         }
     })();
+
+    // Khởi tạo Bulk Delete cho Buổi học
+    window.buoiHocBulk = window.initBulkDelete({
+        selectAllId: 'selectAllBuoiHoc',
+        checkboxClass: 'buoihoc-cb',
+        btnDeleteId: 'btnBulkDeleteBuoiHoc',
+        countBadgeId: 'selectedBuoiHocCount',
+        deleteUrl: '/BuoiHoc/DeleteMultiple',
+        itemLabel: 'buổi học',
+        onSuccess: () => loadBuoiHocPage(window.location.href, false)
+    });
 </script>

@@ -95,10 +95,16 @@
             </div>
         </form>
 
-        <a href="/ChuongTrinhDaoTao/Index" onclick="event.preventDefault(); loadCtdtPage(this.href);" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
-            <span class="material-symbols-outlined text-[16px]">restart_alt</span>
-            <span>Đặt lại</span>
-        </a>
+        <div class="flex items-center gap-2">
+            <button id="btnBulkDeleteCtdt" class="hidden items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition-all cursor-pointer shadow-xs active:scale-95" title="Xóa các chương trình đã chọn">
+                <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+                <span>Xóa đã chọn (<span id="selectedCtdtCount">0</span>)</span>
+            </button>
+            <a href="/ChuongTrinhDaoTao/Index" onclick="event.preventDefault(); loadCtdtPage(this.href);" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
+                <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                <span>Đặt lại</span>
+            </a>
+        </div>
     </div>
 
     <!-- Data Table Container -->
@@ -107,7 +113,10 @@
             <table class="w-full text-left border-collapse" id="crud-table">
                 <thead>
                     <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
-                        <th class="py-3.5 px-4 w-12 text-center">#</th>
+                        <th class="py-3.5 px-3 w-10 text-center">
+                            <input type="checkbox" id="selectAllCtdt" class="w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" title="Chọn tất cả">
+                        </th>
+                        <th class="py-3.5 px-3 w-10 text-center">#</th>
                         <th class="py-3.5 px-4">Chương trình đào tạo</th>
                         <th class="py-3.5 px-4">Mô tả tóm tắt</th>
                         <th class="py-3.5 px-4">Email liên hệ</th>
@@ -120,7 +129,7 @@
                     @if (!Model.Any())
                     {
                         <tr>
-                            <td colspan="7" class="py-12 text-center text-outline">
+                            <td colspan="8" class="py-12 text-center text-outline">
                                 <span class="material-symbols-outlined text-4xl block mb-2 text-outline/50">auto_stories</span>
                                 Không có chương trình đào tạo nào phù hợp.
                             </td>
@@ -139,7 +148,10 @@
                                 data-email="@item.EmailLienHe"
                                 data-trangthai="@(item.TrangThai ? "Đang hoạt động" : "Tạm dừng")"
                                 data-solop="@soLop">
-                                <td class="py-3.5 px-4 text-center text-outline font-mono text-[11px]">@(idx++)</td>
+                                <td class="py-3.5 px-3 text-center">
+                                    <input type="checkbox" class="ctdt-cb w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" value="@item.MaChuongTrinh">
+                                </td>
+                                <td class="py-3.5 px-3 text-center text-outline font-mono text-[11px]">@(idx++)</td>
                                 <td class="py-3.5 px-4">
                                     <div class="flex items-center gap-3">
                                         <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary font-bold text-sm flex items-center justify-center flex-shrink-0">
@@ -377,6 +389,7 @@
             const newContent = doc.getElementById('ctdt-content-area');
             if (newContent && area) {
                 area.innerHTML = newContent.innerHTML;
+                if (window.ctdtBulk) window.ctdtBulk.updateState();
             }
             if (pushState) window.history.pushState({ url }, '', url);
         } catch (err) {
@@ -430,5 +443,16 @@
         const cleanUrl = window.location.pathname + window.location.search.replace(/[?&]create=true/, '').replace(/[?&]action=create/, '');
         window.history.replaceState({}, document.title, cleanUrl || window.location.pathname);
     }
+
+    // Khởi tạo Bulk Delete cho Chương trình đào tạo
+    window.ctdtBulk = window.initBulkDelete({
+        selectAllId: 'selectAllCtdt',
+        checkboxClass: 'ctdt-cb',
+        btnDeleteId: 'btnBulkDeleteCtdt',
+        countBadgeId: 'selectedCtdtCount',
+        deleteUrl: '/ChuongTrinhDaoTao/DeleteMultiple',
+        itemLabel: 'chương trình',
+        onSuccess: () => loadCtdtPage(window.location.href, false)
+    });
 </script>
 }

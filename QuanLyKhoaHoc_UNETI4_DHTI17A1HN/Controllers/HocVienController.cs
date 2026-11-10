@@ -296,6 +296,43 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             return Json(new { success, message = error ?? "Đã xóa học viên thành công!" });
         }
 
+        // ========================================================
+        // ACTION DELETE MULTIPLE: XÓA NHIỀU HỌC VIÊN
+        // ========================================================
+        [HttpPost]
+        public async Task<IActionResult> DeleteMultiple([FromBody] List<int>? ids)
+        {
+            if (!CoQuyenQuanTri(out _))
+            {
+                return Json(new { success = false, message = "Bạn không có quyền quản trị." });
+            }
+
+            if (ids == null || !ids.Any())
+                return Json(new { success = false, message = "Vui lòng chọn ít nhất 1 học viên để xóa." });
+
+            int deleted = 0;
+            int skipped = 0;
+
+            foreach (var id in ids)
+            {
+                var (success, _) = await _hocVienService.XoaHocVienAsync(id);
+                if (success) deleted++;
+                else skipped++;
+            }
+
+            if (deleted == 0 && skipped > 0)
+            {
+                return Json(new { success = false, message = $"Không thể xóa {skipped} học viên đã chọn do đang có lịch sử đăng ký học hoặc kết quả đào tạo." });
+            }
+
+            string msg = $"Đã xóa thành công {deleted} học viên.";
+            if (skipped > 0)
+            {
+                msg += $" Bỏ qua {skipped} học viên đang có dữ liệu đăng ký/kết quả học tập liên quan.";
+            }
+            return Json(new { success = true, message = msg, deletedCount = deleted, skippedCount = skipped });
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetHocVienJson(int id)
         {

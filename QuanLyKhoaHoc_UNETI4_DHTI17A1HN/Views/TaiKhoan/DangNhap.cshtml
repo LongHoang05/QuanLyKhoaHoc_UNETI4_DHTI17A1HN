@@ -57,10 +57,9 @@
                 </div>
                 <h1 class="text-2xl font-black text-brand-deep tracking-tight">UNETI ĐÀO TẠO</h1>
                 <p class="text-xs text-outline mt-1">Cổng Quản lý Đăng ký Khóa học & Đào tạo</p>
-                <span class="mt-1 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-semibold text-[11px]">Module 1 • Vũ Đình Trường (23103100026)</span>
             </div>
 
-            @if (TempData["Success"] != null)
+            @if (TempData["Success"] != null && !TempData["Success"]!.ToString()!.Contains("đăng nhập thành công"))
             {
                 <div class="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
                     <span class="material-symbols-outlined text-emerald-600 text-base">check_circle</span>

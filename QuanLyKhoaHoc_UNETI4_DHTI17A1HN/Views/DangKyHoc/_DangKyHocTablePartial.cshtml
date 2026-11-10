@@ -15,7 +15,10 @@
         <table class="w-full text-left border-collapse" id="dangky-table">
             <thead>
                 <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
-                    <th class="py-3.5 px-4 w-12 text-center">#</th>
+                    <th class="py-3.5 px-3 w-10 text-center">
+                        <input type="checkbox" id="selectAllDk" class="w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" title="Chọn tất cả">
+                    </th>
+                    <th class="py-3.5 px-3 w-10 text-center">#</th>
                     <th class="py-3.5 px-4">Mã ĐK</th>
                     <th class="py-3.5 px-4">Học Viên</th>
                     <th class="py-3.5 px-4">Lớp Học Phần</th>
@@ -29,7 +32,7 @@
                 @if (!Model.Any())
                 {
                     <tr>
-                        <td colspan="8" class="text-center py-12 text-outline">
+                        <td colspan="9" class="text-center py-12 text-outline">
                             <span class="material-symbols-outlined text-[40px] mb-2 opacity-40">assignment_late</span>
                             <p class="font-medium">Không tìm thấy đơn đăng ký nào theo tiêu chí lọc.</p>
                         </td>
@@ -45,7 +48,10 @@
                         double percent = hocPhiLop > 0 ? (double)Math.Min(100m, Math.Round(daDong / hocPhiLop * 100m, 1)) : 0;
 
                         <tr class="hover:bg-surface-container-lowest/60 transition-colors">
-                            <td class="py-3.5 px-4 text-center text-outline font-mono text-[11px]">@(idx++)</td>
+                            <td class="py-3.5 px-3 text-center">
+                                <input type="checkbox" class="dk-cb w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" value="@item.MaDangKy">
+                            </td>
+                            <td class="py-3.5 px-3 text-center text-outline font-mono text-[11px]">@(idx++)</td>
                             <td class="py-3.5 px-4 font-mono font-semibold text-primary">
                                 #DK@(item.MaDangKy.ToString("D3"))
                             </td>

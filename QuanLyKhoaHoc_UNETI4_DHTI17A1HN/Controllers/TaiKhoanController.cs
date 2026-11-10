@@ -40,8 +40,17 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         [Route("TaiKhoan/Login")]
         public IActionResult DangNhap(string? returnUrl = null, bool switchAccount = false)
         {
-            // Nếu đã đăng nhập rồi và không phải bấm chuyển tài khoản thì chuyển hướng
-            if (!switchAccount && HttpContext.Session.GetInt32("MaTaiKhoan") != null)
+            // Dọn sạch thông báo đăng nhập cũ nếu có trong TempData để không hiển thị nhầm trên form đăng nhập
+            if (TempData.ContainsKey("Success") && TempData["Success"]?.ToString()?.Contains("đăng nhập thành công") == true)
+            {
+                TempData.Remove("Success");
+            }
+
+            if (switchAccount)
+            {
+                HttpContext.Session.Clear();
+            }
+            else if (HttpContext.Session.GetInt32("MaTaiKhoan") != null)
             {
                 return RedirectToAction("Index", "Home");
             }
@@ -198,8 +207,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             HttpContext.Session.Clear();
+            TempData.Clear();
             TempData["Success"] = "Bạn đã đăng xuất khỏi hệ thống thành công.";
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction(nameof(DangNhap));
         }
 
         // ========================================================
@@ -590,6 +600,53 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             if (isAjax) return Json(new { success = true, message = msg });
             TempData["Success"] = msg;
             return RedirectToAction(nameof(Index));
+        }
+
+        // ========================================================
+        // ACTION DELETE MULTIPLE: XÓA NHIỀU TÀI KHOẢN
+        // ========================================================
+        [HttpPost]
+        public async Task<IActionResult> DeleteMultiple([FromBody] List<int>? ids)
+        {
+            if (ids == null || !ids.Any())
+                return Json(new { success = false, message = "Vui lòng chọn ít nhất 1 tài khoản để xóa." });
+
+            int currentUserId = HttpContext.Session.GetInt32("MaTaiKhoan") ?? 0;
+            int deleted = 0;
+            int skipped = 0;
+
+            foreach (var id in ids)
+            {
+                if (id == currentUserId)
+                {
+                    skipped++;
+                    continue;
+                }
+
+                var tk = await _taiKhoanRepo.GetByIdAsync(id);
+                if (tk == null) continue;
+
+                if (string.Equals(tk.TenDangNhap, "admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    skipped++;
+                    continue;
+                }
+
+                await _taiKhoanRepo.DeleteAsync(id);
+                deleted++;
+            }
+
+            if (deleted == 0 && skipped > 0)
+            {
+                return Json(new { success = false, message = "Không thể xóa các tài khoản đã chọn (tài khoản đang đăng nhập hoặc tài khoản quản trị hệ thống)." });
+            }
+
+            string msg = $"Đã xóa thành công {deleted} tài khoản.";
+            if (skipped > 0)
+            {
+                msg += $" Bỏ qua {skipped} tài khoản được bảo vệ (tài khoản admin hoặc của chính bạn).";
+            }
+            return Json(new { success = true, message = msg, deletedCount = deleted, skippedCount = skipped });
         }
     }
 }

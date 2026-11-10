@@ -139,10 +139,16 @@
             </div>
         </form>
 
-        <a href="/LopHoc/Index" onclick="event.preventDefault(); loadLopHocPage(this.href);" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
-            <span class="material-symbols-outlined text-[16px]">restart_alt</span>
-            <span>Đặt lại</span>
-        </a>
+        <div class="flex items-center gap-2">
+            <button id="btnBulkDeleteLopHoc" class="hidden items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition-all cursor-pointer shadow-xs active:scale-95" title="Xóa các lớp học đã chọn">
+                <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+                <span>Xóa đã chọn (<span id="selectedLopHocCount">0</span>)</span>
+            </button>
+            <a href="/LopHoc/Index" onclick="event.preventDefault(); loadLopHocPage(this.href);" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
+                <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                <span>Đặt lại</span>
+            </a>
+        </div>
     </div>
 
     <!-- Data Table Container -->
@@ -151,7 +157,10 @@
             <table class="w-full text-left border-collapse" id="crud-table">
                 <thead>
                     <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
-                        <th class="py-3.5 px-4 w-12 text-center">#</th>
+                        <th class="py-3.5 px-3 w-10 text-center">
+                            <input type="checkbox" id="selectAllLopHoc" class="w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" title="Chọn tất cả">
+                        </th>
+                        <th class="py-3.5 px-3 w-10 text-center">#</th>
                         <th class="py-3.5 px-4">Thông tin lớp học</th>
                         <th class="py-3.5 px-4">Giảng viên / Trình độ</th>
                         <th class="py-3.5 px-4 text-center">Sĩ số (Đã duyệt)</th>
@@ -166,7 +175,7 @@
                     @if (!Model.Any())
                     {
                         <tr>
-                            <td colspan="9" class="py-12 text-center text-outline">
+                            <td colspan="10" class="py-12 text-center text-outline">
                                 <span class="material-symbols-outlined text-4xl block mb-2 text-outline/50">search_off</span>
                                 Không có lớp học nào phù hợp với bộ lọc hiện tại.
                             </td>
@@ -198,7 +207,10 @@
                                 data-mota="@item.MoTa"
                                 data-yeucau="@item.YeuCauHocVien"
                                 data-trangthai="@item.TrangThai">
-                                <td class="py-3.5 px-4 text-center text-outline font-mono text-[11px]">@(idx++)</td>
+                                <td class="py-3.5 px-3 text-center">
+                                    <input type="checkbox" class="lophoc-cb w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" value="@item.MaLopHoc">
+                                </td>
+                                <td class="py-3.5 px-3 text-center text-outline font-mono text-[11px]">@(idx++)</td>
                                 <td class="py-3.5 px-4">
                                     <div class="flex items-center gap-3">
                                         <div class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
@@ -596,6 +608,7 @@
             const newContent = doc.getElementById('lophoc-content-area');
             if (newContent && area) {
                 area.innerHTML = newContent.innerHTML;
+                if (window.lopHocBulk) window.lopHocBulk.updateState();
             }
             if (pushState) window.history.pushState({ url }, '', url);
         } catch (err) {
@@ -671,5 +684,16 @@
         const cleanUrl = window.location.pathname + window.location.search.replace(/[?&]create=true/, '').replace(/[?&]action=create/, '');
         window.history.replaceState({}, document.title, cleanUrl || window.location.pathname);
     }
+
+    // Khởi tạo Bulk Delete cho Lớp học
+    window.lopHocBulk = window.initBulkDelete({
+        selectAllId: 'selectAllLopHoc',
+        checkboxClass: 'lophoc-cb',
+        btnDeleteId: 'btnBulkDeleteLopHoc',
+        countBadgeId: 'selectedLopHocCount',
+        deleteUrl: '/LopHoc/DeleteMultiple',
+        itemLabel: 'lớp học',
+        onSuccess: () => loadLopHocPage(window.location.href, false)
+    });
 </script>
 }

@@ -300,6 +300,29 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // ========================================================
+        // ACTION DELETE MULTIPLE: XÓA NHIỀU BUỔI HỌC
+        // ========================================================
+        [HttpPost]
+        public async Task<IActionResult> DeleteMultiple([FromBody] List<int>? ids)
+        {
+            if (ids == null || !ids.Any())
+                return Json(new { success = false, message = "Vui lòng chọn ít nhất 1 buổi học để xóa." });
+
+            int deleted = 0;
+            foreach (var id in ids)
+            {
+                var buoiHoc = await _buoiHocRepo.GetByIdAsync(id);
+                if (buoiHoc != null)
+                {
+                    await _buoiHocRepo.DeleteAsync(id);
+                    deleted++;
+                }
+            }
+
+            return Json(new { success = true, message = $"Đã xóa thành công {deleted} buổi học khỏi lịch đào tạo.", deletedCount = deleted });
+        }
+
         // --- CẬP NHẬT HOÀN THÀNH SAU BUỔI HỌC (Yêu cầu 9.3) ---
         [HttpPost]
         public async Task<IActionResult> HoanThanh(int id)

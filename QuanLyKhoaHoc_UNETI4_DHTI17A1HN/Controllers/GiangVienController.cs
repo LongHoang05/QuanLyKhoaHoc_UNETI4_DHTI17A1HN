@@ -300,5 +300,38 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             return RedirectToAction(nameof(QuanLy));
         }
+
+        // ========================================================
+        // ACTION DELETE MULTIPLE: XÓA NHIỀU GIẢNG VIÊN
+        // ========================================================
+        [HttpPost]
+        [SessionAuthorize("Admin", "GiaoVu")]
+        public async Task<IActionResult> DeleteMultiple([FromBody] List<int>? ids)
+        {
+            if (ids == null || !ids.Any())
+                return Json(new { success = false, message = "Vui lòng chọn ít nhất 1 giảng viên để xóa." });
+
+            int deleted = 0;
+            int skipped = 0;
+
+            foreach (var id in ids)
+            {
+                var (success, _) = await _giangVienService.XoaGiangVienAsync(id);
+                if (success) deleted++;
+                else skipped++;
+            }
+
+            if (deleted == 0 && skipped > 0)
+            {
+                return Json(new { success = false, message = $"Không thể xóa {skipped} giảng viên đã chọn do đang phụ trách lớp học." });
+            }
+
+            string msg = $"Đã xóa thành công {deleted} giảng viên.";
+            if (skipped > 0)
+            {
+                msg += $" Bỏ qua {skipped} giảng viên do đang phụ trách lớp học.";
+            }
+            return Json(new { success = true, message = msg, deletedCount = deleted, skippedCount = skipped });
+        }
     }
 }

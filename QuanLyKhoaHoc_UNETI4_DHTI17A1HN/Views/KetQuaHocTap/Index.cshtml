@@ -192,6 +192,10 @@ Nội dung thực hiện: Module 5 - Quản lý Kết quả học tập CRUD chu
         </form>
 
         <div class="flex items-center gap-2">
+            <button id="btnBulkDeleteKetQua" class="hidden items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition-all cursor-pointer shadow-xs active:scale-95" title="Xóa các điểm đã chọn">
+                <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+                <span>Xóa đã chọn (<span id="selectedKetQuaCount">0</span>)</span>
+            </button>
             <a href="/KetQuaHocTap/Index" onclick="event.preventDefault(); document.getElementById('filter-form').reset(); loadKetQuaPage('/KetQuaHocTap/Index');" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
                 <span class="material-symbols-outlined text-[16px]">restart_alt</span>
                 <span>Đặt lại</span>
@@ -210,7 +214,7 @@ Nội dung thực hiện: Module 5 - Quản lý Kết quả học tập CRUD chu
                 <thead>
                     <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
                         <th class="py-3.5 pl-6 w-12 text-center">
-                            <input class="rounded border-border-standard text-primary focus:ring-primary h-4 w-4 cursor-pointer" type="checkbox" id="select-all"/>
+                            <input class="rounded border-border-standard text-primary focus:ring-primary h-4 w-4 cursor-pointer" type="checkbox" id="selectAllKetQua"/>
                         </th>
                         <th class="py-3.5 px-3 w-10 text-center">#</th>
                         <th class="py-3.5 px-4">Học viên</th>
@@ -260,7 +264,7 @@ Nội dung thực hiện: Module 5 - Quản lý Kết quả học tập CRUD chu
                                 data-nhanxet="@item.NhanXet"
                                 data-ketqua="@item.KetQua">
                                 <td class="py-3.5 pl-6 text-center">
-                                    <input class="rounded border-border-standard text-primary focus:ring-primary h-4 w-4 row-checkbox cursor-pointer" type="checkbox"/>
+                                    <input class="rounded border-border-standard text-primary focus:ring-primary h-4 w-4 ketqua-cb cursor-pointer" type="checkbox" value="@item.MaKetQua"/>
                                 </td>
                                 <td class="py-3.5 px-3 text-center text-outline font-mono text-[11px]">@(idx++)</td>
                                 <td class="py-4 px-4">
@@ -689,6 +693,7 @@ Nội dung thực hiện: Module 5 - Quản lý Kết quả học tập CRUD chu
             if (newContent && area) {
                 area.innerHTML = newContent.innerHTML;
                 bindSelectAll();
+                if (window.ketQuaBulk) window.ketQuaBulk.updateState();
             }
 
             if (pushState) {
@@ -792,4 +797,15 @@ Nội dung thực hiện: Module 5 - Quản lý Kết quả học tập CRUD chu
         downloadLink.click();
         document.body.removeChild(downloadLink);
     }
+
+    // Khởi tạo Bulk Delete cho Kết quả học tập
+    window.ketQuaBulk = window.initBulkDelete({
+        selectAllId: 'selectAllKetQua',
+        checkboxClass: 'ketqua-cb',
+        btnDeleteId: 'btnBulkDeleteKetQua',
+        countBadgeId: 'selectedKetQuaCount',
+        deleteUrl: '/KetQuaHocTap/DeleteMultiple',
+        itemLabel: 'kết quả học tập',
+        onSuccess: () => loadKetQuaPage(window.location.href, false)
+    });
 </script>

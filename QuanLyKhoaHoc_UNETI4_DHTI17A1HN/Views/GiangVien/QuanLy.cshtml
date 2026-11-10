@@ -110,6 +110,10 @@
                     <span class="material-symbols-outlined text-[16px]">filter_alt</span>
                     <span>Lọc</span>
                 </button>
+                <button id="btnBulkDeleteGv" type="button" class="hidden items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition-all cursor-pointer shadow-xs active:scale-95" title="Xóa các giảng viên đã chọn">
+                    <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+                    <span>Xóa đã chọn (<span id="selectedGvCount">0</span>)</span>
+                </button>
             </div>
 
             @if (!string.IsNullOrEmpty(search) || !string.IsNullOrEmpty(hocVi))
@@ -128,7 +132,10 @@
             <table class="w-full text-left border-collapse" id="teacherTable">
                 <thead>
                     <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
-                        <th class="py-3.5 px-4 w-12 text-center">#</th>
+                        <th class="py-3.5 px-3 w-10 text-center">
+                            <input type="checkbox" id="selectAllGv" class="w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" title="Chọn tất cả">
+                        </th>
+                        <th class="py-3.5 px-3 w-10 text-center">#</th>
                         <th class="py-3.5 px-4">Mã GV</th>
                         <th class="py-3.5 px-4 min-w-[200px]">Giảng viên</th>
                         <th class="py-3.5 px-3 min-w-[140px]">Học vị &amp; Chuyên ngành</th>
@@ -153,7 +160,10 @@
                             var initialLetter = string.IsNullOrWhiteSpace(hoTenGv) ? "T" : (hoTenGv.Trim().Contains(' ') ? hoTenGv.Trim().Substring(hoTenGv.Trim().LastIndexOf(' ') + 1).Substring(0, 1).ToUpper() : hoTenGv.Substring(0, 1).ToUpper());
 
                             <tr class="hover:bg-surface-container-low/40 transition-colors">
-                                <td class="py-3.5 px-4 text-center text-outline font-mono text-[11px]">@(idx++)</td>
+                                <td class="py-3.5 px-3 text-center">
+                                    <input type="checkbox" class="gv-cb w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" value="@gv.MaGiangVien">
+                                </td>
+                                <td class="py-3.5 px-3 text-center text-outline font-mono text-[11px]">@(idx++)</td>
                                 <td class="py-3.5 px-4 font-mono font-semibold text-primary">
                                     #GV@(gv.MaGiangVien.ToString("D3"))
                                 </td>
@@ -518,4 +528,15 @@
         const cleanUrl = window.location.pathname + window.location.search.replace(/[?&]create=true/, '').replace(/[?&]action=create/, '');
         window.history.replaceState({}, document.title, cleanUrl || window.location.pathname);
     }
+
+    // Khởi tạo Bulk Delete cho Giảng viên
+    window.gvBulk = window.initBulkDelete({
+        selectAllId: 'selectAllGv',
+        checkboxClass: 'gv-cb',
+        btnDeleteId: 'btnBulkDeleteGv',
+        countBadgeId: 'selectedGvCount',
+        deleteUrl: '/GiangVien/DeleteMultiple',
+        itemLabel: 'giảng viên',
+        onSuccess: () => window.location.reload()
+    });
 </script>

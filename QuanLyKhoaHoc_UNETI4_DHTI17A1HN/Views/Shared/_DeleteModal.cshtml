@@ -182,4 +182,130 @@
             });
         }
     });
+
+    // ========================================================
+    // UNIVERSAL BULK / BATCH DELETE HELPER (CHO TẤT CẢ CÁC BẢNG)
+    // ========================================================
+    window.initBulkDelete = function(config) {
+        const {
+            selectAllId = 'selectAll',
+            checkboxClass = 'row-checkbox',
+            btnDeleteId = 'btnBulkDelete',
+            countBadgeId = 'selectedCount',
+            deleteUrl = '',
+            itemLabel = 'mục',
+            onSuccess = null
+        } = config;
+
+        function getCheckboxes() {
+            return document.querySelectorAll('.' + checkboxClass);
+        }
+
+        function getSelectedIds() {
+            const checked = document.querySelectorAll('.' + checkboxClass + ':checked');
+            return Array.from(checked).map(cb => parseInt(cb.value, 10)).filter(id => !isNaN(id) && id > 0);
+        }
+
+        function updateState() {
+            const selectAllEl = document.getElementById(selectAllId);
+            const btnDelete = document.getElementById(btnDeleteId);
+            const countBadge = document.getElementById(countBadgeId);
+            const checkboxes = getCheckboxes();
+            const selected = getSelectedIds();
+            const total = checkboxes.length;
+
+            if (countBadge) countBadge.innerText = selected.length;
+
+            if (btnDelete) {
+                if (selected.length > 0) {
+                    btnDelete.classList.remove('hidden');
+                    btnDelete.classList.add('inline-flex');
+                } else {
+                    btnDelete.classList.add('hidden');
+                    btnDelete.classList.remove('inline-flex');
+                }
+            }
+
+            if (selectAllEl) {
+                selectAllEl.checked = total > 0 && selected.length === total;
+                selectAllEl.indeterminate = selected.length > 0 && selected.length < total;
+            }
+
+            checkboxes.forEach(cb => {
+                const tr = cb.closest('tr');
+                if (tr) {
+                    if (cb.checked) {
+                        tr.classList.add('bg-blue-50/50');
+                    } else {
+                        tr.classList.remove('bg-blue-50/50');
+                    }
+                }
+            });
+        }
+
+        // Delegate SelectAll & Row checkboxes
+        document.addEventListener('change', function(e) {
+            if (e.target && e.target.id === selectAllId) {
+                const checkboxes = getCheckboxes();
+                checkboxes.forEach(cb => {
+                    cb.checked = e.target.checked;
+                });
+                updateState();
+            } else if (e.target && e.target.classList && e.target.classList.contains(checkboxClass)) {
+                updateState();
+            }
+        });
+
+        // Delegate Delete Button
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('#' + btnDeleteId);
+            if (btn) {
+                e.preventDefault();
+                const ids = getSelectedIds();
+                if (ids.length === 0) {
+                    if (window.showToast) window.showToast('Vui lòng chọn ít nhất 1 ' + itemLabel + ' để xóa.', 'warning');
+                    return;
+                }
+
+                openGlobalDeleteModal({
+                    title: 'Xóa nhiều ' + itemLabel + '?',
+                    message: `Bạn có chắc chắn muốn xóa <strong class="text-rose-600 font-bold">${ids.length}</strong> ${itemLabel} đã chọn?`,
+                    warning: 'Hành động này mang tính vĩnh viễn và không thể hoàn tác sau khi xác nhận.',
+                    submitText: `Xóa ${ids.length} ${itemLabel}`,
+                    icon: 'delete_sweep',
+                    onConfirm: async function() {
+                        const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                        try {
+                            const res = await fetch(deleteUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'RequestVerificationToken': csrfToken
+                                },
+                                body: JSON.stringify(ids)
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                if (window.showToast) window.showToast(data.message, 'success');
+                                if (typeof onSuccess === 'function') {
+                                    onSuccess(data);
+                                } else {
+                                    window.location.reload();
+                                }
+                            } else {
+                                if (window.showToast) window.showToast(data.message, 'error');
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            if (window.showToast) window.showToast('Đã xảy ra lỗi khi thực hiện xóa.', 'error');
+                        }
+                    }
+                });
+            }
+        });
+
+        updateState();
+        return { updateState, getSelectedIds };
+    };
 </script>

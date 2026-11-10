@@ -121,10 +121,16 @@
             </div>
         </div>
 
-        <button type="button" onclick="resetFilters()" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
-            <span class="material-symbols-outlined text-[16px]">restart_alt</span>
-            <span>Đặt lại</span>
-        </button>
+        <div class="flex items-center gap-2">
+            <button id="btnBulkDeleteDk" type="button" class="hidden items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition-all cursor-pointer shadow-xs active:scale-95" title="Xóa các hồ sơ đã chọn">
+                <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+                <span>Xóa đã chọn (<span id="selectedDkCount">0</span>)</span>
+            </button>
+            <button type="button" onclick="resetFilters()" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
+                <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                <span>Đặt lại</span>
+            </button>
+        </div>
     </div>
 
     <!-- Table Section (SPA Ajax Replace Target) -->
@@ -338,6 +344,7 @@
         .then(html => {
             wrapper.innerHTML = html;
             wrapper.classList.remove('opacity-50');
+            if (window.dkBulk) window.dkBulk.updateState();
         })
         .catch(err => {
             console.error(err);
@@ -569,5 +576,19 @@
         document.body.appendChild(downloadLink);
         downloadLink.click();
     }
+
+    // Khởi tạo Bulk Delete cho Đăng ký học
+    window.dkBulk = window.initBulkDelete({
+        selectAllId: 'selectAllDk',
+        checkboxClass: 'dk-cb',
+        btnDeleteId: 'btnBulkDeleteDk',
+        countBadgeId: 'selectedDkCount',
+        deleteUrl: '/DangKyHoc/DeleteMultiple',
+        itemLabel: 'hồ sơ đăng ký',
+        onSuccess: (data) => {
+            if (data && data.stats) updateKpiStats(data.stats);
+            loadTableData();
+        }
+    });
 </script>
 }

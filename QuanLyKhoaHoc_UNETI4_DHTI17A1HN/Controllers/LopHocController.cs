@@ -344,6 +344,49 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         }
 
         // ========================================================
+        // ACTION DELETE MULTIPLE: XÓA NHIỀU LỚP HỌC
+        // ========================================================
+        [HttpPost]
+        public async Task<IActionResult> DeleteMultiple([FromBody] List<int>? ids)
+        {
+            if (ids == null || !ids.Any())
+                return Json(new { success = false, message = "Vui lòng chọn ít nhất 1 lớp học để xóa." });
+
+            int deleted = 0;
+            int skipped = 0;
+
+            foreach (var id in ids)
+            {
+                var lop = await _lopHocRepo.GetByIdWithDetailsAsync(id);
+                if (lop == null) continue;
+
+                int soDangKy = lop.DangKyHocs?.Count ?? 0;
+                int soBuoi = lop.BuoiHocs?.Count ?? 0;
+
+                if (soDangKy > 0 || soBuoi > 0)
+                {
+                    skipped++;
+                    continue;
+                }
+
+                await _lopHocRepo.DeleteAsync(id);
+                deleted++;
+            }
+
+            if (deleted == 0 && skipped > 0)
+            {
+                return Json(new { success = false, message = $"Không thể xóa {skipped} lớp học đã chọn vì đã có hồ sơ đăng ký hoặc lịch học liên kết." });
+            }
+
+            string msg = $"Đã xóa thành công {deleted} lớp học.";
+            if (skipped > 0)
+            {
+                msg += $" Bỏ qua {skipped} lớp học có dữ liệu đăng ký/buổi học liên kết.";
+            }
+            return Json(new { success = true, message = msg, deletedCount = deleted, skippedCount = skipped });
+        }
+
+        // ========================================================
         // BÀI TẬP THỰC HÀNH JAVASCRIPT, JQUERY, AJAX (BÀI 11 - BÀI 15)
         // ========================================================
 

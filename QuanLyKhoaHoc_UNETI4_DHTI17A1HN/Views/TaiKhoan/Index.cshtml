@@ -118,10 +118,16 @@
                 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
             </div>
         </div>
-        <button type="button" onclick="resetTkFilter()" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
-            <span class="material-symbols-outlined text-[16px]">restart_alt</span>
-            <span>Đặt lại</span>
-        </button>
+        <div class="flex items-center gap-2">
+            <button id="btnBulkDeleteTk" type="button" class="hidden items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition-all cursor-pointer shadow-xs active:scale-95" title="Xóa các tài khoản đã chọn">
+                <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+                <span>Xóa đã chọn (<span id="selectedTkCount">0</span>)</span>
+            </button>
+            <button type="button" onclick="resetTkFilter()" class="text-xs text-outline hover:text-primary font-medium flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-standard hover:bg-surface-container-low transition-colors cursor-pointer shrink-0" title="Đặt lại bộ lọc">
+                <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                <span>Đặt lại</span>
+            </button>
+        </div>
     </div>
 
     <!-- Data Table Card -->
@@ -130,7 +136,10 @@
             <table class="w-full text-left border-collapse min-w-[880px]" id="tkTable">
                 <thead>
                     <tr class="bg-surface-container-low/80 border-b border-border-standard font-label-sm text-[11px] text-outline font-bold tracking-wider uppercase">
-                        <th class="py-3.5 px-4 w-12 text-center">#</th>
+                        <th class="py-3.5 px-3 w-10 text-center">
+                            <input type="checkbox" id="selectAllTk" class="w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" title="Chọn tất cả">
+                        </th>
+                        <th class="py-3.5 px-3 w-10 text-center">#</th>
                         <th class="py-3.5 px-4">Tài Khoản</th>
                         <th class="py-3.5 px-4">Họ Và Tên</th>
                         <th class="py-3.5 px-4">Email Liên Hệ</th>
@@ -144,7 +153,7 @@
                     @if (Model.Items == null || !Model.Items.Any())
                     {
                         <tr>
-                            <td colspan="8" class="text-center py-12 text-outline">
+                            <td colspan="9" class="text-center py-12 text-outline">
                                 <span class="material-symbols-outlined text-4xl block mb-2 text-outline/50">manage_accounts</span>
                                 <span class="font-semibold">Chưa có tài khoản nào phù hợp bộ lọc.</span>
                             </td>
@@ -174,7 +183,10 @@
                             string statusText = item.TrangThai ? "Hoạt động" : "Bị khóa";
 
                             <tr class="tk-row hover:bg-canvas-base/60 transition-colors" data-id="@item.MaTaiKhoan" data-user="@item.TenDangNhap" data-name="@item.HoTen" data-email="@item.Email" data-role="@item.VaiTro" data-status="@statusText">
-                                <td class="py-3.5 px-4 text-center font-mono text-outline">@(idx++)</td>
+                                <td class="py-3.5 px-3 text-center">
+                                    <input type="checkbox" class="tk-cb w-4 h-4 rounded text-primary border-border-standard focus:ring-primary/30 cursor-pointer" value="@item.MaTaiKhoan">
+                                </td>
+                                <td class="py-3.5 px-3 text-center font-mono text-outline">@(idx++)</td>
                                 <td class="py-3.5 px-4 font-mono font-bold text-primary">
                                     @item.TenDangNhap
                                 </td>
@@ -600,6 +612,7 @@
             const newContent = doc.getElementById('taikhoan-content-area');
             if (newContent && area) {
                 area.innerHTML = newContent.innerHTML;
+                if (window.tkBulk) window.tkBulk.updateState();
             }
             if (pushState) window.history.pushState({ url }, '', url);
         } catch (err) {
@@ -616,5 +629,16 @@
         const cleanUrl = window.location.pathname + window.location.search.replace(/[?&]create=true/, '').replace(/[?&]action=create/, '');
         window.history.replaceState({}, document.title, cleanUrl || window.location.pathname);
     }
+
+    // Khởi tạo Bulk Delete cho Tài khoản
+    window.tkBulk = window.initBulkDelete({
+        selectAllId: 'selectAllTk',
+        checkboxClass: 'tk-cb',
+        btnDeleteId: 'btnBulkDeleteTk',
+        countBadgeId: 'selectedTkCount',
+        deleteUrl: '/TaiKhoan/DeleteMultiple',
+        itemLabel: 'tài khoản',
+        onSuccess: () => loadTaiKhoanPage(window.location.href, false)
+    });
 </script>
 }

@@ -193,5 +193,46 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             TempData["Success"] = "Đã xóa chương trình đào tạo thành công.";
             return RedirectToAction(nameof(Index));
         }
+
+        // ========================================================
+        // ACTION DELETE MULTIPLE: XÓA NHIỀU CHƯƠNG TRÌNH ĐÀO TẠO
+        // ========================================================
+        [HttpPost]
+        public async Task<IActionResult> DeleteMultiple([FromBody] List<int>? ids)
+        {
+            if (ids == null || !ids.Any())
+                return Json(new { success = false, message = "Vui lòng chọn ít nhất 1 chương trình đào tạo để xóa." });
+
+            int deleted = 0;
+            int skipped = 0;
+
+            foreach (var id in ids)
+            {
+                var ctdt = await _ctdtRepository.GetByIdAsync(id);
+                if (ctdt == null) continue;
+
+                int countLop = await _ctdtRepository.CountLopHocByChuongTrinhAsync(id);
+                if (countLop > 0)
+                {
+                    skipped++;
+                    continue;
+                }
+
+                await _ctdtRepository.DeleteAsync(id);
+                deleted++;
+            }
+
+            if (deleted == 0 && skipped > 0)
+            {
+                return Json(new { success = false, message = $"Không thể xóa {skipped} chương trình đã chọn vì đang có lớp học trực thuộc." });
+            }
+
+            string msg = $"Đã xóa thành công {deleted} chương trình đào tạo.";
+            if (skipped > 0)
+            {
+                msg += $" Bỏ qua {skipped} chương trình do đang có lớp học liên kết.";
+            }
+            return Json(new { success = true, message = msg, deletedCount = deleted, skippedCount = skipped });
+        }
     }
 }
