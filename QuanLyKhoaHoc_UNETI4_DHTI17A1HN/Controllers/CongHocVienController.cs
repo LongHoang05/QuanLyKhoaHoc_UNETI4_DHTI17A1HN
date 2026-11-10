@@ -299,11 +299,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             return Json(new { success = true, message = $"Đã hủy đăng ký lớp '{dk.LopHoc?.TenLop}' thành công." });
         }
 
-        // --- HỌC VIÊN XÁC NHẬN NỘP HỌC PHÍ (FORM POST THUẦN MVC - KHÔNG DÙNG API) ---
+        // --- HỌC VIÊN XÁC NHẬN NỘP HỌC PHÍ (FORM POST THUẦN MVC) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Route("CongHocVien/ThanhToanHocPhi")]
-        [Route("CongHocVien/ThanhToanHocPhiPost")]
         public async Task<IActionResult> ThanhToanHocPhi(int maDangKy, string? ghiChu)
         {
             var student = await GetCurrentHocVienAsync();
