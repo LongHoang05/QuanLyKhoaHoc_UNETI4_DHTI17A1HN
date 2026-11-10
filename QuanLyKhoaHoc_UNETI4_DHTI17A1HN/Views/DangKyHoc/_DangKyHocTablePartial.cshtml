@@ -70,6 +70,13 @@
                                                 <span>@item.HocVien.SoDienThoai</span>
                                             }
                                         </div>
+                                        @if (item.TrangThai == "Chờ xác nhận học phí")
+                                        {
+                                            <div class="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-semibold">
+                                                <span class="material-symbols-outlined text-[13px] text-amber-600 animate-pulse">notifications_active</span>
+                                                <span>@(string.IsNullOrWhiteSpace(item.GhiChu) ? "Học viên báo đã chuyển khoản" : item.GhiChu)</span>
+                                            </div>
+                                        }
                                     </div>
                                 </div>
                             </td>
@@ -106,9 +113,10 @@
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold
                                     @(item.TrangThai == "Đã duyệt" || item.TrangThai == "Đang học" ? "bg-blue-50 text-blue-700 border border-blue-200" :
                                       item.TrangThai == "Đã đóng học phí" || item.TrangThai == "Hoàn thành" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
+                                      item.TrangThai == "Chờ xác nhận học phí" ? "bg-amber-100 text-amber-900 border border-amber-300 font-bold" :
                                       item.TrangThai == "Chờ duyệt" ? "bg-amber-50 text-amber-700 border border-amber-200" :
                                       "bg-rose-50 text-rose-700 border border-rose-200")">
-                                    <span class="w-1.5 h-1.5 rounded-full mr-1.5 @(item.TrangThai == "Chờ duyệt" ? "bg-amber-500 animate-pulse" : "bg-current")"></span>
+                                    <span class="w-1.5 h-1.5 rounded-full mr-1.5 @(item.TrangThai == "Chờ duyệt" || item.TrangThai == "Chờ xác nhận học phí" ? "bg-amber-500 animate-pulse" : "bg-current")"></span>
                                     @item.TrangThai
                                 </span>
                             </td>
@@ -128,11 +136,20 @@
                                             <span class="material-symbols-outlined text-[15px]">close</span>
                                         </button>
                                     }
-                                    else if (item.TrangThai == "Đã duyệt" || item.TrangThai == "Đã đóng học phí")
+                                    else if (item.TrangThai == "Chờ xác nhận học phí" || item.TrangThai == "Đã duyệt" || item.TrangThai == "Đã đóng học phí")
                                     {
-                                        @if (item.TrangThai == "Đã duyệt" || (hocPhiLop > 0 && daDong < hocPhiLop))
+                                        @if (item.TrangThai == "Chờ xác nhận học phí")
                                         {
-                                            <!-- Thu học phí -->
+                                            <!-- Giáo vụ Xác nhận thu phí -->
+                                            <button type="button" onclick="openThuPhiModal(@item.MaDangKy)"
+                                                    title="Học viên đã nộp tiền, bấm để xác nhận thu" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white shadow-xs rounded-lg font-bold text-[11px] flex items-center gap-1 transition-all cursor-pointer">
+                                                <span class="material-symbols-outlined text-[15px]">verified</span>
+                                                <span>Xác nhận thu</span>
+                                            </button>
+                                        }
+                                        else if (item.TrangThai == "Đã duyệt" || (hocPhiLop > 0 && daDong < hocPhiLop))
+                                        {
+                                            <!-- Thu học phí bình thường -->
                                             <button type="button" onclick="openThuPhiModal(@item.MaDangKy)"
                                                     title="Ghi nhận học phí" class="px-2.5 py-1 bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 rounded-lg font-semibold text-[11px] flex items-center gap-1 transition-colors">
                                                 <span class="material-symbols-outlined text-[15px]">payments</span>
