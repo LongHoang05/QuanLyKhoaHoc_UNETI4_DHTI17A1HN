@@ -217,55 +217,66 @@
 </div>
 
 <!-- ================= MODAL GHI NHẬN HỌC PHÍ ================= -->
+<!-- Modal Thu Học Phí (100% Một Lần) -->
 <div id="thuphi-modal" class="fixed inset-0 bg-brand-deep/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 transition-opacity duration-200 opacity-0 pointer-events-none">
-    <div class="bg-surface-white rounded-2xl max-w-md w-full p-6 shadow-2xl transform scale-95 transition-transform duration-200" id="thuphi-modal-content">
+    <div class="bg-surface-white rounded-3xl max-w-md w-full p-6 shadow-2xl transform scale-95 transition-transform duration-200 border border-border-standard" id="thuphi-modal-content">
         <div class="flex items-center gap-3 mb-4">
-            <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+            <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
                 <span class="material-symbols-outlined text-[24px]">payments</span>
             </div>
             <div>
-                <h3 class="font-bold text-base text-brand-deep">Ghi Nhận Thu Học Phí</h3>
-                <p class="text-xs text-outline" id="thuphi-subtitle">Cập nhật số tiền học viên đã nộp</p>
+                <h3 class="font-bold text-base text-brand-deep">Xác Nhận Thu Học Phí</h3>
+                <p class="text-xs text-outline" id="thuphi-subtitle">Thu đủ 100% học phí để kích hoạt vào lớp</p>
             </div>
         </div>
 
         <form id="thuphiForm" onsubmit="submitThuPhi(event)" class="space-y-4">
             @Html.AntiForgeryToken()
             <input type="hidden" id="thuphi-MaDangKy" name="id" value="" />
+            <input type="hidden" id="thuphi-SoTien" name="soTien" value="" />
 
-            <div class="p-3.5 rounded-xl bg-surface-container-lowest border border-border-subtle text-xs space-y-1.5">
-                <div class="flex justify-between">
+            <div class="p-3.5 rounded-2xl bg-surface-container-lowest border border-border-subtle text-xs space-y-2">
+                <div class="flex justify-between items-center">
                     <span class="text-outline">Học viên:</span>
                     <strong class="text-brand-deep" id="thuphi-tenHV">—</strong>
                 </div>
-                <div class="flex justify-between">
+                <div class="flex justify-between items-center">
                     <span class="text-outline">Khóa học:</span>
-                    <strong class="text-brand-deep" id="thuphi-tenLop">—</strong>
+                    <strong class="text-brand-deep text-right max-w-[220px] truncate" id="thuphi-tenLop">—</strong>
                 </div>
-                <div class="flex justify-between border-t border-border-standard pt-1.5">
-                    <span class="text-outline">Học phí gốc của lớp:</span>
-                    <strong class="text-emerald-700 font-mono font-bold" id="thuphi-hocPhiGoc">0 đ</strong>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-outline">Đã nộp trước đó:</span>
-                    <span class="text-brand-deep font-mono font-medium" id="thuphi-daDong">0 đ</span>
+                <div class="flex justify-between items-center border-t border-border-standard pt-2">
+                    <span class="text-outline">Mức học phí quy định (100%):</span>
+                    <strong class="text-emerald-700 font-mono text-sm font-bold" id="thuphi-hocPhiGoc">0 đ</strong>
                 </div>
             </div>
 
-            <div>
-                <div class="flex items-center justify-between mb-1">
-                    <label class="block text-xs font-bold text-brand-deep uppercase">Số tiền đóng lần này (VNĐ) <span class="text-rose-500">*</span></label>
-                    <button type="button" onclick="fillFullTuition()" class="text-[11px] font-semibold text-primary hover:underline">
-                        Nộp đủ 100%
-                    </button>
+            <!-- Thẻ xác nhận thu 100% -->
+            <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
+                <div>
+                    <span class="text-[11px] font-bold text-emerald-900 block uppercase">Số tiền thu thực tế (100%)</span>
+                    <span class="text-[11px] text-emerald-700">Đóng 1 lần hoàn thành khóa học</span>
                 </div>
-                <input type="number" id="thuphi-SoTien" name="soTien" required min="1000" step="1000"
-                       class="w-full px-3.5 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white font-mono font-bold text-brand-deep" />
+                <strong class="text-emerald-700 font-mono text-lg font-black" id="thuphi-soTienDisplay">0 đ</strong>
+            </div>
+
+            <!-- Phương thức thanh toán -->
+            <div>
+                <label class="block text-xs font-bold text-brand-deep uppercase mb-1.5">Phương thức thanh toán <span class="text-rose-500">*</span></label>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-border-standard bg-surface-container-lowest hover:bg-slate-50 cursor-pointer">
+                        <input type="radio" name="phuongThuc" value="Chuyển khoản VietQR" checked class="text-primary focus:ring-primary" />
+                        <span class="font-medium text-slate-800">Chuyển khoản QR</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-border-standard bg-surface-container-lowest hover:bg-slate-50 cursor-pointer">
+                        <input type="radio" name="phuongThuc" value="Tiền mặt tại Văn phòng" class="text-primary focus:ring-primary" />
+                        <span class="font-medium text-slate-800">Tiền mặt</span>
+                    </label>
+                </div>
             </div>
 
             <div>
                 <label class="block text-xs font-bold text-brand-deep uppercase mb-1">Ghi chú phiếu thu (tùy chọn)</label>
-                <input type="text" id="thuphi-GhiChu" name="ghiChu" placeholder="Ví dụ: Chuyển khoản ngân hàng Vietcombank..."
+                <input type="text" id="thuphi-GhiChu" name="ghiChu" placeholder="Ví dụ: MB Bank mã GD 883921 / Thu tiền mặt tại VP HA8..."
                        class="w-full px-3 py-2 text-xs rounded-xl border border-border-standard bg-surface-container-lowest focus:bg-surface-white text-brand-deep" />
             </div>
 
@@ -273,9 +284,9 @@
                 <button type="button" onclick="closeThuPhiModal()" class="px-4 py-2 text-xs font-semibold text-outline hover:text-brand-deep border border-border-standard rounded-xl hover:bg-surface-container-high transition-colors">
                     Hủy
                 </button>
-                <button type="submit" class="px-5 py-2 text-xs font-semibold text-surface-white bg-primary hover:bg-primary-dark rounded-xl shadow-sm transition-all flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-[16px]">receipt_long</span>
-                    <span>Xác nhận thu tiền</span>
+                <button type="submit" class="px-5 py-2.5 text-xs font-bold text-surface-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
+                    <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                    <span>Xác nhận thu đủ 100%</span>
                 </button>
             </div>
         </form>
@@ -451,7 +462,7 @@
         .catch(() => { if (window.showToast) window.showToast('Có lỗi xảy ra khi từ chối hồ sơ.', 'error'); });
     }
 
-    // Modal Thu Học Phí
+    // Modal Thu Học Phí (100% Một Lần)
     function openThuPhiModal(id) {
         fetch(`/DangKyHoc/GetDangKy?id=${id}`)
             .then(r => r.json())
@@ -461,12 +472,12 @@
                     document.getElementById('thuphi-MaDangKy').value = d.maDangKy;
                     document.getElementById('thuphi-tenHV').innerText = d.tenHocVien;
                     document.getElementById('thuphi-tenLop').innerText = d.tenLop;
-                    document.getElementById('thuphi-hocPhiGoc').innerText = Number(d.hocPhi).toLocaleString('vi-VN') + ' đ';
-                    document.getElementById('thuphi-daDong').innerText = Number(d.soTienDaDong).toLocaleString('vi-VN') + ' đ';
-                    
-                    const conLai = Math.max(0, Number(d.hocPhi) - Number(d.soTienDaDong));
-                    currentHocPhiGoc = conLai > 0 ? conLai : Number(d.hocPhi);
-                    document.getElementById('thuphi-SoTien').value = currentHocPhiGoc;
+
+                    const hocPhiGoc = Number(d.hocPhi);
+                    const formatted = hocPhiGoc.toLocaleString('vi-VN') + ' đ';
+                    document.getElementById('thuphi-hocPhiGoc').innerText = formatted;
+                    document.getElementById('thuphi-soTienDisplay').innerText = formatted;
+                    document.getElementById('thuphi-SoTien').value = hocPhiGoc;
                     document.getElementById('thuphi-GhiChu').value = '';
 
                     const modal = document.getElementById('thuphi-modal');
@@ -479,10 +490,6 @@
                 }
             })
             .catch(() => { if (window.showToast) window.showToast('Không thể tải thông tin học phí.', 'error'); });
-    }
-
-    function fillFullTuition() {
-        document.getElementById('thuphi-SoTien').value = currentHocPhiGoc;
     }
 
     function closeThuPhiModal() {

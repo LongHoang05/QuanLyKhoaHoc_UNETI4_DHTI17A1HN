@@ -206,12 +206,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // --- XÁC NHẬN THU HỌC PHÍ (Mục 7.2 & 7.3) ---
+        // --- XÁC NHẬN THU HỌC PHÍ (Đóng đúng 1 lần 100%) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("DangKyHoc/XacNhanHocPhi")]
         [Route("DangKyHoc/ThuHocPhiPost")]
-        public async Task<IActionResult> XacNhanHocPhi(int id, decimal soTien, string? ghiChu)
+        public async Task<IActionResult> XacNhanHocPhi(int id, decimal? soTien, string? phuongThuc, string? ghiChu)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
             var dk = await _dangKyHocRepo.GetByIdWithDetailsAsync(id);
@@ -223,51 +223,14 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            if (soTien <= 0)
-            {
-                if (isAjax) return Json(new { success = false, message = "Số tiền đóng học phí phải lớn hơn 0 VNĐ." });
-                TempData["Error"] = "Số tiền phải lớn hơn 0.";
-                return RedirectToAction(nameof(Index));
-            }
-
             decimal hocPhiLop = dk.LopHoc?.HocPhi ?? 0m;
-            decimal tongSauKhiDong = soTien;
 
-            if (hocPhiLop > 0)
+            if (dk.TrangThai == "Đã đóng học phí" || (hocPhiLop > 0 && dk.SoTienDaDong >= hocPhiLop))
             {
-                if (dk.SoTienDaDong >= hocPhiLop)
-                {
-                    string paidMsg = "Học viên này đã đóng đủ học phí của lớp.";
-                    if (isAjax) return Json(new { success = false, message = paidMsg });
-                    TempData["Error"] = paidMsg;
-                    return RedirectToAction(nameof(Index));
-                }
-
-                if (dk.SoTienDaDong > 0 && dk.SoTienDaDong < hocPhiLop)
-                {
-                    if (dk.SoTienDaDong + soTien <= hocPhiLop)
-                    {
-                        tongSauKhiDong = dk.SoTienDaDong + soTien;
-                    }
-                    else if (soTien == hocPhiLop)
-                    {
-                        tongSauKhiDong = hocPhiLop;
-                    }
-                    else
-                    {
-                        decimal conLai = hocPhiLop - dk.SoTienDaDong;
-                        string overMsg = $"Học viên đã nộp {dk.SoTienDaDong:N0} đ trước đó. Số tiền cần nộp thêm tối đa là {conLai:N0} đ.";
-                        if (isAjax) return Json(new { success = false, message = overMsg });
-                        TempData["Error"] = overMsg;
-                        return RedirectToAction(nameof(Index));
-                    }
-                }
-                else if (soTien > hocPhiLop)
-                {
-                    if (isAjax) return Json(new { success = false, message = $"Số tiền nộp ({soTien:N0} đ) vượt quá mức học phí quy định của lớp ({hocPhiLop:N0} đ)." });
-                    TempData["Error"] = "Số tiền nộp vượt quá học phí quy định.";
-                    return RedirectToAction(nameof(Index));
-                }
+                string paidMsg = "Học viên này đã đóng đủ 100% học phí của lớp.";
+                if (isAjax) return Json(new { success = false, message = paidMsg });
+                TempData["Error"] = paidMsg;
+                return RedirectToAction(nameof(Index));
             }
 
             // Kiểm tra sĩ số nếu hồ sơ trước đó chưa nằm trong nhóm đã duyệt
@@ -283,25 +246,27 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 }
             }
 
-            dk.SoTienDaDong = tongSauKhiDong;
+            // Thu đúng 1 lần 100% học phí của lớp
+            dk.SoTienDaDong = hocPhiLop;
             dk.NgayDongHocPhi = DateTime.Now;
-            bool daDongDu = hocPhiLop <= 0 || dk.SoTienDaDong >= hocPhiLop;
-            dk.TrangThai = daDongDu ? "Đã đóng học phí" : "Đã duyệt";
+            dk.TrangThai = "Đã đóng học phí";
+
+            string method = !string.IsNullOrWhiteSpace(phuongThuc) ? $"[{phuongThuc.Trim()}] " : "";
+            string staffName = HttpContext.Session.GetString("HoTen") ?? "Ban Giáo vụ";
+
             dk.GhiChu = string.IsNullOrWhiteSpace(ghiChu)
-                ? $"Xác nhận thu {soTien:N0} VNĐ bởi {HttpContext.Session.GetString("HoTen") ?? "Giáo vụ"}"
-                : ghiChu.Trim();
+                ? $"{method}Đã thu đủ 100% học phí ({hocPhiLop:N0} đ) bởi {staffName}"
+                : $"{method}{ghiChu.Trim()} (Thu bởi: {staffName})";
 
             if (dk.NgayXuLy == null)
             {
                 dk.NgayXuLy = DateTime.Now;
-                dk.NhanXetGiaoVu = HttpContext.Session.GetString("HoTen") ?? "Ban Giáo vụ";
+                dk.NhanXetGiaoVu = staffName;
             }
 
             await _dangKyHocRepo.UpdateAsync(dk);
 
-            string sMsg = daDongDu
-                ? $"Xác nhận thu đủ học phí ({dk.SoTienDaDong:N0} đ) cho học viên {dk.HocVien?.HoTen} thành công!"
-                : $"Đã ghi nhận thu {soTien:N0} đ (Đã đóng {dk.SoTienDaDong:N0}/{hocPhiLop:N0} đ) cho học viên {dk.HocVien?.HoTen}!";
+            string sMsg = $"Xác nhận thu đủ 100% học phí ({hocPhiLop:N0} đ) cho học viên {dk.HocVien?.HoTen} thành công!";
             if (isAjax) return Json(new { success = true, message = sMsg, stats = await GetStatsJsonAsync() });
             TempData["Success"] = sMsg;
             return RedirectToAction(nameof(Index));
