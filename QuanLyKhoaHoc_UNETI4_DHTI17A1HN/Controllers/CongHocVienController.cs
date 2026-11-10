@@ -299,6 +299,54 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             return Json(new { success = true, message = $"Đã hủy đăng ký lớp '{dk.LopHoc?.TenLop}' thành công." });
         }
 
+        // --- HỌC VIÊN XÁC NHẬN THANH TOÁN HỌC PHÍ ONLINE (100% VIETQR) ---
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ThanhToanHocPhiPost(int maDangKy, string? ghiChu)
+        {
+            var student = await GetCurrentHocVienAsync();
+            if (student == null) return Json(new { success = false, message = "Bạn cần đăng nhập để thao tác." });
+
+            var dk = await _dangKyHocRepo.GetByIdWithDetailsAsync(maDangKy);
+            if (dk == null) return Json(new { success = false, message = "Không tìm thấy hồ sơ đăng ký." });
+
+            // Ràng buộc bảo mật: Học viên chỉ được nộp tiền cho hồ sơ của chính mình
+            if (dk.MaHocVien != student.MaHocVien)
+            {
+                return Json(new { success = false, message = "Bạn không có quyền thao tác trên hồ sơ của người khác." });
+            }
+
+            decimal hocPhiLop = dk.LopHoc?.HocPhi ?? 0m;
+
+            if (dk.TrangThai == "Đã đóng học phí" || (hocPhiLop > 0 && dk.SoTienDaDong >= hocPhiLop))
+            {
+                return Json(new { success = false, message = "Khóa học này đã hoàn tất 100% học phí rồi." });
+            }
+
+            // Ghi nhận nộp đủ 100% học phí
+            dk.SoTienDaDong = hocPhiLop;
+            dk.NgayDongHocPhi = DateTime.Now;
+            dk.TrangThai = "Đã đóng học phí";
+
+            string note = string.IsNullOrWhiteSpace(ghiChu)
+                ? "[VietQR Online] Học viên đã chuyển khoản 100% học phí thành công"
+                : $"[VietQR Online] {ghiChu.Trim()}";
+            dk.GhiChu = note;
+
+            if (dk.NgayXuLy == null)
+            {
+                dk.NgayXuLy = DateTime.Now;
+                dk.NhanXetGiaoVu = "Đã nộp học phí VietQR";
+            }
+
+            await _dangKyHocRepo.UpdateAsync(dk);
+
+            return Json(new {
+                success = true,
+                message = $"Đã xác nhận thanh toán 100% học phí ({hocPhiLop:N0} đ) cho lớp '{dk.LopHoc?.TenLop}' thành công!"
+            });
+        }
+
         // --- KHÔNG GIAN HỌC TẬP CỦA TÔI (MY LEARNING DASHBOARD) ---
         public async Task<IActionResult> TienTrinh(string? tab = null, DateTime? weekStart = null, int? maLop = null)
         {

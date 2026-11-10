@@ -876,7 +876,7 @@
             <button type="button" onclick="closePaymentModal()" class="px-4 py-2.5 text-xs font-semibold text-outline hover:text-brand-deep border border-border-standard rounded-xl hover:bg-slate-50 transition-colors">
                 Đóng
             </button>
-            <button type="button" onclick="confirmPaymentSent()" class="px-5 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5">
+            <button type="button" id="btn-confirm-payment" onclick="confirmPaymentSent()" class="px-5 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
                 <span class="material-symbols-outlined text-[16px]">check_circle</span>
                 <span>Tôi Đã Chuyển Khoản</span>
             </button>
@@ -1004,7 +1004,10 @@
     }
 
     // Modal Thanh Toán Học Phí (VietQR & Trực tiếp)
+    let currentPayingMaDangKy = null;
+
     function openPaymentModal(maDangKy, tenLop, hocPhiGoc, daDong) {
+        currentPayingMaDangKy = maDangKy;
         const conLai = Math.max(0, Number(hocPhiGoc) - Number(daDong));
         const amountToPay = conLai > 0 ? conLai : Number(hocPhiGoc);
         const syntax = `UNETI DK${maDangKy}`;
@@ -1043,12 +1046,49 @@
     }
 
     function confirmPaymentSent() {
-        closePaymentModal();
-        if (window.showToast) {
-            window.showToast('Đã ghi nhận! Ban Giáo vụ sẽ đối soát sao kê và cập nhật trạng thái "Đã đóng học phí" cho bạn trong ít phút.', 'success');
-        } else {
-            alert('Đã ghi nhận! Ban Giáo vụ sẽ đối soát sao kê và cập nhật trạng thái "Đã đóng học phí" cho bạn trong ít phút.');
+        if (!currentPayingMaDangKy) return;
+
+        const btn = document.getElementById('btn-confirm-payment');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span><span>Đang xử lý...</span>';
         }
+
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        const formData = new FormData();
+        formData.append('maDangKy', currentPayingMaDangKy);
+        formData.append('ghiChu', 'Thanh toán chuyển khoản VietQR online');
+        formData.append('__RequestVerificationToken', token);
+
+        fetch('/CongHocVien/ThanhToanHocPhiPost', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(res => {
+            closePaymentModal();
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">check_circle</span><span>Tôi Đã Chuyển Khoản</span>';
+            }
+            if (res.success) {
+                if (window.showToast) window.showToast(res.message, 'success');
+                else alert(res.message);
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                if (window.showToast) window.showToast(res.message, 'error');
+                else alert(res.message);
+            }
+        })
+        .catch(() => {
+            closePaymentModal();
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">check_circle</span><span>Tôi Đã Chuyển Khoản</span>';
+            }
+            if (window.showToast) window.showToast('Có lỗi xảy ra khi xác nhận thanh toán!', 'error');
+        });
     }
 </script>
 }
