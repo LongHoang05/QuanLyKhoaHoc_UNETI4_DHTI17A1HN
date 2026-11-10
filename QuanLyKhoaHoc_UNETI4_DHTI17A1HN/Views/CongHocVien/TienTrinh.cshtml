@@ -872,15 +872,18 @@
             </div>
         </div>
 
-        <div class="flex items-center justify-end gap-3 pt-3 border-t border-border-standard">
+        <form method="post" asp-action="ThanhToanHocPhi" class="flex items-center justify-end gap-3 pt-3 border-t border-border-standard">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="maDangKy" id="pay-modal-input-maDangKy" value="" />
+            <input type="hidden" name="ghiChu" value="Chuyển khoản VietQR" />
             <button type="button" onclick="closePaymentModal()" class="px-4 py-2.5 text-xs font-semibold text-outline hover:text-brand-deep border border-border-standard rounded-xl hover:bg-slate-50 transition-colors">
                 Đóng
             </button>
-            <button type="button" id="btn-confirm-payment" onclick="confirmPaymentSent()" class="px-5 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
+            <button type="submit" class="px-5 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
                 <span class="material-symbols-outlined text-[16px]">check_circle</span>
                 <span>Tôi Đã Chuyển Khoản</span>
             </button>
-        </div>
+        </form>
     </div>
 </div>
 
@@ -1004,20 +1007,20 @@
     }
 
     // Modal Thanh Toán Học Phí (VietQR & Trực tiếp)
-    let currentPayingMaDangKy = null;
-
     function openPaymentModal(maDangKy, tenLop, hocPhiGoc, daDong) {
-        currentPayingMaDangKy = maDangKy;
         const conLai = Math.max(0, Number(hocPhiGoc) - Number(daDong));
         const amountToPay = conLai > 0 ? conLai : Number(hocPhiGoc);
         const syntax = `UNETI DK${maDangKy}`;
+
+        const inputHidden = document.getElementById('pay-modal-input-maDangKy');
+        if (inputHidden) inputHidden.value = maDangKy;
 
         document.getElementById('pay-modal-maDK').innerText = `#DK${String(maDangKy).padStart(3, '0')}`;
         document.getElementById('pay-modal-tenLop').innerText = tenLop;
         document.getElementById('pay-modal-soTien').innerText = Number(amountToPay).toLocaleString('vi-VN') + ' đ';
         document.getElementById('pay-modal-syntax').innerText = syntax;
 
-        // Sinh link ảnh VietQR động chuẩn ngân hàng MB Bank
+        // Ảnh QR chuyển khoản MB Bank
         const qrUrl = `https://img.vietqr.io/image/MB-0381000556688-compact2.png?amount=${amountToPay}&addInfo=${encodeURIComponent(syntax)}&accountName=TRUNG%20TAM%20DAO%20TAO%20UNETI`;
         document.getElementById('pay-modal-qr-img').src = qrUrl;
 
@@ -1042,52 +1045,6 @@
             else alert(successMsg);
         }).catch(() => {
             if (window.showToast) window.showToast('Không thể sao chép tự động!', 'warning');
-        });
-    }
-
-    function confirmPaymentSent() {
-        if (!currentPayingMaDangKy) return;
-
-        const btn = document.getElementById('btn-confirm-payment');
-        if (btn) {
-            btn.disabled = true;
-            btn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span><span>Đang xử lý...</span>';
-        }
-
-        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
-        const formData = new FormData();
-        formData.append('maDangKy', currentPayingMaDangKy);
-        formData.append('ghiChu', 'Thanh toán chuyển khoản VietQR online');
-        formData.append('__RequestVerificationToken', token);
-
-        fetch('/CongHocVien/ThanhToanHocPhiPost', {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(r => r.json())
-        .then(res => {
-            closePaymentModal();
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">check_circle</span><span>Tôi Đã Chuyển Khoản</span>';
-            }
-            if (res.success) {
-                if (window.showToast) window.showToast(res.message, 'success');
-                else alert(res.message);
-                setTimeout(() => window.location.reload(), 1000);
-            } else {
-                if (window.showToast) window.showToast(res.message, 'error');
-                else alert(res.message);
-            }
-        })
-        .catch(() => {
-            closePaymentModal();
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">check_circle</span><span>Tôi Đã Chuyển Khoản</span>';
-            }
-            if (window.showToast) window.showToast('Có lỗi xảy ra khi xác nhận thanh toán!', 'error');
         });
     }
 </script>
