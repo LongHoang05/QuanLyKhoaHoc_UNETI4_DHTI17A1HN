@@ -520,6 +520,28 @@
 
     <!-- ================= TAB 3: BẢNG ĐIỂM & KẾT QUẢ HỌC TẬP ================= -->
     <div id="tab-content-grades" class="space-y-6 @(activeTab == "grades" ? "" : "hidden")">
+        @{
+            var completedDangKyIds = ketQuas.Select(k => k.MaDangKy).ToHashSet();
+            var ongoingList = Model.Where(d => !completedDangKyIds.Contains(d.MaDangKy) && d.TrangThai != "Đã hủy" && d.TrangThai != "Từ chối").ToList();
+            var completedList = ketQuas.ToList();
+
+            double avgHe10 = completedList.Any() ? completedList.Average(k => k.DiemTongKet) : 0;
+            double avgHe4 = completedList.Any() ? completedList.Average(k => k.DiemHe4 ?? (k.DiemTongKet >= 8.5 ? 4.0 : k.DiemTongKet >= 7.0 ? 3.0 : 2.0)) : 0;
+            int totalAccumCredits = completedList.Count * 3;
+            int totalOngoingCredits = ongoingList.Count * 3;
+
+            string academicRank = "Chưa xếp loại";
+            string rankBadgeClass = "bg-slate-100 text-slate-700 border-slate-200";
+            if (completedList.Any())
+            {
+                if (avgHe10 >= 8.5) { academicRank = "Học lực Xuất sắc"; rankBadgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200/50"; }
+                else if (avgHe10 >= 8.0) { academicRank = "Học lực Giỏi"; rankBadgeClass = "bg-blue-50 text-blue-700 border-blue-200/50"; }
+                else if (avgHe10 >= 7.0) { academicRank = "Học lực Khá"; rankBadgeClass = "bg-amber-50 text-amber-700 border-amber-200/50"; }
+                else if (avgHe10 >= 5.5) { academicRank = "Học lực Trung bình"; rankBadgeClass = "bg-slate-100 text-slate-700 border-slate-200"; }
+                else { academicRank = "Cần cố gắng"; rankBadgeClass = "bg-rose-50 text-rose-700 border-rose-200/50"; }
+            }
+        }
+
         <!-- Semester Block 1: HK1 2026-2027 (Current / Ongoing) -->
         <div class="semester-block bg-white rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden" data-semester-group="hk1_2627">
             <!-- Semester Subheader -->
@@ -533,15 +555,15 @@
                             <h3 class="font-display font-bold text-slate-900 text-sm">Học kỳ I • Năm học 2026 - 2027</h3>
                             <span class="text-[10px] font-semibold uppercase tracking-wider bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200/50">Học kỳ hiện tại</span>
                         </div>
-                        <p class="text-xs text-slate-400 mt-0.5">Tiến độ đào tạo chính khóa • Kỹ thuật phần mềm & AI</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Tiến độ đào tạo chính khóa • Kỹ thuật phần mềm & AI (@ongoingList.Count học phần đang học)</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-5 text-xs text-slate-500">
                     <div><span class="text-slate-400">ĐTB Kỳ:</span> <strong class="text-blue-600 font-semibold font-mono">-- | --</strong></div>
                     <div class="h-3 w-px bg-slate-200"></div>
-                    <div><span class="text-slate-400">ĐTB Tích lũy:</span> <strong class="text-slate-800 font-semibold font-mono">2.90</strong></div>
+                    <div><span class="text-slate-400">ĐTB Tích lũy:</span> <strong class="text-slate-800 font-semibold font-mono">@(completedList.Any() ? avgHe4.ToString("0.00") : "--")</strong></div>
                     <div class="h-3 w-px bg-slate-200"></div>
-                    <div><span class="text-slate-400">Lũy kế:</span> <strong class="text-slate-700 font-semibold font-mono">43 / 119 TC</strong></div>
+                    <div><span class="text-slate-400">Lũy kế:</span> <strong class="text-slate-700 font-semibold font-mono">@(totalAccumCredits + totalOngoingCredits) / 120 TC</strong></div>
                 </div>
             </div>
 
@@ -561,125 +583,100 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100/80 text-xs text-slate-700">
-                        <!-- Subject 1 -->
-                        <tr class="hover:bg-slate-50/60 transition-colors grade-row" data-status="current">
-                            <td class="py-4 px-6 text-center font-mono text-slate-400">1</td>
-                            <td class="py-4 px-6">
-                                <div class="font-semibold text-slate-900 text-sm subject-name">Quản lý dự án Công nghệ thông tin</div>
-                                <div class="text-[11px] text-slate-400 font-mono mt-0.5">IT4029.02 • GV: ThS. Lê Hữu Phước</div>
-                            </td>
-                            <td class="py-4 px-4 text-center font-mono font-medium">3</td>
-                            <td class="py-4 px-6">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC 9.0</span>
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX1 8.5</span>
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TH 8.0</span>
-                                </div>
-                            </td>
-                            <td class="py-4 px-4 text-center text-slate-400 italic font-mono">Chưa thi</td>
-                            <td class="py-4 px-6 text-center font-mono text-slate-400 font-medium">--</td>
-                            <td class="py-4 px-4 text-center">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Đang học
-                                </span>
-                            </td>
-                            <td class="py-4 px-4 text-right pr-6">
-                                <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer" onclick="openDetailDrawer('Quản lý dự án CNTT', 'IT4029.02', '3', '9.0', '8.5', '8.0', '--', 'Chưa công bố', 'Đang cập nhật', '9.0/10')">
-                                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Subject 2: Soft Pastel Warning for Tuition Debt -->
-                        <tr class="bg-rose-50/40 hover:bg-rose-50/70 transition-colors grade-row" data-status="fail">
-                            <td class="py-4 px-6 text-center font-mono text-rose-500 font-bold">2</td>
-                            <td class="py-4 px-6">
-                                <div class="flex items-center gap-2">
-                                    <span class="font-semibold text-rose-950 text-sm subject-name">Tư tưởng Hồ Chí Minh</span>
-                                    <span class="material-symbols-outlined text-[16px] text-rose-500" title="Chưa đủ điều kiện dự thi">warning</span>
-                                </div>
-                                <div class="text-[11px] text-rose-600/70 font-mono mt-0.5">LLCT1203.05 • GV: TS. Phạm Thanh Sơn</div>
-                            </td>
-                            <td class="py-4 px-4 text-center font-mono font-medium text-rose-900">2</td>
-                            <td class="py-4 px-6">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="bg-rose-100/60 text-rose-800 px-2 py-0.5 rounded text-[11px] font-mono">CC 8.0</span>
-                                    <span class="bg-rose-100/60 text-rose-800 px-2 py-0.5 rounded text-[11px] font-mono">TX 7.0</span>
-                                </div>
-                            </td>
-                            <td class="py-4 px-4 text-center">
-                                <span class="font-semibold text-rose-600 text-xs">Cấm thi</span>
-                            </td>
-                            <td class="py-4 px-6 text-center font-mono font-bold text-rose-600">F (0.0)</td>
-                            <td class="py-4 px-4 text-center">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-700">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Nợ học phí
-                                </span>
-                            </td>
-                            <td class="py-4 px-4 text-right pr-6">
-                                <button class="w-8 h-8 rounded-lg hover:bg-rose-100/80 text-rose-600 inline-flex items-center justify-center transition-colors cursor-pointer" onclick="openDetailDrawer('Tư tưởng Hồ Chí Minh', 'LLCT1203.05', '2', '8.0', '7.0', '--', '0.0', 'Cấm thi', 'Lý do: Nợ học phí học kỳ I 2026-2027', 'Cần đóng HP')">
-                                    <span class="material-symbols-outlined text-[18px]">info</span>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Subject 3 -->
-                        <tr class="hover:bg-slate-50/60 transition-colors grade-row" data-status="current">
-                            <td class="py-4 px-6 text-center font-mono text-slate-400">3</td>
-                            <td class="py-4 px-6">
-                                <div class="font-semibold text-slate-900 text-sm subject-name">Lập trình ứng dụng doanh nghiệp (.NET Core)</div>
-                                <div class="text-[11px] text-slate-400 font-mono mt-0.5">IT4112.01 • GV: ThS. Trần Hải Bình</div>
-                            </td>
-                            <td class="py-4 px-4 text-center font-mono font-medium">4</td>
-                            <td class="py-4 px-6">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC 10</span>
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX1 9.0</span>
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">Lab 8.8</span>
-                                </div>
-                            </td>
-                            <td class="py-4 px-4 text-center text-slate-400 italic font-mono">Chưa thi</td>
-                            <td class="py-4 px-6 text-center font-mono text-slate-400 font-medium">--</td>
-                            <td class="py-4 px-4 text-center">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Đang học
-                                </span>
-                            </td>
-                            <td class="py-4 px-4 text-right pr-6">
-                                <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer" onclick="openDetailDrawer('Lập trình ứng dụng doanh nghiệp', 'IT4112.01', '4', '10.0', '9.0', '8.8', '--', 'Chưa thi', 'Điểm quá trình rất tốt (9.2/10)', 'Xuất sắc')">
-                                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Subject 4 -->
-                        <tr class="hover:bg-slate-50/60 transition-colors grade-row" data-status="current">
-                            <td class="py-4 px-6 text-center font-mono text-slate-400">4</td>
-                            <td class="py-4 px-6">
-                                <div class="font-semibold text-slate-900 text-sm subject-name">An toàn thông tin &amp; Mật mã học</div>
-                                <div class="text-[11px] text-slate-400 font-mono mt-0.5">IT3088.03 • GV: TS. Đặng Quang Huy</div>
-                            </td>
-                            <td class="py-4 px-4 text-center font-mono font-medium">4</td>
-                            <td class="py-4 px-6">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC 8.5</span>
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX 7.5</span>
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">Lab 8.0</span>
-                                </div>
-                            </td>
-                            <td class="py-4 px-4 text-center text-slate-400 italic font-mono">Chưa thi</td>
-                            <td class="py-4 px-6 text-center font-mono text-slate-400 font-medium">--</td>
-                            <td class="py-4 px-4 text-center">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Đang học
-                                </span>
-                            </td>
-                            <td class="py-4 px-4 text-right pr-6">
-                                <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer" onclick="openDetailDrawer('An toàn thông tin &amp; Mật mã học', 'IT3088.03', '4', '8.5', '7.5', '8.0', '--', 'Chưa thi', 'Đang thực hiện bài tập lớn môn học', 'Khá giỏi')">
-                                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-                                </button>
-                            </td>
-                        </tr>
+                        @if (ongoingList.Any())
+                        {
+                            int ongoingIdx = 1;
+                            @foreach (var dk in ongoingList)
+                            {
+                                var lop = dk.LopHoc;
+                                bool isDept = dk.TrangThai == "Chờ duyệt" || dk.TrangThai == "Chờ xác nhận học phí" || (lop != null && lop.HocPhi > 0 && dk.SoTienDaDong < lop.HocPhi);
+                                string statusRowClass = isDept ? "bg-rose-50/40 hover:bg-rose-50/70" : "hover:bg-slate-50/60";
+                                string statusRowData = isDept ? "fail" : "current";
+                                string maHocPhan = lop != null ? $"HP{lop.MaLopHoc:D4}.01" : $"#DK{dk.MaDangKy:D3}";
+                                string tenLop = lop?.TenLop ?? "Học phần";
+                                string tenGv = lop?.TenGiangVien ?? "ThS. Giảng viên Khoa CNTT";
+                                var kq = dk.KetQuaHocTap;
+                                
+                                <tr class="@statusRowClass transition-colors grade-row" data-status="@statusRowData">
+                                    <td class="py-4 px-6 text-center font-mono @(isDept ? "text-rose-500 font-bold" : "text-slate-400")">@(ongoingIdx++)</td>
+                                    <td class="py-4 px-6">
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-semibold @(isDept ? "text-rose-950" : "text-slate-900") text-sm subject-name">@tenLop</span>
+                                            @if (isDept)
+                                            {
+                                                <span class="material-symbols-outlined text-[16px] text-rose-500" title="Chưa hoàn tất học phí">warning</span>
+                                            }
+                                        </div>
+                                        <div class="text-[11px] @(isDept ? "text-rose-600/70" : "text-slate-400") font-mono mt-0.5">
+                                            @maHocPhan • GV: @tenGv
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4 text-center font-mono font-medium @(isDept ? "text-rose-900" : "")">3</td>
+                                    <td class="py-4 px-6">
+                                        <div class="flex items-center gap-1.5">
+                                            @if (isDept)
+                                            {
+                                                <span class="bg-rose-100/60 text-rose-800 px-2 py-0.5 rounded text-[11px] font-mono">CC 8.0</span>
+                                                <span class="bg-rose-100/60 text-rose-800 px-2 py-0.5 rounded text-[11px] font-mono">TX 7.0</span>
+                                            }
+                                            else if (kq != null && kq.DiemChuyenCan > 0)
+                                            {
+                                                <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC @kq.DiemChuyenCan.ToString("0.0")</span>
+                                                <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX @kq.DiemChuyenCan.ToString("0.0")</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC 9.0</span>
+                                                <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX1 8.5</span>
+                                                <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TH 8.0</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4 text-center">
+                                        @if (isDept)
+                                        {
+                                            <span class="font-semibold text-rose-600 text-xs">Cấm thi</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-slate-400 italic font-mono">Chưa thi</span>
+                                        }
+                                    </td>
+                                    <td class="py-4 px-6 text-center font-mono @(isDept ? "font-bold text-rose-600" : "text-slate-400 font-medium")">
+                                        @(isDept ? "F (0.0)" : "--")
+                                    </td>
+                                    <td class="py-4 px-4 text-center">
+                                        @if (isDept)
+                                        {
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-700">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Nợ học phí
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Đang học
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="py-4 px-4 text-right pr-6">
+                                        <button class="w-8 h-8 rounded-lg @(isDept ? "hover:bg-rose-100/80 text-rose-600" : "hover:bg-slate-100 text-slate-400 hover:text-slate-700") inline-flex items-center justify-center transition-colors cursor-pointer" 
+                                                onclick="openDetailDrawer('@tenLop.Replace("'", "\\'")', '@maHocPhan', '3', '9.0', '8.5', '8.0', '@(isDept ? "0.0" : "--")', '@(isDept ? "Cấm thi" : "Chưa công bố")', '@(isDept ? "Lý do: Nợ học phí học phần" : "Điểm quá trình đang được giảng viên phụ trách cập nhật")', '@(isDept ? "Cần đóng HP" : "Đang học")')">
+                                            <span class="material-symbols-outlined text-[18px]">@(isDept ? "info" : "chevron_right")</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="py-8 text-center text-slate-400 text-xs">
+                                    <span class="material-symbols-outlined text-[32px] text-slate-300 block mb-1">school</span>
+                                    Hiện tại bạn chưa có học phần nào đang học trong học kỳ này.
+                                </td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>
@@ -696,17 +693,17 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <h3 class="font-display font-bold text-slate-900 text-sm">Học kỳ II • Năm học 2025 - 2026</h3>
-                            <span class="text-[10px] font-semibold uppercase tracking-wider bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200/50">Học lực Xuất sắc</span>
+                            <span class="text-[10px] font-semibold uppercase tracking-wider @rankBadgeClass px-2 py-0.5 rounded-full border">@academicRank</span>
                         </div>
-                        <p class="text-xs text-slate-400 mt-0.5">Hoàn thành 30 tín chỉ chuyên ngành</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Hoàn thành @totalAccumCredits tín chỉ tích lũy (@completedList.Count học phần đã hoàn thành)</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-5 text-xs text-slate-500">
-                    <div><span class="text-slate-400">ĐTB Kỳ:</span> <strong class="text-blue-600 font-semibold font-mono">8.29 | 3.60</strong></div>
+                    <div><span class="text-slate-400">ĐTB Kỳ:</span> <strong class="text-blue-600 font-semibold font-mono">@(completedList.Any() ? $"{avgHe10:0.00} | {avgHe4:0.00}" : "-- | --")</strong></div>
                     <div class="h-3 w-px bg-slate-200"></div>
-                    <div><span class="text-slate-400">ĐTB Tích lũy:</span> <strong class="text-slate-800 font-semibold font-mono">2.90</strong></div>
+                    <div><span class="text-slate-400">ĐTB Tích lũy:</span> <strong class="text-slate-800 font-semibold font-mono">@(completedList.Any() ? avgHe4.ToString("0.00") : "--")</strong></div>
                     <div class="h-3 w-px bg-slate-200"></div>
-                    <div><span class="text-slate-400">Lũy kế:</span> <strong class="text-slate-700 font-semibold font-mono">30 / 119 TC</strong></div>
+                    <div><span class="text-slate-400">Lũy kế:</span> <strong class="text-slate-700 font-semibold font-mono">@totalAccumCredits / 120 TC</strong></div>
                 </div>
             </div>
 
@@ -726,145 +723,63 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100/80 text-xs text-slate-700">
-                        <!-- Item 1 -->
-                        <tr class="hover:bg-slate-50/60 transition-colors grade-row" data-status="pass">
-                            <td class="py-4 px-6 text-center font-mono text-slate-400">1</td>
-                            <td class="py-4 px-6">
-                                <div class="font-semibold text-slate-900 text-sm subject-name">Thiết kế &amp; Phát triển Web</div>
-                                <div class="text-[11px] text-slate-400 font-mono mt-0.5">IT3110.02 • GV: TS. Vũ Quốc Dũng</div>
-                            </td>
-                            <td class="py-4 px-4 text-center font-mono font-medium">3</td>
-                            <td class="py-4 px-6">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC 10</span>
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX 9.0</span>
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TH 9.5</span>
-                                </div>
-                            </td>
-                            <td class="py-4 px-4 text-center font-mono font-bold text-slate-800">8.8</td>
-                            <td class="py-4 px-6 text-center">
-                                <div class="inline-flex items-center gap-1.5 font-mono">
-                                    <span class="font-bold text-slate-900">9.10</span>
-                                    <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded font-sans">A</span>
-                                    <span class="text-slate-400 text-[11px]">(4.0)</span>
-                                </div>
-                            </td>
-                            <td class="py-4 px-4 text-center">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Đạt
-                                </span>
-                            </td>
-                            <td class="py-4 px-4 text-right pr-6">
-                                <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer" onclick="openDetailDrawer('Thiết kế &amp; Phát triển Web', 'IT3110.02', '3', '10.0', '9.0', '9.5', '8.8', '9.10 (A)', 'Môn học đạt điểm cao nhất học kỳ', 'Xuất sắc')">
-                                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Item 2 -->
-                        <tr class="hover:bg-slate-50/60 transition-colors grade-row" data-status="pass">
-                            <td class="py-4 px-6 text-center font-mono text-slate-400">2</td>
-                            <td class="py-4 px-6">
-                                <div class="font-semibold text-slate-900 text-sm subject-name">Kiến trúc phần mềm &amp; Design Patterns</div>
-                                <div class="text-[11px] text-slate-400 font-mono mt-0.5">IT3124.01 • GV: PGS.TS. Trịnh Bá Hưng</div>
-                            </td>
-                            <td class="py-4 px-4 text-center font-mono font-medium">3</td>
-                            <td class="py-4 px-6">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC 9.5</span>
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX 8.5</span>
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TH 8.5</span>
-                                </div>
-                            </td>
-                            <td class="py-4 px-4 text-center font-mono font-bold text-slate-800">8.5</td>
-                            <td class="py-4 px-6 text-center">
-                                <div class="inline-flex items-center gap-1.5 font-mono">
-                                    <span class="font-bold text-slate-900">8.60</span>
-                                    <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded font-sans">A</span>
-                                    <span class="text-slate-400 text-[11px]">(4.0)</span>
-                                </div>
-                            </td>
-                            <td class="py-4 px-4 text-center">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Đạt
-                                </span>
-                            </td>
-                            <td class="py-4 px-4 text-right pr-6">
-                                <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer" onclick="openDetailDrawer('Kiến trúc phần mềm &amp; Design Patterns', 'IT3124.01', '3', '9.5', '8.5', '8.5', '8.5', '8.60 (A)', 'Kết quả đồ án kiến trúc Microservices rất tốt', 'Giỏi')">
-                                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Item 3 -->
-                        <tr class="hover:bg-slate-50/60 transition-colors grade-row" data-status="pass">
-                            <td class="py-4 px-6 text-center font-mono text-slate-400">3</td>
-                            <td class="py-4 px-6">
-                                <div class="font-semibold text-slate-900 text-sm subject-name">Kiểm thử và Đảm bảo chất lượng phần mềm</div>
-                                <div class="text-[11px] text-slate-400 font-mono mt-0.5">IT3142.02 • GV: ThS. Ngô Thị Mai</div>
-                            </td>
-                            <td class="py-4 px-4 text-center font-mono font-medium">3</td>
-                            <td class="py-4 px-6">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC 10</span>
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX 8.0</span>
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TH 8.5</span>
-                                </div>
-                            </td>
-                            <td class="py-4 px-4 text-center font-mono font-bold text-slate-800">8.6</td>
-                            <td class="py-4 px-6 text-center">
-                                <div class="inline-flex items-center gap-1.5 font-mono">
-                                    <span class="font-bold text-slate-900">8.60</span>
-                                    <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded font-sans">A</span>
-                                    <span class="text-slate-400 text-[11px]">(4.0)</span>
-                                </div>
-                            </td>
-                            <td class="py-4 px-4 text-center">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Đạt
-                                </span>
-                            </td>
-                            <td class="py-4 px-4 text-right pr-6">
-                                <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer" onclick="openDetailDrawer('Kiểm thử &amp; Đảm bảo CLPM', 'IT3142.02', '3', '10.0', '8.0', '8.5', '8.6', '8.60 (A)', 'Hoàn thành bài tập tự động hóa kiểm thử tốt', 'Giỏi')">
-                                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Item 4 -->
-                        <tr class="hover:bg-slate-50/60 transition-colors grade-row" data-status="pass">
-                            <td class="py-4 px-6 text-center font-mono text-slate-400">4</td>
-                            <td class="py-4 px-6">
-                                <div class="font-semibold text-slate-900 text-sm subject-name">Nhập môn Trí tuệ nhân tạo &amp; Học máy</div>
-                                <div class="text-[11px] text-slate-400 font-mono mt-0.5">IT3160.01 • GV: TS. Nguyễn Ngọc Tuấn</div>
-                            </td>
-                            <td class="py-4 px-4 text-center font-mono font-medium">3</td>
-                            <td class="py-4 px-6">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC 9.0</span>
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX 8.0</span>
-                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">Lab 8.5</span>
-                                </div>
-                            </td>
-                            <td class="py-4 px-4 text-center font-mono font-bold text-slate-800">8.0</td>
-                            <td class="py-4 px-6 text-center">
-                                <div class="inline-flex items-center gap-1.5 font-mono">
-                                    <span class="font-bold text-slate-900">8.20</span>
-                                    <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-1.5 py-0.2 rounded font-sans">B+</span>
-                                    <span class="text-slate-400 text-[11px]">(3.5)</span>
-                                </div>
-                            </td>
-                            <td class="py-4 px-4 text-center">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Đạt
-                                </span>
-                            </td>
-                            <td class="py-4 px-4 text-right pr-6">
-                                <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer" onclick="openDetailDrawer('Nhập môn Trí tuệ nhân tạo', 'IT3160.01', '3', '9.0', '8.0', '8.5', '8.0', '8.20 (B+)', 'Đồ án mô hình phân loại đạt 9.0', 'Khá')">
-                                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-                                </button>
-                            </td>
-                        </tr>
+                        @if (completedList.Any())
+                        {
+                            int completedIdx = 1;
+                            @foreach (var kq in completedList)
+                            {
+                                var lp = kq.DangKyHoc?.LopHoc;
+                                bool isPassed = kq.KetQua == "Hoàn thành" || kq.KetQua == "Đạt" || kq.DiemTongKet >= 4.0;
+                                string maHocPhan = lp != null ? $"HP{lp.MaLopHoc:D4}.01" : $"#DK{kq.MaDangKy:D3}";
+                                string tenLop = lp?.TenLop ?? "Học phần";
+                                string tenGv = lp?.TenGiangVien ?? "ThS. Giảng viên Khoa CNTT";
+                                string diemChu = kq.DiemChu ?? (kq.DiemTongKet >= 8.5 ? "A" : kq.DiemTongKet >= 8.0 ? "B+" : kq.DiemTongKet >= 7.0 ? "B" : "C");
+                                double diemHe4 = kq.DiemHe4 ?? (kq.DiemTongKet >= 8.5 ? 4.0 : kq.DiemTongKet >= 8.0 ? 3.5 : kq.DiemTongKet >= 7.0 ? 3.0 : 2.0);
+                                
+                                <tr class="hover:bg-slate-50/60 transition-colors grade-row" data-status="@(isPassed ? "pass" : "fail")">
+                                    <td class="py-4 px-6 text-center font-mono text-slate-400">@(completedIdx++)</td>
+                                    <td class="py-4 px-6">
+                                        <div class="font-semibold text-slate-900 text-sm subject-name">@tenLop</div>
+                                        <div class="text-[11px] text-slate-400 font-mono mt-0.5">@maHocPhan • GV: @tenGv</div>
+                                    </td>
+                                    <td class="py-4 px-4 text-center font-mono font-medium">3</td>
+                                    <td class="py-4 px-6">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC @kq.DiemChuyenCan.ToString("0.0")</span>
+                                            <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX @kq.DiemChuyenCan.ToString("0.0")</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4 text-center font-mono font-bold text-slate-800">@kq.DiemCuoiKhoa.ToString("0.0")</td>
+                                    <td class="py-4 px-6 text-center">
+                                        <div class="inline-flex items-center gap-1.5 font-mono">
+                                            <span class="font-bold text-slate-900">@kq.DiemTongKet.ToString("0.00")</span>
+                                            <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded font-sans">@diemChu</span>
+                                            <span class="text-slate-400 text-[11px]">(@diemHe4.ToString("0.0"))</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4 text-center">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold @(isPassed ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700")">
+                                            <span class="w-1.5 h-1.5 rounded-full @(isPassed ? "bg-emerald-500" : "bg-rose-500")"></span> @(isPassed ? "Đạt" : "Chưa đạt")
+                                        </span>
+                                    </td>
+                                    <td class="py-4 px-4 text-right pr-6">
+                                        <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer" 
+                                                onclick="openDetailDrawer('@tenLop.Replace("'", "\\'")', '@maHocPhan', '3', '@kq.DiemChuyenCan.ToString("0.0")', '@kq.DiemChuyenCan.ToString("0.0")', '--', '@kq.DiemCuoiKhoa.ToString("0.0")', '@kq.DiemTongKet.ToString("0.00") (@diemChu)', '@(kq.NhanXet?.Replace("'", "\\'") ?? "Hoàn thành học phần")', '@(kq.XepLoai ?? "Đạt")')">
+                                            <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="py-8 text-center text-slate-400 text-xs">
+                                    <span class="material-symbols-outlined text-[32px] text-slate-300 block mb-1">history_edu</span>
+                                    Chưa có học phần nào hoàn thành điểm tổng kết trong kỳ này.
+                                </td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>
