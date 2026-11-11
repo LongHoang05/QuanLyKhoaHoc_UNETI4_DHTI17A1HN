@@ -219,14 +219,14 @@
 
 <!-- ================= MODAL GHI NHẬN HỌC PHÍ ================= -->
 <!-- Modal Thu Học Phí (100% Một Lần) -->
-<div id="thuphi-modal" class="fixed inset-0 bg-brand-deep/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 transition-opacity duration-200 opacity-0 pointer-events-none">
-    <div class="bg-surface-white rounded-3xl max-w-md w-full p-6 shadow-2xl transform scale-95 transition-transform duration-200 border border-border-standard" id="thuphi-modal-content">
+<div id="thuphi-modal" class="fixed inset-0 bg-brand-deep/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 transition-opacity duration-200 opacity-0 pointer-events-none">
+    <div class="bg-surface-white rounded-3xl max-w-md w-full p-6 shadow-2xl transform scale-95 transition-transform duration-200 border border-border-standard" id="thuphi-modal-content" style="background-color: #ffffff !important;">
         <div class="flex items-center gap-3 mb-4">
             <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
                 <span class="material-symbols-outlined text-[24px]">payments</span>
             </div>
             <div>
-                <h3 class="font-bold text-base text-brand-deep">Xác Nhận Thu Học Phí</h3>
+                <h3 class="font-bold text-base text-brand-deep" id="thuphi-modal-title">Xác Nhận Thu Học Phí</h3>
                 <p class="text-xs text-outline" id="thuphi-subtitle">Thu đủ 100% học phí để kích hoạt vào lớp</p>
             </div>
         </div>
@@ -265,11 +265,11 @@
                 <label class="block text-xs font-bold text-brand-deep uppercase mb-1.5">Phương thức thanh toán <span class="text-rose-500">*</span></label>
                 <div class="grid grid-cols-2 gap-2 text-xs">
                     <label class="flex items-center gap-2 p-2.5 rounded-xl border border-border-standard bg-surface-container-lowest hover:bg-slate-50 cursor-pointer">
-                        <input type="radio" name="phuongThuc" value="Chuyển khoản VietQR" checked class="text-primary focus:ring-primary" />
+                        <input type="radio" name="phuongThuc" id="thuphi-pt-ck" value="Chuyển khoản VietQR" checked class="text-primary focus:ring-primary" />
                         <span class="font-medium text-slate-800">Chuyển khoản QR</span>
                     </label>
                     <label class="flex items-center gap-2 p-2.5 rounded-xl border border-border-standard bg-surface-container-lowest hover:bg-slate-50 cursor-pointer">
-                        <input type="radio" name="phuongThuc" value="Tiền mặt tại Văn phòng" class="text-primary focus:ring-primary" />
+                        <input type="radio" name="phuongThuc" id="thuphi-pt-tm" value="Tiền mặt tại Văn phòng" class="text-primary focus:ring-primary" />
                         <span class="font-medium text-slate-800">Tiền mặt</span>
                     </label>
                 </div>
@@ -285,9 +285,9 @@
                 <button type="button" onclick="closeThuPhiModal()" class="px-4 py-2 text-xs font-semibold text-outline hover:text-brand-deep border border-border-standard rounded-xl hover:bg-surface-container-high transition-colors">
                     Hủy
                 </button>
-                <button type="submit" class="px-5 py-2.5 text-xs font-bold text-surface-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
+                <button type="submit" class="px-5 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
                     <span class="material-symbols-outlined text-[16px]">check_circle</span>
-                    <span>Xác nhận thu đủ 100%</span>
+                    <span id="thuphi-btn-text">Xác nhận thu đủ 100%</span>
                 </button>
             </div>
         </form>
@@ -479,7 +479,27 @@
                     document.getElementById('thuphi-hocPhiGoc').innerText = formatted;
                     document.getElementById('thuphi-soTienDisplay').innerText = formatted;
                     document.getElementById('thuphi-SoTien').value = hocPhiGoc;
-                    document.getElementById('thuphi-GhiChu').value = '';
+
+                    // Tùy biến tiêu đề & ghi chú nếu hồ sơ ở trạng thái "Chờ xác nhận học phí"
+                    const titleEl = document.getElementById('thuphi-modal-title');
+                    const subEl = document.getElementById('thuphi-subtitle');
+                    const btnTextEl = document.getElementById('thuphi-btn-text');
+                    const ptCk = document.getElementById('thuphi-pt-ck');
+                    const ptTm = document.getElementById('thuphi-pt-tm');
+
+                    if (d.trangThai === 'Chờ xác nhận học phí') {
+                        if (titleEl) titleEl.innerText = 'Xác Nhận Đã Nộp Học Phí';
+                        if (subEl) subEl.innerText = 'Học viên đã nộp học phí qua chuyển khoản VietQR • Đối soát và xác nhận';
+                        if (btnTextEl) btnTextEl.innerText = 'Xác nhận đã nộp học phí';
+                        if (ptCk) ptCk.checked = true;
+                        document.getElementById('thuphi-GhiChu').value = d.ghiChu ? d.ghiChu : 'Đã đối soát chuyển khoản VietQR';
+                    } else {
+                        if (titleEl) titleEl.innerText = 'Xác Nhận Thu Học Phí';
+                        if (subEl) subEl.innerText = 'Thu đủ 100% học phí để kích hoạt vào lớp';
+                        if (btnTextEl) btnTextEl.innerText = 'Xác nhận thu đủ 100%';
+                        if (ptTm) ptTm.checked = true;
+                        document.getElementById('thuphi-GhiChu').value = '';
+                    }
 
                     const modal = document.getElementById('thuphi-modal');
                     const content = document.getElementById('thuphi-modal-content');

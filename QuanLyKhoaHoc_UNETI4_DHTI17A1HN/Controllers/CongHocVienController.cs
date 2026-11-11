@@ -323,7 +323,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 TempData["Success"] = $"Đã gửi thông báo đã chuyển khoản lớp '{dk.LopHoc?.TenLop}'! Giáo vụ sẽ kiểm tra và xác nhận học phí cho bạn.";
             }
 
-            return RedirectToAction(nameof(TienTrinh));
+            return RedirectToAction(nameof(TienTrinh), new { tab = "dangky" });
         }
 
         // --- KHÔNG GIAN HỌC TẬP CỦA TÔI (MY LEARNING DASHBOARD) ---

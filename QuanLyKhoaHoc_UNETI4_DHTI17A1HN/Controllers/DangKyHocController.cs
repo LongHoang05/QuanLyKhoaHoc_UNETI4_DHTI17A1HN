@@ -157,7 +157,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                     tenHocVien = dk.HocVien?.HoTen ?? $"HV #{dk.MaHocVien}",
                     tenLop = dk.LopHoc?.TenLop ?? $"Lớp #{dk.MaLopHoc}",
                     hocPhi = dk.LopHoc?.HocPhi ?? 0m,
-                    soTienDaDong = dk.SoTienDaDong
+                    soTienDaDong = dk.SoTienDaDong,
+                    trangThai = dk.TrangThai,
+                    ghiChu = dk.GhiChu
                 }
             });
         }
