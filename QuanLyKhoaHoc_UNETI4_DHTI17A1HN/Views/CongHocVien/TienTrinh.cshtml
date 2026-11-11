@@ -521,78 +521,82 @@
     <!-- ================= TAB 3: BẢNG ĐIỂM & KẾT QUẢ HỌC TẬP ================= -->
     <div id="tab-content-grades" class="space-y-6 @(activeTab == "grades" ? "" : "hidden")">
         @{
-            var completedDangKyIds = ketQuas.Select(k => k.MaDangKy).ToHashSet();
-            var ongoingList = Model.Where(d => !completedDangKyIds.Contains(d.MaDangKy) && d.TrangThai != "Đã hủy" && d.TrangThai != "Từ chối").ToList();
-            var completedList = ketQuas.ToList();
-
-            double avgHe10 = completedList.Any() ? completedList.Average(k => k.DiemTongKet) : 0;
-            double avgHe4 = completedList.Any() ? completedList.Average(k => k.DiemHe4 ?? (k.DiemTongKet >= 8.5 ? 4.0 : k.DiemTongKet >= 7.0 ? 3.0 : 2.0)) : 0;
-            int totalAccumCredits = completedList.Count * 3;
-            int totalOngoingCredits = ongoingList.Count * 3;
+            var allDks = Model.Where(d => d.TrangThai != "Đã hủy" && d.TrangThai != "Từ chối").OrderByDescending(d => d.NgayDangKy).ToList();
+            var gradedDks = allDks.Where(d => d.KetQuaHocTap != null && (d.KetQuaHocTap.DiemTongKet > 0 || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành")).ToList();
+            
+            int totalEnrolledCourses = allDks.Count;
+            int totalCompletedCourses = allDks.Count(d => d.TrangThai == "Hoàn thành" || (d.KetQuaHocTap != null && (d.KetQuaHocTap.KetQua == "Hoàn thành" || d.KetQuaHocTap.KetQua == "Đạt")));
+            int totalInProgressCourses = allDks.Count(d => d.TrangThai == "Đang học" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đã duyệt");
+            
+            double avgHe10 = gradedDks.Any() ? gradedDks.Average(d => d.KetQuaHocTap!.DiemTongKet) : 0;
+            double avgHe4 = gradedDks.Any() ? gradedDks.Average(d => d.KetQuaHocTap!.DiemHe4 ?? (d.KetQuaHocTap.DiemTongKet >= 8.5 ? 4.0 : d.KetQuaHocTap.DiemTongKet >= 7.0 ? 3.0 : 2.0)) : 0;
 
             string academicRank = "Chưa xếp loại";
             string rankBadgeClass = "bg-slate-100 text-slate-700 border-slate-200";
-            if (completedList.Any())
+            if (gradedDks.Any())
             {
                 if (avgHe10 >= 8.5) { academicRank = "Học lực Xuất sắc"; rankBadgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200/50"; }
                 else if (avgHe10 >= 8.0) { academicRank = "Học lực Giỏi"; rankBadgeClass = "bg-blue-50 text-blue-700 border-blue-200/50"; }
                 else if (avgHe10 >= 7.0) { academicRank = "Học lực Khá"; rankBadgeClass = "bg-amber-50 text-amber-700 border-amber-200/50"; }
-                else if (avgHe10 >= 5.5) { academicRank = "Học lực Trung bình"; rankBadgeClass = "bg-slate-100 text-slate-700 border-slate-200"; }
+                else if (avgHe10 >= 5.0) { academicRank = "Học lực Trung bình"; rankBadgeClass = "bg-slate-100 text-slate-700 border-slate-200"; }
                 else { academicRank = "Cần cố gắng"; rankBadgeClass = "bg-rose-50 text-rose-700 border-rose-200/50"; }
             }
         }
 
-        <!-- Toolbar: Bộ lọc & Tìm kiếm gợi ý học phần -->
+        <!-- Toolbar: Bộ lọc & Tìm kiếm gợi ý khóa học -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
             <div class="flex items-center gap-2 flex-wrap">
                 <button type="button" onclick="filterGradeRows('all', this)" class="grade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary text-white shadow-xs cursor-pointer transition-all">
-                    Tất cả học phần
+                    Tất cả khóa học (@totalEnrolledCourses)
                 </button>
                 <button type="button" onclick="filterGradeRows('current', this)" class="grade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">
-                    Đang học
+                    Đang học (@totalInProgressCourses)
                 </button>
                 <button type="button" onclick="filterGradeRows('pass', this)" class="grade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">
-                    Đã hoàn thành (Đạt)
+                    Đã hoàn thành (@totalCompletedCourses)
                 </button>
                 <button type="button" onclick="filterGradeRows('fail', this)" class="grade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">
                     Cần lưu ý / Nợ HP
                 </button>
             </div>
             <div class="relative min-w-[280px]" id="grade-search-wrapper">
-                <input type="text" id="grade-search-input" oninput="handleGradeSearchInput(this.value)" onfocus="handleGradeSearchFocus()" placeholder="Tìm kiếm môn học, giảng viên..." autocomplete="off" class="w-full text-xs pl-8 pr-8 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:border-primary transition-colors text-slate-800">
+                <input type="text" id="grade-search-input" oninput="handleGradeSearchInput(this.value)" onfocus="handleGradeSearchFocus()" placeholder="Tìm kiếm khóa học, giảng viên..." autocomplete="off" class="w-full text-xs pl-8 pr-8 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:border-primary transition-colors text-slate-800">
                 <span class="material-symbols-outlined text-[16px] text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">search</span>
                 <button type="button" id="grade-search-clear" onclick="clearGradeSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer" title="Xóa tìm kiếm">
                     <span class="material-symbols-outlined text-[16px]">close</span>
                 </button>
-                <!-- Dropdown Gợi Ý Tìm Kiếm Môn Học -->
+                <!-- Dropdown Gợi Ý Tìm Kiếm Khóa Học -->
                 <div id="grade-search-dropdown" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-xl border border-slate-200/80 z-30 max-h-72 overflow-y-auto divide-y divide-slate-100 text-xs">
                     <!-- Dynamic Suggestions Injected via JS -->
                 </div>
             </div>
         </div>
 
-        <!-- Semester Block 1: HK1 2026-2027 (Current / Ongoing) -->
-        <div class="semester-block bg-white rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden" data-semester-group="hk1_2627">
-            <!-- Semester Subheader -->
+        <!-- Bảng Điểm & Kết Quả Đào Tạo Duy Nhất (Không chia học kỳ) -->
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden">
+            <!-- Table Subheader Summary -->
             <div class="px-6 py-4 bg-slate-50/60 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
-                        <span class="material-symbols-outlined text-[18px]">school</span>
+                    <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+                        <span class="material-symbols-outlined text-[20px]">workspace_premium</span>
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h3 class="font-display font-bold text-slate-900 text-sm">Học kỳ I • Năm học 2026 - 2027</h3>
-                            <span class="text-[10px] font-semibold uppercase tracking-wider bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200/50">Học kỳ hiện tại</span>
+                            <h3 class="font-display font-bold text-slate-900 text-sm">Bảng Điểm &amp; Kết Quả Đào Tạo</h3>
+                            @if (gradedDks.Any())
+                            {
+                                <span class="text-[10px] font-semibold uppercase tracking-wider @rankBadgeClass px-2 py-0.5 rounded-full border">@academicRank</span>
+                            }
                         </div>
-                        <p class="text-xs text-slate-400 mt-0.5">Tiến độ đào tạo chính khóa • Kỹ thuật phần mềm & AI (@ongoingList.Count học phần đang học)</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Tiến độ đào tạo &amp; Đánh giá năng lực các khóa học của học viên</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-5 text-xs text-slate-500">
-                    <div><span class="text-slate-400">ĐTB Kỳ:</span> <strong class="text-blue-600 font-semibold font-mono">-- | --</strong></div>
+                    <div><span class="text-slate-400">Đã hoàn thành:</span> <strong class="text-emerald-600 font-semibold font-mono">@totalCompletedCourses / @totalEnrolledCourses khóa</strong></div>
                     <div class="h-3 w-px bg-slate-200"></div>
-                    <div><span class="text-slate-400">ĐTB Tích lũy:</span> <strong class="text-slate-800 font-semibold font-mono">@(completedList.Any() ? avgHe4.ToString("0.00") : "--")</strong></div>
+                    <div><span class="text-slate-400">ĐTB (Hệ 10):</span> <strong class="text-blue-600 font-semibold font-mono">@(gradedDks.Any() ? avgHe10.ToString("0.00") : "--")</strong></div>
                     <div class="h-3 w-px bg-slate-200"></div>
-                    <div><span class="text-slate-400">Lũy kế:</span> <strong class="text-slate-700 font-semibold font-mono">@(totalAccumCredits + totalOngoingCredits) / 120 TC</strong></div>
+                    <div><span class="text-slate-400">ĐTB (Hệ 4):</span> <strong class="text-slate-800 font-semibold font-mono">@(gradedDks.Any() ? avgHe4.ToString("0.00") : "--")</strong></div>
                 </div>
             </div>
 
@@ -602,80 +606,109 @@
                     <thead>
                         <tr class="border-b border-slate-100 bg-white text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                             <th class="py-3 px-6 w-12 text-center">#</th>
-                            <th class="py-3 px-6 min-w-[280px]">Môn học &amp; Giảng viên</th>
-                            <th class="py-3 px-4 text-center w-16">TC</th>
-                            <th class="py-3 px-6">Quá trình</th>
-                            <th class="py-3 px-4 text-center">Thi KTHP</th>
-                            <th class="py-3 px-6 text-center">Tổng kết</th>
+                            <th class="py-3 px-6 min-w-[280px]">Khóa học &amp; Giảng viên</th>
+                            <th class="py-3 px-4 text-center w-28">Thời lượng</th>
+                            <th class="py-3 px-6 text-center">Điểm quá trình (40%)</th>
+                            <th class="py-3 px-4 text-center">Cuối khóa (60%)</th>
+                            <th class="py-3 px-6 text-center">Điểm tổng kết</th>
                             <th class="py-3 px-4 text-center">Trạng thái</th>
                             <th class="py-3 px-4 text-right pr-6 w-20">Chi tiết</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100/80 text-xs text-slate-700">
-                        @if (ongoingList.Any())
+                        @if (allDks.Any())
                         {
-                            int ongoingIdx = 1;
-                            @foreach (var dk in ongoingList)
+                            int rowIdx = 1;
+                            @foreach (var dk in allDks)
                             {
                                 var lop = dk.LopHoc;
-                                bool isDept = dk.TrangThai == "Chờ duyệt" || dk.TrangThai == "Chờ xác nhận học phí" || (lop != null && lop.HocPhi > 0 && dk.SoTienDaDong < lop.HocPhi);
-                                string statusRowClass = isDept ? "bg-rose-50/40 hover:bg-rose-50/70" : "hover:bg-slate-50/60";
-                                string statusRowData = isDept ? "fail" : "current";
-                                string maHocPhan = lop != null ? $"HP{lop.MaLopHoc:D4}.01" : $"#DK{dk.MaDangKy:D3}";
-                                string tenLop = lop?.TenLop ?? "Học phần";
-                                string tenGv = lop?.TenGiangVien ?? "ThS. Giảng viên Khoa CNTT";
                                 var kq = dk.KetQuaHocTap;
+                                bool hasKq = kq != null && kq.DiemTongKet > 0;
+                                bool isPassed = dk.TrangThai == "Hoàn thành" || (kq != null && (kq.KetQua == "Hoàn thành" || kq.KetQua == "Đạt" || kq.DiemTongKet >= 4.0));
+                                bool isFailed = dk.TrangThai == "Không hoàn thành" || (kq != null && (kq.KetQua == "Không hoàn thành" || (kq.DiemTongKet > 0 && kq.DiemTongKet < 4.0)));
+                                bool isDept = dk.TrangThai == "Chờ duyệt" || dk.TrangThai == "Chờ xác nhận học phí" || (lop != null && lop.HocPhi > 0 && dk.SoTienDaDong < lop.HocPhi);
                                 
-                                <tr class="@statusRowClass transition-colors grade-row" data-status="@statusRowData">
-                                    <td class="py-4 px-6 text-center font-mono @(isDept ? "text-rose-500 font-bold" : "text-slate-400")">@(ongoingIdx++)</td>
+                                string statusKey = isPassed ? "pass" : (isFailed || isDept ? "fail" : "current");
+                                string rowClass = isDept ? "bg-rose-50/40 hover:bg-rose-50/70" : "hover:bg-slate-50/60";
+                                string maLopStr = lop != null ? $"Lớp #{lop.MaLopHoc}" : $"#DK{dk.MaDangKy:D3}";
+                                string tenLop = lop?.TenLop ?? "Khóa học";
+                                string tenGv = lop?.TenGiangVien ?? "ThS. Giảng viên Bộ môn";
+
+                                <tr class="@rowClass transition-colors grade-row" data-status="@statusKey">
+                                    <td class="py-4 px-6 text-center font-mono @(isDept ? "text-rose-500 font-bold" : "text-slate-400")">@(rowIdx++)</td>
                                     <td class="py-4 px-6">
                                         <div class="flex items-center gap-2">
                                             <span class="font-semibold @(isDept ? "text-rose-950" : "text-slate-900") text-sm subject-name">@tenLop</span>
                                             @if (isDept)
                                             {
-                                                <span class="material-symbols-outlined text-[16px] text-rose-500" title="Chưa hoàn tất học phí">warning</span>
+                                                <span class="material-symbols-outlined text-[16px] text-rose-500" title="Chưa hoàn tất học phí (Chưa đủ điều kiện xét kết quả)">warning</span>
                                             }
                                         </div>
                                         <div class="text-[11px] @(isDept ? "text-rose-600/70" : "text-slate-400") font-mono mt-0.5">
-                                            @maHocPhan • GV: @tenGv
+                                            @maLopStr • GV: @tenGv
                                         </div>
                                     </td>
-                                    <td class="py-4 px-4 text-center font-mono font-medium @(isDept ? "text-rose-900" : "")">3</td>
-                                    <td class="py-4 px-6">
-                                        <div class="flex items-center gap-1.5">
-                                            @if (isDept)
-                                            {
-                                                <span class="bg-rose-100/60 text-rose-800 px-2 py-0.5 rounded text-[11px] font-mono">CC 8.0</span>
-                                                <span class="bg-rose-100/60 text-rose-800 px-2 py-0.5 rounded text-[11px] font-mono">TX 7.0</span>
-                                            }
-                                            else if (kq != null && kq.DiemChuyenCan > 0)
-                                            {
-                                                <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC @kq.DiemChuyenCan.ToString("0.0")</span>
-                                                <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX @kq.DiemChuyenCan.ToString("0.0")</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC 9.0</span>
-                                                <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX1 8.5</span>
-                                                <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TH 8.0</span>
-                                            }
-                                        </div>
+                                    <td class="py-4 px-4 text-center font-mono text-slate-600">
+                                        @(lop?.SoBuoiHoc ?? 12) buổi
                                     </td>
-                                    <td class="py-4 px-4 text-center">
-                                        @if (isDept)
+                                    <td class="py-4 px-6 text-center">
+                                        @if (kq != null && kq.DiemChuyenCan > 0)
                                         {
-                                            <span class="font-semibold text-rose-600 text-xs">Cấm thi</span>
+                                            <span class="font-mono font-bold text-slate-800 text-sm">@kq.DiemChuyenCan.ToString("0.0")</span>
+                                        }
+                                        else if (isDept)
+                                        {
+                                            <span class="text-rose-600 font-semibold text-xs">Cấm thi</span>
                                         }
                                         else
                                         {
-                                            <span class="text-slate-400 italic font-mono">Chưa thi</span>
+                                            <span class="text-slate-400 italic font-mono text-xs">Đang cập nhật</span>
                                         }
                                     </td>
-                                    <td class="py-4 px-6 text-center font-mono @(isDept ? "font-bold text-rose-600" : "text-slate-400 font-medium")">
-                                        @(isDept ? "F (0.0)" : "--")
+                                    <td class="py-4 px-4 text-center">
+                                        @if (kq != null && kq.DiemCuoiKhoa > 0)
+                                        {
+                                            <span class="font-mono font-bold text-slate-800 text-sm">@kq.DiemCuoiKhoa.ToString("0.0")</span>
+                                        }
+                                        else if (isDept)
+                                        {
+                                            <span class="text-rose-600 font-semibold text-xs">Cấm thi</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-slate-400 italic font-mono text-xs">Chưa thi</span>
+                                        }
+                                    </td>
+                                    <td class="py-4 px-6 text-center">
+                                        @if (hasKq)
+                                        {
+                                            string diemChu = kq!.DiemChu ?? (kq.DiemTongKet >= 8.5 ? "A" : kq.DiemTongKet >= 8.0 ? "B+" : kq.DiemTongKet >= 7.0 ? "B" : "C");
+                                            double diemHe4 = kq.DiemHe4 ?? (kq.DiemTongKet >= 8.5 ? 4.0 : kq.DiemTongKet >= 8.0 ? 3.5 : kq.DiemTongKet >= 7.0 ? 3.0 : 2.0);
+                                            <div class="inline-flex items-center gap-1.5 font-mono">
+                                                <span class="font-bold text-slate-900 text-sm">@kq.DiemTongKet.ToString("0.00")</span>
+                                                <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded font-sans">@diemChu</span>
+                                                <span class="text-slate-400 text-[11px]">(@diemHe4.ToString("0.0"))</span>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="font-mono text-slate-400 font-medium">--</span>
+                                        }
                                     </td>
                                     <td class="py-4 px-4 text-center">
-                                        @if (isDept)
+                                        @if (isPassed)
+                                        {
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Đạt
+                                            </span>
+                                        }
+                                        else if (isFailed)
+                                        {
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Chưa đạt
+                                            </span>
+                                        }
+                                        else if (isDept)
                                         {
                                             <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-700">
                                                 <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Nợ học phí
@@ -689,8 +722,15 @@
                                         }
                                     </td>
                                     <td class="py-4 px-4 text-right pr-6">
+                                        @{
+                                            string scoreQtStr = kq != null && kq.DiemChuyenCan > 0 ? kq.DiemChuyenCan.ToString("0.0") : "--";
+                                            string scoreThiStr = kq != null && kq.DiemCuoiKhoa > 0 ? kq.DiemCuoiKhoa.ToString("0.0") : "--";
+                                            string scoreFinalStr = hasKq ? $"{kq!.DiemTongKet:0.00} ({kq.DiemChu ?? "Đạt"})" : "--";
+                                            string noteStr = kq != null && !string.IsNullOrEmpty(kq.NhanXet) ? kq.NhanXet : (isDept ? "Lý do: Nợ học phí khóa học" : "Đang cập nhật đánh giá quá trình học tập...");
+                                            string evalStr = isPassed ? (kq?.XepLoai ?? "Hoàn thành") : (isDept ? "Nợ học phí" : (isFailed ? "Chưa đạt" : "Đang học"));
+                                        }
                                         <button class="w-8 h-8 rounded-lg @(isDept ? "hover:bg-rose-100/80 text-rose-600" : "hover:bg-slate-100 text-slate-400 hover:text-slate-700") inline-flex items-center justify-center transition-colors cursor-pointer" 
-                                                onclick="openDetailDrawer('@tenLop.Replace("'", "\\'")', '@maHocPhan', '3', '9.0', '8.5', '8.0', '@(isDept ? "0.0" : "--")', '@(isDept ? "Cấm thi" : "Chưa công bố")', '@(isDept ? "Lý do: Nợ học phí học phần" : "Điểm quá trình đang được giảng viên phụ trách cập nhật")', '@(isDept ? "Cần đóng HP" : "Đang học")')">
+                                                onclick="openDetailDrawer('@tenLop.Replace("'", "\\'")', '@maLopStr', '@(lop?.SoBuoiHoc ?? 12)', '@scoreQtStr', '@scoreThiStr', '@scoreFinalStr', '@noteStr.Replace("'", "\\'")', '@evalStr')">
                                             <span class="material-symbols-outlined text-[18px]">@(isDept ? "info" : "chevron_right")</span>
                                         </button>
                                     </td>
@@ -700,112 +740,9 @@
                         else
                         {
                             <tr>
-                                <td colspan="8" class="py-8 text-center text-slate-400 text-xs">
-                                    <span class="material-symbols-outlined text-[32px] text-slate-300 block mb-1">school</span>
-                                    Hiện tại bạn chưa có học phần nào đang học trong học kỳ này.
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Semester Block 2: HK2 2025-2026 (Completed) -->
-        <div class="semester-block bg-white rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden" data-semester-group="hk2_2526">
-            <!-- Semester Subheader -->
-            <div class="px-6 py-4 bg-slate-50/60 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-                        <span class="material-symbols-outlined text-[18px]">check_circle</span>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h3 class="font-display font-bold text-slate-900 text-sm">Học kỳ II • Năm học 2025 - 2026</h3>
-                            <span class="text-[10px] font-semibold uppercase tracking-wider @rankBadgeClass px-2 py-0.5 rounded-full border">@academicRank</span>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-0.5">Hoàn thành @totalAccumCredits tín chỉ tích lũy (@completedList.Count học phần đã hoàn thành)</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-5 text-xs text-slate-500">
-                    <div><span class="text-slate-400">ĐTB Kỳ:</span> <strong class="text-blue-600 font-semibold font-mono">@(completedList.Any() ? $"{avgHe10:0.00} | {avgHe4:0.00}" : "-- | --")</strong></div>
-                    <div class="h-3 w-px bg-slate-200"></div>
-                    <div><span class="text-slate-400">ĐTB Tích lũy:</span> <strong class="text-slate-800 font-semibold font-mono">@(completedList.Any() ? avgHe4.ToString("0.00") : "--")</strong></div>
-                    <div class="h-3 w-px bg-slate-200"></div>
-                    <div><span class="text-slate-400">Lũy kế:</span> <strong class="text-slate-700 font-semibold font-mono">@totalAccumCredits / 120 TC</strong></div>
-                </div>
-            </div>
-
-            <!-- Clean Table -->
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-slate-100 bg-white text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                            <th class="py-3 px-6 w-12 text-center">#</th>
-                            <th class="py-3 px-6 min-w-[280px]">Môn học &amp; Giảng viên</th>
-                            <th class="py-3 px-4 text-center w-16">TC</th>
-                            <th class="py-3 px-6">Quá trình</th>
-                            <th class="py-3 px-4 text-center">Thi KTHP</th>
-                            <th class="py-3 px-6 text-center">Tổng kết</th>
-                            <th class="py-3 px-4 text-center">Trạng thái</th>
-                            <th class="py-3 px-4 text-right pr-6 w-20">Chi tiết</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100/80 text-xs text-slate-700">
-                        @if (completedList.Any())
-                        {
-                            int completedIdx = 1;
-                            @foreach (var kq in completedList)
-                            {
-                                var lp = kq.DangKyHoc?.LopHoc;
-                                bool isPassed = kq.KetQua == "Hoàn thành" || kq.KetQua == "Đạt" || kq.DiemTongKet >= 4.0;
-                                string maHocPhan = lp != null ? $"HP{lp.MaLopHoc:D4}.01" : $"#DK{kq.MaDangKy:D3}";
-                                string tenLop = lp?.TenLop ?? "Học phần";
-                                string tenGv = lp?.TenGiangVien ?? "ThS. Giảng viên Khoa CNTT";
-                                string diemChu = kq.DiemChu ?? (kq.DiemTongKet >= 8.5 ? "A" : kq.DiemTongKet >= 8.0 ? "B+" : kq.DiemTongKet >= 7.0 ? "B" : "C");
-                                double diemHe4 = kq.DiemHe4 ?? (kq.DiemTongKet >= 8.5 ? 4.0 : kq.DiemTongKet >= 8.0 ? 3.5 : kq.DiemTongKet >= 7.0 ? 3.0 : 2.0);
-                                
-                                <tr class="hover:bg-slate-50/60 transition-colors grade-row" data-status="@(isPassed ? "pass" : "fail")">
-                                    <td class="py-4 px-6 text-center font-mono text-slate-400">@(completedIdx++)</td>
-                                    <td class="py-4 px-6">
-                                        <div class="font-semibold text-slate-900 text-sm subject-name">@tenLop</div>
-                                        <div class="text-[11px] text-slate-400 font-mono mt-0.5">@maHocPhan • GV: @tenGv</div>
-                                    </td>
-                                    <td class="py-4 px-4 text-center font-mono font-medium">3</td>
-                                    <td class="py-4 px-6">
-                                        <div class="flex items-center gap-1.5">
-                                            <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC @kq.DiemChuyenCan.ToString("0.0")</span>
-                                            <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX @kq.DiemChuyenCan.ToString("0.0")</span>
-                                        </div>
-                                    </td>
-                                    <td class="py-4 px-4 text-center font-mono font-bold text-slate-800">@kq.DiemCuoiKhoa.ToString("0.0")</td>
-                                    <td class="py-4 px-6 text-center">
-                                        <div class="inline-flex items-center gap-1.5 font-mono">
-                                            <span class="font-bold text-slate-900">@kq.DiemTongKet.ToString("0.00")</span>
-                                            <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded font-sans">@diemChu</span>
-                                            <span class="text-slate-400 text-[11px]">(@diemHe4.ToString("0.0"))</span>
-                                        </div>
-                                    </td>
-                                    <td class="py-4 px-4 text-center">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold @(isPassed ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700")">
-                                            <span class="w-1.5 h-1.5 rounded-full @(isPassed ? "bg-emerald-500" : "bg-rose-500")"></span> @(isPassed ? "Đạt" : "Chưa đạt")
-                                        </span>
-                                    </td>
-                                    <td class="py-4 px-4 text-right pr-6">
-                                        <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer" 
-                                                onclick="openDetailDrawer('@tenLop.Replace("'", "\\'")', '@maHocPhan', '3', '@kq.DiemChuyenCan.ToString("0.0")', '@kq.DiemChuyenCan.ToString("0.0")', '--', '@kq.DiemCuoiKhoa.ToString("0.0")', '@kq.DiemTongKet.ToString("0.00") (@diemChu)', '@(kq.NhanXet?.Replace("'", "\\'") ?? "Hoàn thành học phần")', '@(kq.XepLoai ?? "Đạt")')">
-                                            <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-                                        </button>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="8" class="py-8 text-center text-slate-400 text-xs">
-                                    <span class="material-symbols-outlined text-[32px] text-slate-300 block mb-1">history_edu</span>
-                                    Chưa có học phần nào hoàn thành điểm tổng kết trong kỳ này.
+                                <td colspan="8" class="py-12 text-center text-slate-400 text-xs">
+                                    <span class="material-symbols-outlined text-[36px] text-slate-300 block mb-2">school</span>
+                                    Bạn chưa đăng ký khóa học nào. Hãy khám phá và đăng ký các khóa học để bắt đầu học tập!
                                 </td>
                             </tr>
                         }
@@ -1159,41 +1096,34 @@
             <div class="flex items-center justify-between mb-2">
                 <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-blue-600 text-[16px]">analytics</span>
-                    <span>Thành phần điểm quá trình</span>
+                    <span>Điểm đánh giá quá trình</span>
                 </h4>
                 <span class="text-[11px] text-slate-400 font-mono">Tỷ trọng 40%</span>
             </div>
-            <div class="grid grid-cols-3 gap-2 text-center text-xs">
-                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                    <span class="text-[11px] text-slate-500 block mb-1">Chuyên cần</span>
-                    <strong class="text-sm font-mono text-slate-900 font-bold" id="drawer-score-cc">--</strong>
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-slate-700 font-semibold block">Quá trình học tập &amp; Bài tập trên lớp</span>
+                    <span class="text-[11px] text-slate-400">Đánh giá mức độ chuyên cần, bài tập thực hành &amp; tương tác</span>
                 </div>
-                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                    <span class="text-[11px] text-slate-500 block mb-1">Thường xuyên</span>
-                    <strong class="text-sm font-mono text-slate-900 font-bold" id="drawer-score-tx">--</strong>
-                </div>
-                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                    <span class="text-[11px] text-slate-500 block mb-1">Thực hành/Lab</span>
-                    <strong class="text-sm font-mono text-slate-900 font-bold" id="drawer-score-th">--</strong>
-                </div>
+                <strong class="text-xl font-mono font-bold text-slate-900" id="drawer-score-qt">--</strong>
             </div>
         </div>
 
-        <!-- Điểm Thi KTHP (60%) -->
+        <!-- Điểm Thi Cuối Khóa (60%) -->
         <div>
             <div class="flex items-center justify-between mb-2">
                 <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-blue-600 text-[16px]">assignment_turned_in</span>
-                    <span>Thi kết thúc học phần</span>
+                    <span>Đánh giá kết thúc khóa học</span>
                 </h4>
                 <span class="text-[11px] text-slate-400 font-mono">Tỷ trọng 60%</span>
             </div>
             <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
                 <div>
-                    <span class="text-xs text-slate-600 font-medium block">Hình thức: Trực tiếp / Bài thi KTHP</span>
-                    <span class="text-[11px] text-slate-400">Thời gian làm bài: 90 phút</span>
+                    <span class="text-xs text-slate-700 font-semibold block">Bài thi cuối khóa / Đồ án tốt nghiệp</span>
+                    <span class="text-[11px] text-slate-400">Hình thức: Trực tiếp phòng Lab hoặc báo cáo đồ án</span>
                 </div>
-                <strong class="text-lg font-mono font-bold text-slate-900" id="drawer-score-thi">--</strong>
+                <strong class="text-xl font-mono font-bold text-slate-900" id="drawer-score-thi">--</strong>
             </div>
         </div>
 
@@ -1393,18 +1323,21 @@
         });
     }
 
-    // Drawer chi tiết bảng điểm môn học
-    function openDetailDrawer(subjectName, subjectCode, credits, cc, tx, th, thi, tongKet, nhanXet, xepLoai) {
-        document.getElementById('drawer-subject-name').innerText = subjectName || 'Môn học';
-        document.getElementById('drawer-subject-code').innerText = subjectCode || 'HP';
-        document.getElementById('drawer-credits-text').innerText = `${credits || 3} Tín chỉ`;
-        document.getElementById('drawer-score-cc').innerText = cc || '--';
-        document.getElementById('drawer-score-tx').innerText = tx || '--';
-        document.getElementById('drawer-score-th').innerText = th || '--';
-        document.getElementById('drawer-score-thi').innerText = thi || '--';
-        document.getElementById('drawer-score-final').innerText = tongKet || '--';
-        document.getElementById('drawer-evaluation').innerText = xepLoai || 'Đang cập nhật';
-        document.getElementById('drawer-notes').innerText = nhanXet ? `"${nhanXet}"` : 'Đang cập nhật đánh giá quá trình học tập...';
+    // Drawer chi tiết bảng điểm khóa học
+    function openDetailDrawer(courseName, courseCode, sessions, scoreQt, scoreThi, scoreFinal, notes, evaluation) {
+        document.getElementById('drawer-subject-name').innerText = courseName || 'Khóa học';
+        document.getElementById('drawer-subject-code').innerText = courseCode || 'Lớp';
+        document.getElementById('drawer-credits-text').innerText = isNaN(sessions) ? sessions : `${sessions || 12} Buổi học`;
+        const scoreQtEl = document.getElementById('drawer-score-qt');
+        if (scoreQtEl) scoreQtEl.innerText = scoreQt || '--';
+        const scoreThiEl = document.getElementById('drawer-score-thi');
+        if (scoreThiEl) scoreThiEl.innerText = scoreThi || '--';
+        const scoreFinalEl = document.getElementById('drawer-score-final');
+        if (scoreFinalEl) scoreFinalEl.innerText = scoreFinal || '--';
+        const evalEl = document.getElementById('drawer-evaluation');
+        if (evalEl) evalEl.innerText = evaluation || 'Đang cập nhật';
+        const notesEl = document.getElementById('drawer-notes');
+        if (notesEl) notesEl.innerText = notes ? `"${notes}"` : 'Đang cập nhật đánh giá quá trình học tập...';
 
         const backdrop = document.getElementById('grade-detail-drawer-backdrop');
         const drawer = document.getElementById('grade-detail-drawer');
