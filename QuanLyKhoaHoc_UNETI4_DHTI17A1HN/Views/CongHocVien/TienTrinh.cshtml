@@ -542,6 +542,35 @@
             }
         }
 
+        <!-- Toolbar: Bộ lọc & Tìm kiếm gợi ý học phần -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+            <div class="flex items-center gap-2 flex-wrap">
+                <button type="button" onclick="filterGradeRows('all', this)" class="grade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary text-white shadow-xs cursor-pointer transition-all">
+                    Tất cả học phần
+                </button>
+                <button type="button" onclick="filterGradeRows('current', this)" class="grade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">
+                    Đang học
+                </button>
+                <button type="button" onclick="filterGradeRows('pass', this)" class="grade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">
+                    Đã hoàn thành (Đạt)
+                </button>
+                <button type="button" onclick="filterGradeRows('fail', this)" class="grade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">
+                    Cần lưu ý / Nợ HP
+                </button>
+            </div>
+            <div class="relative min-w-[280px]" id="grade-search-wrapper">
+                <input type="text" id="grade-search-input" oninput="handleGradeSearchInput(this.value)" onfocus="handleGradeSearchFocus()" placeholder="Tìm kiếm môn học, giảng viên..." autocomplete="off" class="w-full text-xs pl-8 pr-8 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:border-primary transition-colors text-slate-800">
+                <span class="material-symbols-outlined text-[16px] text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">search</span>
+                <button type="button" id="grade-search-clear" onclick="clearGradeSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer" title="Xóa tìm kiếm">
+                    <span class="material-symbols-outlined text-[16px]">close</span>
+                </button>
+                <!-- Dropdown Gợi Ý Tìm Kiếm Môn Học -->
+                <div id="grade-search-dropdown" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-xl border border-slate-200/80 z-30 max-h-72 overflow-y-auto divide-y divide-slate-100 text-xs">
+                    <!-- Dynamic Suggestions Injected via JS -->
+                </div>
+            </div>
+        </div>
+
         <!-- Semester Block 1: HK1 2026-2027 (Current / Ongoing) -->
         <div class="semester-block bg-white rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden" data-semester-group="hk1_2627">
             <!-- Semester Subheader -->
@@ -1392,33 +1421,174 @@
         drawer.classList.add('translate-x-full');
     }
 
+    // ================= BỘ GỢI Ý & TÌM KIẾM BẢNG ĐIỂM =================
+    let currentFilterStatus = 'all';
+
+    function getGradeRowData() {
+        const rows = document.querySelectorAll('.grade-row');
+        const list = [];
+        rows.forEach(r => {
+            const nameEl = r.querySelector('.subject-name');
+            const metaEl = r.querySelector('div.text-\\[11px\\].font-mono');
+            const statusBadge = r.querySelector('td:nth-child(7) span');
+            if (nameEl) {
+                list.push({
+                    name: nameEl.innerText.trim(),
+                    meta: metaEl ? metaEl.innerText.trim() : '',
+                    status: statusBadge ? statusBadge.innerText.trim() : '',
+                    statusClass: statusBadge ? statusBadge.className : '',
+                    statusKey: r.getAttribute('data-status') || 'all',
+                    row: r
+                });
+            }
+        });
+        return list;
+    }
+
+    function handleGradeSearchInput(keyword) {
+        const clearBtn = document.getElementById('grade-search-clear');
+        if (clearBtn) {
+            if (keyword && keyword.trim().length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+        }
+        applyFilterAndSearch();
+        renderGradeSuggestions(keyword);
+    }
+
+    function handleGradeSearchFocus() {
+        const input = document.getElementById('grade-search-input');
+        renderGradeSuggestions(input ? input.value : '');
+    }
+
+    function renderGradeSuggestions(keyword) {
+        const dropdown = document.getElementById('grade-search-dropdown');
+        if (!dropdown) return;
+
+        const term = (keyword || '').toLowerCase().trim();
+        const data = getGradeRowData();
+        
+        // Lấy danh sách môn học duy nhất
+        const unique = [];
+        const seen = new Set();
+        data.forEach(item => {
+            const key = item.name.toLowerCase();
+            if (!seen.has(key)) {
+                seen.add(key);
+                unique.push(item);
+            }
+        });
+
+        const matches = unique.filter(item => {
+            if (!term) return true;
+            return item.name.toLowerCase().includes(term) || item.meta.toLowerCase().includes(term);
+        });
+
+        if (matches.length === 0) {
+            dropdown.innerHTML = `
+                <div class="px-4 py-3 text-center text-slate-400 text-xs">
+                    <span class="material-symbols-outlined text-[20px] text-slate-300 block mb-1">search_off</span>
+                    Không tìm thấy môn học nào phù hợp
+                </div>`;
+            dropdown.classList.remove('hidden');
+            return;
+        }
+
+        dropdown.innerHTML = `
+            <div class="px-3 py-1.5 bg-slate-50 text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                <span>Gợi ý môn học (${matches.length})</span>
+                <span class="text-[9px] font-normal lowercase text-slate-400">bấm để chọn nhanh</span>
+            </div>` +
+            matches.map(item => `
+                <div class="px-3.5 py-2.5 hover:bg-slate-50 cursor-pointer flex items-center justify-between gap-3 transition-colors suggestion-item" onclick="selectGradeSuggestion('${item.name.replace(/'/g, "\\'")}')">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-[16px]">school</span>
+                        </div>
+                        <div class="truncate">
+                            <div class="font-semibold text-slate-800 text-xs truncate">${item.name}</div>
+                            <div class="text-[10px] text-slate-400 font-mono truncate">${item.meta}</div>
+                        </div>
+                    </div>
+                    <span class="shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full ${item.statusKey === 'fail' ? 'bg-rose-100 text-rose-700' : item.statusKey === 'pass' ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'}">
+                        ${item.status}
+                    </span>
+                </div>
+            `).join('');
+
+        dropdown.classList.remove('hidden');
+    }
+
+    function selectGradeSuggestion(subjectName) {
+        const input = document.getElementById('grade-search-input');
+        if (input) input.value = subjectName;
+
+        const clearBtn = document.getElementById('grade-search-clear');
+        if (clearBtn) clearBtn.classList.remove('hidden');
+
+        applyFilterAndSearch();
+        closeGradeSuggestions();
+    }
+
+    function clearGradeSearch() {
+        const input = document.getElementById('grade-search-input');
+        if (input) input.value = '';
+
+        const clearBtn = document.getElementById('grade-search-clear');
+        if (clearBtn) clearBtn.classList.add('hidden');
+
+        applyFilterAndSearch();
+        closeGradeSuggestions();
+        if (input) input.focus();
+    }
+
+    function closeGradeSuggestions() {
+        const dropdown = document.getElementById('grade-search-dropdown');
+        if (dropdown) dropdown.classList.add('hidden');
+    }
+
+    // Đóng gợi ý khi bấm ra ngoài
+    document.addEventListener('click', function(e) {
+        const wrapper = document.getElementById('grade-search-wrapper');
+        if (wrapper && !wrapper.contains(e.target)) {
+            closeGradeSuggestions();
+        }
+    });
+
     // Bộ lọc hàng bảng điểm
     function filterGradeRows(status, btn) {
+        currentFilterStatus = status;
         document.querySelectorAll('.grade-filter-btn').forEach(b => {
             b.className = 'grade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer';
         });
         if (btn) btn.className = 'grade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary text-white shadow-xs cursor-pointer transition-all';
 
-        const rows = document.querySelectorAll('.grade-row');
-        rows.forEach(r => {
-            if (status === 'all') {
-                r.style.display = '';
-            } else if (r.getAttribute('data-status') === status) {
-                r.style.display = '';
-            } else {
-                r.style.display = 'none';
-            }
-        });
+        applyFilterAndSearch();
     }
 
     // Tìm kiếm môn học
     function searchGradeSubjects(keyword) {
-        const term = keyword.toLowerCase().trim();
+        applyFilterAndSearch();
+    }
+
+    function applyFilterAndSearch() {
+        const input = document.getElementById('grade-search-input');
+        const term = (input ? input.value : '').toLowerCase().trim();
         const rows = document.querySelectorAll('.grade-row');
+
         rows.forEach(r => {
             const nameEl = r.querySelector('.subject-name');
-            const text = nameEl ? nameEl.innerText.toLowerCase() : '';
-            if (!term || text.includes(term)) {
+            const metaEl = r.querySelector('div.text-\\[11px\\].font-mono');
+            const textName = nameEl ? nameEl.innerText.toLowerCase() : '';
+            const textMeta = metaEl ? metaEl.innerText.toLowerCase() : '';
+            const statusKey = r.getAttribute('data-status');
+
+            const matchSearch = !term || textName.includes(term) || textMeta.includes(term);
+            const matchFilter = currentFilterStatus === 'all' || statusKey === currentFilterStatus;
+
+            if (matchSearch && matchFilter) {
                 r.style.display = '';
             } else {
                 r.style.display = 'none';
