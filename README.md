@@ -1,532 +1,299 @@
-# BÀI TẬP LỚN MÔN THỰC HÀNH LẬP TRÌNH .NET
-## ĐỀ TÀI: QUẢN LÝ ĐĂNG KÝ KHÓA HỌC VÀ HỌC VIÊN TRUNG TÂM ĐÀO TẠO
-- **Trường:** Đại học Kinh tế - Kỹ thuật Công nghiệp (UNETI)
-- **Khoa:** Công nghệ Thông tin
-- **Lớp:** DHTI17A1HN
-- **Nhóm thực hiện:** Nhóm UNETI 4
-- **Công nghệ nền tảng:** .NET 10 | ASP.NET Core 10 MVC | Entity Framework Core 10 | Microsoft SQL Server | Bootstrap 5
-- **Mô hình kiến trúc:** **Repository Pattern & Service Layer** (Theo đúng giáo trình thực hành khoa CNTT UNETI)
-- **Công cụ phát triển chuẩn:** **Visual Studio 2022 (Visual Studio Tím)**
+# 🎓 HỆ THỐNG QUẢN LÝ KHÓA HỌC & CỔNG ĐÀO TẠO THỰC HÀNH (EDUSPACE UNETI)
+
+> **BÀI TẬP LỚN MÔN THỰC HÀNH LẬP TRÌNH .NET**  
+> **TRƯỜNG ĐẠI HỌC KINH TẾ - KỸ THUẬT CÔNG NGHIỆP (UNETI)**  
+> **KHOA CÔNG NGHỆ THÔNG TIN** — Lớp: **DHTI17A1HN** — Nhóm: **UNETI 4 (Nhóm 4)**  
+
+[![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![ASP.NET Core MVC](https://img.shields.io/badge/ASP.NET_Core-MVC-blue?logo=microsoft)](https://learn.microsoft.com/aspnet/core)
+[![Entity Framework Core 10](https://img.shields.io/badge/EF_Core-10.0-512BD4?logo=nuget&logoColor=white)](https://learn.microsoft.com/ef/core)
+[![SQL Server](https://img.shields.io/badge/Database-SQL_Server_LocalDB-CC292B?logo=microsoftsqlserver&logoColor=white)](https://www.microsoft.com/sql-server)
+[![Tailwind CSS](https://img.shields.io/badge/Frontend-Tailwind_CSS_3-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![VietQR Payment](https://img.shields.io/badge/Payment-VietQR_MBBank-00A859?logo=qr-code&logoColor=white)](https://vietqr.net/)
 
 ---
 
-## 🎯 1. TỔNG QUAN KHUNG DỰ ÁN (STARTER FRAMEWORK) ĐÃ CÓ SẴN
-Khung dự án này là **nền tảng chung duy nhất** đã được cấu hình hoàn chỉnh để tất cả thành viên trong nhóm dùng chung mà không bị lỗi hay xung đột mã nguồn.
+## 👥 1. BẢNG PHÂN CÔNG THÀNH VIÊN & NHIỆM VỤ CHI TIẾT
 
-### Những thành phần ĐÃ ĐƯỢC LÀM SẴN trong khung:
-1. **Toàn bộ Entity Models (`Models/*.cs`):**
-   - Đầy đủ 7 model chuẩn theo đặc tả Đề tài BTL: `TaiKhoan`, `ChuongTrinhDaoTao`, `LopHoc`, `HocVien`, `DangKyHoc`, `BuoiHoc`, `KetQuaHocTap`.
-   - Đã khai báo đầy đủ khóa chính, khóa ngoại, DataAnnotations (Validation, MaxLength, DisplayName).
-2. **Cơ sở dữ liệu & Cấu hình quan hệ (`Data/ApplicationDbContext.cs`):**
-   - Đã cấu hình quan hệ 1-N (ChuongTrinhDaoTao -> LopHoc -> DangKyHoc...), 1-1 (DangKyHoc -> KetQuaHocTap).
-   - Đã cấu hình sẵn **Seed Data** (tạo sẵn dữ liệu mẫu cho tài khoản test, chương trình đào tạo, lớp học, học viên).
-3. **Migration nền tảng gốc (`Migrations/*_InitialCreate.cs`):**
-   - Đã tạo sẵn 1 migration duy nhất cho toàn bộ 7 bảng cốt lõi.
-4. **Cấu hình ứng dụng (`Program.cs`, `appsettings.json`):**
-   - Đã bật sẵn kết nối SQL Server, Session 60 phút, Routing MVC.
-5. **Giao diện dùng chung (`Views/Shared/_Layout.cshtml`, `Views/Home/Index.cshtml`):**
-   - Đã có thanh điều hướng chuẩn, thông báo TempData và trang chủ hiển thị phân công nhiệm vụ.
+Dự án được phân chia thành **5 Module độc lập** theo cấu trúc **Repository Pattern**, bảo đảm mỗi thành viên phụ trách một khối nghiệp vụ riêng biệt, không đè code lên nhau:
+
+| STT | Họ và tên | Mã sinh viên | Vai trò | Module phụ trách | Các File Repository & Service quản lý |
+| :---: | :--- | :---: | :---: | :--- | :--- |
+| **1** | **Vũ Đình Trường** | `23103100026` | **Nhóm trưởng** | **Module 1**: Quản trị Hệ thống, Tài khoản, Phân quyền & Chương trình đào tạo | `ITaiKhoanRepository.cs`, `TaiKhoanRepository.cs`<br>`ITaiKhoanService.cs`, `TaiKhoanService.cs`<br>`IChuongTrinhDaoTaoRepository.cs`, `ChuongTrinhDaoTaoRepository.cs`<br>`IChuongTrinhDaoTaoService.cs`, `ChuongTrinhDaoTaoService.cs` |
+| **2** | **Nguyễn Đình Kiên** | `23103100020` | Thành viên | **Module 2**: Quản lý Lớp học & Đội ngũ Giảng viên | `ILopHocRepository.cs`, `LopHocRepository.cs`<br>`ILopHocService.cs`, `LopHocService.cs`<br>`IGiangVienRepository.cs`, `GiangVienRepository.cs`<br>`IGiangVienService.cs`, `GiangVienService.cs` |
+| **3** | **Nguyễn Đức Linh** | `23103100042` | Thành viên | **Module 3**: Quản lý Học viên, Hồ sơ sinh viên & Cổng dịch vụ học viên (Eduspace) | `IHocVienRepository.cs`, `HocVienRepository.cs`<br>`IHocVienService.cs`, `HocVienService.cs`<br>`CongHocVienController.cs` (Giao diện Không gian học tập) |
+| **4** | **Nguyễn Hoàng Long** | `23103100046` | Thành viên | **Module 4**: Tiếp nhận đăng ký, Xét duyệt hồ sơ, Quản lý tài chính & Thu học phí VietQR | `IDangKyHocRepository.cs`, `DangKyHocRepository.cs`<br>`DangKyHocController.cs`<br>Quy trình thanh toán VietQR & Xác nhận học phí |
+| **5** | **Nguyễn Tùng Dương** | `23103100003` | Thành viên | **Module 5**: Xếp Thời khóa biểu (TKB), Quản lý Kết quả học tập (Bảng điểm) & Thống kê | `IBuoiHocRepository.cs`, `BuoiHocRepository.cs`<br>`IKetQuaHocTapRepository.cs`, `KetQuaHocTapRepository.cs`<br>`IThongKeRepository.cs`, `ThongKeRepository.cs`<br>`BuoiHocController.cs`, `KetQuaHocTapController.cs` |
 
 ---
 
-## ⚠️ 2. NGUYÊN TẮC VÀNG VỀ MIGRATION (CHỐNG XUNG ĐỘT TRÊN GITHUB)
+## 🏛️ 2. KIẾN TRÚC HỆ THỐNG & NGUYÊN TẮC THIẾT KẾ (REPOSITORY PATTERN)
 
-> [!IMPORTANT]
-> **TẤT CẢ 5 THÀNH VIÊN BẮT BUỘC PHẢI ĐỌC KỸ PHẦN NÀY:**
-> 1. Trưởng nhóm đã tạo sẵn Migration nền tảng `InitialCreate` và push lên GitHub.
-> 2. **TUYỆT ĐỐI KHÔNG BẠN NÀO ĐƯỢC CHẠY LỆNH `Add-Migration`**. Nếu mỗi người tự ý gõ `Add-Migration`, thư mục `Migrations/` sẽ bị xung đột (conflict) mã SHA khi merge Git và làm hỏng dự án.
-> 3. Sau khi clone dự án về máy, mỗi thành viên **CHỈ CẦN CHẠY DUY NHẤT LỆNH UPDATE DATABASE**.
+Dự án áp dụng chặt chẽ mô hình **3 lớp (3-Tier)** kết hợp **Repository Pattern & Dependency Injection**.
 
-### Cách cập nhật Database trong Visual Studio Tím:
-1. Mở file giải pháp `QuanLyKhoaHoc_UNETI4_DHTI17A1HN.slnx` bằng **Visual Studio Tím**.
-2. Kiểm tra chuỗi kết nối trong `appsettings.json`:
-   ```json
-   "ConnectionStrings": {
-     "DefaultConnection": "Server=.;Database=QuanLyKhoaHoc_UNETI4_DB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
-   }
-   ```
-   *(Nếu máy bạn dùng SQL Server Express, đổi `Server=.` thành `Server=.\\SQLEXPRESS`)*.
-3. Vào menu: **Tools** -> **NuGet Package Manager** -> **Package Manager Console (PMC)**.
-4. Gõ lệnh sau và nhấn Enter:
+```mermaid
+flowchart TD
+    subgraph UI_Layer["1. Presentation Layer (Tầng Giao Diện)"]
+        Browser["Trình duyệt (Browser / Client)"]
+        RazorViews["Razor Views (*.cshtml) + Tailwind CSS + Vanilla JS"]
+        Controllers["Controllers (Nhận Request, Kiểm tra ModelState, Trả View / JSON)"]
+    end
+
+    subgraph Service_Layer["2. Business Logic Layer (Tầng Nghiệp Vụ)"]
+        Services["Services (*Service.cs): Xử lý validation, kiểm tra điều kiện nghiệp vụ"]
+    end
+
+    subgraph Repo_Layer["3. Data Access Layer (Tầng Dữ Liệu)"]
+        Repos["Repositories (*Repository.cs): Truy vấn LINQ, phân trang, lọc dữ liệu"]
+        EFContext["ApplicationDbContext (EF Core 10)"]
+        SQLDB[("SQL Server (LocalDB / Azure SQL)")]
+    end
+
+    Browser <--> RazorViews
+    RazorViews <--> Controllers
+    Controllers --> Services
+    Controllers --> Repos
+    Services --> Repos
+    Repos --> EFContext
+    EFContext <--> SQLDB
+```
+
+### ⚠️ Quy tắc Vàng về Clean Code:
+1. **Tuyệt đối không inject trực tiếp `ApplicationDbContext` vào Controller**:
+   - Tất cả truy vấn `_context.Set<T>()`, `ToList()`, `Where()`, `Include()` phải đặt trong thư mục `Repositories/`.
+   - Controller chỉ tiêm (Inject) `IRepository` hoặc `IService` qua Constructor.
+2. **Dữ liệu thật 100%**:
+   - Không fix cứng danh sách mẫu (hardcode) trong HTML/Razor. Mọi thông tin lớp học, bảng điểm, lịch học, học phí đều lấy từ CSDL qua Repository.
+3. **Phân trang Server-side (LINQ `Skip` và `Take`)**:
+   - Áp dụng phân trang ngay trên `IQueryable` trước khi gọi `ToListAsync()`, không kéo toàn bộ bảng về RAM rồi mới cắt trang.
+
+---
+
+## 🗄️ 3. MÔ HÌNH DỮ LIỆU & QUAN HỆ CSDL (8 THỰC THỂ)
+
+```mermaid
+erDiagram
+    TaiKhoan ||--o| HocVien : "kết nối (1-1)"
+    ChuongTrinhDaoTao ||--o{ LopHoc : "mở lớp (1-N)"
+    GiangVien ||--o{ LopHoc : "giảng dạy (1-N)"
+    GiangVien ||--o{ BuoiHoc : "phụ trách (1-N)"
+    LopHoc ||--o{ BuoiHoc : "có lịch (1-N)"
+    LopHoc ||--o{ DangKyHoc : "nhận đăng ký (1-N)"
+    HocVien ||--o{ DangKyHoc : "nộp đơn (1-N)"
+    DangKyHoc ||--o| KetQuaHocTap : "có kết quả (1-1)"
+```
+
+### Chi tiết các thực thể chính:
+
+1. **`TaiKhoan`** (Quản lý đăng nhập & phân quyền):
+   - `MaTaiKhoan` (PK), `TenDangNhap`, `MatKhau` (mã hóa SHA256), `HoTen`, `Email`, `SoDienThoai`, `VaiTro` (`Admin`, `GiaoVu`, `HocVien`), `TrangThai` (Hoạt động / Khóa).
+2. **`ChuongTrinhDaoTao`** (Danh mục khóa học):
+   - `MaCTDT` (PK), `MaChuongTrinh`, `TenChuongTrinh`, `MoTa`, `SoTinChi`, `HocPhiGoc`, `HocPhiUuDai`, `ThoiLuongGio`, `TrinhDo` (Cơ bản, Nâng cao), `HinhThuc` (Online, Offline), `DeCuong`, `HinhAnh`.
+3. **`GiangVien`** (Hồ sơ giảng viên):
+   - `MaGiangVien` (PK), `MaGV`, `HoTen`, `Email`, `SoDienThoai`, `HocVi` (ThS, TS, PGS.TS), `ChuyenMon`, `DonViCongTac`, `HinhAnh`.
+4. **`LopHoc`** (Lớp học theo chương trình):
+   - `MaLopHoc` (PK), `MaLop`, `TenLop`, `MaCTDT` (FK), `MaGiangVien` (FK), `NgayMoDangKy`, `HanDangKy`, `NgayKhaiGiang`, `NgayKetThuc`, `SiSoToiDa`, `SiSoHienTai`, `HocPhi`, `PhongHoc`, `TrangThai`.
+5. **`HocVien`** (Hồ sơ học viên):
+   - `MaHocVien` (PK), `MaHV`, `MaTaiKhoan` (FK), `HoTen`, `NgaySinh`, `GioiTinh`, `Email`, `SoDienThoai`, `DiaChi`, `NgheNghiep`, `DonViCongTac`.
+6. **`DangKyHoc`** (Đơn đăng ký & Quản lý thu học phí):
+   - `MaDangKy` (PK), `MaHocVien` (FK), `MaLopHoc` (FK), `NgayDangKy`, `TrangThai` (`ChoDuyet`, `DaDuyet`, `TuChoi`, `DaHuy`), `TrangThaiHocPhi` (`ChuaDong`, `ChoXacNhan`, `DaDong`), `SoTienPhaiDong`, `SoTienDaDong`, `NgayDongHocPhi`, `PhuongThucThanhToan`, `GhiChu`.
+7. **`BuoiHoc`** (Thời khóa biểu từng buổi học):
+   - `MaBuoiHoc` (PK), `MaLopHoc` (FK), `ThuTrongTuan` (2..8), `NgayHoc`, `CaHoc` (1..5), `PhongHoc` (HA8, HA9, HA10, HA11), `MaGiangVien` (FK), `NoiDung`.
+8. **`KetQuaHocTap`** (Bảng điểm & Đánh giá kết quả):
+   - `MaKetQua` (PK), `MaDangKy` (FK), `DiemChuyenCan` (trọng số 40%), `DiemCuoiKhoa` (trọng số 60%), `DiemTongKet` (Hệ 10), `DiemChu` (A, B+, B, C+, C, D, F), `DiemHe4`, `XepLoai` (Xuất sắc, Giỏi, Khá, Trung bình, Yếu), `TrangThai` (Đạt, Học lại).
+
+---
+
+## ⚡ 4. CÁC QUY TRÌNH NGHIỆP VỤ TRỌNG TÂM
+
+### 💳 A. Quy trình Đăng ký & Đóng học phí VietQR (Module 3 & Module 4)
+Quy trình đảm bảo kiểm soát tài chính minh bạch, chuẩn ngân hàng:
+1. **Học viên nộp đơn đăng ký**:
+   - Chọn khóa học phù hợp -> Bấm "Đăng ký".
+   - Đơn ghi nhận với trạng thái `ChoDuyet`, học phí `ChuaDong`.
+2. **Giáo vụ xét duyệt đơn**:
+   - Kiểm tra điều kiện sĩ số lớp (`SiSoHienTai < SiSoToiDa`).
+   - Duyệt đơn -> Trạng thái chuyển thành `DaDuyet`.
+3. **Thanh toán học phí VietQR**:
+   - Tại tab "Đơn đăng ký", học viên bấm **"Đóng học phí (VietQR / CK)"**.
+   - Modal hiển thị **Mã QR động VietQR** chuẩn Napas 24/7 của Ngân hàng **MB Bank** (STK: `0381000556688`).
+   - Mã QR tự động điền sẵn số tiền học phí và cú pháp chuyển tiền chuẩn: `[Mã Lớp] [Họ tên] [SĐT]`.
+4. **Học viên xác nhận chuyển khoản**:
+   - Sau khi chuyển qua App Ngân hàng, học viên bấm nút **"Xác nhận đã chuyển"**.
+   - Trạng thái học phí cập nhật sang **`ChoXacNhan`** (Chờ giáo vụ đối soát).
+5. **Giáo vụ phê duyệt & Kích hoạt lớp học**:
+   - Phía Quản lý / Giáo vụ nhận được thông báo học viên đã nộp học phí, đối soát sao kê tài khoản ngân hàng.
+   - Giáo vụ bấm **"Xác nhận đã nộp học phí"**.
+   - Trạng thái đơn chuyển sang **`DaDong`**, tự động tăng `SiSoHienTai` của lớp.
+   - Lớp học được mở khóa, học viên chính thức truy cập không gian học tập, xem tài liệu và lịch học.
+
+---
+
+### 📊 B. Bảng điểm Học phần Đơn nhất & Tính điểm Chuẩn (Module 5)
+Bảng điểm được thiết kế chuyên nghiệp, loại bỏ chia học kỳ giả định, lấy **100% dữ liệu thật từ database**:
+- **Công thức tính điểm**:
+  $$\text{Điểm Tổng Kết} = (\text{Điểm Quá Trình} \times 0.4) + (\text{Điểm Cuối Khóa} \times 0.6)$$
+- **Thang điểm chuẩn 4 & Quy đổi Điểm Chữ**:
+  - $\ge 8.5$: Loại **A** (Hệ 4: 4.0) — *Xuất sắc*
+  - $7.8 - 8.4$: Loại **B+** (Hệ 4: 3.5) — *Giỏi*
+  - $7.0 - 7.7$: Loại **B** (Hệ 4: 3.0) — *Khá*
+  - $6.3 - 6.9$: Loại **C+** (Hệ 4: 2.5) — *Trung bình khá*
+  - $5.5 - 6.2$: Loại **C** (Hệ 4: 2.0) — *Trung bình*
+  - $4.8 - 5.4$: Loại **D+** (Hệ 4: 1.5) — *Trung bình yếu*
+  - $4.0 - 4.7$: Loại **D** (Hệ 4: 1.0) — *Đạt*
+  - $< 4.0$: Loại **F** (Hệ 4: 0.0) — *Cần học lại*
+- **Tính năng UI nâng cao**:
+  - **Bộ lọc trạng thái**: Tất cả, Đang học, Đã hoàn thành (Đạt), Cần lưu ý / Nợ HP.
+  - **Tìm kiếm thông minh tích hợp Autocomplete**: Gõ tên môn hoặc tên giảng viên sẽ hiển thị danh sách gợi ý rơi xuống (dropdown) để chọn nhanh.
+  - **Drawer xem chi tiết thành phần điểm**: Xem chi tiết trọng số, điểm từng cột và tình trạng học phí.
+
+---
+
+### 📅 C. Ma trận Thời khóa biểu & Thuật toán Chống trùng lịch (Module 5)
+- **Ma trận 7 ngày trong tuần**: Thứ 2 đến Chủ nhật với 5 ca học linh hoạt.
+- **Giảng đường chuẩn UNETI**: Khu phòng học HA8, HA9, HA10, HA11.
+- **Thuật toán LINQ kiểm tra trùng lịch (Overlap Check)**:
+  ```csharp
+  // Kiểm tra trùng phòng học
+  bool biTrungPhong = await _context.BuoiHocs.AnyAsync(b =>
+      b.MaBuoiHoc != buoiHocMoi.MaBuoiHoc &&
+      b.NgayHoc == buoiHocMoi.NgayHoc &&
+      b.CaHoc == buoiHocMoi.CaHoc &&
+      b.PhongHoc == buoiHocMoi.PhongHoc);
+
+  // Kiểm tra trùng lịch giảng viên
+  bool biTrungGiangVien = await _context.BuoiHocs.AnyAsync(b =>
+      b.MaBuoiHoc != buoiHocMoi.MaBuoiHoc &&
+      b.NgayHoc == buoiHocMoi.NgayHoc &&
+      b.CaHoc == buoiHocMoi.CaHoc &&
+      b.MaGiangVien == buoiHocMoi.MaGiangVien);
+  ```
+
+---
+
+## 🛠️ 5. HƯỚNG DẪN CÀI ĐẶT & CHẠY DỰ ÁN
+
+### Yêu cầu môi trường:
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+- [Visual Studio 2022](https://visualstudio.microsoft.com/) (Bản 17.12 trở lên) với workload **ASP.NET and web development**
+- SQL Server (LocalDB hoặc SQL Server 2019/2022)
+
+### Các bước thực hiện:
+
+#### Cách 1: Sử dụng Visual Studio 2022 (Khuyên dùng)
+1. Mở file giải pháp: `QuanLyKhoaHoc_UNETI4_DHTI17A1HN.slnx`.
+2. Mở cửa sổ **Package Manager Console** (`Tools` -> `NuGet Package Manager` -> `Package Manager Console`).
+3. Chạy lệnh tạo CSDL:
    ```powershell
    Update-Database
    ```
-   *(Hoặc nếu dùng Terminal / CMD trong thư mục project thì gõ: `dotnet ef database update`)*.
+4. Bấm `F5` hoặc nút `Run (https / http)` để khởi chạy ứng dụng.
+5. Truy cập trình duyệt tại: `http://localhost:5155` hoặc `https://localhost:7155`.
 
-👉 Ngay lập tức SQL Server sẽ tạo Database `QuanLyKhoaHoc_UNETI4_DB` kèm đầy đủ tất cả các bảng và nạp sẵn dữ liệu mẫu. Cả nhóm dùng chung dữ liệu mà không ai bị đè file của ai!
+#### Cách 2: Sử dụng .NET CLI (Terminal / PowerShell)
+```powershell
+# Di chuyển vào thư mục chứa project
+cd QuanLyKhoaHoc_UNETI4_DHTI17A1HN
 
----
+# Khôi phục dependencies
+dotnet restore
 
-## 🌿 3. QUY TRÌNH PHỐI HỢP GIT & PULL REQUEST (CHUẨN LÀM VIỆC NHÓM)
+# Cập nhật cơ sở dữ liệu
+dotnet ef database update
 
-### 📌 Bước 1: Quy tắc phân chia công việc theo nhánh (Best Practice)
-- **Tuyệt đối không code trực tiếp trên nhánh `main`**. Nhánh `main` chỉ dùng để chứa code đã chạy ổn định, kiểm thử hoàn thiện và chuẩn bị nộp bài.
-- Mỗi thành viên làm việc độc lập trên nhánh module của mình (ví dụ: `long`, `duong`, `ndlinh` hoặc chuẩn feature `feature/module-1-truong`, `feature/module-2-kien`...).
-
----
-
-### 🔄 Bước 2: Quy trình cập nhật code mới nhất từ `main` về nhánh cá nhân
-> [!IMPORTANT]
-> **Quy tắc sống còn:** Trước khi bạn muốn merge code của mình lên `main`, bạn **phải kéo code mới nhất từ `main` về nhánh của bạn trước** để giải quyết xung đột (nếu có) ngay trên máy cá nhân, tránh làm hỏng hoặc "sập" nhánh `main` chung của cả nhóm!
-
-1. **Commit code hiện tại trên nhánh của bạn:**
-   ```bash
-   git add .
-   git commit -m "feat: hoàn thành phần việc của tôi"
-   ```
-
-2. **Chuyển về nhánh `main` và lấy code mới nhất:**
-   ```bash
-   git checkout main
-   git pull origin main
-   ```
-
-3. **Chuyển lại nhánh của bạn và cập nhật (Merge hoặc Rebase) từ `main` vào:**
-   ```bash
-   git checkout <ten-nhanh-cua-ban>
-   git merge main
-   ```
-   *(Hoặc dùng `git rebase main` nếu muốn lịch sử commit tuyến tính, sạch sẽ hơn)*.
-
-4. **Xử lý Conflict (nếu có xung đột code):**
-   - Nếu có file bị trùng lặp chỉnh sửa, Git sẽ đánh dấu xung đột.
-   - Mở **Visual Studio 2022** hoặc **VS Code**, chọn giữ lại đoạn code đúng (*Accept Current Change*, *Accept Incoming Change*, hoặc kết hợp cả hai).
-   - Sau khi giải quyết xong conflict, lưu file và chạy lệnh:
-     ```bash
-     git add .
-     git commit -m "fix: giải quyết conflict với main"
-     ```
-
----
-
-### 🚀 Bước 3: Đưa code lên GitHub và tạo Pull Request (PR) an toàn
-Thay vì đứng ở máy cá nhân gõ lệnh ép merge thẳng lên `main`, hãy dùng cơ chế **Pull Request (PR)** trên GitHub để hệ thống kiểm tra xung đột tự động:
-
-1. **Đẩy nhánh của bạn lên GitHub:**
-   ```bash
-   git push origin <ten-nhanh-cua-ban>
-   ```
-
-2. **Tạo Pull Request trên giao diện GitHub:**
-   - Truy cập vào repository: [QuanLyKhoaHoc_UNETI4_DHTI17A1HN](https://github.com/LongHoang05/QuanLyKhoaHoc_UNETI4_DHTI17A1HN).
-   - Chuyển sang tab **Pull requests** $\rightarrow$ Bấm nút **New pull request**.
-   - Chọn:
-     - **base:** `main`
-     - **compare:** `<ten-nhanh-cua-ban>` (ví dụ: `long`, `duong`...)
-
-3. **Kiểm tra trạng thái Merge:**
-   - ✅ Nếu hiện dòng **"Able to merge"**: Mọi thứ hoàn hảo! Bạn bấm **Create pull request** $\rightarrow$ Sau đó bấm **Merge pull request** $\rightarrow$ **Confirm merge**.
-   - ⚠️ Nếu hiện dòng **"Can't automatically merge"**: Nghĩa là có đoạn code bị xung đột. Bạn cần làm lại **Bước 2** trên máy cá nhân để giải quyết dứt điểm conflict trước khi tạo lại PR.
-
----
-
-### 💡 Mẹo nhỏ cho nhóm khi làm việc:
-1. **Giao tiếp trước khi sửa file chung:** Các file cấu hình chung như `appsettings.json`, `ApplicationDbContext.cs`, hoặc `Program.cs` rất dễ bị conflict. Cả nhóm nên trao đổi trước khi sửa các file cốt lõi này để tránh việc mọi người cùng sửa một chỗ.
-2. **Kéo code về thường xuyên:** Sau khi một thành viên đã merge code thành công vào `main`, các thành viên còn lại nhớ chạy `git checkout main && git pull origin main` về nhánh của mình sớm nhất có thể để luôn làm việc trên nền tảng code mới nhất.
-
----
-
-## 🏗️ 4. HƯỚNG DẪN CHI TIẾT VỀ REPOSITORY PATTERN & SERVICE LAYER
-
-> [!IMPORTANT]
-> **TIÊU CHÍ CHẤM ĐIỂM BẮT BUỘC CỦA THẦY CÔ:**
-> - **Controller KHÔNG ĐƯỢC truy vấn trực tiếp `DbContext`** (Ví dụ: cấm viết `_context.LopHocs.ToList()` trong Controller). Nếu viết trực tiếp sẽ bị trừ điểm kiến trúc.
-> - **Repository Layer:** Chuyên trách lấy và lưu dữ liệu vào CSDL thông qua EF Core + LINQ.
-> - **Service Layer:** Chuyên trách nghiệp vụ, validation, logic kiểm tra (trùng lịch, hết hạn, quá sĩ số) và gọi Repository.
-> - **Controller Layer:** Chỉ tiếp nhận Request từ View, gọi Service lấy kết quả và trả về View.
-
-### Mô hình luồng dữ liệu chuẩn:
-```text
-[ View (.cshtml) ] 
-       ↕ (Gửi Form / Nhận ViewModel)
-[ Controller ]
-       ↕ (Gọi xử lý nghiệp vụ)
-[ Service Layer ] (Kiểm tra hợp lệ, tính điểm, check trùng lịch, check sĩ số)
-       ↕ (Gọi truy vấn dữ liệu)
-[ Repository Layer ] (EF Core 10, LINQ, Include dữ liệu bảng liên kết)
-       ↕
-[ ApplicationDbContext ] 
-       ↕
-[ SQL Server Database ]
+# Khởi chạy dự án
+dotnet run
 ```
 
----
-
-### 🚀 Quy trình 5 bước để tự tạo Repository & Service cho Module của mình:
-
-#### Bước 1: Tạo Interface Repository trong thư mục `Repositories/`
-Tạo file Interface định nghĩa các phương thức cần truy vấn CSDL.
-*Ví dụ:* `Repositories/ILopHocRepository.cs`
-```csharp
-using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
-
-namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
-{
-    public interface ILopHocRepository
-    {
-        Task<IEnumerable<LopHoc>> GetAllAsync();
-        Task<LopHoc?> GetByIdAsync(int id);
-        Task<LopHoc?> GetByIdWithDetailsAsync(int id); // Include GiangVien & KhoaHoc
-        Task AddAsync(LopHoc lopHoc);
-        Task UpdateAsync(LopHoc lopHoc);
-        Task DeleteAsync(int id);
-        Task<bool> ExistsAsync(int id);
-
-        // Truy vấn LINQ nghiệp vụ: Tìm kiếm, lọc, sắp xếp, phân trang Skip & Take
-        Task<(IEnumerable<LopHoc> Items, int TotalCount)> GetPagedAsync(
-            string? keyword, string? trangThai, int? maGiangVien, string? sortBy, int pageIndex, int pageSize);
-    }
-}
-```
-
-#### Bước 2: Tạo Lớp Repository cài đặt Interface trong thư mục `Repositories/`
-Nhận `ApplicationDbContext` qua Constructor để thực hiện truy vấn LINQ.
-*Ví dụ:* `Repositories/LopHocRepository.cs`
-```csharp
-using Microsoft.EntityFrameworkCore;
-using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data;
-using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
-
-namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
-{
-    public class LopHocRepository : ILopHocRepository
-    {
-        private readonly ApplicationDbContext _context;
-
-        public LopHocRepository(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
-        public async Task<IEnumerable<LopHoc>> GetAllAsync()
-        {
-            return await _context.LopHocs
-                .Include(l => l.KhoaHoc)
-                .Include(l => l.GiangVien)
-                .AsNoTracking()
-                .ToListAsync();
-        }
-
-        public async Task<LopHoc?> GetByIdAsync(int id)
-        {
-            return await _context.LopHocs.FindAsync(id);
-        }
-
-        public async Task<LopHoc?> GetByIdWithDetailsAsync(int id)
-        {
-            return await _context.LopHocs
-                .Include(l => l.KhoaHoc)
-                .Include(l => l.GiangVien)
-                .Include(l => l.DangKyHocs)
-                .FirstOrDefaultAsync(l => l.MaLopHoc == id);
-        }
-
-        public async Task AddAsync(LopHoc lopHoc)
-        {
-            await _context.LopHocs.AddAsync(lopHoc);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task UpdateAsync(LopHoc lopHoc)
-        {
-            _context.LopHocs.Update(lopHoc);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(int id)
-        {
-            var lop = await _context.LopHocs.FindAsync(id);
-            if (lop != null)
-            {
-                _context.LopHocs.Remove(lop);
-                await _context.SaveChangesAsync();
-            }
-        }
-
-        public async Task<bool> ExistsAsync(int id)
-        {
-            return await _context.LopHocs.AnyAsync(l => l.MaLopHoc == id);
-        }
-
-        public async Task<(IEnumerable<LopHoc> Items, int TotalCount)> GetPagedAsync(
-            string? keyword, string? trangThai, int? maGiangVien, string? sortBy, int pageIndex, int pageSize)
-        {
-            var query = _context.LopHocs
-                .Include(l => l.KhoaHoc)
-                .Include(l => l.GiangVien)
-                .AsQueryable();
-
-            // 1. Tìm kiếm theo từ khóa
-            if (!string.IsNullOrWhiteSpace(keyword))
-            {
-                query = query.Where(l => l.TenLop.Contains(keyword) || l.MaLop.Contains(keyword) || l.KhoaHoc.TenKhoaHoc.Contains(keyword));
-            }
-
-            // 2. Lọc theo trạng thái
-            if (!string.IsNullOrWhiteSpace(trangThai))
-            {
-                query = query.Where(l => l.TrangThai == trangThai);
-            }
-
-            // 3. Lọc theo giảng viên
-            if (maGiangVien.HasValue)
-            {
-                query = query.Where(l => l.MaGiangVien == maGiangVien.Value);
-            }
-
-            // 4. Sắp xếp LINQ
-            query = sortBy switch
-            {
-                "ten_desc" => query.OrderByDescending(l => l.TenLop),
-                "ngay_asc" => query.OrderBy(l => l.NgayKhaiGiang),
-                "ngay_desc" => query.OrderByDescending(l => l.NgayKhaiGiang),
-                "hocphi_asc" => query.OrderBy(l => l.HocPhi),
-                "hocphi_desc" => query.OrderByDescending(l => l.HocPhi),
-                _ => query.OrderBy(l => l.TenLop)
-            };
-
-            int totalCount = await query.CountAsync();
-
-            // 5. Phân trang trên Server bằng Skip & Take
-            var items = await query
-                .Skip((pageIndex - 1) * pageSize)
-                .Take(pageSize)
-                .AsNoTracking()
-                .ToListAsync();
-
-            return (items, totalCount);
-        }
-    }
-}
-```
-
-#### Bước 3: Tạo Service Layer trong thư mục `Services/`
-Service chứa các kiểm tra nghiệp vụ và gọi Repository.
-*Ví dụ:* `Services/ILopHocService.cs` & `Services/LopHocService.cs`
-```csharp
-using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
-using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
-
-namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
-{
-    public interface ILopHocService
-    {
-        Task<(IEnumerable<LopHoc> Items, int TotalPages, int CurrentPage)> GetDanhSachLopAsync(
-            string? keyword, string? trangThai, int? maGiangVien, string? sortBy, int pageIndex);
-        Task<LopHoc?> GetChiTietLopAsync(int id);
-        Task<(bool Success, string? ErrorMessage)> TaoLopHocAsync(LopHoc lopHoc);
-        Task<(bool Success, string? ErrorMessage)> CapNhatLopHocAsync(LopHoc lopHoc);
-        Task<bool> XoaLopHocAsync(int id);
-    }
-
-    public class LopHocService : ILopHocService
-    {
-        private readonly ILopHocRepository _lopHocRepo;
-        private const int PageSize = 10;
-
-        public LopHocService(ILopHocRepository lopHocRepo)
-        {
-            _lopHocRepo = lopHocRepo;
-        }
-
-        public async Task<(IEnumerable<LopHoc> Items, int TotalPages, int CurrentPage)> GetDanhSachLopAsync(
-            string? keyword, string? trangThai, int? maGiangVien, string? sortBy, int pageIndex)
-        {
-            if (pageIndex < 1) pageIndex = 1;
-            var (items, totalCount) = await _lopHocRepo.GetPagedAsync(keyword, trangThai, maGiangVien, sortBy, pageIndex, PageSize);
-            int totalPages = (int)Math.Ceiling(totalCount / (double)PageSize);
-            return (items, totalPages, pageIndex);
-        }
-
-        public async Task<LopHoc?> GetChiTietLopAsync(int id)
-        {
-            return await _lopHocRepo.GetByIdWithDetailsAsync(id);
-        }
-
-        public async Task<(bool Success, string? ErrorMessage)> TaoLopHocAsync(LopHoc lopHoc)
-        {
-            // Nghiệp vụ Validation logic
-            if (lopHoc.HanDangKy < lopHoc.NgayMoDangKy)
-                return (false, "Hạn đăng ký phải sau hoặc bằng ngày mở đăng ký.");
-
-            if (lopHoc.NgayKhaiGiang < lopHoc.HanDangKy)
-                return (false, "Ngày khai giảng phải sau ngày hết hạn đăng ký.");
-
-            if (lopHoc.SiSoToiDa <= 0)
-                return (false, "Sĩ số tối đa phải lớn hơn 0.");
-
-            await _lopHocRepo.AddAsync(lopHoc);
-            return (true, null);
-        }
-
-        public async Task<(bool Success, string? ErrorMessage)> CapNhatLopHocAsync(LopHoc lopHoc)
-        {
-            if (!await _lopHocRepo.ExistsAsync(lopHoc.MaLopHoc))
-                return (false, "Lớp học không tồn tại.");
-
-            await _lopHocRepo.UpdateAsync(lopHoc);
-            return (true, null);
-        }
-
-        public async Task<bool> XoaLopHocAsync(int id)
-        {
-            if (!await _lopHocRepo.ExistsAsync(id)) return false;
-            await _lopHocRepo.DeleteAsync(id);
-            return true;
-        }
-    }
-}
-```
-
-#### Bước 4: Đăng ký Dependency Injection trong `Program.cs`
-Mở `Program.cs`, tìm khu vực đăng ký dịch vụ và thêm dòng `AddScoped`:
-```csharp
-// Đăng ký Repository & Service của Module 2 (Nguyễn Đình Kiên)
-builder.Services.AddScoped<ILopHocRepository, LopHocRepository>();
-builder.Services.AddScoped<ILopHocService, LopHocService>();
-```
-
-#### Bước 5: Tiêm (Inject) Service vào Controller qua Constructor
-*Ví dụ:* `Controllers/LopHocController.cs`
-```csharp
-using Microsoft.AspNetCore.Mvc;
-using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
-using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services;
-
-namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
-{
-    public class LopHocController : Controller
-    {
-        private readonly ILopHocService _lopHocService;
-
-        // Tiêm Service vào Constructor (Tuyệt đối không tiêm ApplicationDbContext vào đây)
-        public LopHocController(ILopHocService lopHocService)
-        {
-            _lopHocService = lopHocService;
-        }
-
-        public async Task<IActionResult> Index(string? keyword, string? trangThai, int? maGiangVien, string? sortBy, int page = 1)
-        {
-            var (items, totalPages, currentPage) = await _lopHocService.GetDanhSachLopAsync(keyword, trangThai, maGiangVien, sortBy, page);
-            ViewBag.TotalPages = totalPages;
-            ViewBag.CurrentPage = currentPage;
-            ViewBag.Keyword = keyword;
-            return View(items);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(LopHoc lopHoc)
-        {
-            if (!ModelState.IsValid) return View(lopHoc);
-
-            var (success, error) = await _lopHocService.TaoLopHocAsync(lopHoc);
-            if (!success)
-            {
-                ModelState.AddModelError("", error!);
-                return View(lopHoc);
-            }
-
-            TempData["Success"] = "Tạo lớp học thành công!";
-            return RedirectToAction(nameof(Index));
-        }
-    }
-}
-```
+> **Ghi chú về Dữ liệu Mẫu (Seed Data)**:  
+> Hệ thống tích hợp `DbSeeder.SeedMockData()`, khi khởi chạy ứng dụng lần đầu sẽ tự động nạp đầy đủ các chương trình đào tạo, giảng viên, lớp học, tài khoản test, buổi học và kết quả học tập để kiểm thử ngay lập tức.
 
 ---
 
-## 📋 5. BẢNG PHÂN CHIA REPOSITORY & SERVICE CỤ THỂ CHO 5 THÀNH VIÊN
+## 🔑 6. DANH SÁCH TÀI KHOẢN TRUY CẬP HỆ THỐNG
 
-Mỗi bạn căn cứ vào bảng này để tạo đúng file và viết các hàm nghiệp vụ tương ứng:
-
-| Thành viên | Module | File Repository cần tạo | File Service cần tạo | Các phương thức nghiệp vụ trọng tâm |
-| :--- | :---: | :--- | :--- | :--- |
-| **Vũ Đình Trường**<br>`23103100026` | **Module 1** | - `ITaiKhoanRepository.cs`<br>- `TaiKhoanRepository.cs`<br>- `IChuongTrinhDaoTaoRepository.cs`<br>- `ChuongTrinhDaoTaoRepository.cs` | - `ITaiKhoanService.cs`<br>- `TaiKhoanService.cs`<br>- `IChuongTrinhDaoTaoService.cs`<br>- `ChuongTrinhDaoTaoService.cs` | - `KiemTraDangNhap(tenDangNhap, matKhau)`<br>- `TaoTaiKhoanHocVien(taiKhoan)`<br>- `LuuSession(MaTaiKhoan, HoTen, VaiTro)`<br>- Phân quyền (Admin, GiaoVu, HocVien)<br>- CRUD Chương trình đào tạo |
-| **Nguyễn Đình Kiên**<br>`23103100020` | **Module 2** | - `ILopHocRepository.cs`<br>- `LopHocRepository.cs` | - `ILopHocService.cs`<br>- `LopHocService.cs` | - `GetPagedAsync(keyword, trangThai, sapXep, page, size)`<br>- **LINQ Skip() & Take() phân trang server**<br>- Validation ngày mở, hạn nộp, ngày khai giảng<br>- Quản lý lớp học (CRUD) |
-| **Nguyễn Đức Linh**<br>`23103100042` | **Module 3** | - `IHocVienRepository.cs`<br>- `HocVienRepository.cs`<br>- `IDangKyHocRepository.cs`<br>- `DangKyHocRepository.cs` | - `IHocVienService.cs`<br>- `HocVienService.cs` | - `LayHoSoTheoTaiKhoan(maTaiKhoan)`<br>- `CapNhatHoSo(hocVien)`<br>- `LayDanhSachLopDangMo()`<br>- `DangKyLop(maHocVien, maLop)`: Kiểm tra bằng LINQ: lớp còn mở, còn chỗ, không trùng đơn |
-| **Nguyễn Hoàng Long**<br>`23103100046` | **Module 4** | - `IQuanLyDangKyRepository.cs`<br>- `QuanLyDangKyRepository.cs` | - `IQuanLyDangKyService.cs`<br>- `QuanLyDangKyService.cs` | - `LayDanhSachDonDangKy(maLop, trangThai)`<br>- **LINQ đếm sĩ số lớp đã duyệt < SiSoToiDa**<br>- `DuyetDon(maDangKy, ghiChu)`<br>- `TuChoiDon(maDangKy, lyDo)`<br>- `XacNhanDongHocPhi(maDangKy, soTien, ngayDong)` |
-| **Nguyễn Tùng Dương**<br>`23103100003` | **Module 5** | - `IBuoiHocRepository.cs`<br>- `BuoiHocRepository.cs`<br>- `IKetQuaHocTapRepository.cs`<br>- `KetQuaHocTapRepository.cs` | - `ILichHocService.cs`<br>- `LichHocService.cs`<br>- `IThongKeService.cs`<br>- `ThongKeService.cs` | - **Thuật toán LINQ kiểm tra trùng lịch:** Không trùng phòng, không trùng GV, không trùng lớp trong cùng khung giờ<br>- Quản lý điểm & xếp loại học tập<br>- **Dashboard thống kê LINQ**: Doanh thu, Tỷ lệ đăng ký, Sĩ số các lớp |
-
----
-
-## 💻 6. HƯỚNG DẪN THỰC THI TRÊN VISUAL STUDIO 2022 (TÍM)
-
-### Bước 1: Mở Solution
-1. Mở **Visual Studio 2022**.
-2. Chọn **Open a project or solution**.
-3. Trỏ tới file: `QuanLyKhoaHoc_UNETI4_DHTI17A1HN.slnx` (hoặc `.sln`).
-
-### Bước 2: Tạo nhánh cá nhân trong Visual Studio Tím
-1. Nhìn xuống góc dưới cùng bên phải cửa sổ Visual Studio, bấm vào tên branch hiện tại (thường là `main`).
-2. Chọn **New Branch...**
-3. Đặt tên nhánh theo đúng quy định:
-   - Trường: `feature/module-1-truong`
-   - Kiên: `feature/module-2-kien`
-   - Linh: `feature/module-3-linh`
-   - Long: `feature/module-4-long`
-   - Dương: `feature/module-5-duong`
-4. Bấm **Create**.
-
-### Bước 3: Cập nhật Database
-1. Bấm tổ hợp phím hoặc vào: `Tools` -> `NuGet Package Manager` -> `Package Manager Console`.
-2. Gõ:
-   ```powershell
-   Update-Database
-   ```
-3. Đợi hiển thị `Done.` là database đã sẵn sàng chạy.
-
-### Bước 4: Viết code và Thêm file mới
-- Tạo file Interface / Class trong `Repositories/` và `Services/`.
-- Mở `Program.cs` đăng ký `builder.Services.AddScoped<..., ...>();`.
-- Tạo Controller trong thư mục `Controllers/` (Inject Service vào Constructor).
-- Tạo View trong thư mục `Views/[TênController]/`.
-
-### Bước 5: Commit và Push code lên GitHub trong Visual Studio Tím
-1. Mở cửa sổ **Git Changes** (nhấn `Ctrl + 0, Ctrl + G` hoặc vào menu `View` -> `Git Changes`).
-2. Nhập nội dung commit theo đúng cú pháp bắt buộc của môn học:
-   ```text
-   [Mã SV] [Module] Tóm tắt công việc đã làm
-   ```
-   **Ví dụ chuẩn:**
-   - `[23103100026] [Module 1] Hoan thanh dang nhap va phan quyen Session`
-   - `[23103100020] [Module 2] Viet repository va service phan trang LINQ Skip Take`
-   - `[23103100042] [Module 3] Viet service kiem tra dieu kien dang ky lop`
-   - `[23103100046] [Module 4] Viet logic kiem soat si so va thu hoc phi`
-   - `[23103100003] [Module 5] Viet thuat toan LINQ check trung lich va thong ke`
-3. Bấm **Commit All** (hoặc `Commit All and Push`).
-4. Lên GitHub tạo **Pull Request (PR)** để Trưởng nhóm kiểm tra và gộp vào nhánh chính `main`.
-
----
-
-## 🔑 6. THÔNG TIN TÀI KHOẢN MẪU (SEED DATA CÓ SẴN TRONG CSDL)
-
-Dữ liệu đã được nạp sẵn khi chạy `Update-Database`:
-
-| Tài khoản (Username) | Mật khẩu | Vai trò (Role) | Chức năng kiểm thử |
+| Tài khoản (Username) | Mật khẩu | Vai trò (Role) | Chức năng kiểm thử chính |
 | :--- | :--- | :--- | :--- |
-| `admin` | `123456` | **Admin** | Quản trị toàn bộ hệ thống, tài khoản |
-| `giaovu` | `123456` | **GiaoVu** | Mở lớp, duyệt đơn đăng ký, thu học phí, xếp lịch |
-| `hocvien` | `123456` | **HocVien** | Cập nhật hồ sơ, đăng ký lớp học, xem lịch sử |
+| **`admin`** | `123456` | **Admin** | Quản trị toàn bộ danh mục, tài khoản, cấu hình hệ thống |
+| **`giaovu`** | `123456` | **GiaoVu** | Mở lớp học, duyệt đơn đăng ký, xác nhận nộp học phí, xếp TKB, nhập điểm |
+| **`hocvien`** | `123456` | **HocVien** | Tài khoản học viên mẫu: Đăng ký lớp, thanh toán VietQR, xem TKB & bảng điểm |
+| **`nguyenvanan`** | `123456` | **HocVien** | Học viên có dữ liệu bảng điểm đầy đủ, lịch học và đơn đăng ký thực tế |
+| **`gv_lephuoc`** | `123456` | **GiangVien** | Giảng viên: Xem lịch dạy theo tuần, danh sách sinh viên lớp phụ trách |
 
 ---
 
-## 🎓 7. BỘ CÂU HỎI VẤN ĐÁP THẦY CÔ THƯỜNG HỎI KHI BẢO VỆ BTL
+## 🌿 7. QUY TẮC PHÂN NHÁNH GIT & LÀM VIỆC NHÓM
 
-- **Sinh viên 1 (Vũ Đình Trường - M1):**
-  1. *Cơ chế lưu thông tin đăng nhập trong Session hoạt động ra sao? Lưu những gì?*
-  2. *Làm thế nào để chặn sinh viên/người dùng chưa đăng nhập không gõ URL vào trang Admin được?*
-  3. *Tại sao phải tách `TaiKhoanRepository` và `TaiKhoanService` thay vì code trực tiếp trong Controller?*
-- **Sinh viên 2 (Nguyễn Đình Kiên - M2):**
-  1. *Chỉ ra vị trí code LINQ kết hợp Search + Filter + Sort + Phân trang trong `LopHocRepository`?*
-  2. *Tại sao phải dùng `Skip()` và `Take()` trên `IQueryable` trước khi gọi `.ToListAsync()` thay vì gọi `.ToList()` rồi mới cắt trang?*
-  3. *Giữ lại các tham số lọc và từ khóa tìm kiếm khi bấm qua trang 2, 3 bằng cách nào trên Razor View?*
-- **Sinh viên 3 (Nguyễn Đức Linh - M3):**
-  1. *Khi học viên bấm đăng ký một lớp, trong `HocVienService` kiểm tra những điều kiện nghiệp vụ gì?*
-  2. *Viết câu lệnh LINQ kiểm tra học viên không thể gửi 2 đơn đăng ký cho cùng 1 lớp?*
-- **Sinh viên 4 (Nguyễn Hoàng Long - M4):**
-  1. *Viết câu lệnh LINQ đếm số lượng học viên đã duyệt của lớp để so sánh với `SiSoToiDa` trước khi cho phép duyệt đơn?*
-  2. *Luồng xử lý từ lúc đăng ký đến lúc đóng tiền học phí và vào lớp diễn ra như thế nào qua Service và Repository?*
-- **Sinh viên 5 (Nguyễn Tùng Dương - M5):**
-  1. *Giải thích điều kiện logic kiểm tra 2 khoảng thời gian học bị trùng nhau (Overlap check)?*
-  2. *Trình bày công thức tính điểm tổng kết và cách dùng LINQ (`GroupBy`, `Count`, `Sum`, `Average`) trong Service để tạo số liệu cho Dashboard?*
+### Danh sách các nhánh chính thức:
+- **`main`**: Nhánh nguồn chính dùng để nộp bài và demo bảo vệ trước hội đồng.
+- **`feature/module-1-truong`**: Nhánh phát triển của Vũ Đình Trường.
+- **`feature/module-2-kien`**: Nhánh phát triển của Nguyễn Đình Kiên.
+- **`feature/module-3-linh`**: Nhánh phát triển của Nguyễn Đức Linh.
+- **`feature/module-4-long`**: Nhánh phát triển của Nguyễn Hoàng Long.
+- **`feature/module-5-duong`**: Nhánh phát triển của Nguyễn Tùng Dương.
+
+### Quy định đặt thông điệp Commit (Bắt buộc theo môn học):
+```text
+[Mã SV] [Module X] Tóm tắt nội dung công việc thực hiện
+```
+*Ví dụ:*
+- `[23103100026] [Module 1] Hoan thien Repository phan quyen va xac thuc Cookie Claims`
+- `[23103100020] [Module 2] Viet service phan trang LINQ Skip Take va loc giang vien`
+- `[23103100042] [Module 3] Toi uu giao dien Cong Hoc Vien Eduspace va autocomplete tim kiem`
+- `[23103100046] [Module 4] Hoan thien quy trinh thanh toan VietQR MB Bank va xac nhan hoc phi`
+- `[23103100003] [Module 5] Tinh diem trung binh he 10 he 4 va thuat toan kiem tra trung lich`
+
+---
+
+## 🎓 8. BỘ CÂU HỎI VẤN ĐÁP BẢO VỆ BÀI TẬP LỚN CHO 5 THÀNH VIÊN
+
+Bộ câu hỏi chuẩn sát thực tế chấm điểm của các Thầy/Cô Khoa CNTT - UNETI:
+
+### 🔹 Sinh viên 1: Vũ Đình Trường (23103100026 - Module 1)
+1. **Câu hỏi:** *Cơ chế xác thực của hệ thống sử dụng gì? Khác biệt giữa Session và Cookie Authentication với Claims?*  
+   **Trả lời:** Hệ thống sử dụng Cookie Authentication kết hợp Claims. Khi đăng nhập thành công qua `ITaiKhoanService.KiemTraDangNhapAsync()`, hệ thống tạo `ClaimsIdentity` chứa `NameIdentifier` (ID), `Name` (Họ tên), `Role` (`Admin`, `GiaoVu`, `HocVien`) và ghi vào cookie bảo mật HTTP-Only. Đồng thời dùng Session để lưu trữ thông tin hiển thị nhanh trên Header.
+2. **Câu hỏi:** *Chỉ ra vị trí code kiểm tra quyền truy cập không cho người dùng gõ thẳng URL vào trang Admin?*  
+   **Trả lời:** Sử dụng thuộc tính `[Authorize(Roles = "Admin,GiaoVu")]` trên đầu `AdminController` và `ChuongTrinhDaoTaoController`. Nếu người dùng chưa đăng nhập, hệ thống tự động redirect về `/TaiKhoan/DangNhap`. Nếu sai quyền sẽ dẫn tới `/Home/AccessDenied`.
+
+### 🔹 Sinh viên 2: Nguyễn Đình Kiên (23103100020 - Module 2)
+1. **Câu hỏi:** *Tại sao trong `LopHocRepository` phải dùng `Skip()` và `Take()` trước khi gọi `ToListAsync()`?*  
+   **Trả lời:** Dùng `Skip((pageIndex - 1) * pageSize).Take(pageSize)` trên `IQueryable` để Entity Framework sinh ra câu lệnh SQL có mệnh đề `OFFSET ... ROWS FETCH NEXT ... ROWS ONLY`. Dữ liệu chỉ được kéo đúng số bản ghi của trang đó từ Database về RAM, tối ưu tốc độ và không gây tràn bộ nhớ khi dữ liệu lớn.
+2. **Câu hỏi:** *Khi người dùng tìm kiếm và lọc dữ liệu, làm thế nào để khi bấm sang trang 2, trang 3 không bị mất bộ lọc?*  
+   **Trả lời:** Trên Razor View, các thẻ phân trang truyền kèm query string: `asp-route-keyword="@ViewBag.Keyword"`, `asp-route-trangThai="@ViewBag.TrangThai"`, `asp-route-maGiangVien="@ViewBag.MaGiangVien"`, nhờ đó giữ nguyên trạng thái tìm kiếm qua từng trang.
+
+### 🔹 Sinh viên 3: Nguyễn Đức Linh (23103100042 - Module 3)
+1. **Câu hỏi:** *Khi học viên bấm nộp hồ sơ đăng ký lớp học, hệ thống thực hiện kiểm tra những điều kiện gì?*  
+   **Trả lời:** Trong `IHocVienService.DangKyLopAsync()`, hệ thống kiểm tra 4 điều kiện qua LINQ:
+   - Học viên có tồn tại và đang hoạt động hay không.
+   - Lớp học có đang ở trạng thái "Đang mở đăng ký" và thời điểm hiện tại `<= HanDangKy`.
+   - Sĩ số lớp hiện tại có còn chỗ không (`SiSoHienTai < SiSoToiDa`).
+   - Học viên đã có đơn đăng ký lớp này ở trạng thái `ChoDuyet` hoặc `DaDuyet` chưa (chống spam đăng ký trùng lặp).
+2. **Câu hỏi:** *Tính năng tìm kiếm gợi ý tự động (Autocomplete) tại Cổng học viên được hiện thực như thế nào?*  
+   **Trả lời:** Sử dụng hàm JavaScript `searchGradeSubjects()` lắng nghe sự kiện `input`. Dữ liệu danh sách môn học được quét từ các dòng bảng điểm thực tế, hiển thị gợi ý tức thì dưới thanh tìm kiếm. Khi bấm vào gợi ý, hệ thống tự động cuộn đến môn học và làm nổi bật (highlight).
+
+### 🔹 Sinh viên 4: Nguyễn Hoàng Long (23103100046 - Module 4)
+1. **Câu hỏi:** *Quy trình đóng học phí bằng VietQR diễn ra thế nào? Làm sao để tránh việc học viên chưa chuyển tiền mà đã được vào học?*  
+   **Trả lời:** Khi học viên mở thanh toán, hệ thống sinh mã VietQR động theo định dạng Napas 24/7 với tài khoản MB Bank và số tiền chính xác của lớp. Sau khi chuyển, học viên bấm "Xác nhận đã chuyển" thì trạng thái chỉ là `ChoXacNhan`. Chỉ khi Giáo vụ kiểm tra tiền đã vào tài khoản và bấm "Xác nhận đã nộp học phí" trên trang quản lý của Giáo vụ thì trạng thái mới chuyển thành `DaDong` và kích hoạt quyền vào lớp.
+2. **Câu hỏi:** *Viết câu lệnh LINQ kiểm tra số học viên đã nộp học phí của lớp để chốt danh sách?*  
+   **Trả lời:** Trong `IDangKyHocRepository`:
+   ```csharp
+   int siSoDaNopTien = await _context.DangKyHocs
+       .CountAsync(d => d.MaLopHoc == maLop && d.TrangThaiHocPhi == "DaDong");
+   ```
+
+### 🔹 Sinh viên 5: Nguyễn Tùng Dương (23103100003 - Module 5)
+1. **Câu hỏi:** *Trình bày thuật toán kiểm tra xung đột thời khóa biểu khi xếp lịch học mới?*  
+   **Trả lời:** Trong `BuoiHocRepository`, thuật toán kiểm tra 3 điều kiện trùng: Trùng phòng học (`PhongHoc`), trùng giảng viên (`MaGiangVien`), và trùng lớp học (`MaLopHoc`) trong cùng một `NgayHoc` và `CaHoc`. Nếu tồn tại bất kỳ bản ghi nào thỏa mãn điều kiện đó (khác với mã buổi học đang cập nhật), hàm sẽ trả về `false` và thông báo lỗi cụ thể.
+2. **Câu hỏi:** *Công thức tính điểm trung bình tích lũy toàn khóa (GPA) theo thang điểm 10 và thang điểm 4 được thực hiện thế nào trong Repository?*  
+   **Trả lời:** Hệ thống lấy tất cả bản ghi từ bảng `KetQuaHocTap` kết hợp với bảng `LopHoc` và `ChuongTrinhDaoTao` để lấy số tín chỉ:
+   $$\text{GPA}_{10} = \frac{\sum (\text{DiemTongKet} \times \text{SoTinChi})}{\sum \text{SoTinChi}}$$
+   $$\text{GPA}_{4} = \frac{\sum (\text{DiemHe4} \times \text{SoTinChi})}{\sum \text{SoTinChi}}$$
+   Các môn có điểm F không tính vào tín chỉ tích lũy đạt nhưng vẫn được ghi nhận trong bảng điểm để theo dõi nợ học phần.
+
+---
+
+## 🏆 9. TỔNG KẾT & CAM KẾT ĐỒNG BỘ DỰ ÁN
+
+- **Kiến trúc đồng bộ:** 100% tuân thủ Repository Pattern, không pha tạp truy vấn DbContext vào tầng Controller.
+- **Giao diện hiện đại:** Chuẩn Responsive, Tailwind CSS với phối màu Indigo / Slate chuyên nghiệp, tối ưu trải nghiệm học viên và giáo vụ.
+- **Toàn vẹn CSDL:** Tích hợp bộ Seed Data mẫu hoàn chỉnh, đảm bảo mở máy lên là chạy trơn tru mà không cần cấu hình thủ công.
