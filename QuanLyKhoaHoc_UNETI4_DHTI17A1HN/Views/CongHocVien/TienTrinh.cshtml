@@ -101,12 +101,12 @@
             <button type="button" onclick="switchTab('schedule')" id="tab-btn-schedule"
                     class="@(activeTab == "schedule" ? activeBtnClass : inactiveBtnClass)">
                 <span class="material-symbols-outlined text-[20px]">calendar_month</span>
-                <span>Thời khóa biểu tuần (@buoiHocs.Count)</span>
+                <span>Thời khóa biểu tuần</span>
             </button>
             <button type="button" onclick="switchTab('grades')" id="tab-btn-grades"
                     class="@(activeTab == "grades" ? activeBtnClass : inactiveBtnClass)">
                 <span class="material-symbols-outlined text-[20px]">workspace_premium</span>
-                <span>Bảng điểm & Chứng nhận (@ketQuas.Count)</span>
+                <span>Bảng điểm & Chứng nhận</span>
             </button>
             <button type="button" onclick="switchTab('profile')" id="tab-btn-profile"
                     class="@(activeTab == "profile" ? activeBtnClass : inactiveBtnClass)">
@@ -520,28 +520,6 @@
 
     <!-- ================= TAB 3: BẢNG ĐIỂM & KẾT QUẢ HỌC TẬP ================= -->
     <div id="tab-content-grades" class="space-y-6 @(activeTab == "grades" ? "" : "hidden")">
-        <!-- Toolbar: Bộ lọc & Tìm kiếm nhanh môn học -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
-            <div class="flex items-center gap-2 flex-wrap">
-                <button type="button" onclick="filterGradeRows('all', this)" class="grade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary text-white shadow-xs cursor-pointer transition-all">
-                    Tất cả học phần
-                </button>
-                <button type="button" onclick="filterGradeRows('current', this)" class="grade-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">
-                    Đang học
-                </button>
-                <button type="button" onclick="filterGradeRows('pass', this)" class="grade-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">
-                    Đã hoàn thành (Đạt)
-                </button>
-                <button type="button" onclick="filterGradeRows('fail', this)" class="grade-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">
-                    Cần lưu ý / Nợ HP
-                </button>
-            </div>
-            <div class="relative min-w-[260px]">
-                <input type="text" oninput="searchGradeSubjects(this.value)" placeholder="Tìm kiếm môn học, giảng viên..." class="w-full text-xs pl-8 pr-3 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:border-primary transition-colors text-slate-800" />
-                <span class="material-symbols-outlined text-[16px] text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">search</span>
-            </div>
-        </div>
-
         <!-- Semester Block 1: HK1 2026-2027 (Current / Ongoing) -->
         <div class="semester-block bg-white rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden" data-semester-group="hk1_2627">
             <!-- Semester Subheader -->
@@ -559,11 +537,11 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-5 text-xs text-slate-500">
-                    <div><span class="text-slate-400">Đang học:</span> <strong class="text-blue-600 font-semibold font-mono">4 học phần</strong></div>
+                    <div><span class="text-slate-400">ĐTB Kỳ:</span> <strong class="text-blue-600 font-semibold font-mono">-- | --</strong></div>
                     <div class="h-3 w-px bg-slate-200"></div>
-                    <div><span class="text-slate-400">Tín chỉ ĐK:</span> <strong class="text-slate-800 font-semibold font-mono">13 TC</strong></div>
+                    <div><span class="text-slate-400">ĐTB Tích lũy:</span> <strong class="text-slate-800 font-semibold font-mono">2.90</strong></div>
                     <div class="h-3 w-px bg-slate-200"></div>
-                    <div><span class="text-slate-400">Tình trạng HP:</span> <strong class="text-rose-600 font-semibold font-mono">1 môn nợ HP</strong></div>
+                    <div><span class="text-slate-400">Lũy kế:</span> <strong class="text-slate-700 font-semibold font-mono">43 / 119 TC</strong></div>
                 </div>
             </div>
 
@@ -702,42 +680,6 @@
                                 </button>
                             </td>
                         </tr>
-
-                        <!-- Các lớp đăng ký thực tế khác của sinh viên (nếu có) -->
-                        @{
-                            int dynIdx = 5;
-                            var ongoingRegistrations = Model.Where(d => d.TrangThai == "Đang học" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Chờ xác nhận học phí").ToList();
-                        }
-                        @foreach (var dk in ongoingRegistrations)
-                        {
-                            var lp = dk.LopHoc;
-                            <tr class="hover:bg-slate-50/60 transition-colors grade-row" data-status="current">
-                                <td class="py-4 px-6 text-center font-mono text-slate-400">@(dynIdx++)</td>
-                                <td class="py-4 px-6">
-                                    <div class="font-semibold text-slate-900 text-sm subject-name">@(lp?.TenLop ?? $"Lớp #{dk.MaLopHoc}")</div>
-                                    <div class="text-[11px] text-slate-400 font-mono mt-0.5">#DK@(dk.MaDangKy.ToString("D3")) • GV: @(lp?.TenGiangVien ?? "GV Trung tâm")</div>
-                                </td>
-                                <td class="py-4 px-4 text-center font-mono font-medium">3</td>
-                                <td class="py-4 px-6">
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC 9.0</span>
-                                        <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX 8.5</span>
-                                    </div>
-                                </td>
-                                <td class="py-4 px-4 text-center text-slate-400 italic font-mono">Chưa thi</td>
-                                <td class="py-4 px-6 text-center font-mono text-slate-400 font-medium">--</td>
-                                <td class="py-4 px-4 text-center">
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Đang học
-                                    </span>
-                                </td>
-                                <td class="py-4 px-4 text-right pr-6">
-                                    <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer" onclick="openDetailDrawer('@(lp?.TenLop?.Replace("'", "\\'") ?? "")', 'DK@(dk.MaDangKy)', '3', '9.0', '8.5', '--', '--', 'Chưa thi', 'Học phần đang trong tiến trình học tập', 'Đang cập nhật')">
-                                        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-                                    </button>
-                                </td>
-                            </tr>
-                        }
                     </tbody>
                 </table>
             </div>
@@ -923,48 +865,6 @@
                                 </button>
                             </td>
                         </tr>
-
-                        <!-- Các môn đã có kết quả trong DB của sinh viên -->
-                        @{
-                            int completedDynIdx = 5;
-                        }
-                        @foreach (var kq in ketQuas)
-                        {
-                            var lp = kq.DangKyHoc?.LopHoc;
-                            bool isPassed = kq.KetQua == "Hoàn thành" || kq.KetQua == "Đạt" || kq.DiemTongKet >= 4.0;
-                            <tr class="hover:bg-slate-50/60 transition-colors grade-row" data-status="@(isPassed ? "pass" : "fail")">
-                                <td class="py-4 px-6 text-center font-mono text-slate-400">@(completedDynIdx++)</td>
-                                <td class="py-4 px-6">
-                                    <div class="font-semibold text-slate-900 text-sm subject-name">@(lp?.TenLop ?? "Khóa học")</div>
-                                    <div class="text-[11px] text-slate-400 font-mono mt-0.5">#DK@(kq.MaDangKy.ToString("D3")) • GV: @(lp?.TenGiangVien ?? "GV Bộ môn")</div>
-                                </td>
-                                <td class="py-4 px-4 text-center font-mono font-medium">3</td>
-                                <td class="py-4 px-6">
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC @kq.DiemChuyenCan</span>
-                                        <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX @kq.DiemChuyenCan</span>
-                                    </div>
-                                </td>
-                                <td class="py-4 px-4 text-center font-mono font-bold text-slate-800">@kq.DiemCuoiKhoa</td>
-                                <td class="py-4 px-6 text-center">
-                                    <div class="inline-flex items-center gap-1.5 font-mono">
-                                        <span class="font-bold text-slate-900">@kq.DiemTongKet.ToString("0.00")</span>
-                                        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded font-sans">@(kq.DiemChu ?? "A")</span>
-                                        <span class="text-slate-400 text-[11px]">(@(kq.DiemHe4?.ToString("0.0") ?? "4.0"))</span>
-                                    </div>
-                                </td>
-                                <td class="py-4 px-4 text-center">
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold @(isPassed ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700")">
-                                        <span class="w-1.5 h-1.5 rounded-full @(isPassed ? "bg-emerald-500" : "bg-rose-500")"></span> @(isPassed ? "Đạt" : "Chưa đạt")
-                                    </span>
-                                </td>
-                                <td class="py-4 px-4 text-right pr-6">
-                                    <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer" onclick="openDetailDrawer('@(lp?.TenLop?.Replace("'", "\\'") ?? "")', 'DK@(kq.MaDangKy)', '3', '@kq.DiemChuyenCan', '@kq.DiemChuyenCan', '--', '@kq.DiemCuoiKhoa', '@kq.DiemTongKet.ToString("0.00") (@(kq.DiemChu ?? "A"))', '@(kq.NhanXet?.Replace("'", "\\'") ?? "Hoàn thành học phần")', '@(kq.XepLoai ?? "Đạt")')">
-                                        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-                                    </button>
-                                </td>
-                            </tr>
-                        }
                     </tbody>
                 </table>
             </div>
