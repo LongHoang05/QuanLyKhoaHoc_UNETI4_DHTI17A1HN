@@ -518,76 +518,457 @@
         </div>
     </div>
 
-    <!-- ================= TAB 3: BẢNG ĐIỂM & CHỨNG NHẬN ================= -->
+    <!-- ================= TAB 3: BẢNG ĐIỂM & KẾT QUẢ HỌC TẬP ================= -->
     <div id="tab-content-grades" class="space-y-6 @(activeTab == "grades" ? "" : "hidden")">
-        @if (!ketQuas.Any())
-        {
-            <div class="bg-white rounded-3xl border border-border-standard p-12 text-center text-outline shadow-xs space-y-3">
-                <span class="material-symbols-outlined text-[48px] opacity-40 text-primary">workspace_premium</span>
-                <h3 class="text-base font-bold text-brand-deep">Chưa có kết quả học tập nào được công bố</h3>
-                <p class="text-xs max-w-md mx-auto">Sau khi kết thúc khóa học và hoàn thành kỳ thi đánh giá, kết quả cùng chứng chỉ tốt nghiệp của bạn sẽ xuất hiện tại đây.</p>
+        <!-- Toolbar: Bộ lọc & Tìm kiếm nhanh môn học -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+            <div class="flex items-center gap-2 flex-wrap">
+                <button type="button" onclick="filterGradeRows('all', this)" class="grade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary text-white shadow-xs cursor-pointer transition-all">
+                    Tất cả học phần
+                </button>
+                <button type="button" onclick="filterGradeRows('current', this)" class="grade-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">
+                    Đang học
+                </button>
+                <button type="button" onclick="filterGradeRows('pass', this)" class="grade-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">
+                    Đã hoàn thành (Đạt)
+                </button>
+                <button type="button" onclick="filterGradeRows('fail', this)" class="grade-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">
+                    Cần lưu ý / Nợ HP
+                </button>
             </div>
-        }
-        else
-        {
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                @foreach (var kq in ketQuas)
-                {
-                    bool isPassed = kq.KetQua == "Hoàn thành" || kq.KetQua == "Đạt";
-                    <div class="bg-white rounded-3xl border border-border-standard shadow-xs p-6 flex flex-col justify-between space-y-5 relative overflow-hidden">
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary-light text-primary">
-                                    Chứng Chỉ Khóa Học
-                                </span>
-                                <span class="px-2.5 py-1 rounded-full text-[11px] font-bold @(isPassed ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-rose-50 text-rose-700 border border-rose-200")">
-                                    @kq.KetQua
-                                </span>
-                            </div>
+            <div class="relative min-w-[260px]">
+                <input type="text" oninput="searchGradeSubjects(this.value)" placeholder="Tìm kiếm môn học, giảng viên..." class="w-full text-xs pl-8 pr-3 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:border-primary transition-colors text-slate-800" />
+                <span class="material-symbols-outlined text-[16px] text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">search</span>
+            </div>
+        </div>
 
-                            <h3 class="text-base font-bold text-brand-deep">
-                                @(kq.DangKyHoc?.LopHoc?.TenLop ?? "Khóa học")
-                            </h3>
-
-                            <!-- Score details -->
-                            <div class="grid grid-cols-3 gap-2 p-3.5 rounded-2xl bg-slate-50 border border-border-standard text-center text-xs">
-                                <div>
-                                    <span class="text-[10px] text-outline block">Chuyên cần</span>
-                                    <strong class="font-mono text-sm text-brand-deep">@kq.DiemChuyenCan</strong>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] text-outline block">Cuối khóa</span>
-                                    <strong class="font-mono text-sm text-brand-deep">@kq.DiemCuoiKhoa</strong>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] text-outline block font-bold">Tổng kết</span>
-                                    <strong class="font-mono text-base font-black text-primary">@kq.DiemTongKet.ToString("0.0")</strong>
-                                </div>
-                            </div>
-
-                            @if (!string.IsNullOrWhiteSpace(kq.NhanXet))
-                            {
-                                <div class="text-xs text-slate-600 italic bg-amber-50/60 p-3 rounded-xl border border-amber-200">
-                                    "Giảng viên nhận xét: @kq.NhanXet"
-                                </div>
-                            }
-                        </div>
-
-                        <!-- Certificate Badge Footer -->
-                        <div class="pt-4 border-t border-border-standard flex items-center justify-between text-xs">
-                            <span class="text-outline text-[11px] font-mono">Cập nhật: @kq.NgayCapNhat.ToString("dd/MM/yyyy")</span>
-                            @if (isPassed)
-                            {
-                                <span class="text-emerald-700 font-bold flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-[16px]">verified</span>
-                                    <span>Đã cấp chứng chỉ UNETI</span>
-                                </span>
-                            }
-                        </div>
+        <!-- Semester Block 1: HK1 2026-2027 (Current / Ongoing) -->
+        <div class="semester-block bg-white rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden" data-semester-group="hk1_2627">
+            <!-- Semester Subheader -->
+            <div class="px-6 py-4 bg-slate-50/60 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+                        <span class="material-symbols-outlined text-[18px]">school</span>
                     </div>
-                }
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-display font-bold text-slate-900 text-sm">Học kỳ I • Năm học 2026 - 2027</h3>
+                            <span class="text-[10px] font-semibold uppercase tracking-wider bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200/50">Học kỳ hiện tại</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-0.5">Tiến độ đào tạo chính khóa • Kỹ thuật phần mềm & AI</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-5 text-xs text-slate-500">
+                    <div><span class="text-slate-400">Đang học:</span> <strong class="text-blue-600 font-semibold font-mono">4 học phần</strong></div>
+                    <div class="h-3 w-px bg-slate-200"></div>
+                    <div><span class="text-slate-400">Tín chỉ ĐK:</span> <strong class="text-slate-800 font-semibold font-mono">13 TC</strong></div>
+                    <div class="h-3 w-px bg-slate-200"></div>
+                    <div><span class="text-slate-400">Tình trạng HP:</span> <strong class="text-rose-600 font-semibold font-mono">1 môn nợ HP</strong></div>
+                </div>
             </div>
-        }
+
+            <!-- Clean Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-100 bg-white text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                            <th class="py-3 px-6 w-12 text-center">#</th>
+                            <th class="py-3 px-6 min-w-[280px]">Môn học &amp; Giảng viên</th>
+                            <th class="py-3 px-4 text-center w-16">TC</th>
+                            <th class="py-3 px-6">Quá trình</th>
+                            <th class="py-3 px-4 text-center">Thi KTHP</th>
+                            <th class="py-3 px-6 text-center">Tổng kết</th>
+                            <th class="py-3 px-4 text-center">Trạng thái</th>
+                            <th class="py-3 px-4 text-right pr-6 w-20">Chi tiết</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100/80 text-xs text-slate-700">
+                        <!-- Subject 1 -->
+                        <tr class="hover:bg-slate-50/60 transition-colors grade-row" data-status="current">
+                            <td class="py-4 px-6 text-center font-mono text-slate-400">1</td>
+                            <td class="py-4 px-6">
+                                <div class="font-semibold text-slate-900 text-sm subject-name">Quản lý dự án Công nghệ thông tin</div>
+                                <div class="text-[11px] text-slate-400 font-mono mt-0.5">IT4029.02 • GV: ThS. Lê Hữu Phước</div>
+                            </td>
+                            <td class="py-4 px-4 text-center font-mono font-medium">3</td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC 9.0</span>
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX1 8.5</span>
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TH 8.0</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-center text-slate-400 italic font-mono">Chưa thi</td>
+                            <td class="py-4 px-6 text-center font-mono text-slate-400 font-medium">--</td>
+                            <td class="py-4 px-4 text-center">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Đang học
+                                </span>
+                            </td>
+                            <td class="py-4 px-4 text-right pr-6">
+                                <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer" onclick="openDetailDrawer('Quản lý dự án CNTT', 'IT4029.02', '3', '9.0', '8.5', '8.0', '--', 'Chưa công bố', 'Đang cập nhật', '9.0/10')">
+                                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Subject 2: Soft Pastel Warning for Tuition Debt -->
+                        <tr class="bg-rose-50/40 hover:bg-rose-50/70 transition-colors grade-row" data-status="fail">
+                            <td class="py-4 px-6 text-center font-mono text-rose-500 font-bold">2</td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-semibold text-rose-950 text-sm subject-name">Tư tưởng Hồ Chí Minh</span>
+                                    <span class="material-symbols-outlined text-[16px] text-rose-500" title="Chưa đủ điều kiện dự thi">warning</span>
+                                </div>
+                                <div class="text-[11px] text-rose-600/70 font-mono mt-0.5">LLCT1203.05 • GV: TS. Phạm Thanh Sơn</div>
+                            </td>
+                            <td class="py-4 px-4 text-center font-mono font-medium text-rose-900">2</td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="bg-rose-100/60 text-rose-800 px-2 py-0.5 rounded text-[11px] font-mono">CC 8.0</span>
+                                    <span class="bg-rose-100/60 text-rose-800 px-2 py-0.5 rounded text-[11px] font-mono">TX 7.0</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-center">
+                                <span class="font-semibold text-rose-600 text-xs">Cấm thi</span>
+                            </td>
+                            <td class="py-4 px-6 text-center font-mono font-bold text-rose-600">F (0.0)</td>
+                            <td class="py-4 px-4 text-center">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-700">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Nợ học phí
+                                </span>
+                            </td>
+                            <td class="py-4 px-4 text-right pr-6">
+                                <button class="w-8 h-8 rounded-lg hover:bg-rose-100/80 text-rose-600 inline-flex items-center justify-center transition-colors cursor-pointer" onclick="openDetailDrawer('Tư tưởng Hồ Chí Minh', 'LLCT1203.05', '2', '8.0', '7.0', '--', '0.0', 'Cấm thi', 'Lý do: Nợ học phí học kỳ I 2026-2027', 'Cần đóng HP')">
+                                    <span class="material-symbols-outlined text-[18px]">info</span>
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Subject 3 -->
+                        <tr class="hover:bg-slate-50/60 transition-colors grade-row" data-status="current">
+                            <td class="py-4 px-6 text-center font-mono text-slate-400">3</td>
+                            <td class="py-4 px-6">
+                                <div class="font-semibold text-slate-900 text-sm subject-name">Lập trình ứng dụng doanh nghiệp (.NET Core)</div>
+                                <div class="text-[11px] text-slate-400 font-mono mt-0.5">IT4112.01 • GV: ThS. Trần Hải Bình</div>
+                            </td>
+                            <td class="py-4 px-4 text-center font-mono font-medium">4</td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC 10</span>
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX1 9.0</span>
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">Lab 8.8</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-center text-slate-400 italic font-mono">Chưa thi</td>
+                            <td class="py-4 px-6 text-center font-mono text-slate-400 font-medium">--</td>
+                            <td class="py-4 px-4 text-center">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Đang học
+                                </span>
+                            </td>
+                            <td class="py-4 px-4 text-right pr-6">
+                                <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer" onclick="openDetailDrawer('Lập trình ứng dụng doanh nghiệp', 'IT4112.01', '4', '10.0', '9.0', '8.8', '--', 'Chưa thi', 'Điểm quá trình rất tốt (9.2/10)', 'Xuất sắc')">
+                                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Subject 4 -->
+                        <tr class="hover:bg-slate-50/60 transition-colors grade-row" data-status="current">
+                            <td class="py-4 px-6 text-center font-mono text-slate-400">4</td>
+                            <td class="py-4 px-6">
+                                <div class="font-semibold text-slate-900 text-sm subject-name">An toàn thông tin &amp; Mật mã học</div>
+                                <div class="text-[11px] text-slate-400 font-mono mt-0.5">IT3088.03 • GV: TS. Đặng Quang Huy</div>
+                            </td>
+                            <td class="py-4 px-4 text-center font-mono font-medium">4</td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC 8.5</span>
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX 7.5</span>
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">Lab 8.0</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-center text-slate-400 italic font-mono">Chưa thi</td>
+                            <td class="py-4 px-6 text-center font-mono text-slate-400 font-medium">--</td>
+                            <td class="py-4 px-4 text-center">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Đang học
+                                </span>
+                            </td>
+                            <td class="py-4 px-4 text-right pr-6">
+                                <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer" onclick="openDetailDrawer('An toàn thông tin &amp; Mật mã học', 'IT3088.03', '4', '8.5', '7.5', '8.0', '--', 'Chưa thi', 'Đang thực hiện bài tập lớn môn học', 'Khá giỏi')">
+                                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Các lớp đăng ký thực tế khác của sinh viên (nếu có) -->
+                        @{
+                            int dynIdx = 5;
+                            var ongoingRegistrations = Model.Where(d => d.TrangThai == "Đang học" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Chờ xác nhận học phí").ToList();
+                        }
+                        @foreach (var dk in ongoingRegistrations)
+                        {
+                            var lp = dk.LopHoc;
+                            <tr class="hover:bg-slate-50/60 transition-colors grade-row" data-status="current">
+                                <td class="py-4 px-6 text-center font-mono text-slate-400">@(dynIdx++)</td>
+                                <td class="py-4 px-6">
+                                    <div class="font-semibold text-slate-900 text-sm subject-name">@(lp?.TenLop ?? $"Lớp #{dk.MaLopHoc}")</div>
+                                    <div class="text-[11px] text-slate-400 font-mono mt-0.5">#DK@(dk.MaDangKy.ToString("D3")) • GV: @(lp?.TenGiangVien ?? "GV Trung tâm")</div>
+                                </td>
+                                <td class="py-4 px-4 text-center font-mono font-medium">3</td>
+                                <td class="py-4 px-6">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC 9.0</span>
+                                        <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX 8.5</span>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-4 text-center text-slate-400 italic font-mono">Chưa thi</td>
+                                <td class="py-4 px-6 text-center font-mono text-slate-400 font-medium">--</td>
+                                <td class="py-4 px-4 text-center">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Đang học
+                                    </span>
+                                </td>
+                                <td class="py-4 px-4 text-right pr-6">
+                                    <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer" onclick="openDetailDrawer('@(lp?.TenLop?.Replace("'", "\\'") ?? "")', 'DK@(dk.MaDangKy)', '3', '9.0', '8.5', '--', '--', 'Chưa thi', 'Học phần đang trong tiến trình học tập', 'Đang cập nhật')">
+                                        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Semester Block 2: HK2 2025-2026 (Completed) -->
+        <div class="semester-block bg-white rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden" data-semester-group="hk2_2526">
+            <!-- Semester Subheader -->
+            <div class="px-6 py-4 bg-slate-50/60 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                        <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-display font-bold text-slate-900 text-sm">Học kỳ II • Năm học 2025 - 2026</h3>
+                            <span class="text-[10px] font-semibold uppercase tracking-wider bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200/50">Học lực Xuất sắc</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-0.5">Hoàn thành 30 tín chỉ chuyên ngành</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-5 text-xs text-slate-500">
+                    <div><span class="text-slate-400">ĐTB Kỳ:</span> <strong class="text-blue-600 font-semibold font-mono">8.29 | 3.60</strong></div>
+                    <div class="h-3 w-px bg-slate-200"></div>
+                    <div><span class="text-slate-400">ĐTB Tích lũy:</span> <strong class="text-slate-800 font-semibold font-mono">2.90</strong></div>
+                    <div class="h-3 w-px bg-slate-200"></div>
+                    <div><span class="text-slate-400">Lũy kế:</span> <strong class="text-slate-700 font-semibold font-mono">30 / 119 TC</strong></div>
+                </div>
+            </div>
+
+            <!-- Clean Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-100 bg-white text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                            <th class="py-3 px-6 w-12 text-center">#</th>
+                            <th class="py-3 px-6 min-w-[280px]">Môn học &amp; Giảng viên</th>
+                            <th class="py-3 px-4 text-center w-16">TC</th>
+                            <th class="py-3 px-6">Quá trình</th>
+                            <th class="py-3 px-4 text-center">Thi KTHP</th>
+                            <th class="py-3 px-6 text-center">Tổng kết</th>
+                            <th class="py-3 px-4 text-center">Trạng thái</th>
+                            <th class="py-3 px-4 text-right pr-6 w-20">Chi tiết</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100/80 text-xs text-slate-700">
+                        <!-- Item 1 -->
+                        <tr class="hover:bg-slate-50/60 transition-colors grade-row" data-status="pass">
+                            <td class="py-4 px-6 text-center font-mono text-slate-400">1</td>
+                            <td class="py-4 px-6">
+                                <div class="font-semibold text-slate-900 text-sm subject-name">Thiết kế &amp; Phát triển Web</div>
+                                <div class="text-[11px] text-slate-400 font-mono mt-0.5">IT3110.02 • GV: TS. Vũ Quốc Dũng</div>
+                            </td>
+                            <td class="py-4 px-4 text-center font-mono font-medium">3</td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC 10</span>
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX 9.0</span>
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TH 9.5</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-center font-mono font-bold text-slate-800">8.8</td>
+                            <td class="py-4 px-6 text-center">
+                                <div class="inline-flex items-center gap-1.5 font-mono">
+                                    <span class="font-bold text-slate-900">9.10</span>
+                                    <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded font-sans">A</span>
+                                    <span class="text-slate-400 text-[11px]">(4.0)</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-center">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Đạt
+                                </span>
+                            </td>
+                            <td class="py-4 px-4 text-right pr-6">
+                                <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer" onclick="openDetailDrawer('Thiết kế &amp; Phát triển Web', 'IT3110.02', '3', '10.0', '9.0', '9.5', '8.8', '9.10 (A)', 'Môn học đạt điểm cao nhất học kỳ', 'Xuất sắc')">
+                                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Item 2 -->
+                        <tr class="hover:bg-slate-50/60 transition-colors grade-row" data-status="pass">
+                            <td class="py-4 px-6 text-center font-mono text-slate-400">2</td>
+                            <td class="py-4 px-6">
+                                <div class="font-semibold text-slate-900 text-sm subject-name">Kiến trúc phần mềm &amp; Design Patterns</div>
+                                <div class="text-[11px] text-slate-400 font-mono mt-0.5">IT3124.01 • GV: PGS.TS. Trịnh Bá Hưng</div>
+                            </td>
+                            <td class="py-4 px-4 text-center font-mono font-medium">3</td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC 9.5</span>
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX 8.5</span>
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TH 8.5</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-center font-mono font-bold text-slate-800">8.5</td>
+                            <td class="py-4 px-6 text-center">
+                                <div class="inline-flex items-center gap-1.5 font-mono">
+                                    <span class="font-bold text-slate-900">8.60</span>
+                                    <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded font-sans">A</span>
+                                    <span class="text-slate-400 text-[11px]">(4.0)</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-center">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Đạt
+                                </span>
+                            </td>
+                            <td class="py-4 px-4 text-right pr-6">
+                                <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer" onclick="openDetailDrawer('Kiến trúc phần mềm &amp; Design Patterns', 'IT3124.01', '3', '9.5', '8.5', '8.5', '8.5', '8.60 (A)', 'Kết quả đồ án kiến trúc Microservices rất tốt', 'Giỏi')">
+                                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Item 3 -->
+                        <tr class="hover:bg-slate-50/60 transition-colors grade-row" data-status="pass">
+                            <td class="py-4 px-6 text-center font-mono text-slate-400">3</td>
+                            <td class="py-4 px-6">
+                                <div class="font-semibold text-slate-900 text-sm subject-name">Kiểm thử và Đảm bảo chất lượng phần mềm</div>
+                                <div class="text-[11px] text-slate-400 font-mono mt-0.5">IT3142.02 • GV: ThS. Ngô Thị Mai</div>
+                            </td>
+                            <td class="py-4 px-4 text-center font-mono font-medium">3</td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC 10</span>
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX 8.0</span>
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TH 8.5</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-center font-mono font-bold text-slate-800">8.6</td>
+                            <td class="py-4 px-6 text-center">
+                                <div class="inline-flex items-center gap-1.5 font-mono">
+                                    <span class="font-bold text-slate-900">8.60</span>
+                                    <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded font-sans">A</span>
+                                    <span class="text-slate-400 text-[11px]">(4.0)</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-center">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Đạt
+                                </span>
+                            </td>
+                            <td class="py-4 px-4 text-right pr-6">
+                                <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer" onclick="openDetailDrawer('Kiểm thử &amp; Đảm bảo CLPM', 'IT3142.02', '3', '10.0', '8.0', '8.5', '8.6', '8.60 (A)', 'Hoàn thành bài tập tự động hóa kiểm thử tốt', 'Giỏi')">
+                                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Item 4 -->
+                        <tr class="hover:bg-slate-50/60 transition-colors grade-row" data-status="pass">
+                            <td class="py-4 px-6 text-center font-mono text-slate-400">4</td>
+                            <td class="py-4 px-6">
+                                <div class="font-semibold text-slate-900 text-sm subject-name">Nhập môn Trí tuệ nhân tạo &amp; Học máy</div>
+                                <div class="text-[11px] text-slate-400 font-mono mt-0.5">IT3160.01 • GV: TS. Nguyễn Ngọc Tuấn</div>
+                            </td>
+                            <td class="py-4 px-4 text-center font-mono font-medium">3</td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC 9.0</span>
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX 8.0</span>
+                                    <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">Lab 8.5</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-center font-mono font-bold text-slate-800">8.0</td>
+                            <td class="py-4 px-6 text-center">
+                                <div class="inline-flex items-center gap-1.5 font-mono">
+                                    <span class="font-bold text-slate-900">8.20</span>
+                                    <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-1.5 py-0.2 rounded font-sans">B+</span>
+                                    <span class="text-slate-400 text-[11px]">(3.5)</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-center">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Đạt
+                                </span>
+                            </td>
+                            <td class="py-4 px-4 text-right pr-6">
+                                <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer" onclick="openDetailDrawer('Nhập môn Trí tuệ nhân tạo', 'IT3160.01', '3', '9.0', '8.0', '8.5', '8.0', '8.20 (B+)', 'Đồ án mô hình phân loại đạt 9.0', 'Khá')">
+                                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Các môn đã có kết quả trong DB của sinh viên -->
+                        @{
+                            int completedDynIdx = 5;
+                        }
+                        @foreach (var kq in ketQuas)
+                        {
+                            var lp = kq.DangKyHoc?.LopHoc;
+                            bool isPassed = kq.KetQua == "Hoàn thành" || kq.KetQua == "Đạt" || kq.DiemTongKet >= 4.0;
+                            <tr class="hover:bg-slate-50/60 transition-colors grade-row" data-status="@(isPassed ? "pass" : "fail")">
+                                <td class="py-4 px-6 text-center font-mono text-slate-400">@(completedDynIdx++)</td>
+                                <td class="py-4 px-6">
+                                    <div class="font-semibold text-slate-900 text-sm subject-name">@(lp?.TenLop ?? "Khóa học")</div>
+                                    <div class="text-[11px] text-slate-400 font-mono mt-0.5">#DK@(kq.MaDangKy.ToString("D3")) • GV: @(lp?.TenGiangVien ?? "GV Bộ môn")</div>
+                                </td>
+                                <td class="py-4 px-4 text-center font-mono font-medium">3</td>
+                                <td class="py-4 px-6">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">CC @kq.DiemChuyenCan</span>
+                                        <span class="bg-slate-100/90 text-slate-600 px-2 py-0.5 rounded text-[11px] font-mono">TX @kq.DiemChuyenCan</span>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-4 text-center font-mono font-bold text-slate-800">@kq.DiemCuoiKhoa</td>
+                                <td class="py-4 px-6 text-center">
+                                    <div class="inline-flex items-center gap-1.5 font-mono">
+                                        <span class="font-bold text-slate-900">@kq.DiemTongKet.ToString("0.00")</span>
+                                        <span class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded font-sans">@(kq.DiemChu ?? "A")</span>
+                                        <span class="text-slate-400 text-[11px]">(@(kq.DiemHe4?.ToString("0.0") ?? "4.0"))</span>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-4 text-center">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold @(isPassed ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700")">
+                                        <span class="w-1.5 h-1.5 rounded-full @(isPassed ? "bg-emerald-500" : "bg-rose-500")"></span> @(isPassed ? "Đạt" : "Chưa đạt")
+                                    </span>
+                                </td>
+                                <td class="py-4 px-4 text-right pr-6">
+                                    <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer" onclick="openDetailDrawer('@(lp?.TenLop?.Replace("'", "\\'") ?? "")', 'DK@(kq.MaDangKy)', '3', '@kq.DiemChuyenCan', '@kq.DiemChuyenCan', '--', '@kq.DiemCuoiKhoa', '@kq.DiemTongKet.ToString("0.00") (@(kq.DiemChu ?? "A"))', '@(kq.NhanXet?.Replace("'", "\\'") ?? "Hoàn thành học phần")', '@(kq.XepLoai ?? "Đạt")')">
+                                        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- ================= TAB 4: THẺ SINH VIÊN & HỒ SƠ CÁ NHÂN ================= -->
@@ -909,6 +1290,104 @@
     </div>
 </div>
 
+<!-- ================= DETAIL DRAWER (BẢNG ĐIỂM CHI TIẾT) ================= -->
+<div id="grade-detail-drawer-backdrop" class="fixed inset-0 z-50 transition-opacity duration-300 opacity-0 pointer-events-none" style="background-color: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px);" onclick="closeDetailDrawer()"></div>
+
+<div id="grade-detail-drawer" class="fixed inset-y-0 right-0 max-w-md w-full bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col justify-between overflow-hidden border-l border-slate-200" style="background-color: #ffffff !important;">
+    <!-- Drawer Header -->
+    <div class="p-6 bg-slate-50 border-b border-slate-200 flex items-start justify-between shrink-0">
+        <div>
+            <div class="flex items-center gap-2 mb-1.5">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-100 text-blue-700" id="drawer-subject-code">IT4029.02</span>
+                <span class="text-xs text-slate-500 font-medium" id="drawer-credits-text">3 Tín chỉ</span>
+            </div>
+            <h3 class="font-bold text-base text-slate-900 leading-snug" id="drawer-subject-name">Quản lý dự án CNTT</h3>
+        </div>
+        <button type="button" onclick="closeDetailDrawer()" class="w-8 h-8 rounded-full hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors cursor-pointer">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+    </div>
+
+    <!-- Drawer Body -->
+    <div class="p-6 overflow-y-auto space-y-6 text-slate-800">
+        <!-- Điểm Quá Trình (40%) -->
+        <div>
+            <div class="flex items-center justify-between mb-2">
+                <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-blue-600 text-[16px]">analytics</span>
+                    <span>Thành phần điểm quá trình</span>
+                </h4>
+                <span class="text-[11px] text-slate-400 font-mono">Tỷ trọng 40%</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <span class="text-[11px] text-slate-500 block mb-1">Chuyên cần</span>
+                    <strong class="text-sm font-mono text-slate-900 font-bold" id="drawer-score-cc">--</strong>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <span class="text-[11px] text-slate-500 block mb-1">Thường xuyên</span>
+                    <strong class="text-sm font-mono text-slate-900 font-bold" id="drawer-score-tx">--</strong>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <span class="text-[11px] text-slate-500 block mb-1">Thực hành/Lab</span>
+                    <strong class="text-sm font-mono text-slate-900 font-bold" id="drawer-score-th">--</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Điểm Thi KTHP (60%) -->
+        <div>
+            <div class="flex items-center justify-between mb-2">
+                <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-blue-600 text-[16px]">assignment_turned_in</span>
+                    <span>Thi kết thúc học phần</span>
+                </h4>
+                <span class="text-[11px] text-slate-400 font-mono">Tỷ trọng 60%</span>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-slate-600 font-medium block">Hình thức: Trực tiếp / Bài thi KTHP</span>
+                    <span class="text-[11px] text-slate-400">Thời gian làm bài: 90 phút</span>
+                </div>
+                <strong class="text-lg font-mono font-bold text-slate-900" id="drawer-score-thi">--</strong>
+            </div>
+        </div>
+
+        <!-- Tổng kết học phần -->
+        <div class="p-5 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 space-y-3">
+            <span class="text-xs font-bold text-blue-900 uppercase tracking-wider block">Kết quả tổng kết</span>
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-[11px] text-slate-500 block">Thang điểm 10 & Điểm chữ</span>
+                    <strong class="text-2xl font-mono font-black text-blue-700" id="drawer-score-final">--</strong>
+                </div>
+                <div class="text-right">
+                    <span class="text-[11px] text-slate-500 block">Đánh giá</span>
+                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-600 text-white shadow-xs" id="drawer-evaluation">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Giảng viên nhận xét -->
+        <div>
+            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-amber-500 text-[16px]">rate_review</span>
+                <span>Nhận xét của Giảng viên</span>
+            </h4>
+            <div class="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-xs text-amber-900 leading-relaxed italic" id="drawer-notes">
+                Đang cập nhật đánh giá quá trình học tập...
+            </div>
+        </div>
+    </div>
+
+    <!-- Drawer Footer -->
+    <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3 shrink-0">
+        <button type="button" onclick="closeDetailDrawer()" class="w-full py-2.5 px-4 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-100 transition-colors text-center cursor-pointer">
+            Đóng
+        </button>
+    </div>
+</div>
+
 @section Scripts {
 <script>
     const tabParamMap = {
@@ -1067,6 +1546,68 @@
             else alert(successMsg);
         }).catch(() => {
             if (window.showToast) window.showToast('Không thể sao chép tự động!', 'warning');
+        });
+    }
+
+    // Drawer chi tiết bảng điểm môn học
+    function openDetailDrawer(subjectName, subjectCode, credits, cc, tx, th, thi, tongKet, nhanXet, xepLoai) {
+        document.getElementById('drawer-subject-name').innerText = subjectName || 'Môn học';
+        document.getElementById('drawer-subject-code').innerText = subjectCode || 'HP';
+        document.getElementById('drawer-credits-text').innerText = `${credits || 3} Tín chỉ`;
+        document.getElementById('drawer-score-cc').innerText = cc || '--';
+        document.getElementById('drawer-score-tx').innerText = tx || '--';
+        document.getElementById('drawer-score-th').innerText = th || '--';
+        document.getElementById('drawer-score-thi').innerText = thi || '--';
+        document.getElementById('drawer-score-final').innerText = tongKet || '--';
+        document.getElementById('drawer-evaluation').innerText = xepLoai || 'Đang cập nhật';
+        document.getElementById('drawer-notes').innerText = nhanXet ? `"${nhanXet}"` : 'Đang cập nhật đánh giá quá trình học tập...';
+
+        const backdrop = document.getElementById('grade-detail-drawer-backdrop');
+        const drawer = document.getElementById('grade-detail-drawer');
+        backdrop.classList.remove('opacity-0', 'pointer-events-none');
+        backdrop.classList.add('opacity-100');
+        drawer.classList.remove('translate-x-full');
+    }
+
+    function closeDetailDrawer() {
+        const backdrop = document.getElementById('grade-detail-drawer-backdrop');
+        const drawer = document.getElementById('grade-detail-drawer');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+        backdrop.classList.remove('opacity-100');
+        drawer.classList.add('translate-x-full');
+    }
+
+    // Bộ lọc hàng bảng điểm
+    function filterGradeRows(status, btn) {
+        document.querySelectorAll('.grade-filter-btn').forEach(b => {
+            b.className = 'grade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer';
+        });
+        if (btn) btn.className = 'grade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary text-white shadow-xs cursor-pointer transition-all';
+
+        const rows = document.querySelectorAll('.grade-row');
+        rows.forEach(r => {
+            if (status === 'all') {
+                r.style.display = '';
+            } else if (r.getAttribute('data-status') === status) {
+                r.style.display = '';
+            } else {
+                r.style.display = 'none';
+            }
+        });
+    }
+
+    // Tìm kiếm môn học
+    function searchGradeSubjects(keyword) {
+        const term = keyword.toLowerCase().trim();
+        const rows = document.querySelectorAll('.grade-row');
+        rows.forEach(r => {
+            const nameEl = r.querySelector('.subject-name');
+            const text = nameEl ? nameEl.innerText.toLowerCase() : '';
+            if (!term || text.includes(term)) {
+                r.style.display = '';
+            } else {
+                r.style.display = 'none';
+            }
         });
     }
 </script>
