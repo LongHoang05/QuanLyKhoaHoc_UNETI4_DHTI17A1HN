@@ -299,6 +299,33 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             return Json(new { success = true, message = $"Đã hủy đăng ký lớp '{dk.LopHoc?.TenLop}' thành công." });
         }
 
+        // --- HỌC VIÊN BÁO ĐÃ CHUYỂN KHOẢN (CHUYỂN SANG 'Chờ xác nhận học phí' ĐỂ GIÁO VỤ XÁC NHẬN) ---
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ThanhToanHocPhi(int maDangKy, string? ghiChu)
+        {
+            var student = await GetCurrentHocVienAsync();
+            if (student == null) return RedirectToAction("DangNhap", "TaiKhoan");
+
+            var dk = await _dangKyHocRepo.GetByIdWithDetailsAsync(maDangKy);
+            if (dk != null && dk.MaHocVien == student.MaHocVien)
+            {
+                // Khi học viên bấm đã chuyển khoản:
+                // KHÔNG vào thẳng "Đã đóng học phí" mà chuyển sang "Chờ xác nhận học phí"
+                // để Giáo vụ đối soát và bấm xác nhận thu phí
+                dk.TrangThai = "Chờ xác nhận học phí";
+                string thoiGian = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+                dk.GhiChu = string.IsNullOrWhiteSpace(ghiChu)
+                    ? $"[VietQR] Học viên báo đã chuyển khoản lúc {thoiGian}"
+                    : $"[VietQR] {ghiChu.Trim()} (Báo lúc {thoiGian})";
+
+                await _dangKyHocRepo.UpdateAsync(dk);
+                TempData["Success"] = $"Đã gửi thông báo đã chuyển khoản lớp '{dk.LopHoc?.TenLop}'! Giáo vụ sẽ kiểm tra và xác nhận học phí cho bạn.";
+            }
+
+            return RedirectToAction(nameof(TienTrinh), new { tab = "dangky" });
+        }
+
         // --- KHÔNG GIAN HỌC TẬP CỦA TÔI (MY LEARNING DASHBOARD) ---
         public async Task<IActionResult> TienTrinh(string? tab = null, DateTime? weekStart = null, int? maLop = null)
         {
@@ -337,7 +364,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             // Danh sách các lớp học viên đang học hoặc đã đóng phí để lấy lịch học
             var activeClassIds = dangKys
-                .Where(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học")
+                .Where(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Chờ xác nhận học phí" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học")
                 .Select(d => d.MaLopHoc)
                 .ToList();
 
@@ -349,7 +376,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             // Lớp học của tôi phục vụ bộ lọc thời khóa biểu
             var myClasses = dangKys
-                .Where(d => d.LopHoc != null && (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"))
+                .Where(d => d.LopHoc != null && (d.TrangThai == "Đã duyệt" || d.TrangThai == "Chờ xác nhận học phí" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học"))
                 .Select(d => d.LopHoc!)
                 .GroupBy(l => l.MaLopHoc)
                 .Select(g => g.First())

@@ -240,8 +240,8 @@
                                         <button onclick="openEditDrawerFromHv(this, @item.MaHocVien)" class="p-1.5 rounded-lg text-outline hover:text-brand-deep hover:bg-surface-container-low cursor-pointer" title="Sửa hồ sơ">
                                             <span class="material-symbols-outlined text-[18px]">edit</span>
                                         </button>
-                                        <button onclick="toggleStatusHv(this, @item.MaHocVien)" class="p-1.5 rounded-lg text-outline hover:text-amber-600 hover:bg-amber-50 cursor-pointer" title="Đổi trạng thái">
-                                            <span class="material-symbols-outlined text-[18px]">sync</span>
+                                        <button onclick="toggleStatusHv(this, @item.MaHocVien)" class="p-1.5 rounded-lg @(item.TrangThai ? "text-outline hover:text-rose-600 hover:bg-rose-50" : "text-emerald-600 hover:bg-emerald-50") cursor-pointer" title="@(item.TrangThai ? "Khóa học viên" : "Mở khóa học viên")">
+                                            <span class="material-symbols-outlined text-[18px]">@(item.TrangThai ? "lock" : "lock_open")</span>
                                         </button>
                                         <button onclick="confirmDeleteHv(@item.MaHocVien, '@(item.HoTen?.Replace("'", "\\'") ?? "")')" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50 cursor-pointer" title="Xóa">
                                             <span class="material-symbols-outlined text-[18px]">delete</span>
