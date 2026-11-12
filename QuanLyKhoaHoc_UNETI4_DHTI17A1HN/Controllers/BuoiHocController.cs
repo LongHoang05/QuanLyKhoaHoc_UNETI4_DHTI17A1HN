@@ -33,7 +33,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             _giangVienRepo = giangVienRepo;
         }
 
-        public async Task<IActionResult> Index(int? maLop, int? MaLopHoc, string? phong, string? trangThai, string? search, int page = 1)
+        public async Task<IActionResult> Index(int? maLop, int? MaLopHoc, string? phong, string? trangThai, string? search, DateTime? weekDate, int page = 1)
         {
             var vaiTro = HttpContext.Session.GetString("VaiTro");
             if (string.Equals(vaiTro, "HocVien", StringComparison.OrdinalIgnoreCase))
@@ -44,6 +44,19 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             int? targetMaLop = maLop ?? MaLopHoc;
             int pageSize = 8;
             if (page < 1) page = 1;
+
+            // 0. Tính toán tuần làm việc (Tuần chuẩn theo ngày tháng năm)
+            DateTime targetWeek = weekDate ?? DateTime.Today;
+            int diffToMon = (7 + (int)targetWeek.DayOfWeek - (int)DayOfWeek.Monday) % 7;
+            DateTime mondayDate = targetWeek.Date.AddDays(-diffToMon);
+            DateTime sundayDate = mondayDate.AddDays(6);
+
+            ViewBag.CurrentMonday = mondayDate;
+            ViewBag.CurrentSunday = sundayDate;
+            ViewBag.SelectedWeekDate = mondayDate.ToString("yyyy-MM-dd");
+            ViewBag.PrevWeekDate = mondayDate.AddDays(-7).ToString("yyyy-MM-dd");
+            ViewBag.NextWeekDate = mondayDate.AddDays(7).ToString("yyyy-MM-dd");
+            ViewBag.WeekOfYear = System.Globalization.ISOWeek.GetWeekOfYear(mondayDate);
 
             // 1. Kiểm tra xung đột trùng lịch qua Repository
             var (conflictIds, soLoiTrung) = await _buoiHocRepo.GetConflictSessionsAsync();
@@ -91,6 +104,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             ViewBag.LopHocList = await _lopHocRepo.GetAllAsync();
             var allSessions = await _buoiHocRepo.GetAllAsync();
             ViewBag.AllBuoiHocs = allSessions;
+
+            // Danh sách ID các buổi học đã quá giờ kết thúc nhưng vẫn ở trạng thái Đã lên lịch
+            var overdueIds = allSessions
+                .Where(b => b.TrangThai == "Đã lên lịch" && b.ThoiGianKetThuc < DateTime.Now)
+                .Select(b => b.MaBuoiHoc)
+                .ToHashSet();
+            ViewBag.OverdueIds = overdueIds;
 
             var activeSessions = allSessions.Where(b => b.TrangThai != "Đã hủy").ToList();
             ViewBag.SoThi = activeSessions.Count(b => b.NoiDung != null && (b.NoiDung.ToLower().Contains("thi") || b.NoiDung.ToLower().Contains("kiểm tra")));
@@ -145,6 +165,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             ModelState.Remove("LopHoc");
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
 
+            var lopHoc = await _lopHocRepo.GetByIdAsync(buoiHoc.MaLopHoc);
+
             // 1. Kiểm tra lớp có ít nhất 1 đăng ký hợp lệ không? (Mục 9.2)
             int currentEnrolled = await _dangKyHocRepo.CountEnrolledInLopAsync(buoiHoc.MaLopHoc);
             if (currentEnrolled == 0)
@@ -152,8 +174,14 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 ModelState.AddModelError("", "Lớp này chưa có học viên nào được duyệt hoặc đóng học phí, không được xếp lịch.");
             }
 
-            // 2. Validate thời gian hợp lệ (Mục 9.2)
-            if (buoiHoc.ThoiGianBatDau < DateTime.Now)
+            // 2. Ràng buộc ngày khai giảng: Buổi học không được diễn ra trước ngày khai giảng của lớp
+            if (lopHoc != null && buoiHoc.ThoiGianBatDau.Date < lopHoc.NgayKhaiGiang.Date)
+            {
+                ModelState.AddModelError("ThoiGianBatDau", $"Thời gian học ({buoiHoc.ThoiGianBatDau:dd/MM/yyyy}) không được diễn ra trước ngày khai giảng của lớp ({lopHoc.NgayKhaiGiang:dd/MM/yyyy}).");
+            }
+
+            // 3. Validate thời gian không được ở quá khứ tại thời điểm xếp lịch
+            if (buoiHoc.ThoiGianBatDau < DateTime.Now.AddMinutes(-15))
             {
                 ModelState.AddModelError("ThoiGianBatDau", "Thời gian học không được nằm trong quá khứ tại thời điểm xếp lịch.");
             }
@@ -162,8 +190,33 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 ModelState.AddModelError("ThoiGianKetThuc", "Thời gian kết thúc phải sau thời gian bắt đầu.");
             }
 
-            // 3. Kiểm tra số buổi học vượt quy định (Mục 9.2)
-            var lopHoc = await _lopHocRepo.GetByIdAsync(buoiHoc.MaLopHoc);
+            // 4. Validate khung giờ ca học chuẩn UNETI: Cấm tuyệt đối ca tối (>18:15) và cấm giờ nghỉ trưa (11:45 - 13:30)
+            var startTime = buoiHoc.ThoiGianBatDau.TimeOfDay;
+            var endTime = buoiHoc.ThoiGianKetThuc.TimeOfDay;
+            if (startTime < new TimeSpan(7, 0, 0) || endTime > new TimeSpan(18, 15, 0))
+            {
+                ModelState.AddModelError("", "Thời gian học phải nằm trong khung giờ quy định ban ngày từ 07:00 đến 18:15. Hệ thống không cho phép xếp lịch học ca tối (>18:15) hoặc trước 07:00 sáng.");
+            }
+            if (startTime < new TimeSpan(13, 30, 0) && endTime > new TimeSpan(11, 45, 0))
+            {
+                ModelState.AddModelError("", "Thời gian học không được trùng vào giờ nghỉ trưa của trường (11:45 - 13:30).");
+            }
+
+            // 5. Kiểm tra tương thích ca học với mô tả lớp (Ca Sáng vs Ca Chiều)
+            if (lopHoc?.MoTa != null)
+            {
+                string moTaLower = lopHoc.MoTa.ToLower();
+                if (moTaLower.Contains("sáng") && !moTaLower.Contains("chiều") && startTime.Hours >= 12)
+                {
+                    ModelState.AddModelError("ThoiGianBatDau", $"Lớp '{lopHoc.TenLop}' có lịch đăng ký Ca Sáng (07:00 - 11:45), không được xếp lịch vào buổi chiều.");
+                }
+                else if (moTaLower.Contains("chiều") && !moTaLower.Contains("sáng") && startTime.Hours < 12)
+                {
+                    ModelState.AddModelError("ThoiGianBatDau", $"Lớp '{lopHoc.TenLop}' có lịch đăng ký Ca Chiều (13:30 - 18:15), không được xếp lịch vào buổi sáng.");
+                }
+            }
+
+            // 6. Kiểm tra số buổi học vượt quy định (Mục 9.2)
             if (lopHoc != null)
             {
                 int soBuoiChuaHuy = await _buoiHocRepo.CountBuoiHocChuaHuyAsync(buoiHoc.MaLopHoc);
@@ -173,7 +226,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 }
             }
 
-            // 4. KIỂM TRA TRÙNG LỊCH BẰNG REPOSITORY (Lớp, Phòng, Giảng viên - Mục 9.2)
+            // 7. KIỂM TRA TRÙNG LỊCH BẰNG REPOSITORY (Lớp, Phòng, Giảng viên - Mục 9.2)
             var (isTrungLich, conflictMsg, _) = await _buoiHocRepo.KiemTraTrungLichChiTietAsync(
                 buoiHoc.MaLopHoc,
                 buoiHoc.PhongHoc,
@@ -237,7 +290,55 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Kiểm tra trùng lịch ngoại trừ chính buổi học này qua Repository (Mục 9.2)
+            // 1. Kiểm tra ngày khai giảng của lớp
+            var lopHoc = await _lopHocRepo.GetByIdAsync(buoiHoc.MaLopHoc);
+            if (lopHoc != null && buoiHoc.ThoiGianBatDau.Date < lopHoc.NgayKhaiGiang.Date)
+            {
+                string msg = $"Thời gian học ({buoiHoc.ThoiGianBatDau:dd/MM/yyyy}) không được diễn ra trước ngày khai giảng của lớp ({lopHoc.NgayKhaiGiang:dd/MM/yyyy}).";
+                if (isAjax) return Json(new { success = false, message = msg });
+                TempData["Error"] = msg;
+                return RedirectToAction(nameof(Index));
+            }
+
+            // 2. Validate khung giờ ca học chuẩn: Cấm ca tối (>18:15) và cấm giờ nghỉ trưa (11:45 - 13:30)
+            var startTime = buoiHoc.ThoiGianBatDau.TimeOfDay;
+            var endTime = buoiHoc.ThoiGianKetThuc.TimeOfDay;
+            if (startTime < new TimeSpan(7, 0, 0) || endTime > new TimeSpan(18, 15, 0))
+            {
+                string msg = "Thời gian học phải nằm trong khung giờ quy định ban ngày từ 07:00 đến 18:15. Hệ thống không cho phép ca học buổi tối (>18:15) hoặc trước 07:00 sáng.";
+                if (isAjax) return Json(new { success = false, message = msg });
+                TempData["Error"] = msg;
+                return RedirectToAction(nameof(Index));
+            }
+            if (startTime < new TimeSpan(13, 30, 0) && endTime > new TimeSpan(11, 45, 0))
+            {
+                string msg = "Thời gian học không được trùng vào giờ nghỉ trưa của trường (11:45 - 13:30).";
+                if (isAjax) return Json(new { success = false, message = msg });
+                TempData["Error"] = msg;
+                return RedirectToAction(nameof(Index));
+            }
+
+            // 3. Kiểm tra tương thích ca học với mô tả lớp
+            if (lopHoc?.MoTa != null)
+            {
+                string moTaLower = lopHoc.MoTa.ToLower();
+                if (moTaLower.Contains("sáng") && !moTaLower.Contains("chiều") && startTime.Hours >= 12)
+                {
+                    string msg = $"Lớp '{lopHoc.TenLop}' có lịch đăng ký Ca Sáng (07:00 - 11:45), không được xếp lịch vào buổi chiều.";
+                    if (isAjax) return Json(new { success = false, message = msg });
+                    TempData["Error"] = msg;
+                    return RedirectToAction(nameof(Index));
+                }
+                else if (moTaLower.Contains("chiều") && !moTaLower.Contains("sáng") && startTime.Hours < 12)
+                {
+                    string msg = $"Lớp '{lopHoc.TenLop}' có lịch đăng ký Ca Chiều (13:30 - 18:15), không được xếp lịch vào buổi sáng.";
+                    if (isAjax) return Json(new { success = false, message = msg });
+                    TempData["Error"] = msg;
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+
+            // 4. Kiểm tra trùng lịch ngoại trừ chính buổi học này qua Repository (Mục 9.2)
             var (isTrungLich, conflictMsg, _) = await _buoiHocRepo.KiemTraTrungLichChiTietAsync(
                 buoiHoc.MaLopHoc,
                 buoiHoc.PhongHoc,
@@ -251,6 +352,19 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 if (isAjax) return Json(new { success = false, message = $"Cập nhật thất bại: {conflictMsg}" });
                 TempData["Error"] = $"Cập nhật thất bại: {conflictMsg}";
                 return RedirectToAction(nameof(Index));
+            }
+
+            // 5. Ràng buộc trạng thái Đã hoàn thành: Không cho hoàn thành nếu buổi học chưa kết thúc
+            string newStatus = buoiHoc.TrangThai ?? existing.TrangThai;
+            if (newStatus == "Đã hoàn thành")
+            {
+                if (buoiHoc.ThoiGianKetThuc > DateTime.Now)
+                {
+                    string msg = "Buổi học chưa kết thúc (hoặc chưa diễn ra), không thể đánh dấu hoàn thành.";
+                    if (isAjax) return Json(new { success = false, message = msg });
+                    TempData["Error"] = msg;
+                    return RedirectToAction(nameof(Index));
+                }
             }
 
             existing.MaLopHoc = buoiHoc.MaLopHoc;
@@ -349,6 +463,23 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            // Ràng buộc mâu thuẫn 4: Trùng lịch trong quá khứ không được chuyển thành Đã hoàn thành
+            var (isTrungLich, conflictMsg, _) = await _buoiHocRepo.KiemTraTrungLichChiTietAsync(
+                buoiHoc.MaLopHoc,
+                buoiHoc.PhongHoc,
+                buoiHoc.GiangVien,
+                buoiHoc.ThoiGianBatDau,
+                buoiHoc.ThoiGianKetThuc,
+                buoiHoc.MaBuoiHoc);
+
+            if (isTrungLich)
+            {
+                string errMsg = $"Không thể xác nhận hoàn thành! Buổi học này đang bị xung đột trùng lịch ({conflictMsg}). Vui lòng điều chỉnh hoặc hủy ca trùng trước khi hoàn thành.";
+                if (isAjax) return Json(new { success = false, message = errMsg });
+                TempData["Error"] = errMsg;
+                return RedirectToAction(nameof(Index));
+            }
+
             buoiHoc.TrangThai = "Đã hoàn thành";
             await _buoiHocRepo.UpdateAsync(buoiHoc);
 
@@ -390,6 +521,39 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return Json(new { hasConflict = true, message = "Thời gian kết thúc phải sau thời gian bắt đầu." });
             }
 
+            // 1. Kiểm tra ngày khai giảng của lớp
+            var lopHoc = await _lopHocRepo.GetByIdAsync(maLopHoc);
+            if (lopHoc != null && batDau.Value.Date < lopHoc.NgayKhaiGiang.Date)
+            {
+                return Json(new { hasConflict = true, message = $"Thời gian học ({batDau.Value:dd/MM/yyyy}) không được diễn ra trước ngày khai giảng của lớp ({lopHoc.NgayKhaiGiang:dd/MM/yyyy})." });
+            }
+
+            // 2. Kiểm tra ca học ban ngày chuẩn: Cấm tuyệt đối ca tối (>18:15) và cấm giờ nghỉ trưa (11:45 - 13:30)
+            var startTime = batDau.Value.TimeOfDay;
+            var endTime = ketThuc.Value.TimeOfDay;
+            if (startTime < new TimeSpan(7, 0, 0) || endTime > new TimeSpan(18, 15, 0))
+            {
+                return Json(new { hasConflict = true, message = "Thời gian học phải nằm trong khung giờ quy định ban ngày từ 07:00 đến 18:15. Hệ thống cấm tuyệt đối ca học buổi tối (>18:15)." });
+            }
+            if (startTime < new TimeSpan(13, 30, 0) && endTime > new TimeSpan(11, 45, 0))
+            {
+                return Json(new { hasConflict = true, message = "Thời gian học không được trùng vào giờ nghỉ trưa của trường (11:45 - 13:30)." });
+            }
+
+            // 3. Kiểm tra tương thích ca học với mô tả lớp
+            if (lopHoc?.MoTa != null)
+            {
+                string moTaLower = lopHoc.MoTa.ToLower();
+                if (moTaLower.Contains("sáng") && !moTaLower.Contains("chiều") && startTime.Hours >= 12)
+                {
+                    return Json(new { hasConflict = true, message = $"Lớp '{lopHoc.TenLop}' có lịch đăng ký Ca Sáng (07:00 - 11:45), không được xếp vào buổi chiều." });
+                }
+                else if (moTaLower.Contains("chiều") && !moTaLower.Contains("sáng") && startTime.Hours < 12)
+                {
+                    return Json(new { hasConflict = true, message = $"Lớp '{lopHoc.TenLop}' có lịch đăng ký Ca Chiều (13:30 - 18:15), không được xếp vào buổi sáng." });
+                }
+            }
+
             var (hasConflict, conflictMsg, _) = await _buoiHocRepo.KiemTraTrungLichChiTietAsync(
                 maLopHoc,
                 phongHoc.Trim(),
@@ -398,7 +562,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 ketThuc.Value,
                 maBuoiHoc > 0 ? maBuoiHoc : null);
 
-            return Json(new { hasConflict = hasConflict, message = conflictMsg ?? "Khung giờ và phòng học hoàn toàn trống!" });
+            return Json(new { hasConflict = hasConflict, message = conflictMsg ?? "Khung giờ và phòng học hoàn toàn trống và hợp lệ!" });
         }
 
         // --- TỰ ĐỘNG XỬ LÝ DỌN DẸP CÁC CA TRÙNG LỊCH TRONG DB ---

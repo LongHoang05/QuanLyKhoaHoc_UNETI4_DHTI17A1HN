@@ -9,11 +9,11 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
     ViewData["Title"] = "Quản lý lịch học";
 
     Func<DateTime, int> getCa = (dt) => {
-        int h = dt.Hour;
-        if (h < 9 || (h == 9 && dt.Minute <= 20)) return 1;
-        if (h < 13) return 2;
-        if (h < 16) return 3;
-        return 4;
+        TimeSpan t = dt.TimeOfDay;
+        if (t < new TimeSpan(9, 25, 0)) return 1; // Ca 1 (Sáng 1): 07:00 - 09:15
+        if (t < new TimeSpan(13, 0, 0)) return 2;  // Ca 2 (Sáng 2): 09:30 - 11:45
+        if (t < new TimeSpan(15, 55, 0)) return 3; // Ca 3 (Chiều 1): 13:30 - 15:45
+        return 4;                                   // Ca 4 (Chiều 2): 16:00 - 18:15
     };
 
     var days = new DayOfWeek[] {
@@ -39,6 +39,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
     };
 
     var conflictIds = ViewBag.ConflictIds as HashSet<int> ?? new HashSet<int>();
+    var overdueIds = ViewBag.OverdueIds as HashSet<int> ?? new HashSet<int>();
     var allBuoiHocs = ViewBag.AllBuoiHocs as List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.BuoiHoc> ?? new List<QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models.BuoiHoc>();
 
     int totalSessions = ViewBag.TotalSessions ?? 0;
@@ -70,9 +71,9 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
 
     DateTime today = DateTime.Today;
     int diffToMonday = (7 + (int)today.DayOfWeek - (int)DayOfWeek.Monday) % 7;
-    DateTime mondayDate = today.AddDays(-diffToMonday);
-    DateTime sundayDate = mondayDate.AddDays(6);
-    int weekOfYear = System.Globalization.ISOWeek.GetWeekOfYear(today);
+    DateTime mondayDate = ViewBag.CurrentMonday != null ? (DateTime)ViewBag.CurrentMonday : today.AddDays(-diffToMonday);
+    DateTime sundayDate = ViewBag.CurrentSunday != null ? (DateTime)ViewBag.CurrentSunday : mondayDate.AddDays(6);
+    int weekOfYear = ViewBag.WeekOfYear != null ? (int)ViewBag.WeekOfYear : System.Globalization.ISOWeek.GetWeekOfYear(mondayDate);
 
     var dayDates = new Dictionary<DayOfWeek, DateTime> {
         { DayOfWeek.Monday, mondayDate },
@@ -227,7 +228,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
             <div class="flex items-center gap-2.5 flex-wrap">
                 <button type="button" onclick="goToToday()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border-standard bg-surface-white hover:bg-surface-container-low text-brand-deep font-label-sm text-xs font-bold transition-all shadow-2xs hover:shadow-xs cursor-pointer active:scale-95">
                     <span class="material-symbols-outlined text-[16px] text-primary">today</span>
-                    <span>Hôm nay</span>
+                    <span>Tuần hiện tại</span>
                 </button>
                 <div class="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl border border-border-subtle">
                     <button type="button" onclick="changeWeek(-1)" class="w-7 h-7 rounded-lg bg-surface-white text-outline hover:text-brand-deep hover:bg-surface-container flex items-center justify-center transition-all shadow-2xs cursor-pointer active:scale-95" title="Tuần trước">
@@ -241,9 +242,13 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                     <span class="font-bold text-sm text-brand-deep" id="week-display-title">
                         Tuần @(weekOfYear) (@mondayDate.ToString("dd/MM") - @sundayDate.ToString("dd/MM/yyyy"))
                     </span>
+                    <input type="date" value="@mondayDate.ToString("yyyy-MM-dd")" onchange="navigateToWeek(this.value)" class="bg-surface-container-low border border-border-standard text-brand-deep font-mono text-xs px-2.5 py-1 rounded-xl focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-white transition-colors" title="Chọn ngày để nhảy đến tuần tương ứng"/>
+                    @{
+                        int weekSessionsCount = allBuoiHocs.Count(b => b.ThoiGianBatDau.Date >= mondayDate.Date && b.ThoiGianBatDau.Date <= sundayDate.Date && b.TrangThai != "Đã hủy");
+                    }
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/70 text-xs font-semibold">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span id="week-sessions-count">@(allBuoiHocs.Count(b => b.TrangThai != "Đã hủy")) buổi học phân bổ</span>
+                        <span id="week-sessions-count">@weekSessionsCount buổi học trong tuần</span>
                     </span>
                 </div>
             </div>
@@ -329,9 +334,9 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                         </div>
                         @foreach (var day in days)
                         {
-                            var isToday = today.DayOfWeek == day;
                             var dDate = dayDates[day];
-                            var countInDay = allBuoiHocs.Count(b => b.ThoiGianBatDau.DayOfWeek == day && b.TrangThai != "Đã hủy");
+                            var isToday = today.Date == dDate.Date;
+                            var countInDay = allBuoiHocs.Count(b => b.ThoiGianBatDau.Date == dDate.Date && b.TrangThai != "Đã hủy");
 
                             <div class="py-3 px-3 border-r border-border-standard text-center min-w-0 transition-colors @(isToday ? "bg-primary/[0.04] relative" : "hover:bg-surface-container-low/40")">
                                 @if (isToday)
@@ -416,21 +421,22 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
 
                             @foreach (var day in days)
                             {
+                                var targetDate = dayDates[day];
                                 var classesInSlot = allBuoiHocs
-                                    .Where(b => b.ThoiGianBatDau.DayOfWeek == day && getCa(b.ThoiGianBatDau) == shift.Ca && b.TrangThai != "Đã hủy")
+                                    .Where(b => b.ThoiGianBatDau.Date == targetDate.Date && getCa(b.ThoiGianBatDau) == shift.Ca && b.TrangThai != "Đã hủy")
                                     .ToList();
                                 int occupiedRooms = classesInSlot.Select(c => c.PhongHoc).Where(p => !string.IsNullOrEmpty(p)).Distinct().Count();
                                 int emptyRooms = Math.Max(0, totalRoomsCount - occupiedRooms);
                                 bool isConflict = classesInSlot.Count > 1 && classesInSlot.Any(b1 => classesInSlot.Any(b2 => b1 != b2 && (b1.PhongHoc == b2.PhongHoc || b1.GiangVien == b2.GiangVien)));
-                                bool isToday = today.DayOfWeek == day;
+                                bool isToday = today.Date == targetDate.Date;
 
                                 <div class="p-2 relative min-w-0 overflow-hidden flex flex-col justify-between @(isToday ? "bg-primary/[0.03]" : "")">
                                     @if (classesInSlot.Count == 0)
                                     {
                                         <!-- Ô Trống Lịch -->
-                                        <div onclick="quickAddScheduleSlot('@day', @shift.Ca)" 
+                                        <div onclick="quickAddScheduleSlot('@targetDate.ToString("yyyy-MM-dd")', @shift.Ca)" 
                                              class="h-full min-h-[135px] flex flex-col items-center justify-center border-2 border-dashed border-border-standard/70 hover:border-primary/80 rounded-xl bg-canvas-base/20 hover:bg-primary/[0.04] p-3 transition-all duration-200 cursor-pointer group select-none text-center" 
-                                             title="Xếp lớp vào @dayNames[day] @shift.Name">
+                                             title="Xếp lớp vào @dayNames[day] (@targetDate.ToString("dd/MM")) @shift.Name">
                                             <div class="w-7 h-7 rounded-full bg-surface-white border border-border-standard group-hover:border-primary group-hover:bg-primary group-hover:text-surface-white flex items-center justify-center text-outline/70 transition-all duration-200 shadow-2xs group-hover:scale-110">
                                                 <span class="material-symbols-outlined text-[16px]">add</span>
                                             </div>
@@ -508,10 +514,10 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                                                         rmIcon = "school";
                                                     }
 
-                                                    bool isCardToday = today.DayOfWeek == day;
-                                                    string statusText = "Lên lịch";
-                                                    string statusColor = "text-outline";
-                                                    string statusDot = "bg-outline/40";
+                                                    bool isCardToday = today.Date == targetDate.Date;
+                                                    string statusText = "Đã lên lịch";
+                                                    string statusColor = "text-primary font-semibold";
+                                                    string statusDot = "bg-primary";
 
                                                     if (b.TrangThai == "Đã hoàn thành")
                                                     {
@@ -519,17 +525,29 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                                                         statusColor = "text-success-emerald font-semibold";
                                                         statusDot = "bg-success-emerald";
                                                     }
+                                                    else if (b.TrangThai == "Đã hủy")
+                                                    {
+                                                        statusText = "Đã hủy";
+                                                        statusColor = "text-outline font-semibold";
+                                                        statusDot = "bg-outline";
+                                                    }
+                                                    else if (overdueIds.Contains(b.MaBuoiHoc) || (b.TrangThai == "Đã lên lịch" && b.ThoiGianKetThuc < DateTime.Now))
+                                                    {
+                                                        statusText = "Đã kết thúc (Chờ xác nhận)";
+                                                        statusColor = "text-amber-800 font-semibold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200";
+                                                        statusDot = "bg-amber-500";
+                                                    }
+                                                    else if (b.ThoiGianBatDau <= DateTime.Now && b.ThoiGianKetThuc >= DateTime.Now)
+                                                    {
+                                                        statusText = "Đang diễn ra";
+                                                        statusColor = "text-indigo-600 font-bold";
+                                                        statusDot = "bg-indigo-500 animate-ping";
+                                                    }
                                                     else if (isCardToday)
                                                     {
                                                         statusText = "Hôm nay";
                                                         statusColor = "text-primary font-bold";
                                                         statusDot = "bg-primary animate-pulse";
-                                                    }
-                                                    else if (b.ThoiGianBatDau < DateTime.Now)
-                                                    {
-                                                        statusText = "Đang học";
-                                                        statusColor = "text-amber-600 font-semibold";
-                                                        statusDot = "bg-amber-500 animate-ping";
                                                     }
 
                                                     <div class="timetable-card group relative bg-surface-white border rounded-xl p-2.5 transition-all duration-200 cursor-pointer flex flex-col justify-between gap-1.5 hover:-translate-y-0.5 @(isCardToday ? "border-primary/40 shadow-xs hover:border-primary hover:shadow-md ring-1 ring-primary/20" : "border-border-standard/90 shadow-2xs hover:border-primary/60 hover:shadow-md")"
@@ -765,6 +783,13 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                                                 Đã hủy
                                             </span>
                                         }
+                                        else if (overdueIds.Contains(item.MaBuoiHoc) || (item.ThoiGianKetThuc < DateTime.Now && item.TrangThai == "Đã lên lịch"))
+                                        {
+                                            <span class="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-amber-800 bg-amber-100/90 px-2.5 py-1 rounded-full font-medium" title="Buổi học đã kết thúc nhưng chưa hoàn thành hoặc điểm danh">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                                Đã kết thúc (Chờ xác nhận)
+                                            </span>
+                                        }
                                         else
                                         {
                                             <span class="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-primary bg-primary/10 px-2.5 py-1 rounded-full">
@@ -866,7 +891,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                                 <optgroup label="📚 @grp.Key">
                                     @foreach (var lop in grp)
                                     {
-                                        <option value="@lop.MaLopHoc" data-ten="@lop.TenLop" data-gv="@(lop.TenGiangVien ?? "")" data-siso="@lop.SiSoToiDa" data-sobuoi="@lop.SoBuoiHoc" data-ctdt="@(lop.ChuongTrinhDaoTao?.TenChuongTrinh ?? "")">
+                                        <option value="@lop.MaLopHoc" data-ten="@lop.TenLop" data-gv="@(lop.TenGiangVien ?? "")" data-siso="@lop.SiSoToiDa" data-sobuoi="@lop.SoBuoiHoc" data-ctdt="@(lop.ChuongTrinhDaoTao?.TenChuongTrinh ?? "")" data-khaigiang="@lop.NgayKhaiGiang.ToString("yyyy-MM-dd")" data-mota="@(lop.MoTa ?? "")">
                                             @lop.TenLop (@lop.SiSoToiDa SV) @(!string.IsNullOrEmpty(lop.TenGiangVien) ? $"• GV: {lop.TenGiangVien}" : "")
                                         </option>
                                     }
@@ -933,6 +958,31 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                             }
                         </select>
                         <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px] transition-transform duration-200">expand_more</span>
+                    </div>
+                </div>
+
+                <!-- Quick Shift Select: 4 Ca chuẩn ban ngày UNETI (Cấm tuyệt đối ca tối >18:15) -->
+                <div class="space-y-1.5">
+                    <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
+                        Chọn nhanh ca học chuẩn UNETI (07:00 – 18:15)
+                    </label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                        <button type="button" onclick="setDrawerShift(1)" class="p-2 rounded-xl border border-border-standard bg-surface-white hover:bg-primary/[0.06] hover:border-primary text-center text-xs transition-all group cursor-pointer">
+                            <div class="font-bold text-primary group-hover:scale-105 transition-transform">Ca 1 (Sáng)</div>
+                            <div class="font-mono text-[10px] text-outline mt-0.5">07:00 – 09:15</div>
+                        </button>
+                        <button type="button" onclick="setDrawerShift(2)" class="p-2 rounded-xl border border-border-standard bg-surface-white hover:bg-primary/[0.06] hover:border-primary text-center text-xs transition-all group cursor-pointer">
+                            <div class="font-bold text-primary group-hover:scale-105 transition-transform">Ca 2 (Sáng)</div>
+                            <div class="font-mono text-[10px] text-outline mt-0.5">09:30 – 11:45</div>
+                        </button>
+                        <button type="button" onclick="setDrawerShift(3)" class="p-2 rounded-xl border border-border-standard bg-surface-white hover:bg-primary/[0.06] hover:border-primary text-center text-xs transition-all group cursor-pointer">
+                            <div class="font-bold text-primary group-hover:scale-105 transition-transform">Ca 3 (Chiều)</div>
+                            <div class="font-mono text-[10px] text-outline mt-0.5">13:30 – 15:45</div>
+                        </button>
+                        <button type="button" onclick="setDrawerShift(4)" class="p-2 rounded-xl border border-border-standard bg-surface-white hover:bg-primary/[0.06] hover:border-primary text-center text-xs transition-all group cursor-pointer">
+                            <div class="font-bold text-primary group-hover:scale-105 transition-transform">Ca 4 (Chiều)</div>
+                            <div class="font-mono text-[10px] text-outline mt-0.5">16:00 – 18:15</div>
+                        </button>
                     </div>
                 </div>
 
@@ -1039,53 +1089,30 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
 
 <script>
     // Weekly Timetable Week Navigation & Realtime Filters
-    let currentWeekOffset = 0;
     const baseMondayDate = new Date('@mondayDate.ToString("yyyy-MM-ddTHH:mm:ss")');
 
-    function updateWeekDisplay() {
-        const monday = new Date(baseMondayDate);
-        monday.setDate(monday.getDate() + (currentWeekOffset * 7));
-        const sunday = new Date(monday);
-        sunday.setDate(sunday.getDate() + 6);
-
-        const pad = (n) => String(n).padStart(2, '0');
-        const mondayStr = `${pad(monday.getDate())}/${pad(monday.getMonth() + 1)}`;
-        const sundayStr = `${pad(sunday.getDate())}/${pad(sunday.getMonth() + 1)}/${sunday.getFullYear()}`;
-
-        // Tính số tuần ISO
-        const target = new Date(monday.valueOf());
-        const dayNr = (monday.getDay() + 6) % 7;
-        target.setDate(target.getDate() - dayNr + 3);
-        const firstThursday = target.valueOf();
-        target.setMonth(0, 1);
-        if (target.getDay() !== 4) {
-            target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
-        }
-        const weekNum = 1 + Math.ceil((firstThursday - target) / 604800000);
-
-        const titleEl = document.getElementById('week-display-title');
-        if (titleEl) {
-            titleEl.innerText = `Tuần ${weekNum} (${mondayStr} - ${sundayStr})`;
-        }
-
-        const daysArr = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-        daysArr.forEach((d, idx) => {
-            const dDate = new Date(monday);
-            dDate.setDate(dDate.getDate() + idx);
-            const dStr = `${pad(dDate.getDate())}/${pad(dDate.getMonth() + 1)}`;
-            const el = document.getElementById(`day-date-${d}`);
-            if (el) el.innerText = dStr;
-        });
+    function navigateToWeek(dateStr) {
+        if (!dateStr) return;
+        const url = new URL(window.location.href);
+        url.searchParams.set('weekDate', dateStr);
+        window.location.href = url.toString();
     }
 
     function changeWeek(delta) {
-        currentWeekOffset += delta;
-        updateWeekDisplay();
+        const nextMon = new Date(baseMondayDate);
+        nextMon.setDate(nextMon.getDate() + (delta * 7));
+        const yyyy = nextMon.getFullYear();
+        const mm = String(nextMon.getMonth() + 1).padStart(2, '0');
+        const dd = String(nextMon.getDate()).padStart(2, '0');
+        navigateToWeek(`${yyyy}-${mm}-${dd}`);
     }
 
     function goToToday() {
-        currentWeekOffset = 0;
-        updateWeekDisplay();
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        navigateToWeek(`${yyyy}-${mm}-${dd}`);
     }
 
     function applyTimetableFilters() {
@@ -1298,10 +1325,32 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         const gvLop = opt.dataset.gv || '';
         const siso = opt.dataset.siso || '';
         const sobuoi = opt.dataset.sobuoi || '';
+        const khaigiang = opt.dataset.khaigiang || '';
+        const mota = opt.dataset.mota || '';
 
         if (card && textEl) {
-            textEl.innerText = `${tenLop} • Sĩ số: ${siso} SV • Quy định: ${sobuoi} buổi`;
+            let infoText = `${tenLop} • Sĩ số: ${siso} SV • Quy định: ${sobuoi} buổi`;
+            if (khaigiang) infoText += ` • Khai giảng: ${khaigiang}`;
+            if (mota) {
+                const shiftHint = mota.includes('Sáng') ? 'Ca Sáng (07:00-11:45)' : (mota.includes('Chiều') ? 'Ca Chiều (13:30-18:15)' : '');
+                if (shiftHint) infoText += ` • ${shiftHint}`;
+            }
+            textEl.innerText = infoText;
             card.classList.remove('hidden');
+        }
+
+        // Tự động căn ngày bắt đầu tối thiểu từ Ngày Khai Giảng nếu đang tạo mới và ngày hiện tại trước khai giảng
+        const curBatDau = document.getElementById('drawer-batdau')?.value;
+        const mode = document.getElementById('drawer-mabuoi')?.value;
+        if ((mode === '0' || !mode) && khaigiang && curBatDau) {
+            const curDate = curBatDau.split('T')[0];
+            if (curDate < khaigiang) {
+                const timePart = curBatDau.split('T')[1] || "07:00";
+                document.getElementById('drawer-batdau').value = `${khaigiang}T${timePart}`;
+                const curKetThuc = document.getElementById('drawer-ketthuc')?.value;
+                const endTimePart = (curKetThuc && curKetThuc.includes('T')) ? curKetThuc.split('T')[1] : "09:15";
+                document.getElementById('drawer-ketthuc').value = `${khaigiang}T${endTimePart}`;
+            }
         }
 
         if (autoSelectGv && gvLop) {
@@ -1388,14 +1437,14 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
             document.getElementById('drawer-noidung').value = '';
             document.getElementById('drawer-ghichu').value = '';
             
-            // Set default times (Tomorrow 08:00 to 11:30)
+            // Set default times (Ca 1 Sáng: 07:00 đến 09:15 ngày mai)
             const tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
             const yyyy = tomorrow.getFullYear();
             const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
             const dd = String(tomorrow.getDate()).padStart(2, '0');
-            document.getElementById('drawer-batdau').value = `${yyyy}-${mm}-${dd}T08:00`;
-            document.getElementById('drawer-ketthuc').value = `${yyyy}-${mm}-${dd}T11:30`;
+            document.getElementById('drawer-batdau').value = `${yyyy}-${mm}-${dd}T07:00`;
+            document.getElementById('drawer-ketthuc').value = `${yyyy}-${mm}-${dd}T09:15`;
             checkScheduleConflictLive();
         }
     }
@@ -1410,30 +1459,56 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         if (box) box.classList.add('hidden');
     }
 
+    // Helper: Nút chọn nhanh 4 ca chuẩn UNETI từ Drawer
+    function setDrawerShift(caNumber) {
+        const curStart = document.getElementById('drawer-batdau')?.value;
+        let datePart = curStart && curStart.includes('T') ? curStart.split('T')[0] : '';
+        if (!datePart) {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const yyyy = tomorrow.getFullYear();
+            const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+            const dd = String(tomorrow.getDate()).padStart(2, '0');
+            datePart = `${yyyy}-${mm}-${dd}`;
+        }
+        
+        let startH = "07:00", endH = "09:15";
+        if (caNumber === 2) { startH = "09:30"; endH = "11:45"; }
+        else if (caNumber === 3) { startH = "13:30"; endH = "15:45"; }
+        else if (caNumber === 4) { startH = "16:00"; endH = "18:15"; }
+
+        document.getElementById('drawer-batdau').value = `${datePart}T${startH}`;
+        document.getElementById('drawer-ketthuc').value = `${datePart}T${endH}`;
+        checkScheduleConflictLive();
+    }
+
     // Quick Add Schedule into a specific Day and Shift from Timetable Grid
-    function quickAddScheduleSlot(dayName, caNumber) {
+    function quickAddScheduleSlot(dateStrOrDay, caNumber) {
         openDrawer('create');
         
-        // Calculate date for next dayName
-        const dayMap = { 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6, 'Sunday': 7 };
-        const targetDay = dayMap[dayName] || 1;
-        const now = new Date();
-        const currentDay = now.getDay() || 7;
-        let diff = targetDay - currentDay;
-        if (diff <= 0) diff += 7;
-        const targetDate = new Date(now.setDate(now.getDate() + diff));
+        let datePart = dateStrOrDay;
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+            const dayMap = { 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6, 'Sunday': 7 };
+            const targetDay = dayMap[dateStrOrDay] || 1;
+            const now = new Date();
+            const currentDay = now.getDay() || 7;
+            let diff = targetDay - currentDay;
+            if (diff <= 0) diff += 7;
+            const targetDate = new Date(now.setDate(now.getDate() + diff));
 
-        const yyyy = targetDate.getFullYear();
-        const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
-        const dd = String(targetDate.getDate()).padStart(2, '0');
+            const yyyy = targetDate.getFullYear();
+            const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(targetDate.getDate()).padStart(2, '0');
+            datePart = `${yyyy}-${mm}-${dd}`;
+        }
 
         let startH = "07:00", endH = "09:15";
         if (caNumber === 2) { startH = "09:30"; endH = "11:45"; }
         else if (caNumber === 3) { startH = "13:30"; endH = "15:45"; }
         else if (caNumber === 4) { startH = "16:00"; endH = "18:15"; }
 
-        document.getElementById('drawer-batdau').value = `${yyyy}-${mm}-${dd}T${startH}`;
-        document.getElementById('drawer-ketthuc').value = `${yyyy}-${mm}-${dd}T${endH}`;
+        document.getElementById('drawer-batdau').value = `${datePart}T${startH}`;
+        document.getElementById('drawer-ketthuc').value = `${datePart}T${endH}`;
         checkScheduleConflictLive();
     }
 

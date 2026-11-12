@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Helpers;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 
@@ -218,40 +219,40 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
 
             var newLopHocs = new List<LopHoc>
             {
-                // Nhóm 1: Đang mở đăng ký (16 lớp)
-                new LopHoc { TenLop = "NETCORE10-K01", MaChuongTrinh = ctdt1, MaGiangVien = gvId1, TenGiangVien = "ThS. Trần Văn Hùng", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 25, SoBuoiHoc = 16, HocPhi = 3500000, NgayBatDauDangKy = DateTime.Today.AddDays(-10), HanDangKy = DateTime.Today.AddDays(15), NgayKhaiGiang = DateTime.Today.AddDays(20), MoTa = "Lập trình Web hiện đại với ASP.NET Core 10 MVC, EF Core 10 và SQL Server.", YeuCauHocVien = "Biết C# căn bản", TrangThai = "Đang mở đăng ký", PhongHoc = "HA8-201" },
-                new LopHoc { TenLop = "PYTHON-K02", MaChuongTrinh = ctdt2, MaGiangVien = gvId2, TenGiangVien = "TS. Hoàng Thị Lan", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 30, SoBuoiHoc = 14, HocPhi = 3200000, NgayBatDauDangKy = DateTime.Today.AddDays(-8), HanDangKy = DateTime.Today.AddDays(12), NgayKhaiGiang = DateTime.Today.AddDays(18), MoTa = "Phân tích dữ liệu với Python, Pandas, Numpy và trực quan hóa dữ liệu.", YeuCauHocVien = "Không yêu cầu", TrangThai = "Đang mở đăng ký", PhongHoc = "HA9-301" },
-                new LopHoc { TenLop = "REACT-K05", MaChuongTrinh = ctdt1, MaGiangVien = gvId1, TenGiangVien = "ThS. Trần Văn Hùng", TrinhDoDauVao = "Trung cấp", SiSoToiDa = 25, SoBuoiHoc = 16, HocPhi = 3800000, NgayBatDauDangKy = DateTime.Today.AddDays(-5), HanDangKy = DateTime.Today.AddDays(15), NgayKhaiGiang = DateTime.Today.AddDays(22), MoTa = "Xây dựng Single Page App với React 19, Hooks, Redux Toolkit và Tailwind CSS.", YeuCauHocVien = "Nắm vững HTML/CSS/JS", TrangThai = "Đang mở đăng ký", PhongHoc = "Lab CNTT 1" },
-                new LopHoc { TenLop = "FLUTTER-K03", MaChuongTrinh = ctdt3, MaGiangVien = gvId3, TenGiangVien = "ThS. Nguyễn Thành Nam", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 20, SoBuoiHoc = 16, HocPhi = 4200000, NgayBatDauDangKy = DateTime.Today.AddDays(-7), HanDangKy = DateTime.Today.AddDays(10), NgayKhaiGiang = DateTime.Today.AddDays(16), MoTa = "Lập trình ứng dụng di động đa nền tảng iOS & Android với Flutter và Dart.", YeuCauHocVien = "Có tư duy lập trình", TrangThai = "Đang mở đăng ký", PhongHoc = "Lab Máy 1" },
-                new LopHoc { TenLop = "CEH-K08", MaChuongTrinh = ctdt4, MaGiangVien = gvId3, TenGiangVien = "ThS. Nguyễn Thành Nam", TrinhDoDauVao = "Nâng cao", SiSoToiDa = 18, SoBuoiHoc = 18, HocPhi = 5500000, NgayBatDauDangKy = DateTime.Today.AddDays(-12), HanDangKy = DateTime.Today.AddDays(8), NgayKhaiGiang = DateTime.Today.AddDays(14), MoTa = "Đạo đức Hacker, kỹ thuật rà soát lỗ hổng và kiểm thử xâm nhập thực chiến.", YeuCauHocVien = "Hiểu mạng máy tính căn bản", TrangThai = "Đang mở đăng ký", PhongHoc = "HA11-501" },
-                new LopHoc { TenLop = "UIUX-K01", MaChuongTrinh = ctdt5, MaGiangVien = gvId2, TenGiangVien = "TS. Hoàng Thị Lan", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 25, SoBuoiHoc = 12, HocPhi = 2800000, NgayBatDauDangKy = DateTime.Today.AddDays(-3), HanDangKy = DateTime.Today.AddDays(20), NgayKhaiGiang = DateTime.Today.AddDays(25), MoTa = "Thiết kế UI/UX bài bản từ nghiên cứu User Persona đến sản phẩm hoàn chỉnh trên Figma.", YeuCauHocVien = "Đam mê thiết kế đồ họa", TrangThai = "Đang mở đăng ký", PhongHoc = "HA9-301" },
-                new LopHoc { TenLop = "AI-VISION-K01", MaChuongTrinh = ctdt2, MaGiangVien = gvId2, TenGiangVien = "TS. Hoàng Thị Lan", TrinhDoDauVao = "Nâng cao", SiSoToiDa = 15, SoBuoiHoc = 16, HocPhi = 5900000, NgayBatDauDangKy = DateTime.Today.AddDays(-5), HanDangKy = DateTime.Today.AddDays(14), NgayKhaiGiang = DateTime.Today.AddDays(20), MoTa = "Thị giác máy tính và Deep Learning với OpenCV, PyTorch và YOLO.", YeuCauHocVien = "Thành thạo Python", TrangThai = "Đang mở đăng ký", PhongHoc = "HA10-401" },
-                new LopHoc { TenLop = "DEVOPS-K02", MaChuongTrinh = ctdt6, MaGiangVien = gvId4, TenGiangVien = "PGS.TS. Lê Bá Thành", TrinhDoDauVao = "Trung cấp", SiSoToiDa = 20, SoBuoiHoc = 12, HocPhi = 4500000, NgayBatDauDangKy = DateTime.Today.AddDays(-6), HanDangKy = DateTime.Today.AddDays(16), NgayKhaiGiang = DateTime.Today.AddDays(24), MoTa = "Triển khai CI/CD pipeline với Docker, Kubernetes, GitHub Actions và Azure Cloud.", YeuCauHocVien = "Biết lập trình web và Linux cơ bản", TrangThai = "Đang mở đăng ký", PhongHoc = "HA10-301" },
-                new LopHoc { TenLop = "SQL-OPT-K04", MaChuongTrinh = ctdt1, MaGiangVien = gvId1, TenGiangVien = "ThS. Trần Văn Hùng", TrinhDoDauVao = "Trung cấp", SiSoToiDa = 28, SoBuoiHoc = 10, HocPhi = 2200000, NgayBatDauDangKy = DateTime.Today.AddDays(-4), HanDangKy = DateTime.Today.AddDays(18), NgayKhaiGiang = DateTime.Today.AddDays(26), MoTa = "Tối ưu hóa truy vấn SQL Server, lập chỉ mục Index, Partitioning và stored procedure.", YeuCauHocVien = "Đã học CSDL căn bản", TrangThai = "Đang mở đăng ký", PhongHoc = "HA8-301" },
-                new LopHoc { TenLop = "FIGMA-PRO-K02", MaChuongTrinh = ctdt5, MaGiangVien = gvId2, TenGiangVien = "TS. Hoàng Thị Lan", TrinhDoDauVao = "Trung cấp", SiSoToiDa = 20, SoBuoiHoc = 10, HocPhi = 2600000, NgayBatDauDangKy = DateTime.Today.AddDays(-2), HanDangKy = DateTime.Today.AddDays(25), NgayKhaiGiang = DateTime.Today.AddDays(30), MoTa = "Xây dựng Design System quy mô lớn, Variables, Auto-layout nâng cao và Prototyping.", YeuCauHocVien = "Đã sử dụng Figma cơ bản", TrangThai = "Đang mở đăng ký", PhongHoc = "HA9-301" },
-                new LopHoc { TenLop = "CLOUD-AWS-K02", MaChuongTrinh = ctdt6, MaGiangVien = gvId4, TenGiangVien = "PGS.TS. Lê Bá Thành", TrinhDoDauVao = "Trung cấp", SiSoToiDa = 22, SoBuoiHoc = 14, HocPhi = 4900000, NgayBatDauDangKy = DateTime.Today.AddDays(-3), HanDangKy = DateTime.Today.AddDays(17), NgayKhaiGiang = DateTime.Today.AddDays(23), MoTa = "Khóa đào tạo luyện thi AWS Solutions Architect Associate với bài thực hành VPC, EC2, S3, RDS, Lambda.", YeuCauHocVien = "Hiểu mạng căn bản", TrangThai = "Đang mở đăng ký", PhongHoc = "HA11-201" },
-                new LopHoc { TenLop = "GOLANG-API-K01", MaChuongTrinh = ctdt7, MaGiangVien = gvId1, TenGiangVien = "ThS. Trần Văn Hùng", TrinhDoDauVao = "Nâng cao", SiSoToiDa = 18, SoBuoiHoc = 14, HocPhi = 4800000, NgayBatDauDangKy = DateTime.Today.AddDays(-1), HanDangKy = DateTime.Today.AddDays(20), NgayKhaiGiang = DateTime.Today.AddDays(28), MoTa = "Phát triển RESTful & gRPC API tải cao với Golang, Gin Framework và Redis Caching.", YeuCauHocVien = "Biết lập trình Backend", TrangThai = "Đang mở đăng ký", PhongHoc = "HA8-401" },
-                new LopHoc { TenLop = "QA-AUTO-K01", MaChuongTrinh = ctdt8, MaGiangVien = gvId5, TenGiangVien = "ThS. Phạm Thu Trang", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 24, SoBuoiHoc = 12, HocPhi = 3400000, NgayBatDauDangKy = DateTime.Today.AddDays(-4), HanDangKy = DateTime.Today.AddDays(16), NgayKhaiGiang = DateTime.Today.AddDays(24), MoTa = "Kiểm thử tự động Web với Playwright & TypeScript, tích hợp báo cáo Allure và CI/CD.", YeuCauHocVien = "Biết JavaScript/HTML căn bản", TrangThai = "Đang mở đăng ký", PhongHoc = "HA9-201" },
-                new LopHoc { TenLop = "JAVA-SPRING-K03", MaChuongTrinh = ctdt1, MaGiangVien = gvId1, TenGiangVien = "ThS. Trần Văn Hùng", TrinhDoDauVao = "Trung cấp", SiSoToiDa = 25, SoBuoiHoc = 16, HocPhi = 3900000, NgayBatDauDangKy = DateTime.Today.AddDays(-7), HanDangKy = DateTime.Today.AddDays(14), NgayKhaiGiang = DateTime.Today.AddDays(21), MoTa = "Lập trình Backend chuyên sâu với Java Spring Boot 3, Spring Security và Hibernate.", YeuCauHocVien = "Java căn bản", TrangThai = "Đang mở đăng ký", PhongHoc = "HA8-501" },
-                new LopHoc { TenLop = "K8S-MASTER-K01", MaChuongTrinh = ctdt6, MaGiangVien = gvId4, TenGiangVien = "PGS.TS. Lê Bá Thành", TrinhDoDauVao = "Chuyên sâu", SiSoToiDa = 16, SoBuoiHoc = 14, HocPhi = 5800000, NgayBatDauDangKy = DateTime.Today.AddDays(-2), HanDangKy = DateTime.Today.AddDays(22), NgayKhaiGiang = DateTime.Today.AddDays(30), MoTa = "Quản trị và vận hành cụm Kubernetes doanh nghiệp, Helm Chart, Ingress NGINX và Istio Service Mesh.", YeuCauHocVien = "Thành thạo Docker & Linux", TrangThai = "Đang mở đăng ký", PhongHoc = "HA11-401" },
-                new LopHoc { TenLop = "DATA-ENG-K01", MaChuongTrinh = ctdt2, MaGiangVien = gvId2, TenGiangVien = "TS. Hoàng Thị Lan", TrinhDoDauVao = "Nâng cao", SiSoToiDa = 20, SoBuoiHoc = 15, HocPhi = 5200000, NgayBatDauDangKy = DateTime.Today.AddDays(-5), HanDangKy = DateTime.Today.AddDays(15), NgayKhaiGiang = DateTime.Today.AddDays(22), MoTa = "Xây dựng Data Pipeline quy mô lớn với Apache Spark, Kafka và kho dữ liệu Snowflake.", YeuCauHocVien = "Biết Python & SQL", TrangThai = "Đang mở đăng ký", PhongHoc = "HA10-401" },
+                // Nhóm 1: Đang mở đăng ký (16 lớp) - Chuẩn ca học ban ngày (Sáng / Chiều)
+                new LopHoc { TenLop = "NETCORE10-K01", MaChuongTrinh = ctdt1, MaGiangVien = gvId1, TenGiangVien = "ThS. Trần Văn Hùng", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 25, SoBuoiHoc = 16, HocPhi = 3500000, NgayBatDauDangKy = DateTime.Today.AddDays(-10), HanDangKy = DateTime.Today.AddDays(15), NgayKhaiGiang = DateTime.Today.AddDays(20), MoTa = "Lập trình Web hiện đại với ASP.NET Core 10 MVC, EF Core 10 và SQL Server. Học Ca Sáng (07:00 - 11:45).", YeuCauHocVien = "Biết C# căn bản", TrangThai = "Đang mở đăng ký", PhongHoc = "HA8-201" },
+                new LopHoc { TenLop = "PYTHON-K02", MaChuongTrinh = ctdt2, MaGiangVien = gvId2, TenGiangVien = "TS. Hoàng Thị Lan", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 30, SoBuoiHoc = 14, HocPhi = 3200000, NgayBatDauDangKy = DateTime.Today.AddDays(-8), HanDangKy = DateTime.Today.AddDays(12), NgayKhaiGiang = DateTime.Today.AddDays(18), MoTa = "Phân tích dữ liệu với Python, Pandas, Numpy và trực quan hóa dữ liệu. Học Ca Chiều (13:30 - 18:15).", YeuCauHocVien = "Không yêu cầu", TrangThai = "Đang mở đăng ký", PhongHoc = "HA9-301" },
+                new LopHoc { TenLop = "REACT-K05", MaChuongTrinh = ctdt1, MaGiangVien = gvId1, TenGiangVien = "ThS. Trần Văn Hùng", TrinhDoDauVao = "Trung cấp", SiSoToiDa = 25, SoBuoiHoc = 16, HocPhi = 3800000, NgayBatDauDangKy = DateTime.Today.AddDays(-5), HanDangKy = DateTime.Today.AddDays(15), NgayKhaiGiang = DateTime.Today.AddDays(22), MoTa = "Xây dựng Single Page App với React 19, Hooks, Redux Toolkit và Tailwind CSS. Học Ca Sáng (07:00 - 11:45).", YeuCauHocVien = "Nắm vững HTML/CSS/JS", TrangThai = "Đang mở đăng ký", PhongHoc = "Lab CNTT 1" },
+                new LopHoc { TenLop = "FLUTTER-K03", MaChuongTrinh = ctdt3, MaGiangVien = gvId3, TenGiangVien = "ThS. Nguyễn Thành Nam", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 20, SoBuoiHoc = 16, HocPhi = 4200000, NgayBatDauDangKy = DateTime.Today.AddDays(-7), HanDangKy = DateTime.Today.AddDays(10), NgayKhaiGiang = DateTime.Today.AddDays(16), MoTa = "Lập trình ứng dụng di động đa nền tảng iOS & Android với Flutter và Dart. Học Ca Chiều (13:30 - 18:15).", YeuCauHocVien = "Có tư duy lập trình", TrangThai = "Đang mở đăng ký", PhongHoc = "Lab Máy 1" },
+                new LopHoc { TenLop = "CEH-K08", MaChuongTrinh = ctdt4, MaGiangVien = gvId3, TenGiangVien = "ThS. Nguyễn Thành Nam", TrinhDoDauVao = "Nâng cao", SiSoToiDa = 18, SoBuoiHoc = 18, HocPhi = 5500000, NgayBatDauDangKy = DateTime.Today.AddDays(-12), HanDangKy = DateTime.Today.AddDays(8), NgayKhaiGiang = DateTime.Today.AddDays(14), MoTa = "Đạo đức Hacker, kỹ thuật rà soát lỗ hổng và kiểm thử xâm nhập thực chiến. Học Ca Sáng (07:00 - 11:45).", YeuCauHocVien = "Hiểu mạng máy tính căn bản", TrangThai = "Đang mở đăng ký", PhongHoc = "HA11-501" },
+                new LopHoc { TenLop = "UIUX-K01", MaChuongTrinh = ctdt5, MaGiangVien = gvId2, TenGiangVien = "TS. Hoàng Thị Lan", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 25, SoBuoiHoc = 12, HocPhi = 2800000, NgayBatDauDangKy = DateTime.Today.AddDays(-3), HanDangKy = DateTime.Today.AddDays(20), NgayKhaiGiang = DateTime.Today.AddDays(25), MoTa = "Thiết kế UI/UX bài bản từ nghiên cứu User Persona đến sản phẩm hoàn chỉnh trên Figma. Học Ca Chiều (13:30 - 18:15).", YeuCauHocVien = "Đam mê thiết kế đồ họa", TrangThai = "Đang mở đăng ký", PhongHoc = "HA9-301" },
+                new LopHoc { TenLop = "AI-VISION-K01", MaChuongTrinh = ctdt2, MaGiangVien = gvId2, TenGiangVien = "TS. Hoàng Thị Lan", TrinhDoDauVao = "Nâng cao", SiSoToiDa = 15, SoBuoiHoc = 16, HocPhi = 5900000, NgayBatDauDangKy = DateTime.Today.AddDays(-5), HanDangKy = DateTime.Today.AddDays(14), NgayKhaiGiang = DateTime.Today.AddDays(20), MoTa = "Thị giác máy tính và Deep Learning với OpenCV, PyTorch và YOLO. Học Ca Sáng (07:00 - 11:45).", YeuCauHocVien = "Thành thạo Python", TrangThai = "Đang mở đăng ký", PhongHoc = "HA10-401" },
+                new LopHoc { TenLop = "DEVOPS-K02", MaChuongTrinh = ctdt6, MaGiangVien = gvId4, TenGiangVien = "PGS.TS. Lê Bá Thành", TrinhDoDauVao = "Trung cấp", SiSoToiDa = 20, SoBuoiHoc = 12, HocPhi = 4500000, NgayBatDauDangKy = DateTime.Today.AddDays(-6), HanDangKy = DateTime.Today.AddDays(16), NgayKhaiGiang = DateTime.Today.AddDays(24), MoTa = "Triển khai CI/CD pipeline với Docker, Kubernetes, GitHub Actions và Azure Cloud. Học Ca Chiều (13:30 - 18:15).", YeuCauHocVien = "Biết lập trình web và Linux cơ bản", TrangThai = "Đang mở đăng ký", PhongHoc = "HA10-301" },
+                new LopHoc { TenLop = "SQL-OPT-K04", MaChuongTrinh = ctdt1, MaGiangVien = gvId1, TenGiangVien = "ThS. Trần Văn Hùng", TrinhDoDauVao = "Trung cấp", SiSoToiDa = 28, SoBuoiHoc = 10, HocPhi = 2200000, NgayBatDauDangKy = DateTime.Today.AddDays(-4), HanDangKy = DateTime.Today.AddDays(18), NgayKhaiGiang = DateTime.Today.AddDays(26), MoTa = "Tối ưu hóa truy vấn SQL Server, lập chỉ mục Index, Partitioning và stored procedure. Học Ca Sáng (07:00 - 11:45).", YeuCauHocVien = "Đã học CSDL căn bản", TrangThai = "Đang mở đăng ký", PhongHoc = "HA8-301" },
+                new LopHoc { TenLop = "FIGMA-PRO-K02", MaChuongTrinh = ctdt5, MaGiangVien = gvId2, TenGiangVien = "TS. Hoàng Thị Lan", TrinhDoDauVao = "Trung cấp", SiSoToiDa = 20, SoBuoiHoc = 10, HocPhi = 2600000, NgayBatDauDangKy = DateTime.Today.AddDays(-2), HanDangKy = DateTime.Today.AddDays(25), NgayKhaiGiang = DateTime.Today.AddDays(30), MoTa = "Xây dựng Design System quy mô lớn, Variables, Auto-layout nâng cao và Prototyping. Học Ca Chiều (13:30 - 18:15).", YeuCauHocVien = "Đã sử dụng Figma cơ bản", TrangThai = "Đang mở đăng ký", PhongHoc = "HA9-301" },
+                new LopHoc { TenLop = "CLOUD-AWS-K02", MaChuongTrinh = ctdt6, MaGiangVien = gvId4, TenGiangVien = "PGS.TS. Lê Bá Thành", TrinhDoDauVao = "Trung cấp", SiSoToiDa = 22, SoBuoiHoc = 14, HocPhi = 4900000, NgayBatDauDangKy = DateTime.Today.AddDays(-3), HanDangKy = DateTime.Today.AddDays(17), NgayKhaiGiang = DateTime.Today.AddDays(23), MoTa = "Khóa đào tạo luyện thi AWS Solutions Architect Associate với bài thực hành VPC, EC2, S3, RDS, Lambda. Học Ca Sáng (07:00 - 11:45).", YeuCauHocVien = "Hiểu mạng căn bản", TrangThai = "Đang mở đăng ký", PhongHoc = "HA11-201" },
+                new LopHoc { TenLop = "GOLANG-API-K01", MaChuongTrinh = ctdt7, MaGiangVien = gvId1, TenGiangVien = "ThS. Trần Văn Hùng", TrinhDoDauVao = "Nâng cao", SiSoToiDa = 18, SoBuoiHoc = 14, HocPhi = 4800000, NgayBatDauDangKy = DateTime.Today.AddDays(-1), HanDangKy = DateTime.Today.AddDays(20), NgayKhaiGiang = DateTime.Today.AddDays(28), MoTa = "Phát triển RESTful & gRPC API tải cao với Golang, Gin Framework và Redis Caching. Học Ca Chiều (13:30 - 18:15).", YeuCauHocVien = "Biết lập trình Backend", TrangThai = "Đang mở đăng ký", PhongHoc = "HA8-401" },
+                new LopHoc { TenLop = "QA-AUTO-K01", MaChuongTrinh = ctdt8, MaGiangVien = gvId5, TenGiangVien = "ThS. Phạm Thu Trang", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 24, SoBuoiHoc = 12, HocPhi = 3400000, NgayBatDauDangKy = DateTime.Today.AddDays(-4), HanDangKy = DateTime.Today.AddDays(16), NgayKhaiGiang = DateTime.Today.AddDays(24), MoTa = "Kiểm thử tự động Web với Playwright & TypeScript, tích hợp báo cáo Allure và CI/CD. Học Ca Sáng (07:00 - 11:45).", YeuCauHocVien = "Biết JavaScript/HTML căn bản", TrangThai = "Đang mở đăng ký", PhongHoc = "HA9-201" },
+                new LopHoc { TenLop = "JAVA-SPRING-K03", MaChuongTrinh = ctdt1, MaGiangVien = gvId1, TenGiangVien = "ThS. Trần Văn Hùng", TrinhDoDauVao = "Trung cấp", SiSoToiDa = 25, SoBuoiHoc = 16, HocPhi = 3900000, NgayBatDauDangKy = DateTime.Today.AddDays(-7), HanDangKy = DateTime.Today.AddDays(14), NgayKhaiGiang = DateTime.Today.AddDays(21), MoTa = "Lập trình Backend chuyên sâu với Java Spring Boot 3, Spring Security và Hibernate. Học Ca Sáng (07:00 - 11:45).", YeuCauHocVien = "Java căn bản", TrangThai = "Đang mở đăng ký", PhongHoc = "HA8-501" },
+                new LopHoc { TenLop = "K8S-MASTER-K01", MaChuongTrinh = ctdt6, MaGiangVien = gvId4, TenGiangVien = "PGS.TS. Lê Bá Thành", TrinhDoDauVao = "Chuyên sâu", SiSoToiDa = 16, SoBuoiHoc = 14, HocPhi = 5800000, NgayBatDauDangKy = DateTime.Today.AddDays(-2), HanDangKy = DateTime.Today.AddDays(22), NgayKhaiGiang = DateTime.Today.AddDays(30), MoTa = "Quản trị và vận hành cụm Kubernetes doanh nghiệp, Helm Chart, Ingress NGINX và Istio Service Mesh. Học Ca Chiều (13:30 - 18:15).", YeuCauHocVien = "Thành thạo Docker & Linux", TrangThai = "Đang mở đăng ký", PhongHoc = "HA11-401" },
+                new LopHoc { TenLop = "DATA-ENG-K01", MaChuongTrinh = ctdt2, MaGiangVien = gvId2, TenGiangVien = "TS. Hoàng Thị Lan", TrinhDoDauVao = "Nâng cao", SiSoToiDa = 20, SoBuoiHoc = 15, HocPhi = 5200000, NgayBatDauDangKy = DateTime.Today.AddDays(-5), HanDangKy = DateTime.Today.AddDays(15), NgayKhaiGiang = DateTime.Today.AddDays(22), MoTa = "Xây dựng Data Pipeline quy mô lớn với Apache Spark, Kafka và kho dữ liệu Snowflake. Học Ca Sáng (07:00 - 11:45).", YeuCauHocVien = "Biết Python & SQL", TrangThai = "Đang mở đăng ký", PhongHoc = "HA10-401" },
 
                 // Nhóm 2: Đã đóng đăng ký (5 lớp)
-                new LopHoc { TenLop = "NETCORE10-K00", MaChuongTrinh = ctdt1, MaGiangVien = gvId1, TenGiangVien = "ThS. Trần Văn Hùng", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 5, SoBuoiHoc = 16, HocPhi = 3500000, NgayBatDauDangKy = DateTime.Today.AddDays(-40), HanDangKy = DateTime.Today.AddDays(-15), NgayKhaiGiang = DateTime.Today.AddDays(-10), MoTa = "Lớp đã hoàn thành tuyển sinh và đang trong quá trình học tập thực tế.", YeuCauHocVien = "C# căn bản", TrangThai = "Đã đóng đăng ký", PhongHoc = "HA8-101" },
-                new LopHoc { TenLop = "PYTHON-K01", MaChuongTrinh = ctdt2, MaGiangVien = gvId2, TenGiangVien = "TS. Hoàng Thị Lan", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 6, SoBuoiHoc = 14, HocPhi = 3200000, NgayBatDauDangKy = DateTime.Today.AddDays(-35), HanDangKy = DateTime.Today.AddDays(-12), NgayKhaiGiang = DateTime.Today.AddDays(-8), MoTa = "Lớp học đã đủ sĩ số tối đa và hoàn tất xếp lịch học.", YeuCauHocVien = "Không yêu cầu", TrangThai = "Đã đóng đăng ký", PhongHoc = "HA9-101" },
-                new LopHoc { TenLop = "REACT-K04", MaChuongTrinh = ctdt1, MaGiangVien = gvId1, TenGiangVien = "ThS. Trần Văn Hùng", TrinhDoDauVao = "Trung cấp", SiSoToiDa = 20, SoBuoiHoc = 16, HocPhi = 3800000, NgayBatDauDangKy = DateTime.Today.AddDays(-45), HanDangKy = DateTime.Today.AddDays(-2), NgayKhaiGiang = DateTime.Today.AddDays(5), MoTa = "Đã kết thúc giai đoạn nộp hồ sơ, chuẩn bị khai giảng.", YeuCauHocVien = "HTML/CSS/JS", TrangThai = "Đã đóng đăng ký", PhongHoc = "HA8-201" },
-                new LopHoc { TenLop = "FLUTTER-K02", MaChuongTrinh = ctdt3, MaGiangVien = gvId3, TenGiangVien = "ThS. Nguyễn Thành Nam", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 22, SoBuoiHoc = 16, HocPhi = 4200000, NgayBatDauDangKy = DateTime.Today.AddDays(-50), HanDangKy = DateTime.Today.AddDays(-20), NgayKhaiGiang = DateTime.Today.AddDays(-15), MoTa = "Khóa học di động đợt trước, chuẩn bị bước vào giai đoạn làm đồ án.", YeuCauHocVien = "Có tư duy lập trình", TrangThai = "Đã đóng đăng ký", PhongHoc = "Lab Máy 2" },
-                new LopHoc { TenLop = "CEH-K07", MaChuongTrinh = ctdt4, MaGiangVien = gvId3, TenGiangVien = "ThS. Nguyễn Thành Nam", TrinhDoDauVao = "Nâng cao", SiSoToiDa = 18, SoBuoiHoc = 18, HocPhi = 5500000, NgayBatDauDangKy = DateTime.Today.AddDays(-40), HanDangKy = DateTime.Today.AddDays(-10), NgayKhaiGiang = DateTime.Today.AddDays(-5), MoTa = "Đã kín chỗ khóa học an toàn thông tin chuyên sâu.", YeuCauHocVien = "Hiểu mạng máy tính căn bản", TrangThai = "Đã đóng đăng ký", PhongHoc = "HA11-501" },
+                new LopHoc { TenLop = "NETCORE10-K00", MaChuongTrinh = ctdt1, MaGiangVien = gvId1, TenGiangVien = "ThS. Trần Văn Hùng", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 5, SoBuoiHoc = 16, HocPhi = 3500000, NgayBatDauDangKy = DateTime.Today.AddDays(-40), HanDangKy = DateTime.Today.AddDays(-15), NgayKhaiGiang = DateTime.Today.AddDays(-10), MoTa = "Lớp đã hoàn thành tuyển sinh và đang trong quá trình học tập thực tế. Học Ca Sáng (07:00 - 11:45).", YeuCauHocVien = "C# căn bản", TrangThai = "Đã đóng đăng ký", PhongHoc = "HA8-101" },
+                new LopHoc { TenLop = "PYTHON-K01", MaChuongTrinh = ctdt2, MaGiangVien = gvId2, TenGiangVien = "TS. Hoàng Thị Lan", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 6, SoBuoiHoc = 14, HocPhi = 3200000, NgayBatDauDangKy = DateTime.Today.AddDays(-35), HanDangKy = DateTime.Today.AddDays(-12), NgayKhaiGiang = DateTime.Today.AddDays(-8), MoTa = "Lớp học đã đủ sĩ số tối đa và hoàn tất xếp lịch học. Học Ca Chiều (13:30 - 18:15).", YeuCauHocVien = "Không yêu cầu", TrangThai = "Đã đóng đăng ký", PhongHoc = "HA9-101" },
+                new LopHoc { TenLop = "REACT-K04", MaChuongTrinh = ctdt1, MaGiangVien = gvId1, TenGiangVien = "ThS. Trần Văn Hùng", TrinhDoDauVao = "Trung cấp", SiSoToiDa = 20, SoBuoiHoc = 16, HocPhi = 3800000, NgayBatDauDangKy = DateTime.Today.AddDays(-45), HanDangKy = DateTime.Today.AddDays(-2), NgayKhaiGiang = DateTime.Today.AddDays(5), MoTa = "Đã kết thúc giai đoạn nộp hồ sơ, chuẩn bị khai giảng. Học Ca Sáng (07:00 - 11:45).", YeuCauHocVien = "HTML/CSS/JS", TrangThai = "Đã đóng đăng ký", PhongHoc = "HA8-201" },
+                new LopHoc { TenLop = "FLUTTER-K02", MaChuongTrinh = ctdt3, MaGiangVien = gvId3, TenGiangVien = "ThS. Nguyễn Thành Nam", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 22, SoBuoiHoc = 16, HocPhi = 4200000, NgayBatDauDangKy = DateTime.Today.AddDays(-50), HanDangKy = DateTime.Today.AddDays(-20), NgayKhaiGiang = DateTime.Today.AddDays(-15), MoTa = "Khóa học di động đợt trước, chuẩn bị bước vào giai đoạn làm đồ án. Học Ca Chiều (13:30 - 18:15).", YeuCauHocVien = "Có tư duy lập trình", TrangThai = "Đã đóng đăng ký", PhongHoc = "Lab Máy 2" },
+                new LopHoc { TenLop = "CEH-K07", MaChuongTrinh = ctdt4, MaGiangVien = gvId3, TenGiangVien = "ThS. Nguyễn Thành Nam", TrinhDoDauVao = "Nâng cao", SiSoToiDa = 18, SoBuoiHoc = 18, HocPhi = 5500000, NgayBatDauDangKy = DateTime.Today.AddDays(-40), HanDangKy = DateTime.Today.AddDays(-10), NgayKhaiGiang = DateTime.Today.AddDays(-5), MoTa = "Đã kín chỗ khóa học an toàn thông tin chuyên sâu. Học Ca Sáng (07:00 - 11:45).", YeuCauHocVien = "Hiểu mạng máy tính căn bản", TrangThai = "Đã đóng đăng ký", PhongHoc = "HA11-501" },
 
                 // Nhóm 3: Tạm dừng (3 lớp)
-                new LopHoc { TenLop = "CLOUD-AWS-K01", MaChuongTrinh = ctdt6, MaGiangVien = gvId4, TenGiangVien = "PGS.TS. Lê Bá Thành", TrinhDoDauVao = "Nâng cao", SiSoToiDa = 20, SoBuoiHoc = 14, HocPhi = 4900000, NgayBatDauDangKy = DateTime.Today.AddDays(-10), HanDangKy = DateTime.Today.AddDays(10), NgayKhaiGiang = DateTime.Today.AddDays(20), MoTa = "Kiến trúc đám mây AWS Solutions Architect. Tạm dừng để nâng cấp phòng máy.", YeuCauHocVien = "Có kiến thức hạ tầng mạng", TrangThai = "Tạm dừng", PhongHoc = "HA11-101" },
-                new LopHoc { TenLop = "DATA-BI-K03", MaChuongTrinh = ctdt2, MaGiangVien = gvId2, TenGiangVien = "TS. Hoàng Thị Lan", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 25, SoBuoiHoc = 12, HocPhi = 2900000, NgayBatDauDangKy = DateTime.Today.AddDays(-15), HanDangKy = DateTime.Today.AddDays(5), NgayKhaiGiang = DateTime.Today.AddDays(15), MoTa = "Phân tích và trực quan dữ liệu với Power BI, DAX & Data Modeling.", YeuCauHocVien = "Excel cơ bản", TrangThai = "Tạm dừng", PhongHoc = "HA10-201" },
-                new LopHoc { TenLop = "LINUX-ADMIN-K01", MaChuongTrinh = ctdt4, MaGiangVien = gvId3, TenGiangVien = "ThS. Nguyễn Thành Nam", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 25, SoBuoiHoc = 10, HocPhi = 2500000, NgayBatDauDangKy = DateTime.Today.AddDays(-10), HanDangKy = DateTime.Today.AddDays(10), NgayKhaiGiang = DateTime.Today.AddDays(20), MoTa = "Quản trị hệ thống máy chủ Linux RedHat/CentOS và shell script.", YeuCauHocVien = "Tin học văn phòng", TrangThai = "Tạm dừng", PhongHoc = "HA9-401" },
+                new LopHoc { TenLop = "CLOUD-AWS-K01", MaChuongTrinh = ctdt6, MaGiangVien = gvId4, TenGiangVien = "PGS.TS. Lê Bá Thành", TrinhDoDauVao = "Nâng cao", SiSoToiDa = 20, SoBuoiHoc = 14, HocPhi = 4900000, NgayBatDauDangKy = DateTime.Today.AddDays(-10), HanDangKy = DateTime.Today.AddDays(10), NgayKhaiGiang = DateTime.Today.AddDays(20), MoTa = "Kiến trúc đám mây AWS Solutions Architect. Tạm dừng để nâng cấp phòng máy. Học Ca Chiều (13:30 - 18:15).", YeuCauHocVien = "Có kiến thức hạ tầng mạng", TrangThai = "Tạm dừng", PhongHoc = "HA11-101" },
+                new LopHoc { TenLop = "DATA-BI-K03", MaChuongTrinh = ctdt2, MaGiangVien = gvId2, TenGiangVien = "TS. Hoàng Thị Lan", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 25, SoBuoiHoc = 12, HocPhi = 2900000, NgayBatDauDangKy = DateTime.Today.AddDays(-15), HanDangKy = DateTime.Today.AddDays(5), NgayKhaiGiang = DateTime.Today.AddDays(15), MoTa = "Phân tích và trực quan dữ liệu với Power BI, DAX & Data Modeling. Học Ca Sáng (07:00 - 11:45).", YeuCauHocVien = "Excel cơ bản", TrangThai = "Tạm dừng", PhongHoc = "HA10-201" },
+                new LopHoc { TenLop = "LINUX-ADMIN-K01", MaChuongTrinh = ctdt4, MaGiangVien = gvId3, TenGiangVien = "ThS. Nguyễn Thành Nam", TrinhDoDauVao = "Cơ bản", SiSoToiDa = 25, SoBuoiHoc = 10, HocPhi = 2500000, NgayBatDauDangKy = DateTime.Today.AddDays(-10), HanDangKy = DateTime.Today.AddDays(10), NgayKhaiGiang = DateTime.Today.AddDays(20), MoTa = "Quản trị hệ thống máy chủ Linux RedHat/CentOS và shell script. Học Ca Chiều (13:30 - 18:15).", YeuCauHocVien = "Tin học văn phòng", TrangThai = "Tạm dừng", PhongHoc = "HA9-401" },
 
                 // Nhóm 4: Chưa mở (3 lớp)
-                new LopHoc { TenLop = "GOLANG-MICRO-K01", MaChuongTrinh = ctdt7, MaGiangVien = gvId1, TenGiangVien = "ThS. Trần Văn Hùng", TrinhDoDauVao = "Chuyên sâu", SiSoToiDa = 20, SoBuoiHoc = 14, HocPhi = 4800000, NgayBatDauDangKy = DateTime.Today.AddDays(10), HanDangKy = DateTime.Today.AddDays(30), NgayKhaiGiang = DateTime.Today.AddDays(40), MoTa = "Xây dựng hệ thống Microservices hiệu năng cao với Golang, gRPC và Kafka.", YeuCauHocVien = "Thành thạo ít nhất 1 ngôn ngữ OOP", TrangThai = "Chưa mở", PhongHoc = "HA8-301" },
-                new LopHoc { TenLop = "CYBER-DEF-K01", MaChuongTrinh = ctdt4, MaGiangVien = gvId3, TenGiangVien = "ThS. Nguyễn Thành Nam", TrinhDoDauVao = "Nâng cao", SiSoToiDa = 20, SoBuoiHoc = 15, HocPhi = 5200000, NgayBatDauDangKy = DateTime.Today.AddDays(15), HanDangKy = DateTime.Today.AddDays(35), NgayKhaiGiang = DateTime.Today.AddDays(45), MoTa = "Phòng thủ an ninh mạng Blue Team, SIEM SOC và ứng cứu sự cố không gian mạng.", YeuCauHocVien = "Đã học bảo mật cơ bản", TrangThai = "Chưa mở", PhongHoc = "HA11-501" },
-                new LopHoc { TenLop = "BLOCKCHAIN-K01", MaChuongTrinh = ctdt1, MaGiangVien = gvId4, TenGiangVien = "PGS.TS. Lê Bá Thành", TrinhDoDauVao = "Chuyên sâu", SiSoToiDa = 15, SoBuoiHoc = 14, HocPhi = 6500000, NgayBatDauDangKy = DateTime.Today.AddDays(20), HanDangKy = DateTime.Today.AddDays(40), NgayKhaiGiang = DateTime.Today.AddDays(50), MoTa = "Phát triển ứng dụng Web3 và Smart Contracts với Solidity, Ethereum và Hardhat.", YeuCauHocVien = "Lập trình web thành thạo", TrangThai = "Chưa mở", PhongHoc = "HA11-501" }
+                new LopHoc { TenLop = "GOLANG-MICRO-K01", MaChuongTrinh = ctdt7, MaGiangVien = gvId1, TenGiangVien = "ThS. Trần Văn Hùng", TrinhDoDauVao = "Chuyên sâu", SiSoToiDa = 20, SoBuoiHoc = 14, HocPhi = 4800000, NgayBatDauDangKy = DateTime.Today.AddDays(10), HanDangKy = DateTime.Today.AddDays(30), NgayKhaiGiang = DateTime.Today.AddDays(40), MoTa = "Xây dựng hệ thống Microservices hiệu năng cao với Golang, gRPC và Kafka. Học Ca Sáng (07:00 - 11:45).", YeuCauHocVien = "Thành thạo ít nhất 1 ngôn ngữ OOP", TrangThai = "Chưa mở", PhongHoc = "HA8-301" },
+                new LopHoc { TenLop = "CYBER-DEF-K01", MaChuongTrinh = ctdt4, MaGiangVien = gvId3, TenGiangVien = "ThS. Nguyễn Thành Nam", TrinhDoDauVao = "Nâng cao", SiSoToiDa = 20, SoBuoiHoc = 15, HocPhi = 5200000, NgayBatDauDangKy = DateTime.Today.AddDays(15), HanDangKy = DateTime.Today.AddDays(35), NgayKhaiGiang = DateTime.Today.AddDays(45), MoTa = "Phòng thủ an ninh mạng Blue Team, SIEM SOC và ứng cứu sự cố không gian mạng. Học Ca Chiều (13:30 - 18:15).", YeuCauHocVien = "Đã học bảo mật cơ bản", TrangThai = "Chưa mở", PhongHoc = "HA11-501" },
+                new LopHoc { TenLop = "BLOCKCHAIN-K01", MaChuongTrinh = ctdt1, MaGiangVien = gvId4, TenGiangVien = "PGS.TS. Lê Bá Thành", TrinhDoDauVao = "Chuyên sâu", SiSoToiDa = 15, SoBuoiHoc = 14, HocPhi = 6500000, NgayBatDauDangKy = DateTime.Today.AddDays(20), HanDangKy = DateTime.Today.AddDays(40), NgayKhaiGiang = DateTime.Today.AddDays(50), MoTa = "Phát triển ứng dụng Web3 và Smart Contracts với Solidity, Ethereum và Hardhat. Học Ca Sáng (07:00 - 11:45).", YeuCauHocVien = "Lập trình web thành thạo", TrangThai = "Chưa mở", PhongHoc = "HA11-501" }
             };
 
             foreach (var lop in newLopHocs)
@@ -283,6 +284,21 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                             openLop.NgayKhaiGiang = DateTime.Today.AddDays(27);
                         }
                     }
+                }
+                context.SaveChanges();
+            }
+
+            // Chuẩn hóa mô tả ca học: Loại bỏ hoàn toàn mô tả ca tối theo quy định đào tạo ban ngày
+            var eveningLops = context.LopHocs
+                .Where(l => l.MoTa != null && (l.MoTa.Contains("buổi tối") || l.MoTa.Contains("18:00") || l.MoTa.Contains("21:00")))
+                .ToList();
+            if (eveningLops.Any())
+            {
+                foreach (var el in eveningLops)
+                {
+                    el.MoTa = el.MoTa!
+                        .Replace("Lớp học buổi tối thứ 2-4-6 từ 18:00 - 21:00", "Lớp học Ca Sáng thứ 2-4-6 từ 07:00 - 09:15")
+                        .Replace("buổi tối", "Ca Sáng (07:00 - 11:45)");
                 }
                 context.SaveChanges();
             }
@@ -523,80 +539,194 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                     var lop = allLops[i];
                     string rm = rooms[i % rooms.Length];
                     string gvName = lop.TenGiangVien ?? "ThS. Trần Văn Hùng";
+                    bool isChieu = lop.MoTa != null && lop.MoTa.Contains("Chiều");
 
-                    // Buổi quá khứ 1 (Đã hoàn thành)
-                    sessionsToAdd.Add(new BuoiHoc
+                    // Định nghĩa giờ học theo 4 ca ban ngày chuẩn UNETI (Tuyệt đối không ca tối, không giờ nghỉ trưa)
+                    // Ca 1: 07:00 - 09:15 | Ca 2: 09:30 - 11:45 | Ca 3: 13:30 - 15:45 | Ca 4: 16:00 - 18:15
+                    int startH1 = isChieu ? 13 : 7;
+                    int startM1 = isChieu ? 30 : 0;
+                    int endH1 = isChieu ? 15 : 9;
+                    int endM1 = isChieu ? 45 : 15;
+
+                    int startH2 = isChieu ? 16 : 9;
+                    int startM2 = isChieu ? 0 : 30;
+                    int endH2 = isChieu ? 18 : 11;
+                    int endM2 = isChieu ? 15 : 45;
+
+                    if (lop.NgayKhaiGiang <= DateTime.Today)
                     {
-                        MaLopHoc = lop.MaLopHoc,
-                        MaGiangVien = lop.MaGiangVien,
-                        GiangVien = gvName,
-                        PhongHoc = rm,
-                        ThoiGianBatDau = DateTime.Today.AddDays(-10).AddHours(8 + (i % 3) * 4),
-                        ThoiGianKetThuc = DateTime.Today.AddDays(-10).AddHours(11 + (i % 3) * 4),
-                        NoiDung = $"Buổi 1: Giới thiệu đề cương môn học, cài đặt công cụ và môi trường cho lớp {lop.TenLop}",
-                        GhiChu = "Đã hoàn thành tốt đẹp, sĩ số có mặt 100%",
-                        TrangThai = "Đã hoàn thành"
-                    });
+                        // Lớp đã khai giảng trong quá khứ: Buổi 1 & 2 đã hoàn thành, Buổi 3 sắp diễn ra
+                        DateTime d1 = lop.NgayKhaiGiang;
+                        sessionsToAdd.Add(new BuoiHoc
+                        {
+                            MaLopHoc = lop.MaLopHoc,
+                            MaGiangVien = lop.MaGiangVien,
+                            GiangVien = gvName,
+                            PhongHoc = rm,
+                            ThoiGianBatDau = d1.Date.AddHours(startH1).AddMinutes(startM1),
+                            ThoiGianKetThuc = d1.Date.AddHours(endH1).AddMinutes(endM1),
+                            NoiDung = $"Buổi 1: Giới thiệu đề cương môn học, cài đặt công cụ và môi trường cho lớp {lop.TenLop}",
+                            GhiChu = "Đã hoàn thành tốt đẹp, sĩ số có mặt 100%",
+                            TrangThai = "Đã hoàn thành"
+                        });
 
-                    // Buổi quá khứ 2 (Đã hoàn thành)
-                    sessionsToAdd.Add(new BuoiHoc
+                        DateTime d2 = lop.NgayKhaiGiang.AddDays(2);
+                        if (d2 <= DateTime.Today)
+                        {
+                            sessionsToAdd.Add(new BuoiHoc
+                            {
+                                MaLopHoc = lop.MaLopHoc,
+                                MaGiangVien = lop.MaGiangVien,
+                                GiangVien = gvName,
+                                PhongHoc = rm,
+                                ThoiGianBatDau = d2.Date.AddHours(startH2).AddMinutes(startM2),
+                                ThoiGianKetThuc = d2.Date.AddHours(endH2).AddMinutes(endM2),
+                                NoiDung = $"Buổi 2: Kiến trúc hệ thống cốt lõi và bài thực hành mã nguồn mở {lop.TenLop}",
+                                GhiChu = "Thực hành trên phòng Lab đạt kết quả tốt",
+                                TrangThai = "Đã hoàn thành"
+                            });
+                        }
+
+                        DateTime d3 = DateTime.Today.AddDays(1 + (i % 5));
+                        sessionsToAdd.Add(new BuoiHoc
+                        {
+                            MaLopHoc = lop.MaLopHoc,
+                            MaGiangVien = lop.MaGiangVien,
+                            GiangVien = gvName,
+                            PhongHoc = rm,
+                            ThoiGianBatDau = d3.Date.AddHours(startH1).AddMinutes(startM1),
+                            ThoiGianKetThuc = d3.Date.AddHours(endH1).AddMinutes(endM1),
+                            NoiDung = $"Buổi 3: Thực hành đồ án chuyên sâu, hướng dẫn tối ưu và kiểm thử dự án",
+                            GhiChu = "Yêu cầu học viên mang theo laptop cá nhân và làm trước bài tập về nhà",
+                            TrangThai = "Đã lên lịch"
+                        });
+                    }
+                    else
                     {
-                        MaLopHoc = lop.MaLopHoc,
-                        MaGiangVien = lop.MaGiangVien,
-                        GiangVien = gvName,
-                        PhongHoc = rm,
-                        ThoiGianBatDau = DateTime.Today.AddDays(-5).AddHours(8 + (i % 3) * 4),
-                        ThoiGianKetThuc = DateTime.Today.AddDays(-5).AddHours(11 + (i % 3) * 4),
-                        NoiDung = $"Buổi 2: Kiến trúc hệ thống cốt lõi và bài thực hành mã nguồn mở {lop.TenLop}",
-                        GhiChu = "Thực hành trên phòng Lab đạt kết quả tốt",
-                        TrangThai = "Đã hoàn thành"
-                    });
+                        // Lớp khai giảng trong tương lai: TẤT CẢ buổi học đều phải diễn ra từ Ngày Khai Giảng trở đi
+                        DateTime d1 = lop.NgayKhaiGiang;
+                        DateTime d2 = lop.NgayKhaiGiang.AddDays(2);
+                        DateTime d3 = lop.NgayKhaiGiang.AddDays(4);
 
-                    // Buổi tương lai (Đã lên lịch)
-                    sessionsToAdd.Add(new BuoiHoc
-                    {
-                        MaLopHoc = lop.MaLopHoc,
-                        MaGiangVien = lop.MaGiangVien,
-                        GiangVien = gvName,
-                        PhongHoc = rm,
-                        ThoiGianBatDau = DateTime.Today.AddDays(1 + (i % 7)).AddHours(8 + (i % 2) * 5),
-                        ThoiGianKetThuc = DateTime.Today.AddDays(1 + (i % 7)).AddHours(11 + (i % 2) * 5),
-                        NoiDung = $"Buổi 3: Thực hành đồ án chuyên sâu, hướng dẫn tối ưu và kiểm thử dự án",
-                        GhiChu = "Yêu cầu học viên mang theo laptop cá nhân và làm trước bài tập về nhà",
-                        TrangThai = "Đã lên lịch"
-                    });
+                        sessionsToAdd.Add(new BuoiHoc
+                        {
+                            MaLopHoc = lop.MaLopHoc,
+                            MaGiangVien = lop.MaGiangVien,
+                            GiangVien = gvName,
+                            PhongHoc = rm,
+                            ThoiGianBatDau = d1.Date.AddHours(startH1).AddMinutes(startM1),
+                            ThoiGianKetThuc = d1.Date.AddHours(endH1).AddMinutes(endM1),
+                            NoiDung = $"Buổi 1: Khai giảng lớp học & Giới thiệu tổng quan đề cương {lop.TenLop}",
+                            GhiChu = "Chuẩn bị tài liệu phát tay và kích hoạt tài khoản Lab",
+                            TrangThai = "Đã lên lịch"
+                        });
 
-                    if (sessionsToAdd.Count >= 36) break;
+                        sessionsToAdd.Add(new BuoiHoc
+                        {
+                            MaLopHoc = lop.MaLopHoc,
+                            MaGiangVien = lop.MaGiangVien,
+                            GiangVien = gvName,
+                            PhongHoc = rm,
+                            ThoiGianBatDau = d2.Date.AddHours(startH2).AddMinutes(startM2),
+                            ThoiGianKetThuc = d2.Date.AddHours(endH2).AddMinutes(endM2),
+                            NoiDung = $"Buổi 2: Thiết lập môi trường và cấu hình dự án chuẩn",
+                            GhiChu = "Thực hành tại phòng máy chuyên dụng",
+                            TrangThai = "Đã lên lịch"
+                        });
+
+                        sessionsToAdd.Add(new BuoiHoc
+                        {
+                            MaLopHoc = lop.MaLopHoc,
+                            MaGiangVien = lop.MaGiangVien,
+                            GiangVien = gvName,
+                            PhongHoc = rm,
+                            ThoiGianBatDau = d3.Date.AddHours(startH1).AddMinutes(startM1),
+                            ThoiGianKetThuc = d3.Date.AddHours(endH1).AddMinutes(endM1),
+                            NoiDung = $"Buổi 3: Lập trình tính năng cốt lõi theo đồ án phân công",
+                            GhiChu = "Kiểm tra tiến độ thực hành từng học viên",
+                            TrangThai = "Đã lên lịch"
+                        });
+                    }
+
+                    if (sessionsToAdd.Count >= 38) break;
                 }
 
-                // Thêm 2 buổi học Đã hủy (mẫu trường hợp hoãn/hủy ca học)
+                // Thêm 2 buổi học Đã hủy mẫu (Ca 3 Chiều 1 và Ca 4 Chiều 2 - Tuyệt đối không xếp ca tối)
+                var lopHuy1 = allLops[0];
+                DateTime ngayHuy1 = lopHuy1.NgayKhaiGiang > DateTime.Today ? lopHuy1.NgayKhaiGiang.AddDays(5) : DateTime.Today.AddDays(4);
                 sessionsToAdd.Add(new BuoiHoc
                 {
-                    MaLopHoc = allLops[0].MaLopHoc,
-                    MaGiangVien = allLops[0].MaGiangVien,
-                    GiangVien = allLops[0].TenGiangVien ?? "ThS. Trần Văn Hùng",
+                    MaLopHoc = lopHuy1.MaLopHoc,
+                    MaGiangVien = lopHuy1.MaGiangVien,
+                    GiangVien = lopHuy1.TenGiangVien ?? "ThS. Trần Văn Hùng",
                     PhongHoc = "HA8-501",
-                    ThoiGianBatDau = DateTime.Today.AddDays(4).AddHours(13),
-                    ThoiGianKetThuc = DateTime.Today.AddDays(4).AddHours(16),
+                    ThoiGianBatDau = ngayHuy1.Date.AddHours(13).AddMinutes(30),
+                    ThoiGianKetThuc = ngayHuy1.Date.AddHours(15).AddMinutes(45),
                     NoiDung = "Chuyên đề mở rộng: Trải nghiệm công nghệ thế hệ mới (Hoãn do bảo trì hội trường)",
                     GhiChu = "Đã báo nghỉ cho sinh viên qua SMS và Email",
                     TrangThai = "Đã hủy"
                 });
 
+                var lopHuy2 = allLops.Count > 1 ? allLops[1] : allLops[0];
+                DateTime ngayHuy2 = lopHuy2.NgayKhaiGiang > DateTime.Today ? lopHuy2.NgayKhaiGiang.AddDays(7) : DateTime.Today.AddDays(6);
                 sessionsToAdd.Add(new BuoiHoc
                 {
-                    MaLopHoc = allLops[1].MaLopHoc,
-                    MaGiangVien = allLops[1].MaGiangVien,
-                    GiangVien = allLops[1].TenGiangVien ?? "TS. Hoàng Thị Lan",
+                    MaLopHoc = lopHuy2.MaLopHoc,
+                    MaGiangVien = lopHuy2.MaGiangVien,
+                    GiangVien = lopHuy2.TenGiangVien ?? "TS. Hoàng Thị Lan",
                     PhongHoc = "HA9-301",
-                    ThoiGianBatDau = DateTime.Today.AddDays(6).AddHours(18),
-                    ThoiGianKetThuc = DateTime.Today.AddDays(6).AddHours(21),
+                    ThoiGianBatDau = ngayHuy2.Date.AddHours(16),
+                    ThoiGianKetThuc = ngayHuy2.Date.AddHours(18).AddMinutes(15),
                     NoiDung = "Ôn tập chuyên đề thi cuối kỳ (Dời sang buổi phụ đạo)",
                     GhiChu = "Giảng viên có lịch công tác đột xuất",
                     TrangThai = "Đã hủy"
                 });
 
                 context.BuoiHocs.AddRange(sessionsToAdd);
+                context.SaveChanges();
+            }
+
+            // Chuẩn hóa và làm sạch mọi buổi học hiện có trong DB đảm bảo 100% tuân thủ quy tắc nghiệp vụ:
+            // 1. Không ca tối (>18:15) và không sáng sớm (<07:00)
+            // 2. Không nằm trong giờ nghỉ trưa (11:45 - 13:30)
+            // 3. Không diễn ra trước ngày khai giảng của lớp
+            var existingSessions = context.BuoiHocs.Include(b => b.LopHoc).ToList();
+            bool hasSessionFix = false;
+            foreach (var b in existingSessions)
+            {
+                var st = b.ThoiGianBatDau.TimeOfDay;
+                var et = b.ThoiGianKetThuc.TimeOfDay;
+
+                // Fix ca tối (>18:15) hoặc sáng sớm (<07:00)
+                if (st < new TimeSpan(7, 0, 0) || et > new TimeSpan(18, 15, 0))
+                {
+                    b.ThoiGianBatDau = b.ThoiGianBatDau.Date.AddHours(16);
+                    b.ThoiGianKetThuc = b.ThoiGianBatDau.Date.AddHours(18).AddMinutes(15);
+                    hasSessionFix = true;
+                }
+                // Fix giờ nghỉ trưa (11:45 - 13:30)
+                else if (st < new TimeSpan(13, 30, 0) && et > new TimeSpan(11, 45, 0))
+                {
+                    b.ThoiGianBatDau = b.ThoiGianBatDau.Date.AddHours(9).AddMinutes(30);
+                    b.ThoiGianKetThuc = b.ThoiGianBatDau.Date.AddHours(11).AddMinutes(45);
+                    hasSessionFix = true;
+                }
+
+                // Fix buổi học trước ngày khai giảng của lớp
+                if (b.LopHoc != null && b.ThoiGianBatDau.Date < b.LopHoc.NgayKhaiGiang.Date)
+                {
+                    var diffDays = (b.LopHoc.NgayKhaiGiang.Date - b.ThoiGianBatDau.Date).Days;
+                    b.ThoiGianBatDau = b.ThoiGianBatDau.AddDays(diffDays + 1);
+                    b.ThoiGianKetThuc = b.ThoiGianKetThuc.AddDays(diffDays + 1);
+                    if (b.ThoiGianBatDau > DateTime.Now && b.TrangThai == "Đã hoàn thành")
+                    {
+                        b.TrangThai = "Đã lên lịch";
+                    }
+                    hasSessionFix = true;
+                }
+            }
+            if (hasSessionFix)
+            {
                 context.SaveChanges();
             }
 

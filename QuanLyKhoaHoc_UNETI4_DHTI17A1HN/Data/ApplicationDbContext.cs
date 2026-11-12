@@ -215,7 +215,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                     NgayBatDauDangKy = new DateTime(2026, 1, 1),
                     HanDangKy = new DateTime(2026, 12, 31),
                     NgayKhaiGiang = new DateTime(2027, 1, 15),
-                    MoTa = "Lớp học buổi tối thứ 2-4-6 từ 18:00 - 21:00",
+                    MoTa = "Lớp học Ca Sáng thứ 2-4-6 từ 07:00 - 09:15",
                     YeuCauHocVien = "Đã có kiến thức lập trình C# cơ bản",
                     TrangThai = "Đang mở đăng ký",
                     PhongHoc = "Lab 402 - Cơ sở Lĩnh Nam",
