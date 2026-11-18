@@ -9,7 +9,7 @@
 [![Entity Framework Core 10](https://img.shields.io/badge/EF_Core-10.0-512BD4?logo=nuget&logoColor=white)](https://learn.microsoft.com/ef/core)
 [![SQL Server](https://img.shields.io/badge/Database-SQL_Server_LocalDB-CC292B?logo=microsoftsqlserver&logoColor=white)](https://www.microsoft.com/sql-server)
 [![Tailwind CSS](https://img.shields.io/badge/Frontend-Tailwind_CSS_3-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![VietQR Payment](https://img.shields.io/badge/Payment-VietQR_MBBank-00A859?logo=qr-code&logoColor=white)](https://vietqr.net/)
+[![ClosedXML Excel Export](https://img.shields.io/badge/Export-ClosedXML_Excel-217346?logo=microsoftexcel&logoColor=white)](https://github.com/ClosedXML/ClosedXML)
 
 ---
 
@@ -22,7 +22,7 @@ Dự án được phân chia thành **5 Module độc lập** theo cấu trúc *
 | **1** | **Vũ Đình Trường** | `23103100026` | **Nhóm trưởng** | **Module 1**: Quản trị Hệ thống, Tài khoản, Phân quyền & Chương trình đào tạo | `ITaiKhoanRepository.cs`, `TaiKhoanRepository.cs`<br>`ITaiKhoanService.cs`, `TaiKhoanService.cs`<br>`IChuongTrinhDaoTaoRepository.cs`, `ChuongTrinhDaoTaoRepository.cs`<br>`IChuongTrinhDaoTaoService.cs`, `ChuongTrinhDaoTaoService.cs` |
 | **2** | **Nguyễn Đình Kiên** | `23103100020` | Thành viên | **Module 2**: Quản lý Lớp học & Đội ngũ Giảng viên | `ILopHocRepository.cs`, `LopHocRepository.cs`<br>`ILopHocService.cs`, `LopHocService.cs`<br>`IGiangVienRepository.cs`, `GiangVienRepository.cs`<br>`IGiangVienService.cs`, `GiangVienService.cs` |
 | **3** | **Nguyễn Đức Linh** | `23103100042` | Thành viên | **Module 3**: Quản lý Học viên, Hồ sơ sinh viên & Cổng dịch vụ học viên (Eduspace) | `IHocVienRepository.cs`, `HocVienRepository.cs`<br>`IHocVienService.cs`, `HocVienService.cs`<br>`CongHocVienController.cs` (Giao diện Không gian học tập) |
-| **4** | **Nguyễn Hoàng Long** | `23103100046` | Thành viên | **Module 4**: Tiếp nhận đăng ký, Xét duyệt hồ sơ, Quản lý tài chính & Thu học phí VietQR | `IDangKyHocRepository.cs`, `DangKyHocRepository.cs`<br>`DangKyHocController.cs`<br>Quy trình thanh toán VietQR & Xác nhận học phí |
+| **4** | **Nguyễn Hoàng Long** | `23103100046` | Thành viên | **Module 4**: Tiếp nhận đăng ký, Xét duyệt hồ sơ, Quản lý tài chính & Thu học phí | `IDangKyHocRepository.cs`, `DangKyHocRepository.cs`<br>`DangKyHocController.cs`<br>Quy trình xác nhận chuyển khoản & thu học phí, xuất Excel `ClosedXML` |
 | **5** | **Nguyễn Tùng Dương** | `23103100003` | Thành viên | **Module 5**: Xếp Thời khóa biểu (TKB), Quản lý Kết quả học tập (Bảng điểm) & Thống kê | `IBuoiHocRepository.cs`, `BuoiHocRepository.cs`<br>`IKetQuaHocTapRepository.cs`, `KetQuaHocTapRepository.cs`<br>`IThongKeRepository.cs`, `ThongKeRepository.cs`<br>`BuoiHocController.cs`, `KetQuaHocTapController.cs` |
 
 ---
@@ -106,26 +106,23 @@ erDiagram
 
 ## ⚡ 4. CÁC QUY TRÌNH NGHIỆP VỤ TRỌNG TÂM
 
-### 💳 A. Quy trình Đăng ký & Đóng học phí VietQR (Module 3 & Module 4)
-Quy trình đảm bảo kiểm soát tài chính minh bạch, chuẩn ngân hàng:
+### 💳 A. Quy trình Đăng ký & Đóng học phí Chuyển khoản QR / Trực tiếp (Module 3 & Module 4)
+Quy trình đảm bảo kiểm soát tài chính minh bạch và chặt chẽ:
 1. **Học viên nộp đơn đăng ký**:
    - Chọn khóa học phù hợp -> Bấm "Đăng ký".
-   - Đơn ghi nhận với trạng thái `ChoDuyet`, học phí `ChuaDong`.
+   - Đơn ghi nhận với trạng thái `Chờ duyệt`, học phí `0 đ`.
 2. **Giáo vụ xét duyệt đơn**:
    - Kiểm tra điều kiện sĩ số lớp (`SiSoHienTai < SiSoToiDa`).
-   - Duyệt đơn -> Trạng thái chuyển thành `DaDuyet`.
-3. **Thanh toán học phí VietQR**:
-   - Tại tab "Đơn đăng ký", học viên bấm **"Đóng học phí (VietQR / CK)"**.
-   - Modal hiển thị **Mã QR động VietQR** chuẩn Napas 24/7 của Ngân hàng **MB Bank** (STK: `0381000556688`).
-   - Mã QR tự động điền sẵn số tiền học phí và cú pháp chuyển tiền chuẩn: `[Mã Lớp] [Họ tên] [SĐT]`.
+   - Duyệt đơn -> Trạng thái chuyển thành `Đã duyệt`.
+3. **Thanh toán học phí (Chuyển khoản QR / Nộp trực tiếp)**:
+   - Tại tab "Đơn đăng ký", học viên bấm **"Đóng Học Phí (Chuyển khoản / Trực tiếp)"**.
+   - Modal hiển thị ảnh **Mã QR chuyển khoản tĩnh**, thông tin số tài khoản, số tiền học phí và cú pháp chuyển khoản (`UNETI DKxxx`).
 4. **Học viên xác nhận chuyển khoản**:
-   - Sau khi chuyển qua App Ngân hàng, học viên bấm nút **"Xác nhận đã chuyển"**.
-   - Trạng thái học phí cập nhật sang **`ChoXacNhan`** (Chờ giáo vụ đối soát).
+   - Sau khi chuyển qua App Ngân hàng, học viên bấm nút **"Tôi Đã Chuyển Khoản"**.
+   - Trạng thái đơn cập nhật sang **`Chờ xác nhận học phí`** (Chờ giáo vụ đối soát).
 5. **Giáo vụ phê duyệt & Kích hoạt lớp học**:
-   - Phía Quản lý / Giáo vụ nhận được thông báo học viên đã nộp học phí, đối soát sao kê tài khoản ngân hàng.
-   - Giáo vụ bấm **"Xác nhận đã nộp học phí"**.
-   - Trạng thái đơn chuyển sang **`DaDong`**, tự động tăng `SiSoHienTai` của lớp.
-   - Lớp học được mở khóa, học viên chính thức truy cập không gian học tập, xem tài liệu và lịch học.
+   - Phía Quản lý / Giáo vụ kiểm tra đối soát thanh toán, bấm **"Xác nhận đã nộp học phí"**.
+   - Trạng thái đơn chuyển sang **`Đã đóng học phí`** / **`Đang học`**, mở khóa lớp học và cho phép xuất danh sách báo cáo Excel (`.xlsx`) bằng thư viện **ClosedXML**.
 
 ---
 
@@ -214,11 +211,10 @@ dotnet run
 
 | Tài khoản (Username) | Mật khẩu | Vai trò (Role) | Chức năng kiểm thử chính |
 | :--- | :--- | :--- | :--- |
-| **`admin`** | `123456` | **Admin** | Quản trị toàn bộ danh mục, tài khoản, cấu hình hệ thống |
-| **`giaovu`** | `123456` | **GiaoVu** | Mở lớp học, duyệt đơn đăng ký, xác nhận nộp học phí, xếp TKB, nhập điểm |
-| **`hocvien`** | `123456` | **HocVien** | Tài khoản học viên mẫu: Đăng ký lớp, thanh toán VietQR, xem TKB & bảng điểm |
-| **`nguyenvanan`** | `123456` | **HocVien** | Học viên có dữ liệu bảng điểm đầy đủ, lịch học và đơn đăng ký thực tế |
-| **`gv_lephuoc`** | `123456` | **GiangVien** | Giảng viên: Xem lịch dạy theo tuần, danh sách sinh viên lớp phụ trách |
+| **`admin`** | `admin123` | **Admin** | Quản trị toàn bộ danh mục, tài khoản, cấu hình hệ thống |
+| **`giaovu`** | `giaovu123` | **GiaoVu** | Mở lớp học, duyệt đơn đăng ký, xác nhận nộp học phí, xếp TKB, nhập điểm |
+| **`giangvien`** | `giangvien123` | **GiangVien** | Giảng viên: Xem lịch dạy theo tuần, danh sách sinh viên và chấm điểm |
+| **`hocvien`** | `hocvien123` | **HocVien** | Tài khoản học viên mẫu: Đăng ký lớp, nộp học phí, xem TKB & bảng điểm |
 
 ---
 
@@ -240,7 +236,7 @@ dotnet run
 - `[23103100026] [Module 1] Hoan thien Repository phan quyen va xac thuc Cookie Claims`
 - `[23103100020] [Module 2] Viet service phan trang LINQ Skip Take va loc giang vien`
 - `[23103100042] [Module 3] Toi uu giao dien Cong Hoc Vien Eduspace va autocomplete tim kiem`
-- `[23103100046] [Module 4] Hoan thien quy trinh thanh toan VietQR MB Bank va xac nhan hoc phi`
+- `[23103100046] [Module 4] Hoan thien quy trinh xac nhan hoc phi, xuat Excel ClosedXML va popup xac nhan`
 - `[23103100003] [Module 5] Tinh diem trung binh he 10 he 4 va thuat toan kiem tra trung lich`
 
 ---
@@ -272,8 +268,8 @@ Bộ câu hỏi chuẩn sát thực tế chấm điểm của các Thầy/Cô Kh
    **Trả lời:** Sử dụng hàm JavaScript `searchGradeSubjects()` lắng nghe sự kiện `input`. Dữ liệu danh sách môn học được quét từ các dòng bảng điểm thực tế, hiển thị gợi ý tức thì dưới thanh tìm kiếm. Khi bấm vào gợi ý, hệ thống tự động cuộn đến môn học và làm nổi bật (highlight).
 
 ### 🔹 Sinh viên 4: Nguyễn Hoàng Long (23103100046 - Module 4)
-1. **Câu hỏi:** *Quy trình đóng học phí bằng VietQR diễn ra thế nào? Làm sao để tránh việc học viên chưa chuyển tiền mà đã được vào học?*  
-   **Trả lời:** Khi học viên mở thanh toán, hệ thống sinh mã VietQR động theo định dạng Napas 24/7 với tài khoản MB Bank và số tiền chính xác của lớp. Sau khi chuyển, học viên bấm "Xác nhận đã chuyển" thì trạng thái chỉ là `ChoXacNhan`. Chỉ khi Giáo vụ kiểm tra tiền đã vào tài khoản và bấm "Xác nhận đã nộp học phí" trên trang quản lý của Giáo vụ thì trạng thái mới chuyển thành `DaDong` và kích hoạt quyền vào lớp.
+1. **Câu hỏi:** *Quy trình đóng học phí diễn ra thế nào? Làm sao để tránh việc học viên chưa chuyển tiền mà đã được vào học?*  
+   **Trả lời:** Khi học viên mở modal thanh toán, hệ thống hiển thị ảnh mã QR chuyển khoản cùng số tiền và cú pháp thanh toán chuẩn (`UNETI DKxxx`). Sau khi chuyển khoản, học viên bấm "Tôi Đã Chuyển Khoản" thì trạng thái chỉ là `Chờ xác nhận học phí`. Chỉ khi Giáo vụ kiểm tra đối soát và bấm "Xác nhận đã nộp học phí" trên trang quản lý của Giáo vụ thì trạng thái mới chuyển thành `Đã đóng học phí` và kích hoạt quyền vào lớp. Ngoài ra hệ thống hỗ trợ xuất file Excel `.xlsx` qua thư viện `ClosedXML`.
 2. **Câu hỏi:** *Viết câu lệnh LINQ kiểm tra số học viên đã nộp học phí của lớp để chốt danh sách?*  
    **Trả lời:** Trong `IDangKyHocRepository`:
    ```csharp

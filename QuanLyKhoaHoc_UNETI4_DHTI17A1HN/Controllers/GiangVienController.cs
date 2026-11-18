@@ -1,5 +1,7 @@
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Helpers;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services;
@@ -126,8 +128,20 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
+            bool isLecturerRole = string.Equals(HttpContext.Session.GetString("VaiTro"), "GiangVien", StringComparison.OrdinalIgnoreCase);
             var myClasses = await _giangVienService.GetClassesForTeacherAsync(gv);
 
+            if (!myClasses.Any() && !isLecturerRole)
+            {
+                // Fallback chỉ áp dụng cho Admin/Giáo vụ khi xem demo tổng quát
+                myClasses = (await _giangVienRepo.GetClassesByTeacherAsync(0, "")).Take(5).ToList();
+            }
+
+            if (isLecturerRole && maLop.HasValue && maLop.Value > 0 && !myClasses.Any(l => l.MaLopHoc == maLop.Value))
+            {
+                TempData["Error"] = "Từ chối truy cập: Bạn không phụ trách lớp học này!";
+                return RedirectToAction(nameof(Index));
+            }
             int selectedClassId = maLop ?? myClasses.FirstOrDefault()?.MaLopHoc ?? 0;
             var currentClass = myClasses.FirstOrDefault(l => l.MaLopHoc == selectedClassId);
 
@@ -151,7 +165,22 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> LuuDiemAjax(int maDangKy, double? diemCC, double? diemGK, double? diemCK, string? ghiChu)
         {
-            var (success, message, data) = await _giangVienService.LuuDiemHocVienAsync(maDangKy, diemCC, diemGK, diemCK, ghiChu);
+            bool isLecturerRole = string.Equals(HttpContext.Session.GetString("VaiTro"), "GiangVien", StringComparison.OrdinalIgnoreCase);
+            int? expectedMaGv = null;
+            string? expectedTenGv = null;
+
+            if (isLecturerRole)
+            {
+                var gv = await GetCurrentGiangVienAsync();
+                if (gv == null)
+                {
+                    return Json(new { success = false, message = "Không xác định được hồ sơ giảng viên đăng nhập." });
+                }
+                expectedMaGv = gv.MaGiangVien;
+                expectedTenGv = gv.HoTen;
+            }
+
+            var (success, message, data) = await _giangVienService.LuuDiemHocVienAsync(maDangKy, diemCC, diemGK, diemCK, ghiChu, expectedMaGv, expectedTenGv);
 
             if (!success || data == null)
             {
@@ -342,6 +371,111 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 msg += $" Bỏ qua {skipped} giảng viên do đang phụ trách lớp học.";
             }
             return Json(new { success = true, message = msg, deletedCount = deleted, skippedCount = skipped });
+        }
+
+        // ========================================================
+        // XUẤT FILE EXCEL DANH SÁCH GIẢNG VIÊN & SỔ ĐIỂM (CLOSEDXML)
+        // ========================================================
+        [HttpGet]
+        [SessionAuthorize("Admin", "GiaoVu")]
+        public async Task<IActionResult> ExportExcelQuanLy(string? search, string? hocVi)
+        {
+            var list = await _giangVienService.GetDanhSachGiangVienAsync(search, hocVi);
+            string[] headers = { "STT", "Mã GV", "Họ và Tên", "Học vị", "Chuyên ngành", "Email", "Số điện thoại", "Số lớp phụ trách", "Trạng thái" };
+
+            var fileBytes = ExcelExportHelper.ExportToExcel(
+                "DanhSachGiangVien",
+                "DANH SÁCH ĐỘI NGŨ GIẢNG VIÊN - UNETI",
+                $"Tổng số giảng viên: {list.Count}",
+                headers,
+                list,
+                (ws, row, stt, gv) =>
+                {
+                    ws.Cell(row, 1).Value = stt;
+                    ws.Cell(row, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 2).Value = $"GV{gv.MaGiangVien:D3}";
+                    ws.Cell(row, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 3).Value = gv.HoTen;
+                    ws.Cell(row, 4).Value = gv.HocVi ?? "";
+                    ws.Cell(row, 5).Value = gv.ChuyenNganh ?? "";
+                    ws.Cell(row, 6).Value = gv.Email;
+                    ws.Cell(row, 7).Value = gv.SoDienThoai ?? "";
+                    ws.Cell(row, 8).Value = gv.LopHocs?.Count ?? 0;
+                    ws.Cell(row, 8).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 9).Value = gv.TrangThai ? "Đang giảng dạy" : "Tạm nghỉ";
+                    ws.Cell(row, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                });
+
+            return File(fileBytes, ExcelExportHelper.ExcelContentType, $"DanhSachGiangVien_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportExcelBangDiem(int maLop)
+        {
+            bool isLecturerRole = string.Equals(HttpContext.Session.GetString("VaiTro"), "GiangVien", StringComparison.OrdinalIgnoreCase);
+            if (isLecturerRole)
+            {
+                var gv = await GetCurrentGiangVienAsync();
+                var myClasses = gv != null ? await _giangVienService.GetClassesForTeacherAsync(gv) : new List<LopHoc>();
+                if (maLop <= 0 || !myClasses.Any(l => l.MaLopHoc == maLop))
+                {
+                    TempData["Error"] = "Từ chối truy cập: Bạn không phụ trách lớp học này!";
+                    return RedirectToAction(nameof(ChamDiem));
+                }
+            }
+
+            var studentEnrollments = maLop > 0
+                ? await _giangVienService.GetStudentsForGradingAsync(maLop)
+                : new List<DangKyHoc>();
+
+            var lopName = studentEnrollments.FirstOrDefault()?.LopHoc?.TenLop ?? $"Lop_{maLop}";
+            string[] headers = { "STT", "Mã ĐK", "Họ và Tên", "Email", "Quá trình (40%)", "Cuối kỳ (60%)", "Tổng kết", "Điểm chữ", "Hệ 4", "Xếp loại", "Kết quả", "Nhận xét" };
+
+            var fileBytes = ExcelExportHelper.ExportToExcel(
+                "SoDiemLopHoc",
+                $"SỔ ĐIỂM LỚP HỌC PHẦN: {lopName}",
+                $"Tổng số học viên: {studentEnrollments.Count}",
+                headers,
+                studentEnrollments,
+                (ws, row, stt, dk) =>
+                {
+                    var kq = dk.KetQuaHocTap;
+                    ws.Cell(row, 1).Value = stt;
+                    ws.Cell(row, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 2).Value = $"#DK{dk.MaDangKy:D3}";
+                    ws.Cell(row, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 3).Value = dk.HocVien?.HoTen ?? "N/A";
+                    ws.Cell(row, 4).Value = dk.HocVien?.Email ?? "";
+
+                    if (kq != null)
+                    {
+                        ws.Cell(row, 5).Value = kq.DiemChuyenCan;
+                        ws.Cell(row, 5).Style.NumberFormat.Format = "0.0";
+                        ws.Cell(row, 6).Value = kq.DiemCuoiKhoa;
+                        ws.Cell(row, 6).Style.NumberFormat.Format = "0.0";
+                        ws.Cell(row, 7).Value = kq.DiemTongKet;
+                        ws.Cell(row, 7).Style.NumberFormat.Format = "0.0";
+                        ws.Cell(row, 7).Style.Font.Bold = true;
+                        ws.Cell(row, 8).Value = kq.DiemChu ?? "-";
+                        ws.Cell(row, 9).Value = kq.DiemHe4.HasValue ? kq.DiemHe4.Value.ToString("0.0") : "-";
+                        ws.Cell(row, 10).Value = kq.XepLoai ?? "-";
+                        ws.Cell(row, 11).Value = kq.KetQua;
+                        ws.Cell(row, 12).Value = kq.NhanXet ?? "";
+                    }
+                    else
+                    {
+                        ws.Cell(row, 5).Value = "-";
+                        ws.Cell(row, 6).Value = "-";
+                        ws.Cell(row, 7).Value = "-";
+                        ws.Cell(row, 8).Value = "-";
+                        ws.Cell(row, 9).Value = "-";
+                        ws.Cell(row, 10).Value = "Chưa có điểm";
+                        ws.Cell(row, 11).Value = "Đang học";
+                        ws.Cell(row, 12).Value = "";
+                    }
+                });
+
+            return File(fileBytes, ExcelExportHelper.ExcelContentType, $"SoDiem_{lopName}_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
     }
 }

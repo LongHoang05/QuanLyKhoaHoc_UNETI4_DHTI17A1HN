@@ -40,7 +40,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             double tyLeHoanThanh = totalCoDiem > 0 ? Math.Round((double)soHoanThanh / totalCoDiem * 100, 1) : 0;
 
             decimal tongDoanhThu = await _context.DangKyHocs
-                .Where(d => d.NgayDongHocPhi != null)
+                .Where(d => d.NgayDongHocPhi != null && d.TrangThai != "Đã hủy" && d.TrangThai != "Từ chối")
                 .SumAsync(d => (decimal?)d.SoTienDaDong) ?? 0m;
 
             int tongChoHoc = await _context.LopHocs.SumAsync(l => (int?)l.SiSoToiDa) ?? 0;
@@ -103,7 +103,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         public async Task<IEnumerable<ThongKeDoanhThuVM>> GetDoanhThuTheoThangAsync()
         {
             return await _context.DangKyHocs
-                .Where(d => d.NgayDongHocPhi != null)
+                .Where(d => d.NgayDongHocPhi != null && d.TrangThai != "Đã hủy" && d.TrangThai != "Từ chối")
                 .GroupBy(d => new { d.NgayDongHocPhi!.Value.Year, d.NgayDongHocPhi!.Value.Month })
                 .OrderBy(g => g.Key.Year)
                 .ThenBy(g => g.Key.Month)
@@ -118,7 +118,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         public async Task<IEnumerable<dynamic>> GetDoanhThuTheoCTDTAsync()
         {
             return await _context.DangKyHocs
-                .Where(d => d.NgayDongHocPhi != null && d.LopHoc != null && d.LopHoc.ChuongTrinhDaoTao != null)
+                .Where(d => d.NgayDongHocPhi != null && d.TrangThai != "Đã hủy" && d.TrangThai != "Từ chối" && d.LopHoc != null && d.LopHoc.ChuongTrinhDaoTao != null)
                 .GroupBy(d => d.LopHoc!.ChuongTrinhDaoTao!.TenChuongTrinh)
                 .Select(g => (dynamic)new { Ten = g.Key, DoanhThu = g.Sum(d => d.SoTienDaDong) })
                 .ToListAsync();

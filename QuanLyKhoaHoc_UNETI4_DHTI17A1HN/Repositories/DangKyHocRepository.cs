@@ -177,7 +177,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 d.TrangThai == "Đang học" ||
                 d.TrangThai == "Hoàn thành" ||
                 d.TrangThai == "Không hoàn thành");
-            double doanhThu = await _context.DangKyHocs.SumAsync(d => (double?)d.SoTienDaDong) ?? 0;
+            double doanhThu = await _context.DangKyHocs
+                .Where(d => d.TrangThai != "Đã hủy" && d.TrangThai != "Từ chối")
+                .SumAsync(d => (double?)d.SoTienDaDong) ?? 0;
 
             return (choDuyet, daDuyet, doanhThu);
         }
@@ -256,6 +258,46 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         public async Task<int> GetTotalCountExcludingCancelledAsync()
         {
             return await _context.DangKyHocs.CountAsync(d => d.TrangThai != "Đã hủy");
+        }
+
+        public async Task<(bool HasConflict, string? ConflictMessage)> KiemTraTrungLichHocVienAsync(int maHocVien, int maLopMoi)
+        {
+            var newSessions = await _context.BuoiHocs
+                .Where(b => b.MaLopHoc == maLopMoi && b.TrangThai != "Đã hủy")
+                .ToListAsync();
+
+            if (!newSessions.Any()) return (false, null);
+
+            var activeLopIds = await _context.DangKyHocs
+                .Where(d => d.MaHocVien == maHocVien &&
+                            d.MaLopHoc != maLopMoi &&
+                            (d.TrangThai == "Đã duyệt" ||
+                             d.TrangThai == "Chờ xác nhận học phí" ||
+                             d.TrangThai == "Đã đóng học phí" ||
+                             d.TrangThai == "Đang học"))
+                .Select(d => d.MaLopHoc)
+                .Distinct()
+                .ToListAsync();
+
+            if (!activeLopIds.Any()) return (false, null);
+
+            var existingSessions = await _context.BuoiHocs
+                .Include(b => b.LopHoc)
+                .Where(b => activeLopIds.Contains(b.MaLopHoc) && b.TrangThai != "Đã hủy")
+                .ToListAsync();
+
+            foreach (var bNew in newSessions)
+            {
+                var conflict = existingSessions.FirstOrDefault(bOld =>
+                    bNew.ThoiGianBatDau < bOld.ThoiGianKetThuc && bNew.ThoiGianKetThuc > bOld.ThoiGianBatDau);
+                if (conflict != null)
+                {
+                    string tenLopCu = conflict.LopHoc?.TenLop ?? $"Lớp #{conflict.MaLopHoc}";
+                    return (true, $"Trùng thời khóa biểu! Buổi học ngày {bNew.ThoiGianBatDau:dd/MM/yyyy} ({bNew.ThoiGianBatDau:HH:mm} - {bNew.ThoiGianKetThuc:HH:mm}) bị trùng với lớp '{tenLopCu}' bạn đang theo học.");
+                }
+            }
+
+            return (false, null);
         }
     }
 }

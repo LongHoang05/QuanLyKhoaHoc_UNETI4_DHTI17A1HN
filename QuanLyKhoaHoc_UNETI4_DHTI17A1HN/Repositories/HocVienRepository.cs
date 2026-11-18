@@ -85,8 +85,27 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             var hocVien = await _context.HocViens.FindAsync(id);
             if (hocVien != null)
             {
+                int? maTaiKhoan = hocVien.MaTaiKhoan;
                 _context.HocViens.Remove(hocVien);
                 await _context.SaveChangesAsync();
+
+                // Ràng buộc (#08): Xóa hoặc vô hiệu hóa tài khoản liên kết để tránh tài khoản mồ côi
+                if (maTaiKhoan.HasValue)
+                {
+                    var taiKhoan = await _context.TaiKhoans.FindAsync(maTaiKhoan.Value);
+                    if (taiKhoan != null)
+                    {
+                        if (taiKhoan.VaiTro == "HocVien")
+                        {
+                            _context.TaiKhoans.Remove(taiKhoan);
+                        }
+                        else
+                        {
+                            taiKhoan.TrangThai = false;
+                        }
+                        await _context.SaveChangesAsync();
+                    }
+                }
             }
         }
 

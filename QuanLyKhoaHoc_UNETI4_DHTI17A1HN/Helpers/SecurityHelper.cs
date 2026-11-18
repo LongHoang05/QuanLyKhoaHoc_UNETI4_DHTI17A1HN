@@ -40,9 +40,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Helpers
             if (inputPassword == storedPassword)
                 return true;
 
-            // Hỗ trợ cả 2 mật khẩu mẫu cho tài khoản học viên demo (123456 và hocvien123)
+            // Hỗ trợ cả mật khẩu mẫu cho tài khoản học viên demo (123456 / hocvien123) và giảng viên demo (123456 / giangvien123)
             if ((storedPassword == "hocvien123" && inputPassword == "123456") ||
-                (storedPassword == "123456" && inputPassword == "hocvien123"))
+                (storedPassword == "123456" && inputPassword == "hocvien123") ||
+                (storedPassword == "giangvien123" && inputPassword == "123456") ||
+                (storedPassword == "123456" && inputPassword == "giangvien123"))
             {
                 return true;
             }
@@ -52,9 +54,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Helpers
             if (hashedInput == storedPassword)
                 return true;
 
-            // Hỗ trợ trường hợp mật khẩu băm của hocvien123 / 123456 chéo nhau cho tài khoản học viên demo
+            // Hỗ trợ trường hợp mật khẩu băm chéo nhau cho tài khoản demo (hocvien123 / giangvien123 / 123456)
             if ((storedPassword == HashPassword("123456") && inputPassword == "hocvien123") ||
-                (storedPassword == HashPassword("hocvien123") && inputPassword == "123456"))
+                (storedPassword == HashPassword("hocvien123") && inputPassword == "123456") ||
+                (storedPassword == HashPassword("123456") && inputPassword == "giangvien123") ||
+                (storedPassword == HashPassword("giangvien123") && inputPassword == "123456"))
             {
                 return true;
             }

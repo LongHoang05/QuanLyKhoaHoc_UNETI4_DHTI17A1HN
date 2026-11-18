@@ -250,6 +250,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return Json(new { success = false, message = "Khóa học đã đủ chỉ tiêu sĩ số. Vui lòng chọn lớp học khác." });
             }
 
+            // 6.5. Kiểm tra học viên có bị trùng thời khóa biểu với lớp đang học/đã duyệt không
+            var (hasScheduleConflict, conflictMsg) = await _dangKyHocRepo.KiemTraTrungLichHocVienAsync(student.MaHocVien, targetMaLop);
+            if (hasScheduleConflict)
+            {
+                return Json(new { success = false, message = conflictMsg ?? "Lịch học của lớp này bị trùng với lớp bạn đang theo học!" });
+            }
+
             // 7. Tạo đăng ký mới với trạng thái 'Chờ duyệt', ngày do hệ thống xác định, học phí 0
             var dangKy = new DangKyHoc
             {
@@ -291,6 +298,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             if (dk.TrangThai != "Chờ duyệt" && !(dk.TrangThai == "Đã duyệt" && dk.SoTienDaDong == 0))
             {
                 return Json(new { success = false, message = $"Không thể tự hủy đơn khi đã ở trạng thái '{dk.TrangThai}'. Vui lòng liên hệ ban giáo vụ để được hỗ trợ giải quyết." });
+            }
+
+            // Quy định (#05): Không cho phép học viên tự hủy đăng ký kể từ ngày khai giảng trở đi
+            if (dk.LopHoc != null && DateTime.Today >= dk.LopHoc.NgayKhaiGiang.Date)
+            {
+                return Json(new { success = false, message = $"Lớp '{dk.LopHoc.TenLop}' đã đến hoặc qua ngày khai giảng ({dk.LopHoc.NgayKhaiGiang:dd/MM/yyyy}). Bạn không thể tự hủy đơn trực tuyến, vui lòng liên hệ ban giáo vụ để được hỗ trợ." });
             }
 
             dk.TrangThai = "Đã hủy";

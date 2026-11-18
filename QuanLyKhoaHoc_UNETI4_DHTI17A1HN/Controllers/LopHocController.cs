@@ -4,9 +4,11 @@
 // Phụ trách: Module 2 - Quản lý lớp học, Tìm kiếm, Lọc, Sắp xếp và Phân trang
 // ========================================================
 
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Helpers;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 
@@ -193,6 +195,21 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            // Ràng buộc (#07): Không cho phép mở lớp mới thuộc chương trình đào tạo đang tạm dừng
+            var ctdt = await _ctdtRepo.GetByIdAsync(lop.MaChuongTrinh);
+            if (ctdt == null)
+            {
+                if (isAjax) return Json(new { success = false, message = "Chương trình đào tạo không tồn tại." });
+                TempData["Error"] = "Chương trình đào tạo không tồn tại.";
+                return RedirectToAction(nameof(Index));
+            }
+            if (!ctdt.TrangThai)
+            {
+                if (isAjax) return Json(new { success = false, message = $"Chương trình đào tạo '{ctdt.TenChuongTrinh}' đang tạm dừng, không thể mở lớp học mới." });
+                TempData["Error"] = $"Chương trình đào tạo '{ctdt.TenChuongTrinh}' đang tạm dừng, không thể mở lớp học mới.";
+                return RedirectToAction(nameof(Index));
+            }
+
             if (string.IsNullOrEmpty(lop.TrangThai)) lop.TrangThai = "Chưa mở";
             if (string.IsNullOrEmpty(lop.TrinhDoDauVao)) lop.TrinhDoDauVao = "Cơ bản";
             if (string.IsNullOrEmpty(lop.TenGiangVien)) lop.TenGiangVien = "Chưa xếp";
@@ -277,6 +294,21 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             {
                 if (isAjax) return Json(new { success = false, message = "Tên lớp học bắt buộc nhập." });
                 TempData["Error"] = "Tên lớp học bắt buộc nhập.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Ràng buộc (#07): Không cho phép chuyển hoặc kích hoạt lớp thuộc chương trình đào tạo đang tạm dừng
+            var ctdtEdit = await _ctdtRepo.GetByIdAsync(maChuongTrinh);
+            if (ctdtEdit == null)
+            {
+                if (isAjax) return Json(new { success = false, message = "Chương trình đào tạo không tồn tại." });
+                TempData["Error"] = "Chương trình đào tạo không tồn tại.";
+                return RedirectToAction(nameof(Index));
+            }
+            if (!ctdtEdit.TrangThai && (lop.MaChuongTrinh != maChuongTrinh || (!string.IsNullOrEmpty(trangThai) && trangThai != "Đã hủy" && trangThai != "Tạm dừng" && trangThai != lop.TrangThai)))
+            {
+                if (isAjax) return Json(new { success = false, message = $"Chương trình đào tạo '{ctdtEdit.TenChuongTrinh}' đang tạm dừng, không thể gắn hoặc mở lớp mới theo chương trình này." });
+                TempData["Error"] = $"Chương trình đào tạo '{ctdtEdit.TenChuongTrinh}' đang tạm dừng, không thể gắn hoặc mở lớp mới theo chương trình này.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -448,6 +480,68 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         {
             var dsLop = await _lopHocRepo.SearchAjaxAsync(keyword, maChuongTrinh);
             return PartialView("_DanhSachLopPartial", dsLop);
+        }
+
+        // ========================================================
+        // XUẤT FILE EXCEL BẰNG CLOSEDXML
+        // ========================================================
+        [HttpGet]
+        public async Task<IActionResult> ExportExcel(
+            string search = "",
+            int? maChuongTrinh = null,
+            string trinhDo = "",
+            string trangThai = "",
+            decimal? hocPhiMin = null,
+            decimal? hocPhiMax = null,
+            string hanDangKyStatus = "",
+            string choTrongStatus = "",
+            string sortBy = "")
+        {
+            var (items, _) = await _lopHocRepo.GetPagedAsync(
+                search, maChuongTrinh, trinhDo, trangThai, null,
+                hocPhiMin, hocPhiMax, hanDangKyStatus, choTrongStatus, sortBy, 1, 10000);
+
+            var lopIds = items.Select(l => l.MaLopHoc).ToList();
+            var siSoMap = await _dangKyHocRepo.GetSiSoDaDangKyMapAsync(lopIds);
+
+            string[] headers = { "STT", "Mã lớp", "Tên lớp học", "Chương trình đào tạo", "Giảng viên", "Trình độ", "Sĩ số", "Số buổi", "Học phí (VNĐ)", "Hạn ĐK", "Khai giảng", "Phòng học", "Trạng thái" };
+
+            var fileBytes = ExcelExportHelper.ExportToExcel(
+                "DanhSachLopHoc",
+                "DANH SÁCH LỚP HỌC PHẦN - UNETI",
+                $"Tổng số lớp: {items.Count()}",
+                headers,
+                items,
+                (ws, row, stt, lop) =>
+                {
+                    int daDk = siSoMap.TryGetValue(lop.MaLopHoc, out var cnt) ? cnt : 0;
+                    ws.Cell(row, 1).Value = stt;
+                    ws.Cell(row, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 2).Value = $"#LH{lop.MaLopHoc:D3}";
+                    ws.Cell(row, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 3).Value = lop.TenLop;
+                    ws.Cell(row, 4).Value = lop.ChuongTrinhDaoTao?.TenChuongTrinh ?? "";
+                    ws.Cell(row, 5).Value = lop.TenGiangVien ?? "Chưa phân công";
+                    ws.Cell(row, 6).Value = lop.TrinhDoDauVao ?? "";
+                    ws.Cell(row, 7).Value = $"{daDk}/{lop.SiSoToiDa}";
+                    ws.Cell(row, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 8).Value = lop.SoBuoiHoc;
+                    ws.Cell(row, 8).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                    var cHocPhi = ws.Cell(row, 9);
+                    cHocPhi.Value = lop.HocPhi;
+                    cHocPhi.Style.NumberFormat.Format = "#,##0";
+
+                    ws.Cell(row, 10).Value = lop.HanDangKy.ToString("dd/MM/yyyy");
+                    ws.Cell(row, 10).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 11).Value = lop.NgayKhaiGiang.ToString("dd/MM/yyyy");
+                    ws.Cell(row, 11).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 12).Value = lop.PhongHoc ?? "";
+                    ws.Cell(row, 13).Value = lop.TrangThai;
+                    ws.Cell(row, 13).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                });
+
+            return File(fileBytes, ExcelExportHelper.ExcelContentType, $"DanhSachLopHoc_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
     }
 }

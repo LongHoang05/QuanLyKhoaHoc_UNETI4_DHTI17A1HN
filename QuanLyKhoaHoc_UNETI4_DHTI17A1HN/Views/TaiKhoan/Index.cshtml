@@ -216,7 +216,7 @@
                                 <td class="py-3.5 px-4 font-mono text-outline">@item.NgayTao.ToString("dd/MM/yyyy")</td>
                                 <td class="py-3.5 px-4 text-right">
                                     <div class="inline-flex items-center gap-1">
-                                        <button onclick="toggleLockAccount(this, @item.MaTaiKhoan, '@item.TenDangNhap')" class="p-1.5 rounded-lg @(item.TrangThai ? "text-outline hover:text-rose-600 hover:bg-rose-50" : "text-emerald-600 hover:bg-emerald-50")" title="@(item.TrangThai ? "Khóa tài khoản" : "Mở khóa tài khoản")">
+                                        <button type="button" onclick="toggleLockAccount(this, @item.MaTaiKhoan, '@(item.TenDangNhap?.Replace("'", "\\'") ?? "")', @(item.TrangThai ? "true" : "false"))" class="p-1.5 rounded-lg @(item.TrangThai ? "text-outline hover:text-rose-600 hover:bg-rose-50" : "text-emerald-600 hover:bg-emerald-50") cursor-pointer" title="@(item.TrangThai ? "Khóa tài khoản" : "Mở khóa tài khoản")">
                                             <span class="material-symbols-outlined text-[18px]">@(item.TrangThai ? "lock" : "lock_open")</span>
                                         </button>
                                         <button onclick="openResetPasswordModal(@item.MaTaiKhoan, '@item.TenDangNhap')" class="p-1.5 rounded-lg text-outline hover:text-amber-600 hover:bg-amber-50" title="Đặt lại mật khẩu">
@@ -485,27 +485,43 @@
         .catch(() => showToast('Đã có lỗi xảy ra khi lưu tài khoản.', 'error'));
     }
 
-    function toggleLockAccount(btn, id, user) {
-        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
-        const formData = new FormData();
-        formData.append('__RequestVerificationToken', token);
-        formData.append('id', id);
+    function toggleLockAccount(btn, id, user, isActive) {
+        const isCurrentlyActive = (isActive === true || isActive === 'true');
+        openGlobalDeleteModal({
+            title: isCurrentlyActive ? 'Khóa tài khoản?' : 'Mở khóa tài khoản?',
+            message: isCurrentlyActive
+                ? `Bạn có chắc chắn muốn <strong class="text-amber-700">khóa</strong> tài khoản <strong class="text-brand-deep">${user}</strong> không?`
+                : `Bạn có chắc chắn muốn <strong class="text-emerald-700">mở khóa</strong> tài khoản <strong class="text-brand-deep">${user}</strong> không?`,
+            warning: isCurrentlyActive
+                ? 'Người dùng sẽ không thể đăng nhập vào hệ thống cho đến khi được mở khóa lại.'
+                : 'Người dùng sẽ có thể đăng nhập lại bình thường ngay sau khi mở khóa.',
+            submitText: isCurrentlyActive ? 'Khóa tài khoản' : 'Mở khóa tài khoản',
+            submitIcon: isCurrentlyActive ? 'lock' : 'lock_open',
+            icon: isCurrentlyActive ? 'lock' : 'lock_open',
+            theme: isCurrentlyActive ? 'warning' : 'primary',
+            onConfirm: function() {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                const formData = new FormData();
+                formData.append('__RequestVerificationToken', token);
+                formData.append('id', id);
 
-        fetch('/TaiKhoan/ToggleStatusAjax', {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.success) {
-                showToast(res.message, 'success');
-                setTimeout(() => location.reload(), 600);
-            } else {
-                showToast(res.message, 'error');
+                fetch('/TaiKhoan/ToggleStatusAjax', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.success) {
+                        showToast(res.message, 'success');
+                        setTimeout(() => location.reload(), 600);
+                    } else {
+                        showToast(res.message, 'error');
+                    }
+                })
+                .catch(() => showToast('Không thể thay đổi trạng thái tài khoản.', 'error'));
             }
-        })
-        .catch(() => showToast('Không thể thay đổi trạng thái tài khoản.', 'error'));
+        });
     }
 
     function openResetPasswordModal(id, user) {

@@ -129,13 +129,14 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
 
             foreach (var gv in sampleLecturers)
             {
+                string defaultGvPass = gv.Username == "giangvien" ? "giangvien123" : "123456";
                 var tkGv = context.TaiKhoans.FirstOrDefault(t => t.TenDangNhap == gv.Username);
                 if (tkGv == null)
                 {
                     tkGv = new TaiKhoan
                     {
                         TenDangNhap = gv.Username,
-                        MatKhau = SecurityHelper.HashPassword("123456"),
+                        MatKhau = SecurityHelper.HashPassword(defaultGvPass),
                         HoTen = gv.HoTen,
                         Email = gv.Email,
                         VaiTro = "GiangVien",
@@ -143,6 +144,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                         NgayTao = DateTime.Today.AddDays(-50)
                     };
                     context.TaiKhoans.Add(tkGv);
+                    context.SaveChanges();
+                }
+                else if (gv.Username == "giangvien" && tkGv.MatKhau == SecurityHelper.HashPassword("123456"))
+                {
+                    tkGv.MatKhau = SecurityHelper.HashPassword("giangvien123");
                     context.SaveChanges();
                 }
 
@@ -552,53 +558,74 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                     "Lab Máy 1", "Lab Máy 2", "Lab CNTT 1", "Lab CNTT 2"
                 };
 
+                // Helper chọn khung giờ & phòng không bị trùng (lớp, phòng, giảng viên) khi seed
+                var shiftHours = new[] { (7, 0, 9, 15), (9, 30, 11, 45), (13, 30, 15, 45), (16, 0, 18, 15) };
+                void AddNonConflictingSession(LopHoc lop, int dayOffsetStart, int preferredShiftIdx, int preferredRoomIdx, string noiDung, string ghiChu, string trangThai)
+                {
+                    string gvName = lop.TenGiangVien ?? "ThS. Trần Văn Hùng";
+                    for (int d = dayOffsetStart; d < dayOffsetStart + 30; d++)
+                    {
+                        for (int sOffset = 0; sOffset < shiftHours.Length; sOffset++)
+                        {
+                            var sh = shiftHours[(preferredShiftIdx + sOffset) % shiftHours.Length];
+                            var batDau = DateTime.Today.AddDays(d).AddHours(sh.Item1).AddMinutes(sh.Item2);
+                            var ketThuc = DateTime.Today.AddDays(d).AddHours(sh.Item3).AddMinutes(sh.Item4);
+
+                            bool gvBusy = sessionsToAdd.Any(x =>
+                                x.TrangThai != "Đã hủy" &&
+                                x.ThoiGianBatDau < ketThuc && x.ThoiGianKetThuc > batDau &&
+                                (x.MaLopHoc == lop.MaLopHoc || (x.MaGiangVien.HasValue && lop.MaGiangVien.HasValue && x.MaGiangVien == lop.MaGiangVien) || string.Equals(x.GiangVien, gvName, StringComparison.OrdinalIgnoreCase)));
+                            if (gvBusy) continue;
+
+                            for (int rOffset = 0; rOffset < rooms.Length; rOffset++)
+                            {
+                                string rm = rooms[(preferredRoomIdx + rOffset) % rooms.Length];
+                                bool roomBusy = sessionsToAdd.Any(x =>
+                                    x.TrangThai != "Đã hủy" &&
+                                    x.ThoiGianBatDau < ketThuc && x.ThoiGianKetThuc > batDau &&
+                                    x.PhongHoc == rm);
+                                if (!roomBusy)
+                                {
+                                    sessionsToAdd.Add(new BuoiHoc
+                                    {
+                                        MaLopHoc = lop.MaLopHoc,
+                                        MaGiangVien = lop.MaGiangVien,
+                                        GiangVien = gvName,
+                                        PhongHoc = rm,
+                                        ThoiGianBatDau = batDau,
+                                        ThoiGianKetThuc = ketThuc,
+                                        NoiDung = noiDung,
+                                        GhiChu = ghiChu,
+                                        TrangThai = trangThai
+                                    });
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+
                 for (int i = 0; i < allLops.Count; i++)
                 {
                     var lop = allLops[i];
-                    string rm = rooms[i % rooms.Length];
-                    string gvName = lop.TenGiangVien ?? "ThS. Trần Văn Hùng";
 
                     // Buổi quá khứ 1 (Đã hoàn thành)
-                    sessionsToAdd.Add(new BuoiHoc
-                    {
-                        MaLopHoc = lop.MaLopHoc,
-                        MaGiangVien = lop.MaGiangVien,
-                        GiangVien = gvName,
-                        PhongHoc = rm,
-                        ThoiGianBatDau = DateTime.Today.AddDays(-10).AddHours(8 + (i % 3) * 4),
-                        ThoiGianKetThuc = DateTime.Today.AddDays(-10).AddHours(11 + (i % 3) * 4),
-                        NoiDung = $"Buổi 1: Giới thiệu đề cương môn học, cài đặt công cụ và môi trường cho lớp {lop.TenLop}",
-                        GhiChu = "Đã hoàn thành tốt đẹp, sĩ số có mặt 100%",
-                        TrangThai = "Đã hoàn thành"
-                    });
+                    AddNonConflictingSession(lop, -14 + (i % 4), i % 4, i,
+                        $"Buổi 1: Giới thiệu đề cương môn học, cài đặt công cụ và môi trường cho lớp {lop.TenLop}",
+                        "Đã hoàn thành tốt đẹp, sĩ số có mặt 100%",
+                        "Đã hoàn thành");
 
                     // Buổi quá khứ 2 (Đã hoàn thành)
-                    sessionsToAdd.Add(new BuoiHoc
-                    {
-                        MaLopHoc = lop.MaLopHoc,
-                        MaGiangVien = lop.MaGiangVien,
-                        GiangVien = gvName,
-                        PhongHoc = rm,
-                        ThoiGianBatDau = DateTime.Today.AddDays(-5).AddHours(8 + (i % 3) * 4),
-                        ThoiGianKetThuc = DateTime.Today.AddDays(-5).AddHours(11 + (i % 3) * 4),
-                        NoiDung = $"Buổi 2: Kiến trúc hệ thống cốt lõi và bài thực hành mã nguồn mở {lop.TenLop}",
-                        GhiChu = "Thực hành trên phòng Lab đạt kết quả tốt",
-                        TrangThai = "Đã hoàn thành"
-                    });
+                    AddNonConflictingSession(lop, -7 + (i % 4), (i + 1) % 4, i,
+                        $"Buổi 2: Kiến trúc hệ thống cốt lõi và bài thực hành mã nguồn mở {lop.TenLop}",
+                        "Thực hành trên phòng Lab đạt kết quả tốt",
+                        "Đã hoàn thành");
 
                     // Buổi tương lai (Đã lên lịch)
-                    sessionsToAdd.Add(new BuoiHoc
-                    {
-                        MaLopHoc = lop.MaLopHoc,
-                        MaGiangVien = lop.MaGiangVien,
-                        GiangVien = gvName,
-                        PhongHoc = rm,
-                        ThoiGianBatDau = DateTime.Today.AddDays(1 + (i % 7)).AddHours(8 + (i % 2) * 5),
-                        ThoiGianKetThuc = DateTime.Today.AddDays(1 + (i % 7)).AddHours(11 + (i % 2) * 5),
-                        NoiDung = $"Buổi 3: Thực hành đồ án chuyên sâu, hướng dẫn tối ưu và kiểm thử dự án",
-                        GhiChu = "Yêu cầu học viên mang theo laptop cá nhân và làm trước bài tập về nhà",
-                        TrangThai = "Đã lên lịch"
-                    });
+                    AddNonConflictingSession(lop, 1 + (i % 7), (i + 2) % 4, i,
+                        $"Buổi 3: Thực hành đồ án chuyên sâu, hướng dẫn tối ưu và kiểm thử dự án",
+                        "Yêu cầu học viên mang theo laptop cá nhân và làm trước bài tập về nhà",
+                        "Đã lên lịch");
 
                     if (sessionsToAdd.Count >= 36) break;
                 }

@@ -6,8 +6,10 @@
 // Controller không truy vấn trực tiếp DbContext / LINQ
 // ========================================================
 
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Helpers;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 
@@ -33,13 +35,15 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             _giangVienRepo = giangVienRepo;
         }
 
-        public async Task<IActionResult> Index(int? maLop, int? MaLopHoc, string? phong, string? trangThai, string? search, int page = 1)
+        public async Task<IActionResult> Index(int? maLop, int? MaLopHoc, string? phong, string? trangThai, string? search, int page = 1, int weekOffset = 0)
         {
             var vaiTro = HttpContext.Session.GetString("VaiTro");
             if (string.Equals(vaiTro, "HocVien", StringComparison.OrdinalIgnoreCase))
             {
                 return RedirectToAction("TienTrinh", "CongHocVien", new { tab = "tkb" });
             }
+
+            ViewBag.WeekOffset = weekOffset;
 
             int? targetMaLop = maLop ?? MaLopHoc;
             int pageSize = 8;
@@ -426,6 +430,46 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             int soCaDaXuLy = await _buoiHocRepo.XuLyCaTrungLichTuDongAsync();
             TempData["Success"] = $"Đã tự động tối ưu và giải phóng {soCaDaXuLy} ca học trùng lịch thành công!";
             return RedirectToAction(nameof(Index));
+        }
+
+        // ========================================================
+        // XUẤT FILE EXCEL LỊCH HỌC BẰNG CLOSEDXML
+        // ========================================================
+        [HttpGet]
+        public async Task<IActionResult> ExportExcel(int? maLop, string? phong, string? trangThai, string? search)
+        {
+            var (items, _) = await _buoiHocRepo.GetPagedAsync(search, maLop, phong, trangThai, null, null, "thoigian_asc", 1, 10000);
+
+            string[] headers = { "STT", "Mã BH", "Lớp học", "Giảng viên", "Phòng học", "Ngày học", "Giờ bắt đầu", "Giờ kết thúc", "Nội dung giảng dạy", "Trạng thái" };
+
+            var fileBytes = ExcelExportHelper.ExportToExcel(
+                "LichHocTKB",
+                "LỊCH HỌC & PHÒNG MÁY - TRUNG TÂM ĐÀO TẠO UNETI",
+                $"Tổng số buổi học: {items.Count()}",
+                headers,
+                items,
+                (ws, row, stt, bh) =>
+                {
+                    ws.Cell(row, 1).Value = stt;
+                    ws.Cell(row, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 2).Value = $"#BH{bh.MaBuoiHoc:D3}";
+                    ws.Cell(row, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 3).Value = bh.LopHoc?.TenLop ?? $"Lớp #{bh.MaLopHoc}";
+                    ws.Cell(row, 4).Value = bh.GiangVien ?? "";
+                    ws.Cell(row, 5).Value = bh.PhongHoc ?? "";
+                    ws.Cell(row, 5).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 6).Value = bh.ThoiGianBatDau.ToString("dd/MM/yyyy");
+                    ws.Cell(row, 6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 7).Value = bh.ThoiGianBatDau.ToString("HH:mm");
+                    ws.Cell(row, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 8).Value = bh.ThoiGianKetThuc.ToString("HH:mm");
+                    ws.Cell(row, 8).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 9).Value = bh.NoiDung ?? "";
+                    ws.Cell(row, 10).Value = bh.TrangThai;
+                    ws.Cell(row, 10).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                });
+
+            return File(fileBytes, ExcelExportHelper.ExcelContentType, $"LichHoc_UNETI_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
     }
 }

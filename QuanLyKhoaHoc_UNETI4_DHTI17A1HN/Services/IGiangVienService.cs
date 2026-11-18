@@ -21,7 +21,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
 
         // 4. Nghiệp vụ Chấm điểm học viên
         Task<List<DangKyHoc>> GetStudentsForGradingAsync(int maLop);
-        Task<(bool Success, string Message, object? Data)> LuuDiemHocVienAsync(int maDangKy, double? diemCC, double? diemGK, double? diemCK, string? ghiChu);
+        Task<(bool Success, string Message, object? Data)> LuuDiemHocVienAsync(int maDangKy, double? diemCC, double? diemGK, double? diemCK, string? ghiChu, int? expectedMaGiangVien = null, string? expectedTeacherName = null);
 
         // 5. Nghiệp vụ Quản trị Giảng viên (Admin & Giáo vụ)
         Task<List<GiangVien>> GetDanhSachGiangVienAsync(string? search, string? hocVi);

@@ -4,8 +4,10 @@
 // Phụ trách: Module 4 - Đăng ký khóa học, Quản lý hồ sơ & Thu học phí
 // ========================================================
 
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Helpers;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 
@@ -194,6 +196,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 }
             }
 
+            // Kiểm tra trùng thời khóa biểu của học viên giữa các lớp
+            var (hasScheduleConflict, conflictMsg) = await _dangKyHocRepo.KiemTraTrungLichHocVienAsync(dk.MaHocVien, dk.MaLopHoc);
+            if (hasScheduleConflict)
+            {
+                string msg = $"Không thể duyệt hồ sơ #{id}! {conflictMsg}";
+                if (isAjax) return Json(new { success = false, message = msg });
+                TempData["Error"] = msg;
+                return RedirectToAction(nameof(Index));
+            }
+
             // Cập nhật trạng thái
             string nguoiDuyet = HttpContext.Session.GetString("HoTen") ?? "Ban Giáo vụ";
             dk.TrangThai = "Đã duyệt";
@@ -274,6 +286,48 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // --- HOÀN TÁC KHI CHƯA NHẬN ĐƯỢC HỌC PHÍ (TRẢ VỀ 'Đã duyệt' ĐỂ HỌC VIÊN NỘP LẠI) ---
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("DangKyHoc/ChuaNhanHocPhiPost")]
+        public async Task<IActionResult> ChuaNhanHocPhiPost(int id, string? ghiChu)
+        {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            var dk = await _dangKyHocRepo.GetByIdWithDetailsAsync(id);
+
+            if (dk == null)
+            {
+                if (isAjax) return Json(new { success = false, message = "Không tìm thấy hồ sơ đăng ký." });
+                TempData["Error"] = "Không tìm thấy hồ sơ.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (dk.TrangThai != "Chờ xác nhận học phí")
+            {
+                string errMsg = $"Chỉ có thể hoàn tác khi hồ sơ đang ở trạng thái 'Chờ xác nhận học phí' (hiện tại: '{dk.TrangThai}').";
+                if (isAjax) return Json(new { success = false, message = errMsg });
+                TempData["Error"] = errMsg;
+                return RedirectToAction(nameof(Index));
+            }
+
+            string staffName = HttpContext.Session.GetString("HoTen") ?? "Ban Giáo vụ";
+            dk.TrangThai = "Đã duyệt";
+            dk.SoTienDaDong = 0m;
+            dk.NgayDongHocPhi = null;
+
+            string lyDo = string.IsNullOrWhiteSpace(ghiChu)
+                ? "Giáo vụ đối soát: Chưa nhận được tiền học phí, vui lòng kiểm tra và thực hiện nộp lại"
+                : ghiChu.Trim();
+            dk.GhiChu = $"[Chưa nhận học phí] {lyDo} ({staffName} - {DateTime.Now:dd/MM/yyyy HH:mm})";
+
+            await _dangKyHocRepo.UpdateAsync(dk);
+
+            string sMsg = $"Đã trả hồ sơ #{id:D3} của học viên {dk.HocVien?.HoTen} về trạng thái 'Đã duyệt' (Chưa nộp học phí).";
+            if (isAjax) return Json(new { success = true, message = sMsg, stats = await GetStatsJsonAsync() });
+            TempData["Success"] = sMsg;
+            return RedirectToAction(nameof(Index));
+        }
+
         // --- CHUYỂN TRẠNG THÁI BẮT ĐẦU HỌC ---
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -286,6 +340,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             {
                 if (isAjax) return Json(new { success = false, message = "Không tìm thấy hồ sơ đăng ký." });
                 TempData["Error"] = "Không tìm thấy hồ sơ.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            bool isPaidOrFreeApproved = dk.TrangThai == "Đã đóng học phí" ||
+                (dk.LopHoc != null && dk.LopHoc.HocPhi <= 0 && dk.TrangThai == "Đã duyệt");
+            if (!isPaidOrFreeApproved)
+            {
+                string errMsg = $"Không thể kích hoạt vào học! Hồ sơ đang ở trạng thái '{dk.TrangThai}', học viên cần hoàn tất nộp học phí trước.";
+                if (isAjax) return Json(new { success = false, message = errMsg });
+                TempData["Error"] = errMsg;
                 return RedirectToAction(nameof(Index));
             }
 
@@ -441,6 +505,59 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 msg += $" Bỏ qua {skipped} hồ sơ đang ở trạng thái Đã duyệt/Đang học.";
             }
             return Json(new { success = true, message = msg, deletedCount = deleted, skippedCount = skipped, stats = await GetStatsJsonAsync() });
+        }
+
+        // ========================================================
+        // XUẤT FILE EXCEL BẰNG CLOSEDXML
+        // ========================================================
+        [HttpGet]
+        public async Task<IActionResult> ExportExcel(
+            string? search,
+            int? maChuongTrinh,
+            int? maLop,
+            string? trangThai,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? sortBy)
+        {
+            var (items, _) = await _dangKyHocRepo.GetPagedAsync(
+                search, maChuongTrinh, maLop, trangThai, tuNgay, denNgay, sortBy, 1, 10000);
+
+            string[] headers = { "STT", "Mã ĐK", "Học viên", "Email", "Lớp học", "Chương trình", "Ngày đăng ký", "Học phí (VNĐ)", "Đã đóng (VNĐ)", "Trạng thái", "Ghi chú" };
+
+            var fileBytes = ExcelExportHelper.ExportToExcel(
+                "DanhSachDangKyHoc",
+                "DANH SÁCH ĐĂNG KÝ HỌC & THU HỌC PHÍ - UNETI",
+                $"Tổng số hồ sơ: {items.Count()}",
+                headers,
+                items,
+                (ws, row, stt, dk) =>
+                {
+                    ws.Cell(row, 1).Value = stt;
+                    ws.Cell(row, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 2).Value = $"#DK{dk.MaDangKy:D3}";
+                    ws.Cell(row, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 3).Value = dk.HocVien?.HoTen ?? "N/A";
+                    ws.Cell(row, 4).Value = dk.HocVien?.Email ?? "";
+                    ws.Cell(row, 5).Value = dk.LopHoc?.TenLop ?? "N/A";
+                    ws.Cell(row, 6).Value = dk.LopHoc?.ChuongTrinhDaoTao?.TenChuongTrinh ?? "";
+                    ws.Cell(row, 7).Value = dk.NgayDangKy.ToString("dd/MM/yyyy HH:mm");
+                    ws.Cell(row, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                    var cHocPhi = ws.Cell(row, 8);
+                    cHocPhi.Value = dk.LopHoc?.HocPhi ?? 0;
+                    cHocPhi.Style.NumberFormat.Format = "#,##0";
+
+                    var cDaDong = ws.Cell(row, 9);
+                    cDaDong.Value = dk.SoTienDaDong;
+                    cDaDong.Style.NumberFormat.Format = "#,##0";
+
+                    ws.Cell(row, 10).Value = dk.TrangThai;
+                    ws.Cell(row, 10).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 11).Value = dk.NhanXetGiaoVu ?? dk.GhiChu ?? "";
+                });
+
+            return File(fileBytes, ExcelExportHelper.ExcelContentType, $"DanhSachDangKyHoc_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
     }
 }

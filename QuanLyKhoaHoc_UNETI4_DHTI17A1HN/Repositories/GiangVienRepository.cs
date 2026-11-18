@@ -194,15 +194,30 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 .ToListAsync();
         }
 
-        public async Task<(bool Success, string Message, KetQuaHocTap? KetQua)> SaveGradeAsync(int maDangKy, double? diemCC, double? diemGK, double? diemCK, string? ghiChu)
+        public async Task<(bool Success, string Message, KetQuaHocTap? KetQua)> SaveGradeAsync(
+            int maDangKy, double? diemCC, double? diemGK, double? diemCK, string? ghiChu,
+            int? expectedMaGiangVien = null, string? expectedTeacherName = null)
         {
             var dk = await _context.DangKyHocs
+                .Include(d => d.LopHoc)
                 .Include(d => d.KetQuaHocTap)
                 .FirstOrDefaultAsync(d => d.MaDangKy == maDangKy);
 
             if (dk == null)
             {
                 return (false, "Không tìm thấy hồ sơ đăng ký học.", null);
+            }
+
+            // Chặn IDOR: nếu là tài khoản Giảng viên, bắt buộc phải đúng lớp giảng viên đó phụ trách
+            if (expectedMaGiangVien.HasValue)
+            {
+                bool isOwner = dk.LopHoc != null &&
+                    (dk.LopHoc.MaGiangVien == expectedMaGiangVien.Value ||
+                     (!string.IsNullOrEmpty(expectedTeacherName) && dk.LopHoc.TenGiangVien == expectedTeacherName));
+                if (!isOwner)
+                {
+                    return (false, "Từ chối truy cập: Bạn không phụ trách giảng dạy lớp học của học viên này!", null);
+                }
             }
 
             if (diemCC.HasValue && (diemCC.Value < 0 || diemCC.Value > 10))

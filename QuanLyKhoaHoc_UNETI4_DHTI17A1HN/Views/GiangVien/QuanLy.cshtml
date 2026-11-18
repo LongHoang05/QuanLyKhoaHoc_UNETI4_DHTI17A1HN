@@ -29,9 +29,9 @@
         </div>
 
         <div class="flex items-center gap-2.5">
-            <button onclick="exportTeacherTableToCSV('danh-sach-giang-vien.csv')" class="hidden">
-                <span class="material-symbols-outlined text-[18px] text-primary">file_download</span>
-                <span class="hidden sm:inline">Xuất Excel</span>
+            <button type="button" onclick="exportGiangVienExcel()" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-emerald-50 hover:border-emerald-300 text-brand-deep font-label-md text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer">
+                <span class="material-symbols-outlined text-[18px] text-emerald-600">table_view</span>
+                <span class="hidden sm:inline">Xuất Excel (.xlsx)</span>
             </button>
             <button onclick="openTeacherDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-hover text-surface-white font-label-md text-label-md px-4 py-2.5 rounded-xl shadow-sm hover:shadow-card transition-all active:scale-95 cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">person_add</span>
@@ -506,26 +506,14 @@
         }
     }
 
-    // Export CSV
-    function exportTeacherTableToCSV(filename) {
-        const rows = document.querySelectorAll('#teacherTable tr');
-        let csv = [];
-        for (let i = 0; i < rows.length; i++) {
-            let row = [], cols = rows[i].querySelectorAll('td, th');
-            for (let j = 0; j < cols.length - 1; j++) {
-                let data = cols[j].innerText.trim().replace(/"/g, '""');
-                row.push('"' + data + '"');
-            }
-            csv.push(row.join(','));
-        }
-        const csvFile = new Blob(["\uFEFF" + csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
-        const downloadLink = document.createElement('a');
-        downloadLink.download = filename;
-        downloadLink.href = window.URL.createObjectURL(csvFile);
-        downloadLink.style.display = 'none';
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
+    // Xuất Excel bằng ClosedXML
+    function exportGiangVienExcel() {
+        const params = new URLSearchParams(window.location.search);
+        const searchInput = document.querySelector('input[name="search"]');
+        const hocViSelect = document.querySelector('select[name="hocVi"]');
+        if (searchInput && searchInput.value.trim()) params.set('search', searchInput.value.trim());
+        if (hocViSelect && hocViSelect.value) params.set('hocVi', hocViSelect.value);
+        window.location.href = `/GiangVien/ExportExcelQuanLy?${params.toString()}`;
     }
 
     // Tự động mở drawer nếu URL có ?create=true
