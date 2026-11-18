@@ -846,51 +846,87 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="MaBuoiHoc" id="drawer-mabuoi" value="0"/>
 
-                <!-- Select: Lớp học đào tạo kèm tìm kiếm nhanh và gom nhóm theo CTĐT -->
-                <div class="space-y-1.5">
+                <!-- Strict Searchable Combobox: Lớp học đào tạo (Bắt buộc chọn từ danh sách) -->
+                <div class="space-y-1.5 relative" id="drawer-lop-combobox-wrapper">
                     <div class="flex items-center justify-between">
                         <label class="block font-label-sm text-label-sm text-brand-deep uppercase tracking-wider">
                             Lớp học đào tạo <span class="text-danger-crimson">*</span>
                         </label>
-                        <span id="drawer-lop-count" class="text-[11px] text-outline font-medium">@lopHocs.Count() lớp</span>
+                        <span id="drawer-lop-count" class="text-[11px] text-outline font-medium">@lopHocs.Count() lớp có sẵn</span>
                     </div>
 
-                    <!-- Input tìm kiếm nhanh tên lớp / môn học -->
+                    <input type="hidden" name="MaLopHoc" id="drawer-malop" value=""/>
+
                     <div class="relative">
-                        <span class="material-symbols-outlined text-outline absolute left-3 top-1/2 -translate-y-1/2 text-[16px]">search</span>
-                        <input type="text" id="drawer-search-lop" oninput="filterDrawerLopHoc(this.value)" placeholder="Gõ tìm nhanh tên lớp, mã lớp hoặc môn học..." 
-                               class="w-full bg-surface-container-low border border-border-subtle rounded-xl pl-9 pr-8 py-1.5 text-xs text-brand-deep focus:outline-none focus:border-primary focus:bg-surface-white transition-all"/>
-                        <button type="button" onclick="clearDrawerLopSearch()" id="drawer-clear-search-lop" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-outline hover:text-brand-deep cursor-pointer">
-                            <span class="material-symbols-outlined text-[15px]">close</span>
+                        <span class="material-symbols-outlined text-outline absolute left-3 top-1/2 -translate-y-1/2 text-[17px] pointer-events-none">search</span>
+                        <input type="text"
+                               id="drawer-search-lop"
+                               autocomplete="off"
+                               onfocus="openLopComboboxDropdown()"
+                               oninput="filterDrawerLopHoc(this.value)"
+                               onkeydown="handleLopComboboxKeydown(event)"
+                               placeholder="Gõ tìm và chọn lớp học từ danh sách..."
+                               class="w-full bg-surface-white border border-border-standard rounded-xl pl-9 pr-14 py-2.5 text-xs font-semibold text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"/>
+                        <button type="button" onclick="clearDrawerLopSearch()" id="drawer-clear-search-lop" class="hidden absolute right-8 top-1/2 -translate-y-1/2 text-outline hover:text-danger-crimson cursor-pointer p-0.5 rounded" title="Xóa chọn">
+                            <span class="material-symbols-outlined text-[16px]">close</span>
+                        </button>
+                        <button type="button" onclick="toggleLopComboboxDropdown()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-outline hover:text-brand-deep cursor-pointer p-0.5" title="Mở danh sách lớp">
+                            <span class="material-symbols-outlined text-[18px] transition-transform duration-200" id="drawer-lop-chevron">expand_more</span>
                         </button>
                     </div>
 
-                    <!-- Dropdown danh sách lớp gom nhóm theo Chương trình đào tạo -->
-                    <div class="relative">
-                        <select name="MaLopHoc" id="drawer-malop" required onchange="onDrawerLopChanged(this)" class="w-full appearance-none bg-surface-white border border-border-standard rounded-xl px-3.5 py-2.5 font-body-md text-body-md text-brand-deep focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer">
-                            <option value="">-- Chọn lớp học --</option>
-                            @{
-                                var groupedLop = lopHocs.GroupBy(l => l.ChuongTrinhDaoTao?.TenChuongTrinh ?? "Chương trình đào tạo khác");
-                            }
-                            @foreach (var grp in groupedLop)
-                            {
-                                <optgroup label="📚 @grp.Key">
-                                    @foreach (var lop in grp)
-                                    {
-                                        <option value="@lop.MaLopHoc" data-ten="@lop.TenLop" data-gv="@(lop.TenGiangVien ?? "")" data-siso="@lop.SiSoToiDa" data-sobuoi="@lop.SoBuoiHoc" data-ctdt="@(lop.ChuongTrinhDaoTao?.TenChuongTrinh ?? "")">
-                                            @lop.TenLop (@lop.SiSoToiDa SV) @(!string.IsNullOrEmpty(lop.TenGiangVien) ? $"• GV: {lop.TenGiangVien}" : "")
-                                        </option>
-                                    }
-                                </optgroup>
-                            }
-                        </select>
-                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px] transition-transform duration-200">expand_more</span>
+                    <!-- Floating Dropdown Danh sách Lớp (Chỉ cho phép chọn lớp hợp lệ trong CSDL) -->
+                    <div id="drawer-lop-dropdown" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-border-standard z-50 max-h-64 overflow-y-auto custom-scrollbar divide-y divide-border-subtle" style="background-color: #ffffff !important;">
+                        @{
+                            var groupedLop = lopHocs.GroupBy(l => l.ChuongTrinhDaoTao?.TenChuongTrinh ?? "Chương trình đào tạo khác");
+                        }
+                        @foreach (var grp in groupedLop)
+                        {
+                            <div class="lop-combobox-group">
+                                <div class="px-3.5 py-1.5 bg-slate-50 text-[10px] font-bold text-slate-500 uppercase tracking-wider sticky top-0 border-b border-slate-100">
+                                    📚 @grp.Key
+                                </div>
+                                @foreach (var lop in grp)
+                                {
+                                    <button type="button"
+                                            class="lop-combobox-option w-full text-left px-3.5 py-2.5 hover:bg-primary/[0.06] flex items-center justify-between gap-2 transition-colors cursor-pointer"
+                                            data-id="@lop.MaLopHoc"
+                                            data-ten="@lop.TenLop"
+                                            data-gv="@(lop.TenGiangVien ?? "")"
+                                            data-siso="@lop.SiSoToiDa"
+                                            data-sobuoi="@lop.SoBuoiHoc"
+                                            data-ctdt="@(lop.ChuongTrinhDaoTao?.TenChuongTrinh ?? "")"
+                                            onclick="selectDrawerLopOption(this)">
+                                        <div class="min-w-0">
+                                            <div class="font-bold text-xs text-brand-deep truncate">@lop.TenLop</div>
+                                            <div class="text-[10.5px] text-outline truncate mt-0.5">
+                                                #LH@(lop.MaLopHoc.ToString("D3")) • @lop.SiSoToiDa SV @(!string.IsNullOrEmpty(lop.TenGiangVien) ? $"• GV: {lop.TenGiangVien}" : "")
+                                            </div>
+                                        </div>
+                                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold shrink-0">@lop.TrangThai</span>
+                                    </button>
+                                }
+                            </div>
+                        }
+                        <div id="drawer-lop-empty" class="hidden px-4 py-5 text-center text-xs text-rose-600">
+                            <span class="material-symbols-outlined text-[24px] text-rose-400 block mb-1">error_outline</span>
+                            <span class="font-semibold block">Không tìm thấy lớp học phù hợp trong danh sách!</span>
+                            <span class="text-[11px] text-outline mt-0.5 block">Bạn chỉ có thể chọn lớp học đã có sẵn trong hệ thống.</span>
+                        </div>
                     </div>
+
+                    <!-- Lỗi validation khi nhập lớp không có trong danh sách -->
+                    <p id="drawer-lop-error" class="hidden text-[11px] text-danger-crimson font-semibold flex items-center gap-1 mt-1">
+                        <span class="material-symbols-outlined text-[14px]">error</span>
+                        <span>Lớp học không có trong danh sách. Vui lòng chọn đúng lớp từ gợi ý!</span>
+                    </p>
 
                     <!-- Info Box tóm tắt thông tin lớp được chọn -->
                     <div id="drawer-lop-info-card" class="hidden p-2 rounded-xl bg-primary/[0.04] border border-primary/20 text-xs flex items-center justify-between text-brand-deep">
                         <span id="drawer-lop-info-text" class="font-medium truncate">...</span>
-                        <span class="text-[10px] text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-full flex-shrink-0">Đã chọn</span>
+                        <span class="text-[10px] text-emerald-700 font-bold bg-emerald-100 px-2 py-0.5 rounded-full flex-shrink-0 flex items-center gap-0.5">
+                            <span class="material-symbols-outlined text-[12px]">check</span> Đã chọn
+                        </span>
                     </div>
                 </div>
 
@@ -1227,71 +1263,160 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         r.addEventListener('change', updateStatusRadioStyles);
     });
 
-    // Helper: Tìm kiếm nhanh lớp học trong Drawer
-    function filterDrawerLopHoc(kw) {
+    // Strict Searchable Combobox Helpers (Bắt buộc chọn đúng lớp có trong danh sách)
+    function handleLopComboboxKeydown(e) {
+        if (e.key === 'Escape') {
+            closeLopComboboxDropdown();
+            return;
+        }
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const visibleOptions = Array.from(document.querySelectorAll('.lop-combobox-option:not(.hidden)'));
+            if (visibleOptions.length === 1) {
+                selectDrawerLopOption(visibleOptions[0], true);
+            } else if (visibleOptions.length > 1) {
+                const typed = (e.target.value || '').trim().toLowerCase();
+                const exact = visibleOptions.find(b => (b.dataset.ten || '').trim().toLowerCase() === typed);
+                if (exact) selectDrawerLopOption(exact, true);
+                else selectDrawerLopOption(visibleOptions[0], true);
+            } else {
+                showLopComboboxError(true, 'Lớp học bạn nhập không có trong danh sách. Vui lòng chọn từ gợi ý!');
+            }
+        }
+    }
+
+    function openLopComboboxDropdown() {
+        const dd = document.getElementById('drawer-lop-dropdown');
+        const chevron = document.getElementById('drawer-lop-chevron');
+        if (dd) dd.classList.remove('hidden');
+        if (chevron) chevron.style.transform = 'rotate(180deg)';
+    }
+
+    function closeLopComboboxDropdown() {
+        const dd = document.getElementById('drawer-lop-dropdown');
+        const chevron = document.getElementById('drawer-lop-chevron');
+        if (dd) dd.classList.add('hidden');
+        if (chevron) chevron.style.transform = 'rotate(0deg)';
+    }
+
+    function toggleLopComboboxDropdown() {
+        const dd = document.getElementById('drawer-lop-dropdown');
+        if (!dd) return;
+        if (dd.classList.contains('hidden')) {
+            filterDrawerLopHoc(document.getElementById('drawer-search-lop')?.value || '', false);
+            openLopComboboxDropdown();
+        } else {
+            closeLopComboboxDropdown();
+        }
+    }
+
+    function showLopComboboxError(show, msgText) {
+        const input = document.getElementById('drawer-search-lop');
+        const err = document.getElementById('drawer-lop-error');
+        if (show) {
+            if (input) {
+                input.classList.remove('border-border-standard', 'border-emerald-400');
+                input.classList.add('border-danger-crimson', 'ring-2', 'ring-rose-500/20');
+            }
+            if (err) {
+                if (msgText) err.querySelector('span:last-child').innerText = msgText;
+                err.classList.remove('hidden');
+            }
+        } else {
+            if (input) {
+                input.classList.remove('border-danger-crimson', 'ring-2', 'ring-rose-500/20');
+                input.classList.add('border-border-standard');
+            }
+            if (err) err.classList.add('hidden');
+        }
+    }
+
+    function filterDrawerLopHoc(kw, clearSelectedId = true) {
         const q = (kw || '').trim().toLowerCase();
-        const select = document.getElementById('drawer-malop');
+        const dd = document.getElementById('drawer-lop-dropdown');
         const clearBtn = document.getElementById('drawer-clear-search-lop');
         const countEl = document.getElementById('drawer-lop-count');
-        if (!select) return;
+        const hiddenInput = document.getElementById('drawer-malop');
+        const card = document.getElementById('drawer-lop-info-card');
+        const emptyEl = document.getElementById('drawer-lop-empty');
+        if (!dd) return;
 
         if (clearBtn) {
             if (q) clearBtn.classList.remove('hidden');
             else clearBtn.classList.add('hidden');
         }
 
+        // Nếu người dùng tự gõ text, bắt buộc xóa MaLopHoc đã chọn trước đó để tránh gửi nhầm
+        if (clearSelectedId && hiddenInput) {
+            hiddenInput.value = '';
+            if (card) card.classList.add('hidden');
+        }
+
         let matchCount = 0;
-        const optgroups = select.querySelectorAll('optgroup');
-        optgroups.forEach(grp => {
+        const groups = dd.querySelectorAll('.lop-combobox-group');
+        groups.forEach(grp => {
             let grpMatch = 0;
-            const options = grp.querySelectorAll('option');
+            const options = grp.querySelectorAll('.lop-combobox-option');
             options.forEach(opt => {
-                const text = (opt.text || '').toLowerCase();
+                const ten = (opt.dataset.ten || '').toLowerCase();
+                const idStr = ('#lh' + String(opt.dataset.id || '').padStart(3, '0')).toLowerCase();
                 const gv = (opt.dataset.gv || '').toLowerCase();
                 const ctdt = (opt.dataset.ctdt || '').toLowerCase();
-                if (!q || text.includes(q) || gv.includes(q) || ctdt.includes(q)) {
-                    opt.hidden = false;
+                if (!q || ten.includes(q) || idStr.includes(q) || gv.includes(q) || ctdt.includes(q)) {
+                    opt.classList.remove('hidden');
                     grpMatch++;
                     matchCount++;
                 } else {
-                    opt.hidden = true;
+                    opt.classList.add('hidden');
                 }
             });
-            grp.hidden = (grpMatch === 0);
+            if (grpMatch === 0) grp.classList.add('hidden');
+            else grp.classList.remove('hidden');
         });
+
+        if (emptyEl) {
+            if (matchCount === 0) emptyEl.classList.remove('hidden');
+            else emptyEl.classList.add('hidden');
+        }
 
         if (countEl) {
             if (q) countEl.innerText = `${matchCount} lớp khớp`;
-            else countEl.innerText = `${select.querySelectorAll('option:not([value=""])').length} lớp`;
+            else countEl.innerText = `${dd.querySelectorAll('.lop-combobox-option').length} lớp có sẵn`;
         }
+
+        if (matchCount === 0 && q) {
+            showLopComboboxError(true, `Không có lớp học "${kw.trim()}" trong danh sách!`);
+        } else {
+            showLopComboboxError(false);
+        }
+
+        openLopComboboxDropdown();
     }
 
-    function clearDrawerLopSearch() {
-        const input = document.getElementById('drawer-search-lop');
-        if (input) {
-            input.value = '';
-            filterDrawerLopHoc('');
-        }
-    }
-
-    // Helper: Tự động điền Giảng viên khi chọn Lớp học
-    function onDrawerLopChanged(selectEl, autoSelectGv = true) {
-        if (!selectEl) return;
-        const opt = selectEl.options[selectEl.selectedIndex];
+    function selectDrawerLopOption(btnEl, autoSelectGv = true) {
+        if (!btnEl) return;
+        const hiddenInput = document.getElementById('drawer-malop');
+        const searchInput = document.getElementById('drawer-search-lop');
+        const clearBtn = document.getElementById('drawer-clear-search-lop');
         const card = document.getElementById('drawer-lop-info-card');
         const textEl = document.getElementById('drawer-lop-info-text');
         const badgeGv = document.getElementById('drawer-gv-autofill-badge');
 
-        if (!opt || !opt.value) {
-            if (card) card.classList.add('hidden');
-            if (badgeGv) badgeGv.classList.add('hidden');
-            return;
-        }
+        const id = btnEl.dataset.id;
+        const tenLop = btnEl.dataset.ten || '';
+        const gvLop = btnEl.dataset.gv || '';
+        const siso = btnEl.dataset.siso || '';
+        const sobuoi = btnEl.dataset.sobuoi || '';
 
-        const tenLop = opt.dataset.ten || opt.text;
-        const gvLop = opt.dataset.gv || '';
-        const siso = opt.dataset.siso || '';
-        const sobuoi = opt.dataset.sobuoi || '';
+        if (hiddenInput) hiddenInput.value = id;
+        if (searchInput) {
+            searchInput.value = tenLop;
+            searchInput.classList.remove('border-danger-crimson', 'ring-2', 'ring-rose-500/20');
+            searchInput.classList.add('border-emerald-400');
+        }
+        if (clearBtn) clearBtn.classList.remove('hidden');
+        showLopComboboxError(false);
+        closeLopComboboxDropdown();
 
         if (card && textEl) {
             textEl.innerText = `${tenLop} • Sĩ số: ${siso} SV • Quy định: ${sobuoi} buổi`;
@@ -1315,6 +1440,62 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
 
         checkScheduleConflictLive();
     }
+
+    function selectDrawerLopById(maLop, autoSelectGv = false) {
+        const btnEl = document.querySelector(`.lop-combobox-option[data-id="${maLop}"]`);
+        if (btnEl) {
+            selectDrawerLopOption(btnEl, autoSelectGv);
+        }
+    }
+
+    function clearDrawerLopSearch() {
+        const input = document.getElementById('drawer-search-lop');
+        const hiddenInput = document.getElementById('drawer-malop');
+        const clearBtn = document.getElementById('drawer-clear-search-lop');
+        const card = document.getElementById('drawer-lop-info-card');
+        const badgeGv = document.getElementById('drawer-gv-autofill-badge');
+        if (hiddenInput) hiddenInput.value = '';
+        if (input) {
+            input.value = '';
+            input.classList.remove('border-emerald-400');
+        }
+        if (clearBtn) clearBtn.classList.add('hidden');
+        if (card) card.classList.add('hidden');
+        if (badgeGv) badgeGv.classList.add('hidden');
+        showLopComboboxError(false);
+
+        const dd = document.getElementById('drawer-lop-dropdown');
+        if (dd) {
+            dd.querySelectorAll('.lop-combobox-group, .lop-combobox-option').forEach(el => el.classList.remove('hidden'));
+            document.getElementById('drawer-lop-empty')?.classList.add('hidden');
+            const countEl = document.getElementById('drawer-lop-count');
+            if (countEl) countEl.innerText = `${dd.querySelectorAll('.lop-combobox-option').length} lớp có sẵn`;
+        }
+        checkScheduleConflictLive();
+    }
+
+    // Validate khi bấm ra ngoài combobox lớp học
+    document.addEventListener('click', function(e) {
+        const wrapper = document.getElementById('drawer-lop-combobox-wrapper');
+        if (wrapper && !wrapper.contains(e.target)) {
+            const dd = document.getElementById('drawer-lop-dropdown');
+            const isDropdownWasOpen = dd && !dd.classList.contains('hidden');
+            closeLopComboboxDropdown();
+
+            const hiddenInput = document.getElementById('drawer-malop');
+            const searchInput = document.getElementById('drawer-search-lop');
+            if (isDropdownWasOpen && hiddenInput && searchInput && !hiddenInput.value && searchInput.value.trim()) {
+                const typed = searchInput.value.trim().toLowerCase();
+                const exactBtn = Array.from(document.querySelectorAll('.lop-combobox-option'))
+                    .find(b => (b.dataset.ten || '').trim().toLowerCase() === typed);
+                if (exactBtn) {
+                    selectDrawerLopOption(exactBtn, true);
+                } else {
+                    showLopComboboxError(true, 'Lớp học bạn nhập không có trong danh sách. Vui lòng chọn từ gợi ý!');
+                }
+            }
+        }
+    });
 
     // Helper: Gán giá trị Giảng viên vào Dropdown (Hỗ trợ cả khớp chính xác & thỉnh giảng)
     function setDrawerGiangVienValue(gvName) {
@@ -1446,8 +1627,7 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
 
         clearDrawerLopSearch();
         document.getElementById('drawer-mabuoi').value = item.dataset.id;
-        document.getElementById('drawer-malop').value = item.dataset.malop;
-        onDrawerLopChanged(document.getElementById('drawer-malop'), false);
+        selectDrawerLopById(item.dataset.malop, false);
         document.getElementById('drawer-phong').value = item.dataset.phong;
         setDrawerGiangVienValue(item.dataset.gv);
         document.getElementById('drawer-batdau').value = item.dataset.batdau;
@@ -1588,6 +1768,16 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
     if (drawerForm) {
         drawerForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            const selectedMaLop = document.getElementById('drawer-malop')?.value;
+            if (!selectedMaLop) {
+                showLopComboboxError(true, 'Vui lòng chọn đúng lớp học có trong danh sách gợi ý!');
+                openLopComboboxDropdown();
+                document.getElementById('drawer-search-lop')?.focus();
+                if (window.showToast) {
+                    window.showToast('Lớp học không hợp lệ! Vui lòng chọn đúng lớp học từ danh sách.', 'error');
+                }
+                return;
+            }
             if (isCurrentFormConflicted) {
                 if (window.showToast) {
                     window.showToast('Không thể lưu do lịch học đang bị trùng! Vui lòng chọn giờ hoặc phòng khác.', 'error');
