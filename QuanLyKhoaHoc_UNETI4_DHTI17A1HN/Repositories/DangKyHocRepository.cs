@@ -238,7 +238,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         {
             return await _context.DangKyHocs
                 .Where(d => maLopList.Contains(d.MaLopHoc) &&
-                            (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành"))
+                            (d.TrangThai == "Đã duyệt" || d.TrangThai == "Chờ xác nhận học phí" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành"))
                 .GroupBy(d => d.MaLopHoc)
                 .Select(g => new { MaLop = g.Key, Count = g.Count() })
                 .ToDictionaryAsync(g => g.MaLop, g => g.Count);
@@ -247,7 +247,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         public async Task<Dictionary<int, int>> GetAllSiSoMapAsync()
         {
             return await _context.DangKyHocs
-                .Where(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành")
+                .Where(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Chờ xác nhận học phí" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành")
                 .GroupBy(d => d.MaLopHoc)
                 .Select(g => new { MaLop = g.Key, Count = g.Count() })
                 .ToDictionaryAsync(g => g.MaLop, g => g.Count);

@@ -146,7 +146,8 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                     context.SaveChanges();
                 }
 
-                if (!context.GiangViens.Any(g => g.Email == gv.Email))
+                var existingGv = context.GiangViens.FirstOrDefault(g => g.Email == gv.Email || g.HoTen == gv.HoTen);
+                if (existingGv == null)
                 {
                     context.GiangViens.Add(new GiangVien
                     {
@@ -161,15 +162,26 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                         NgayTao = DateTime.Today.AddDays(-50)
                     });
                 }
+                else if (existingGv.MaTaiKhoan == null)
+                {
+                    existingGv.MaTaiKhoan = tkGv.MaTaiKhoan;
+                }
             }
             context.SaveChanges();
 
             var gvList = context.GiangViens.ToList();
-            int gvId1 = gvList.Count > 0 ? gvList[0].MaGiangVien : 1;
-            int gvId2 = gvList.Count > 1 ? gvList[1].MaGiangVien : gvId1;
-            int gvId3 = gvList.Count > 2 ? gvList[2].MaGiangVien : gvId1;
-            int gvId4 = gvList.Count > 3 ? gvList[3].MaGiangVien : gvId1;
-            int gvId5 = gvList.Count > 4 ? gvList[4].MaGiangVien : gvId2;
+            int ResolveGvId(string email, string hoTen, int fallback)
+            {
+                var found = gvList.FirstOrDefault(g => string.Equals(g.Email, email, StringComparison.OrdinalIgnoreCase))
+                         ?? gvList.FirstOrDefault(g => string.Equals(g.HoTen, hoTen, StringComparison.OrdinalIgnoreCase));
+                return found?.MaGiangVien ?? fallback;
+            }
+            int firstGvId = gvList.FirstOrDefault()?.MaGiangVien ?? 1;
+            int gvId1 = ResolveGvId("hung.tran@uneti.edu.vn", "ThS. Trần Văn Hùng", firstGvId);
+            int gvId2 = ResolveGvId("lan.hoang@uneti.edu.vn", "TS. Hoàng Thị Lan", firstGvId);
+            int gvId3 = ResolveGvId("nam.nguyen@uneti.edu.vn", "ThS. Nguyễn Thành Nam", firstGvId);
+            int gvId4 = ResolveGvId("thanh.le@uneti.edu.vn", "PGS.TS. Lê Bá Thành", firstGvId);
+            int gvId5 = ResolveGvId("trang.pham@uneti.edu.vn", "ThS. Phạm Thu Trang", gvId2);
 
             // ========================================================
             // 3. TÀI KHOẢN ADMIN VÀ GIÁO VỤ (Mục 16: Băm mật khẩu SHA-256)
@@ -262,6 +274,28 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                 }
             }
             context.SaveChanges();
+
+            // Đồng bộ lại MaGiangVien của LopHoc theo TenGiangVien nếu bị lệch
+            var classesToSync = context.LopHocs.ToList();
+            bool hasClassSyncChanges = false;
+            foreach (var lop in classesToSync)
+            {
+                if (!string.IsNullOrWhiteSpace(lop.TenGiangVien))
+                {
+                    var matchedGv = gvList.FirstOrDefault(g =>
+                        string.Equals(g.HoTen, lop.TenGiangVien, StringComparison.OrdinalIgnoreCase) ||
+                        lop.TenGiangVien.Contains(g.HoTen, StringComparison.OrdinalIgnoreCase));
+                    if (matchedGv != null && lop.MaGiangVien != matchedGv.MaGiangVien)
+                    {
+                        lop.MaGiangVien = matchedGv.MaGiangVien;
+                        hasClassSyncChanges = true;
+                    }
+                }
+            }
+            if (hasClassSyncChanges)
+            {
+                context.SaveChanges();
+            }
 
             // Tự động gia hạn các lớp đang mở tuyển sinh nếu hạn đăng ký mẫu bị trôi qua ngày hiện tại
             var expiredOpenClasses = context.LopHocs

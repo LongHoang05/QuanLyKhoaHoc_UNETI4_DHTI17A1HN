@@ -71,7 +71,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             var upcomingSessions = await _giangVienService.GetUpcomingSessionsAsync(gv, 6);
 
             // Tổng học viên đang dạy
-            int totalStudents = myClasses.Sum(l => l.DangKyHocs.Count(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành"));
+            int totalStudents = myClasses.Sum(l => l.DangKyHocs.Count(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Chờ xác nhận học phí" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành"));
 
             // Số lượt học viên đã có điểm tổng kết
             int gradedCount = await _giangVienService.GetGradedCountAsync(myClassIds);
@@ -127,12 +127,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
 
             var myClasses = await _giangVienService.GetClassesForTeacherAsync(gv);
-
-            if (!myClasses.Any())
-            {
-                // Fallback nếu chưa phân công
-                myClasses = (await _giangVienRepo.GetClassesByTeacherAsync(0, "")).Take(5).ToList();
-            }
 
             int selectedClassId = maLop ?? myClasses.FirstOrDefault()?.MaLopHoc ?? 0;
             var currentClass = myClasses.FirstOrDefault(l => l.MaLopHoc == selectedClassId);
@@ -198,6 +192,14 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             var list = await _giangVienService.GetDanhSachGiangVienAsync(search, hocVi);
 
+            var allTeachers = (!string.IsNullOrWhiteSpace(search) || !string.IsNullOrWhiteSpace(hocVi))
+                ? await _giangVienService.GetDanhSachGiangVienAsync(null, null)
+                : list;
+
+            ViewBag.TotalTeachers = allTeachers.Count;
+            ViewBag.ActiveTeachers = allTeachers.Count(g => g.TrangThai);
+            ViewBag.TotalAssignedClasses = allTeachers.Sum(g => g.LopHocs?.Count ?? 0);
+
             int pageSize = 6;
             int totalItems = list.Count;
             int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
@@ -256,6 +258,10 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         public async Task<IActionResult> CreatePost(GiangVien gv, string? tenDangNhap, string? matKhau)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            if (Request.HasFormContentType)
+            {
+                gv.TrangThai = Request.Form["TrangThai"].Contains("true") || Request.Form["TrangThai"].Contains("on");
+            }
 
             var (success, message) = await _giangVienService.TaoGiangVienAsync(gv, tenDangNhap, matKhau);
 
@@ -270,11 +276,15 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [SessionAuthorize("Admin", "GiaoVu")]
-        public async Task<IActionResult> EditPost(int maGiangVien, GiangVien gv)
+        public async Task<IActionResult> EditPost(int maGiangVien, GiangVien gv, string? tenDangNhap, string? matKhau)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            if (Request.HasFormContentType)
+            {
+                gv.TrangThai = Request.Form["TrangThai"].Contains("true") || Request.Form["TrangThai"].Contains("on");
+            }
 
-            var (success, message) = await _giangVienService.CapNhatGiangVienAsync(maGiangVien, gv);
+            var (success, message) = await _giangVienService.CapNhatGiangVienAsync(maGiangVien, gv, tenDangNhap, matKhau);
 
             if (isAjax) return Json(new { success, message });
 

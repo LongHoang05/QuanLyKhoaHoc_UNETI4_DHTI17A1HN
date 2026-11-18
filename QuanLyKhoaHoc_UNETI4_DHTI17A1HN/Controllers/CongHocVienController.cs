@@ -310,6 +310,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             var dk = await _dangKyHocRepo.GetByIdWithDetailsAsync(maDangKy);
             if (dk != null && dk.MaHocVien == student.MaHocVien)
             {
+                if (dk.TrangThai != "Đã duyệt" && dk.TrangThai != "Chờ xác nhận học phí")
+                {
+                    TempData["Error"] = $"Đơn đăng ký đang ở trạng thái '{dk.TrangThai}', không thể xác nhận chuyển khoản học phí.";
+                    return RedirectToAction(nameof(TienTrinh), new { tab = "dangky" });
+                }
+
                 // Khi học viên bấm đã chuyển khoản:
                 // KHÔNG vào thẳng "Đã đóng học phí" mà chuyển sang "Chờ xác nhận học phí"
                 // để Giáo vụ đối soát và bấm xác nhận thu phí

@@ -103,7 +103,10 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             ViewBag.SiSoMap = siSoMap;
             ViewBag.BuoiHocMap = buoiHocMap;
             ViewBag.ChuongTrinhList = await _ctdtRepo.GetAllAsync();
-            ViewBag.GiangVienList = await _giangVienRepo.GetAllAsync();
+            var allGiangViens = await _giangVienRepo.GetAllAsync();
+            ViewBag.GiangVienList = allGiangViens
+                .Where(g => g.TrangThai && g.MaTaiKhoan != null && (g.TaiKhoan == null || g.TaiKhoan.TrangThai))
+                .ToList();
 
             // 3 thẻ KPI lấy từ Repository
             var (tongSoLop, soLopDangMo, _, _) = await _lopHocRepo.GetThongKeNhanhAsync();
@@ -123,7 +126,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             var buoiHocs = await _buoiHocRepo.GetByLopHocIdAsync(id);
             var dangKys = lop.DangKyHocs
-                .Where(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành")
+                .Where(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Chờ xác nhận học phí" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành")
                 .ToList();
 
             ViewBag.BuoiHocs = buoiHocs;
@@ -200,6 +203,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 var gvMatch = gvs.FirstOrDefault(g => g.HoTen == lop.TenGiangVien || lop.TenGiangVien.Contains(g.HoTen) || g.HoTen.Contains(lop.TenGiangVien));
                 if (gvMatch != null)
                 {
+                    if (gvMatch.MaTaiKhoan == null || !gvMatch.TrangThai || (gvMatch.TaiKhoan != null && !gvMatch.TaiKhoan.TrangThai))
+                    {
+                        string gvErr = $"Giảng viên '{gvMatch.HoTen}' chưa được cấp tài khoản hoặc đang tạm nghỉ, không thể phân công đứng lớp!";
+                        if (isAjax) return Json(new { success = false, message = gvErr });
+                        TempData["Error"] = gvErr;
+                        return RedirectToAction(nameof(Index));
+                    }
                     lop.MaGiangVien = gvMatch.MaGiangVien;
                 }
             }
@@ -278,6 +288,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             {
                 var gvs = await _giangVienRepo.GetAllAsync();
                 var gvMatch = gvs.FirstOrDefault(g => g.HoTen == tenGiangVien || tenGiangVien.Contains(g.HoTen) || g.HoTen.Contains(tenGiangVien));
+                if (gvMatch != null && (gvMatch.MaTaiKhoan == null || !gvMatch.TrangThai || (gvMatch.TaiKhoan != null && !gvMatch.TaiKhoan.TrangThai)))
+                {
+                    string gvErr = $"Giảng viên '{gvMatch.HoTen}' chưa được cấp tài khoản hoặc đang tạm nghỉ, không thể phân công đứng lớp!";
+                    if (isAjax) return Json(new { success = false, message = gvErr });
+                    TempData["Error"] = gvErr;
+                    return RedirectToAction(nameof(Index));
+                }
                 lop.MaGiangVien = gvMatch?.MaGiangVien;
             }
             else
