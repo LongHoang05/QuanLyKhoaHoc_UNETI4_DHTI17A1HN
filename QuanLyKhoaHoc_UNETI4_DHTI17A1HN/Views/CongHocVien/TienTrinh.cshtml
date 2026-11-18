@@ -233,6 +233,13 @@
                                 else if (dk.TrangThai == "Đã duyệt" && (dk.SoTienDaDong < (lop?.HocPhi ?? 0) || (lop?.HocPhi ?? 0) == 0))
                                 {
                                     <div class="space-y-1.5">
+                                        @if (!string.IsNullOrWhiteSpace(dk.GhiChu) && dk.GhiChu.Contains("[Chưa nhận học phí]"))
+                                        {
+                                            <div class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-[11px] flex items-start gap-2">
+                                                <span class="material-symbols-outlined text-rose-600 text-[16px] shrink-0 mt-0.5">error</span>
+                                                <span class="font-medium">@dk.GhiChu.Replace("[Chưa nhận học phí]", "").Trim()</span>
+                                            </div>
+                                        }
                                         <button type="button" onclick="openPaymentModal(@dk.MaDangKy, '@(lop?.TenLop?.Replace("'", "\\'") ?? "")', @(lop?.HocPhi ?? 0), @(dk.SoTienDaDong))"
                                                 class="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold text-center flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer">
                                             <span class="material-symbols-outlined text-[16px]">qr_code_2</span>

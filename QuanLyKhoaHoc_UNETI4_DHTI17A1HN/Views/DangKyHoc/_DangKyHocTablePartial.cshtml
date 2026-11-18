@@ -77,6 +77,13 @@
                                                 <span>@(string.IsNullOrWhiteSpace(item.GhiChu) ? "Học viên báo đã chuyển khoản" : item.GhiChu)</span>
                                             </div>
                                         }
+                                        else if (item.TrangThai == "Đã duyệt" && !string.IsNullOrWhiteSpace(item.GhiChu) && item.GhiChu.Contains("[Chưa nhận học phí]"))
+                                        {
+                                            <div class="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-700 text-[10px] font-semibold">
+                                                <span class="material-symbols-outlined text-[13px] text-rose-600">money_off</span>
+                                                <span>@item.GhiChu</span>
+                                            </div>
+                                        }
                                     </div>
                                 </div>
                             </td>

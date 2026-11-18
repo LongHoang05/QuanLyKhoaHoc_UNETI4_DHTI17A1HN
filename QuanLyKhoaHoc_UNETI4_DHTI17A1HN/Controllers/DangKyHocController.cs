@@ -286,6 +286,48 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // --- HOÀN TÁC KHI CHƯA NHẬN ĐƯỢC HỌC PHÍ (TRẢ VỀ 'Đã duyệt' ĐỂ HỌC VIÊN NỘP LẠI) ---
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("DangKyHoc/ChuaNhanHocPhiPost")]
+        public async Task<IActionResult> ChuaNhanHocPhiPost(int id, string? ghiChu)
+        {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            var dk = await _dangKyHocRepo.GetByIdWithDetailsAsync(id);
+
+            if (dk == null)
+            {
+                if (isAjax) return Json(new { success = false, message = "Không tìm thấy hồ sơ đăng ký." });
+                TempData["Error"] = "Không tìm thấy hồ sơ.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (dk.TrangThai != "Chờ xác nhận học phí")
+            {
+                string errMsg = $"Chỉ có thể hoàn tác khi hồ sơ đang ở trạng thái 'Chờ xác nhận học phí' (hiện tại: '{dk.TrangThai}').";
+                if (isAjax) return Json(new { success = false, message = errMsg });
+                TempData["Error"] = errMsg;
+                return RedirectToAction(nameof(Index));
+            }
+
+            string staffName = HttpContext.Session.GetString("HoTen") ?? "Ban Giáo vụ";
+            dk.TrangThai = "Đã duyệt";
+            dk.SoTienDaDong = 0m;
+            dk.NgayDongHocPhi = null;
+
+            string lyDo = string.IsNullOrWhiteSpace(ghiChu)
+                ? "Giáo vụ đối soát: Chưa nhận được tiền học phí, vui lòng kiểm tra và thực hiện nộp lại"
+                : ghiChu.Trim();
+            dk.GhiChu = $"[Chưa nhận học phí] {lyDo} ({staffName} - {DateTime.Now:dd/MM/yyyy HH:mm})";
+
+            await _dangKyHocRepo.UpdateAsync(dk);
+
+            string sMsg = $"Đã trả hồ sơ #{id:D3} của học viên {dk.HocVien?.HoTen} về trạng thái 'Đã duyệt' (Chưa nộp học phí).";
+            if (isAjax) return Json(new { success = true, message = sMsg, stats = await GetStatsJsonAsync() });
+            TempData["Success"] = sMsg;
+            return RedirectToAction(nameof(Index));
+        }
+
         // --- CHUYỂN TRẠNG THÁI BẮT ĐẦU HỌC ---
         [HttpPost]
         [ValidateAntiForgeryToken]
