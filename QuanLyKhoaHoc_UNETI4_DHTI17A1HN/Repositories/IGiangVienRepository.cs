@@ -27,7 +27,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
 
         // 3. Nghiệp vụ Học viên & Chấm điểm
         Task<List<DangKyHoc>> GetClassStudentsWithGradesAsync(int maLop);
-        Task<(bool Success, string Message, KetQuaHocTap? KetQua)> SaveGradeAsync(int maDangKy, double? diemCC, double? diemGK, double? diemCK, string? ghiChu);
+        Task<(bool Success, string Message, KetQuaHocTap? KetQua)> SaveGradeAsync(int maDangKy, double? diemCC, double? diemGK, double? diemCK, string? ghiChu, int? expectedMaGiangVien = null, string? expectedTeacherName = null);
         Task<int> CountGradedStudentsAsync(List<int> classIds);
 
         // 4. Quản lý Tài khoản liên kết

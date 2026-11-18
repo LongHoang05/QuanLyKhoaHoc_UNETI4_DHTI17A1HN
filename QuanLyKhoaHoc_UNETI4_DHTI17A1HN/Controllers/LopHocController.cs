@@ -192,6 +192,21 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            // Ràng buộc (#07): Không cho phép mở lớp mới thuộc chương trình đào tạo đang tạm dừng
+            var ctdt = await _ctdtRepo.GetByIdAsync(lop.MaChuongTrinh);
+            if (ctdt == null)
+            {
+                if (isAjax) return Json(new { success = false, message = "Chương trình đào tạo không tồn tại." });
+                TempData["Error"] = "Chương trình đào tạo không tồn tại.";
+                return RedirectToAction(nameof(Index));
+            }
+            if (!ctdt.TrangThai)
+            {
+                if (isAjax) return Json(new { success = false, message = $"Chương trình đào tạo '{ctdt.TenChuongTrinh}' đang tạm dừng, không thể mở lớp học mới." });
+                TempData["Error"] = $"Chương trình đào tạo '{ctdt.TenChuongTrinh}' đang tạm dừng, không thể mở lớp học mới.";
+                return RedirectToAction(nameof(Index));
+            }
+
             if (string.IsNullOrEmpty(lop.TrangThai)) lop.TrangThai = "Chưa mở";
             if (string.IsNullOrEmpty(lop.TrinhDoDauVao)) lop.TrinhDoDauVao = "Cơ bản";
             if (string.IsNullOrEmpty(lop.TenGiangVien)) lop.TenGiangVien = "Chưa xếp";
@@ -269,6 +284,21 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             {
                 if (isAjax) return Json(new { success = false, message = "Tên lớp học bắt buộc nhập." });
                 TempData["Error"] = "Tên lớp học bắt buộc nhập.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Ràng buộc (#07): Không cho phép chuyển hoặc kích hoạt lớp thuộc chương trình đào tạo đang tạm dừng
+            var ctdtEdit = await _ctdtRepo.GetByIdAsync(maChuongTrinh);
+            if (ctdtEdit == null)
+            {
+                if (isAjax) return Json(new { success = false, message = "Chương trình đào tạo không tồn tại." });
+                TempData["Error"] = "Chương trình đào tạo không tồn tại.";
+                return RedirectToAction(nameof(Index));
+            }
+            if (!ctdtEdit.TrangThai && (lop.MaChuongTrinh != maChuongTrinh || (!string.IsNullOrEmpty(trangThai) && trangThai != "Đã hủy" && trangThai != "Tạm dừng" && trangThai != lop.TrangThai)))
+            {
+                if (isAjax) return Json(new { success = false, message = $"Chương trình đào tạo '{ctdtEdit.TenChuongTrinh}' đang tạm dừng, không thể gắn hoặc mở lớp mới theo chương trình này." });
+                TempData["Error"] = $"Chương trình đào tạo '{ctdtEdit.TenChuongTrinh}' đang tạm dừng, không thể gắn hoặc mở lớp mới theo chương trình này.";
                 return RedirectToAction(nameof(Index));
             }
 

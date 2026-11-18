@@ -300,6 +300,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return Json(new { success = false, message = $"Không thể tự hủy đơn khi đã ở trạng thái '{dk.TrangThai}'. Vui lòng liên hệ ban giáo vụ để được hỗ trợ giải quyết." });
             }
 
+            // Quy định (#05): Không cho phép học viên tự hủy đăng ký kể từ ngày khai giảng trở đi
+            if (dk.LopHoc != null && DateTime.Today >= dk.LopHoc.NgayKhaiGiang.Date)
+            {
+                return Json(new { success = false, message = $"Lớp '{dk.LopHoc.TenLop}' đã đến hoặc qua ngày khai giảng ({dk.LopHoc.NgayKhaiGiang:dd/MM/yyyy}). Bạn không thể tự hủy đơn trực tuyến, vui lòng liên hệ ban giáo vụ để được hỗ trợ." });
+            }
+
             dk.TrangThai = "Đã hủy";
             await _dangKyHocRepo.UpdateAsync(dk);
 

@@ -128,12 +128,19 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
+            bool isLecturerRole = string.Equals(HttpContext.Session.GetString("VaiTro"), "GiangVien", StringComparison.OrdinalIgnoreCase);
             var myClasses = await _giangVienService.GetClassesForTeacherAsync(gv);
 
-            if (!myClasses.Any())
+            if (!myClasses.Any() && !isLecturerRole)
             {
-                // Fallback nếu chưa phân công
+                // Fallback chỉ áp dụng cho Admin/Giáo vụ khi xem demo tổng quát
                 myClasses = (await _giangVienRepo.GetClassesByTeacherAsync(0, "")).Take(5).ToList();
+            }
+
+            if (isLecturerRole && maLop.HasValue && maLop.Value > 0 && !myClasses.Any(l => l.MaLopHoc == maLop.Value))
+            {
+                TempData["Error"] = "Từ chối truy cập: Bạn không phụ trách lớp học này!";
+                return RedirectToAction(nameof(Index));
             }
 
             int selectedClassId = maLop ?? myClasses.FirstOrDefault()?.MaLopHoc ?? 0;
@@ -159,7 +166,22 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> LuuDiemAjax(int maDangKy, double? diemCC, double? diemGK, double? diemCK, string? ghiChu)
         {
-            var (success, message, data) = await _giangVienService.LuuDiemHocVienAsync(maDangKy, diemCC, diemGK, diemCK, ghiChu);
+            bool isLecturerRole = string.Equals(HttpContext.Session.GetString("VaiTro"), "GiangVien", StringComparison.OrdinalIgnoreCase);
+            int? expectedMaGv = null;
+            string? expectedTenGv = null;
+
+            if (isLecturerRole)
+            {
+                var gv = await GetCurrentGiangVienAsync();
+                if (gv == null)
+                {
+                    return Json(new { success = false, message = "Không xác định được hồ sơ giảng viên đăng nhập." });
+                }
+                expectedMaGv = gv.MaGiangVien;
+                expectedTenGv = gv.HoTen;
+            }
+
+            var (success, message, data) = await _giangVienService.LuuDiemHocVienAsync(maDangKy, diemCC, diemGK, diemCK, ghiChu, expectedMaGv, expectedTenGv);
 
             if (!success || data == null)
             {
@@ -375,6 +397,18 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         [HttpGet]
         public async Task<IActionResult> ExportExcelBangDiem(int maLop)
         {
+            bool isLecturerRole = string.Equals(HttpContext.Session.GetString("VaiTro"), "GiangVien", StringComparison.OrdinalIgnoreCase);
+            if (isLecturerRole)
+            {
+                var gv = await GetCurrentGiangVienAsync();
+                var myClasses = gv != null ? await _giangVienService.GetClassesForTeacherAsync(gv) : new List<LopHoc>();
+                if (maLop <= 0 || !myClasses.Any(l => l.MaLopHoc == maLop))
+                {
+                    TempData["Error"] = "Từ chối truy cập: Bạn không phụ trách lớp học này!";
+                    return RedirectToAction(nameof(ChamDiem));
+                }
+            }
+
             var studentEnrollments = maLop > 0
                 ? await _giangVienService.GetStudentsForGradingAsync(maLop)
                 : new List<DangKyHoc>();

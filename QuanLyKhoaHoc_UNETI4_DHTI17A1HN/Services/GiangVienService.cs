@@ -74,9 +74,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
             return await _giangVienRepo.GetClassStudentsWithGradesAsync(maLop);
         }
 
-        public async Task<(bool Success, string Message, object? Data)> LuuDiemHocVienAsync(int maDangKy, double? diemCC, double? diemGK, double? diemCK, string? ghiChu)
+        public async Task<(bool Success, string Message, object? Data)> LuuDiemHocVienAsync(int maDangKy, double? diemCC, double? diemGK, double? diemCK, string? ghiChu, int? expectedMaGiangVien = null, string? expectedTeacherName = null)
         {
-            var result = await _giangVienRepo.SaveGradeAsync(maDangKy, diemCC, diemGK, diemCK, ghiChu);
+            var result = await _giangVienRepo.SaveGradeAsync(maDangKy, diemCC, diemGK, diemCK, ghiChu, expectedMaGiangVien, expectedTeacherName);
             if (!result.Success || result.KetQua == null)
             {
                 return (false, result.Message, null);

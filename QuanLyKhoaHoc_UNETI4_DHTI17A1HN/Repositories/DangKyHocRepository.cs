@@ -177,7 +177,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 d.TrangThai == "Đang học" ||
                 d.TrangThai == "Hoàn thành" ||
                 d.TrangThai == "Không hoàn thành");
-            double doanhThu = await _context.DangKyHocs.SumAsync(d => (double?)d.SoTienDaDong) ?? 0;
+            double doanhThu = await _context.DangKyHocs
+                .Where(d => d.TrangThai != "Đã hủy" && d.TrangThai != "Từ chối")
+                .SumAsync(d => (double?)d.SoTienDaDong) ?? 0;
 
             return (choDuyet, daDuyet, doanhThu);
         }
