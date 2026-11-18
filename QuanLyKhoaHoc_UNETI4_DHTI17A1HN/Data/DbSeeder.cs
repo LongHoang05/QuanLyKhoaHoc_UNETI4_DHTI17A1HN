@@ -129,13 +129,14 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
 
             foreach (var gv in sampleLecturers)
             {
+                string defaultGvPass = gv.Username == "giangvien" ? "giangvien123" : "123456";
                 var tkGv = context.TaiKhoans.FirstOrDefault(t => t.TenDangNhap == gv.Username);
                 if (tkGv == null)
                 {
                     tkGv = new TaiKhoan
                     {
                         TenDangNhap = gv.Username,
-                        MatKhau = SecurityHelper.HashPassword("123456"),
+                        MatKhau = SecurityHelper.HashPassword(defaultGvPass),
                         HoTen = gv.HoTen,
                         Email = gv.Email,
                         VaiTro = "GiangVien",
@@ -143,6 +144,11 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Data
                         NgayTao = DateTime.Today.AddDays(-50)
                     };
                     context.TaiKhoans.Add(tkGv);
+                    context.SaveChanges();
+                }
+                else if (gv.Username == "giangvien" && tkGv.MatKhau == SecurityHelper.HashPassword("123456"))
+                {
+                    tkGv.MatKhau = SecurityHelper.HashPassword("giangvien123");
                     context.SaveChanges();
                 }
 

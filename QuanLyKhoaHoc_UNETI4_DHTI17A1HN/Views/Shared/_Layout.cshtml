@@ -328,7 +328,7 @@
                             <span class="text-[11px] text-slate-500 leading-tight font-medium">@roleLabel</span>
                         </div>
                     </a>
-                    <a href="/TaiKhoan/Logout" title="Đăng xuất" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors active:scale-95">
+                    <a href="/TaiKhoan/Logout" onclick="event.preventDefault(); confirmLogout('/TaiKhoan/Logout');" title="Đăng xuất" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors active:scale-95">
                         <span class="material-symbols-outlined text-[18px]">logout</span>
                     </a>
                 </div>
@@ -358,7 +358,7 @@
                         <span class="material-symbols-outlined text-[16px] text-primary">storefront</span>
                         <span class="hidden sm:inline">Trang chủ EdTech</span>
                     </a>
-                    <a href="/TaiKhoan/Login?switchAccount=true" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary-light hover:bg-blue-100 text-brand-deep font-semibold text-xs transition-colors active:scale-[0.98]" title="Chuyển đổi tài khoản khác">
+                    <a href="/TaiKhoan/Login?switchAccount=true" onclick="event.preventDefault(); openGlobalDeleteModal({ title: 'Xác nhận đổi tài khoản?', message: 'Bạn có chắc chắn muốn thoát phiên hiện tại để đăng nhập bằng tài khoản khác không?', warning: 'Phiên làm việc hiện tại sẽ kết thúc.', submitText: 'Đổi tài khoản', submitIcon: 'switch_account', icon: 'switch_account', theme: 'primary', onConfirm: () => window.location.href = '/TaiKhoan/Login?switchAccount=true' });" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary-light hover:bg-blue-100 text-brand-deep font-semibold text-xs transition-colors active:scale-[0.98]" title="Chuyển đổi tài khoản khác">
                         <span class="material-symbols-outlined text-[16px] text-primary">switch_account</span>
                         <span>Đổi tài khoản</span>
                     </a>

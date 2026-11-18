@@ -4,8 +4,10 @@
 // Phụ trách: Module 4 - Đăng ký khóa học, Quản lý hồ sơ & Thu học phí
 // ========================================================
 
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Helpers;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 
@@ -441,6 +443,59 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 msg += $" Bỏ qua {skipped} hồ sơ đang ở trạng thái Đã duyệt/Đang học.";
             }
             return Json(new { success = true, message = msg, deletedCount = deleted, skippedCount = skipped, stats = await GetStatsJsonAsync() });
+        }
+
+        // ========================================================
+        // XUẤT FILE EXCEL BẰNG CLOSEDXML
+        // ========================================================
+        [HttpGet]
+        public async Task<IActionResult> ExportExcel(
+            string? search,
+            int? maChuongTrinh,
+            int? maLop,
+            string? trangThai,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? sortBy)
+        {
+            var (items, _) = await _dangKyHocRepo.GetPagedAsync(
+                search, maChuongTrinh, maLop, trangThai, tuNgay, denNgay, sortBy, 1, 10000);
+
+            string[] headers = { "STT", "Mã ĐK", "Học viên", "Email", "Lớp học", "Chương trình", "Ngày đăng ký", "Học phí (VNĐ)", "Đã đóng (VNĐ)", "Trạng thái", "Ghi chú" };
+
+            var fileBytes = ExcelExportHelper.ExportToExcel(
+                "DanhSachDangKyHoc",
+                "DANH SÁCH ĐĂNG KÝ HỌC & THU HỌC PHÍ - UNETI",
+                $"Tổng số hồ sơ: {items.Count()}",
+                headers,
+                items,
+                (ws, row, stt, dk) =>
+                {
+                    ws.Cell(row, 1).Value = stt;
+                    ws.Cell(row, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 2).Value = $"#DK{dk.MaDangKy:D3}";
+                    ws.Cell(row, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 3).Value = dk.HocVien?.HoTen ?? "N/A";
+                    ws.Cell(row, 4).Value = dk.HocVien?.Email ?? "";
+                    ws.Cell(row, 5).Value = dk.LopHoc?.TenLop ?? "N/A";
+                    ws.Cell(row, 6).Value = dk.LopHoc?.ChuongTrinhDaoTao?.TenChuongTrinh ?? "";
+                    ws.Cell(row, 7).Value = dk.NgayDangKy.ToString("dd/MM/yyyy HH:mm");
+                    ws.Cell(row, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                    var cHocPhi = ws.Cell(row, 8);
+                    cHocPhi.Value = dk.LopHoc?.HocPhi ?? 0;
+                    cHocPhi.Style.NumberFormat.Format = "#,##0";
+
+                    var cDaDong = ws.Cell(row, 9);
+                    cDaDong.Value = dk.SoTienDaDong;
+                    cDaDong.Style.NumberFormat.Format = "#,##0";
+
+                    ws.Cell(row, 10).Value = dk.TrangThai;
+                    ws.Cell(row, 10).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 11).Value = dk.NhanXetGiaoVu ?? dk.GhiChu ?? "";
+                });
+
+            return File(fileBytes, ExcelExportHelper.ExcelContentType, $"DanhSachDangKyHoc_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
     }
 }

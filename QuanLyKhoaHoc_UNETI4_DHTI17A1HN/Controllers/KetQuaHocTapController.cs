@@ -4,8 +4,10 @@
 // Phụ trách: Module 5 - Buổi học, Điểm danh, Kết quả học tập & Thống kê báo cáo
 // ========================================================
 
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Helpers;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 
@@ -291,6 +293,49 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             }
 
             return Json(new { success = true, message = $"Đã xóa thành công {deleted} kết quả học tập và hoàn lại trạng thái cho học viên.", deletedCount = deleted });
+        }
+
+        // ========================================================
+        // XUẤT FILE EXCEL BẰNG CLOSEDXML
+        // ========================================================
+        [HttpGet]
+        public async Task<IActionResult> ExportExcel(int? maLop, string? ketQua, string? search, string? sortBy)
+        {
+            var (items, _) = await _ketQuaRepo.GetPagedAsync(search, maLop, null, ketQua, 1, 10000, sortBy);
+
+            string[] headers = { "STT", "Mã KQ", "Học viên", "Email", "Lớp học", "Điểm QT (40%)", "Điểm CK (60%)", "Tổng kết (10)", "Điểm chữ", "Hệ 4", "Xếp loại", "Kết quả", "Nhận xét" };
+
+            var fileBytes = ExcelExportHelper.ExportToExcel(
+                "BangDiemKetQua",
+                "BẢNG ĐIỂM & KẾT QUẢ HỌC TẬP HỌC VIÊN - UNETI",
+                $"Tổng số kết quả: {items.Count()}",
+                headers,
+                items,
+                (ws, row, stt, kq) =>
+                {
+                    ws.Cell(row, 1).Value = stt;
+                    ws.Cell(row, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 2).Value = $"#KQ{kq.MaKetQua:D3}";
+                    ws.Cell(row, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 3).Value = kq.DangKyHoc?.HocVien?.HoTen ?? "N/A";
+                    ws.Cell(row, 4).Value = kq.DangKyHoc?.HocVien?.Email ?? "";
+                    ws.Cell(row, 5).Value = kq.DangKyHoc?.LopHoc?.TenLop ?? "N/A";
+
+                    var cQt = ws.Cell(row, 6); cQt.Value = kq.DiemChuyenCan; cQt.Style.NumberFormat.Format = "0.0";
+                    var cCk = ws.Cell(row, 7); cCk.Value = kq.DiemCuoiKhoa; cCk.Style.NumberFormat.Format = "0.0";
+                    var cTk = ws.Cell(row, 8); cTk.Value = kq.DiemTongKet; cTk.Style.NumberFormat.Format = "0.0"; cTk.Style.Font.Bold = true;
+
+                    ws.Cell(row, 9).Value = kq.DiemChu ?? "-";
+                    ws.Cell(row, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 10).Value = kq.DiemHe4.HasValue ? kq.DiemHe4.Value.ToString("0.0") : "-";
+                    ws.Cell(row, 10).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 11).Value = kq.XepLoai ?? "-";
+                    ws.Cell(row, 12).Value = kq.KetQua;
+                    ws.Cell(row, 12).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 13).Value = kq.NhanXet ?? "";
+                });
+
+            return File(fileBytes, ExcelExportHelper.ExcelContentType, $"KetQuaHocTap_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
     }
 }

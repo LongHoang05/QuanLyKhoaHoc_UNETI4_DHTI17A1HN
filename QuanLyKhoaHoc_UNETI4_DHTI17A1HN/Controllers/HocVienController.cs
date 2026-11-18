@@ -4,7 +4,9 @@
 // Phụ trách: Module 3 - Quản lý học viên, Hồ sơ cá nhân và Đăng ký học
 // ========================================================
 
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Helpers;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services;
@@ -665,6 +667,62 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             };
 
             return View(viewModel);
+        }
+
+        // ========================================================
+        // 15. XUẤT FILE EXCEL BẰNG CLOSEDXML
+        // ========================================================
+        [HttpGet]
+        public async Task<IActionResult> ExportExcel(
+            string? search = null,
+            string? trangThai = null,
+            string? trinhDo = null,
+            string? sortBy = null)
+        {
+            if (!CoQuyenQuanTri(out var redirectResult))
+            {
+                return redirectResult!;
+            }
+
+            bool? filterTrangThai = null;
+            if (!string.IsNullOrWhiteSpace(trangThai))
+            {
+                if (trangThai == "Đang học" || trangThai == "active" || trangThai.ToLower() == "true")
+                    filterTrangThai = true;
+                else if (trangThai == "Tạm khóa" || trangThai == "locked" || trangThai.ToLower() == "false")
+                    filterTrangThai = false;
+            }
+
+            var (items, _) = await _hocVienRepo.GetPagedAsync(search, filterTrangThai, 1, 10000, trinhDo, sortBy);
+
+            string[] headers = { "STT", "Mã HV", "Họ và Tên", "Email", "Số điện thoại", "Giới tính", "Trình độ", "Nghề nghiệp", "Trạng thái", "Ngày tạo" };
+
+            var fileBytes = ExcelExportHelper.ExportToExcel(
+                "DanhSachHocVien",
+                "DANH SÁCH HỒ SƠ HỌC VIÊN - TRUNG TÂM ĐÀO TẠO UNETI",
+                $"Tổng số bản ghi: {items.Count()}",
+                headers,
+                items,
+                (ws, row, stt, hv) =>
+                {
+                    ws.Cell(row, 1).Value = stt;
+                    ws.Cell(row, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 2).Value = $"HV{hv.MaHocVien:D4}";
+                    ws.Cell(row, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 3).Value = hv.HoTen;
+                    ws.Cell(row, 4).Value = hv.Email;
+                    ws.Cell(row, 5).Value = hv.SoDienThoai ?? "";
+                    ws.Cell(row, 6).Value = hv.GioiTinh ?? "Khác";
+                    ws.Cell(row, 6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 7).Value = hv.TrinhDoHocVan ?? "";
+                    ws.Cell(row, 8).Value = hv.NgheNghiep ?? "";
+                    ws.Cell(row, 9).Value = hv.TrangThai ? "Đang học" : "Tạm khóa";
+                    ws.Cell(row, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 10).Value = hv.NgayTao.ToString("dd/MM/yyyy");
+                    ws.Cell(row, 10).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                });
+
+            return File(fileBytes, ExcelExportHelper.ExcelContentType, $"DanhSachHocVien_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
     }
 }

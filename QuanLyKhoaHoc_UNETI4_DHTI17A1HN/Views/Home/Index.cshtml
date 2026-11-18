@@ -320,7 +320,7 @@
                 </div>
                 <button type="button" onclick="openVietQRModal('DK05', 'React 19 & Next.js 15 Thực chiến', 3200000)" class="px-3.5 py-2 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer self-start sm:self-auto">
                     <span class="material-symbols-outlined text-[16px]">qr_code_2</span>
-                    <span>Nộp học phí VietQR</span>
+                    <span>Nộp học phí (QR)</span>
                 </button>
             </div>
 
@@ -372,7 +372,7 @@
                                     else
                                     {
                                         <button type="button" onclick="openVietQRModal('DK@(dk.MaDangKy.ToString("D2"))', '@(dk.LopHoc?.TenLop)', @hocPhi)" class="px-3 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold shadow-xs cursor-pointer">
-                                            Thanh toán VietQR
+                                            Thanh toán học phí
                                         </button>
                                     }
                                 </td>
@@ -1749,17 +1749,17 @@
                 <span class="material-symbols-outlined text-[24px]">qr_code_2</span>
             </div>
             <div>
-                <h3 class="text-sm font-bold text-brand-deep">Cổng Nộp Học Phí VietQR UNETI</h3>
-                <p class="text-xs text-outline">Xác nhận gạch nợ tự động trong 60 giây</p>
+                <h3 class="text-sm font-bold text-brand-deep">Thông Tin Thanh Toán Học Phí UNETI</h3>
+                <p class="text-xs text-outline">Quét mã QR chuyển khoản hoặc nộp tại văn phòng giáo vụ</p>
             </div>
         </div>
 
-        <!-- VietQR Box -->
+        <!-- QR Box -->
         <div class="bg-slate-50 p-4 rounded-2xl border border-border-standard text-center space-y-3">
             <div class="w-48 h-48 mx-auto bg-white p-2 rounded-xl border border-border-standard shadow-xs flex items-center justify-center">
-                <img id="vietQrImg" src="https://api.vietqr.io/image/970422-1903686888-qrx68.jpg?amount=3200000&addInfo=DK05%20TRAN%20MINH%20TUAN" alt="VietQR" class="w-full h-full object-contain" />
+                <img id="vietQrImg" src="/images/qr_chuyenkhoan.png" alt="Mã QR Chuyển Khoản" class="w-full h-full object-contain" />
             </div>
-            <p class="text-xs text-outline font-medium">Mở ứng dụng Ngân hàng (MBBank, Vietcombank, Techcombank...) quét mã QR</p>
+            <p class="text-xs text-outline font-medium">Mở ứng dụng Ngân hàng quét mã QR và nhập đúng nội dung chuyển khoản bên dưới</p>
         </div>
 
         <!-- Bank Transfer Details -->
@@ -1886,7 +1886,7 @@
         if (amountDisplay) amountDisplay.textContent = Number(amount).toLocaleString('vi-VN') + ' đ';
         if (noteDisplay) noteDisplay.textContent = transferNote;
         if (qrImg) {
-            qrImg.src = 'https://api.vietqr.io/image/970422-1903686888-qrx68.jpg?amount=' + amount + '&addInfo=' + encodeURIComponent(transferNote);
+            qrImg.src = '/images/qr_chuyenkhoan.png';
         }
 
         if (modal) modal.classList.remove('hidden');

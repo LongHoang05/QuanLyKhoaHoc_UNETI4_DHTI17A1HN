@@ -79,6 +79,10 @@ Nội dung thực hiện: Module 5 - Quản lý Kết quả học tập CRUD chu
         </div>
 
         <div class="flex items-center flex-wrap gap-2.5">
+            <button type="button" onclick="exportKetQuaExcel()" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-emerald-50 hover:border-emerald-300 text-brand-deep font-label-md text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer">
+                <span class="material-symbols-outlined text-[18px] text-emerald-600">table_view</span>
+                <span class="hidden sm:inline">Xuất Excel (.xlsx)</span>
+            </button>
             <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-hover text-surface-white font-label-md text-label-md px-4 py-2 rounded-xl shadow-sm hover:shadow-card transition-all active:scale-95 cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">add_circle</span>
                 <span> Vào điểm mới</span>
@@ -775,27 +779,11 @@ Nội dung thực hiện: Module 5 - Quản lý Kết quả học tập CRUD chu
     }
     bindSelectAll();
 
-    // Client-side CSV Exporter
-    function exportTableToCSV(filename) {
-        let csv = [];
-        const rows = document.querySelectorAll("#crud-table tr");
-        for (let i = 0; i < rows.length; i++) {
-            let row = [], cols = rows[i].querySelectorAll("td, th");
-            for (let j = 1; j < cols.length - 1; j++) {
-                let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
-                data = data.replace(/"/g, '""');
-                row.push('"' + data + '"');
-            }
-            csv.push(row.join(","));
-        }
-        const csvFile = new Blob(["\uFEFF" + csv.join("\n")], { type: "text/csv;charset=utf-8;" });
-        const downloadLink = document.createElement("a");
-        downloadLink.download = filename;
-        downloadLink.href = window.URL.createObjectURL(csvFile);
-        downloadLink.style.display = "none";
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
+    // Xuất Excel bằng ClosedXML
+    function exportKetQuaExcel() {
+        const form = document.getElementById('filter-form');
+        const params = form ? new URLSearchParams(new FormData(form)) : new URLSearchParams(window.location.search);
+        window.location.href = `/KetQuaHocTap/ExportExcel?${params.toString()}`;
     }
 
     // Khởi tạo Bulk Delete cho Kết quả học tập

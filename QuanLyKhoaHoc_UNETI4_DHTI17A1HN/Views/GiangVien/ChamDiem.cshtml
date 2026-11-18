@@ -47,10 +47,10 @@
         </div>
 
         <div class="flex items-center gap-2.5">
-            <button onclick="exportGradeTableToCSV('bang-diem-lop-@(selectedClassId).csv')" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-3.5 py-2.5 rounded-xl transition-all shadow-xs cursor-pointer">
-                <span class="material-symbols-outlined text-[18px] text-primary">file_download</span>
-                <span class="hidden sm:inline">Xuất File Excel</span>
-            </button>
+            <a href="/GiangVien/ExportExcelBangDiem?maLop=@selectedClassId" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-emerald-50 hover:border-emerald-300 text-brand-deep font-label-md text-label-md px-3.5 py-2.5 rounded-xl transition-all shadow-xs cursor-pointer">
+                <span class="material-symbols-outlined text-[18px] text-emerald-600">table_view</span>
+                <span class="hidden sm:inline">Xuất Excel (.xlsx)</span>
+            </a>
             <button onclick="window.print()" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-surface-container-low text-brand-deep font-label-md text-label-md px-3.5 py-2.5 rounded-xl transition-all shadow-xs cursor-pointer">
                 <span class="material-symbols-outlined text-[18px] text-outline">print</span>
                 <span class="hidden sm:inline">In sổ điểm</span>

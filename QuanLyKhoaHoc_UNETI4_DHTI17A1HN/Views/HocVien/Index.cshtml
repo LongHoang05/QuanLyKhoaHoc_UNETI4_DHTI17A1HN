@@ -40,9 +40,9 @@
         </div>
 
         <div class="flex items-center gap-2.5">
-            <button onclick="exportTableToCSV('danh-sach-hoc-vien.csv')" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-slate-50 text-brand-deep font-label-md text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer">
-                <span class="material-symbols-outlined text-[18px] text-primary">file_download</span>
-                <span class="hidden sm:inline">Xuất Excel</span>
+            <button type="button" onclick="exportHocVienExcel()" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-emerald-50 hover:border-emerald-300 text-brand-deep font-label-md text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer">
+                <span class="material-symbols-outlined text-[18px] text-emerald-600">table_view</span>
+                <span class="hidden sm:inline">Xuất Excel (.xlsx)</span>
             </button>
             <button onclick="openDrawer('create')" class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-hover text-surface-white font-label-md text-xs px-4 py-2.5 rounded-xl shadow-sm hover:shadow-card transition-all active:scale-95 cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">person_add</span>
@@ -240,7 +240,7 @@
                                         <button onclick="openEditDrawerFromHv(this, @item.MaHocVien)" class="p-1.5 rounded-lg text-outline hover:text-brand-deep hover:bg-surface-container-low cursor-pointer" title="Sửa hồ sơ">
                                             <span class="material-symbols-outlined text-[18px]">edit</span>
                                         </button>
-                                        <button onclick="toggleStatusHv(this, @item.MaHocVien)" class="p-1.5 rounded-lg @(item.TrangThai ? "text-outline hover:text-rose-600 hover:bg-rose-50" : "text-emerald-600 hover:bg-emerald-50") cursor-pointer" title="@(item.TrangThai ? "Khóa học viên" : "Mở khóa học viên")">
+                                        <button type="button" onclick="toggleStatusHv(this, @item.MaHocVien, '@(item.HoTen?.Replace("'", "\\'") ?? "")', @(item.TrangThai ? "true" : "false"))" class="p-1.5 rounded-lg @(item.TrangThai ? "text-outline hover:text-rose-600 hover:bg-rose-50" : "text-emerald-600 hover:bg-emerald-50") cursor-pointer" title="@(item.TrangThai ? "Khóa học viên" : "Mở khóa học viên")">
                                             <span class="material-symbols-outlined text-[18px]">@(item.TrangThai ? "lock" : "lock_open")</span>
                                         </button>
                                         <button onclick="confirmDeleteHv(@item.MaHocVien, '@(item.HoTen?.Replace("'", "\\'") ?? "")')" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50 cursor-pointer" title="Xóa">
@@ -596,27 +596,43 @@
         document.getElementById('studentDetailsModal').classList.add('hidden');
     }
 
-    function toggleStatusHv(btn, id) {
-        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
-        const formData = new FormData();
-        formData.append('__RequestVerificationToken', token);
-        formData.append('id', id);
+    function toggleStatusHv(btn, id, name, isActive) {
+        const isCurrentlyActive = (isActive === true || isActive === 'true');
+        openGlobalDeleteModal({
+            title: isCurrentlyActive ? 'Khóa hồ sơ học viên?' : 'Mở khóa hồ sơ học viên?',
+            message: isCurrentlyActive
+                ? `Bạn có chắc chắn muốn <strong class="text-amber-700">tạm khóa</strong> học viên <strong class="text-brand-deep">${name || '#' + id}</strong> không?`
+                : `Bạn có chắc chắn muốn <strong class="text-emerald-700">mở khóa</strong> học viên <strong class="text-brand-deep">${name || '#' + id}</strong> không?`,
+            warning: isCurrentlyActive
+                ? 'Học viên tạm khóa sẽ bị hạn chế thao tác đăng ký lớp học mới.'
+                : 'Học viên sẽ hoạt động bình thường trở lại ngay sau khi mở khóa.',
+            submitText: isCurrentlyActive ? 'Tạm khóa học viên' : 'Mở khóa học viên',
+            submitIcon: isCurrentlyActive ? 'lock' : 'lock_open',
+            icon: isCurrentlyActive ? 'lock' : 'lock_open',
+            theme: isCurrentlyActive ? 'warning' : 'primary',
+            onConfirm: function() {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                const formData = new FormData();
+                formData.append('__RequestVerificationToken', token);
+                formData.append('id', id);
 
-        fetch('/HocVien/ToggleTrangThai', {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.success) {
-                showToast(res.message || 'Cập nhật trạng thái thành công!', 'success');
-                setTimeout(() => location.reload(), 600);
-            } else {
-                showToast(res.message, 'error');
+                fetch('/HocVien/ToggleTrangThai', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.success) {
+                        showToast(res.message || 'Cập nhật trạng thái thành công!', 'success');
+                        setTimeout(() => location.reload(), 600);
+                    } else {
+                        showToast(res.message, 'error');
+                    }
+                })
+                .catch(() => showToast('Không thể đổi trạng thái học viên.', 'error'));
             }
-        })
-        .catch(() => showToast('Không thể đổi trạng thái học viên.', 'error'));
+        });
     }
 
     function confirmDeleteHv(id, name) {
@@ -705,29 +721,19 @@
         if (e.state && e.state.url) loadHocVienPage(e.state.url, false);
     });
 
-    function exportTableToCSV(filename) {
-        const rows = document.querySelectorAll('#hvTable tr');
-        let csv = [];
-        rows.forEach(row => {
-            if (row.style.display === 'none') return;
-            const cols = row.querySelectorAll('th, td');
-            let rowData = [];
-            cols.forEach((col, idx) => {
-                if (idx === cols.length - 1) return; // skip actions col
-                let text = col.innerText.replace(/(\r\n|\n|\r)/gm, ' ').replace(/\s+/g, ' ').trim();
-                rowData.push('"' + text.replace(/"/g, '""') + '"');
-            });
-            csv.push(rowData.join(','));
-        });
+    function exportHocVienExcel() {
+        const search = document.getElementById('hvSearchInput')?.value.trim() || '';
+        const trangThai = document.getElementById('filterHvStatus')?.value || '';
+        const trinhDo = document.getElementById('filterHvLevel')?.value || '';
+        const sortBy = document.getElementById('filterHvSortBy')?.value || '';
 
-        const csvFile = new Blob(["\uFEFF" + csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
-        const downloadLink = document.createElement('a');
-        downloadLink.download = filename;
-        downloadLink.href = window.URL.createObjectURL(csvFile);
-        downloadLink.style.display = 'none';
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
+        const params = new URLSearchParams();
+        if (search) params.set('search', search);
+        if (trangThai) params.set('trangThai', trangThai);
+        if (trinhDo) params.set('trinhDo', trinhDo);
+        if (sortBy) params.set('sortBy', sortBy);
+
+        window.location.href = `/HocVien/ExportExcel?${params.toString()}`;
     }
 
     // Tự động mở drawer nếu URL có ?create=true

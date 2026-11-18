@@ -4,9 +4,11 @@
 // Phụ trách: Module 2 - Quản lý lớp học, Tìm kiếm, Lọc, Sắp xếp và Phân trang
 // ========================================================
 
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Filters;
+using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Helpers;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Models;
 using QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories;
 
@@ -431,6 +433,68 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         {
             var dsLop = await _lopHocRepo.SearchAjaxAsync(keyword, maChuongTrinh);
             return PartialView("_DanhSachLopPartial", dsLop);
+        }
+
+        // ========================================================
+        // XUẤT FILE EXCEL BẰNG CLOSEDXML
+        // ========================================================
+        [HttpGet]
+        public async Task<IActionResult> ExportExcel(
+            string search = "",
+            int? maChuongTrinh = null,
+            string trinhDo = "",
+            string trangThai = "",
+            decimal? hocPhiMin = null,
+            decimal? hocPhiMax = null,
+            string hanDangKyStatus = "",
+            string choTrongStatus = "",
+            string sortBy = "")
+        {
+            var (items, _) = await _lopHocRepo.GetPagedAsync(
+                search, maChuongTrinh, trinhDo, trangThai, null,
+                hocPhiMin, hocPhiMax, hanDangKyStatus, choTrongStatus, sortBy, 1, 10000);
+
+            var lopIds = items.Select(l => l.MaLopHoc).ToList();
+            var siSoMap = await _dangKyHocRepo.GetSiSoDaDangKyMapAsync(lopIds);
+
+            string[] headers = { "STT", "Mã lớp", "Tên lớp học", "Chương trình đào tạo", "Giảng viên", "Trình độ", "Sĩ số", "Số buổi", "Học phí (VNĐ)", "Hạn ĐK", "Khai giảng", "Phòng học", "Trạng thái" };
+
+            var fileBytes = ExcelExportHelper.ExportToExcel(
+                "DanhSachLopHoc",
+                "DANH SÁCH LỚP HỌC PHẦN - UNETI",
+                $"Tổng số lớp: {items.Count()}",
+                headers,
+                items,
+                (ws, row, stt, lop) =>
+                {
+                    int daDk = siSoMap.TryGetValue(lop.MaLopHoc, out var cnt) ? cnt : 0;
+                    ws.Cell(row, 1).Value = stt;
+                    ws.Cell(row, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 2).Value = $"#LH{lop.MaLopHoc:D3}";
+                    ws.Cell(row, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 3).Value = lop.TenLop;
+                    ws.Cell(row, 4).Value = lop.ChuongTrinhDaoTao?.TenChuongTrinh ?? "";
+                    ws.Cell(row, 5).Value = lop.TenGiangVien ?? "Chưa phân công";
+                    ws.Cell(row, 6).Value = lop.TrinhDoDauVao ?? "";
+                    ws.Cell(row, 7).Value = $"{daDk}/{lop.SiSoToiDa}";
+                    ws.Cell(row, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 8).Value = lop.SoBuoiHoc;
+                    ws.Cell(row, 8).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                    var cHocPhi = ws.Cell(row, 9);
+                    cHocPhi.Value = lop.HocPhi;
+                    cHocPhi.Style.NumberFormat.Format = "#,##0";
+
+                    ws.Cell(row, 10).Value = lop.HanDangKy.ToString("dd/MM/yyyy");
+                    ws.Cell(row, 10).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 11).Value = lop.NgayKhaiGiang.ToString("dd/MM/yyyy");
+                    ws.Cell(row, 11).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws.Cell(row, 12).Value = lop.PhongHoc ?? "";
+                    ws.Cell(row, 13).Value = lop.TrangThai;
+                    ws.Cell(row, 13).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                });
+
+            return File(fileBytes, ExcelExportHelper.ExcelContentType, $"DanhSachLopHoc_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
     }
 }

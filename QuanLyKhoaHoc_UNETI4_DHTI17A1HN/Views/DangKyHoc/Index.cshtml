@@ -33,9 +33,9 @@
         </div>
 
         <div class="flex items-center gap-2.5">
-            <button onclick="exportTableToCSV('danh-sach-dang-ky.csv')" class="hidden">
-                <span class="material-symbols-outlined text-[18px] text-primary">file_download</span>
-                <span class="hidden sm:inline">Xuất Excel</span>
+            <button type="button" onclick="exportDangKyExcel()" class="inline-flex items-center gap-1.5 bg-surface-white border border-border-standard hover:bg-emerald-50 hover:border-emerald-300 text-brand-deep font-label-md text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer">
+                <span class="material-symbols-outlined text-[18px] text-emerald-600">table_view</span>
+                <span class="hidden sm:inline">Xuất Excel (.xlsx)</span>
             </button>
         </div>
     </section>
@@ -265,7 +265,7 @@
                 <label class="block text-xs font-bold text-brand-deep uppercase mb-1.5">Phương thức thanh toán <span class="text-rose-500">*</span></label>
                 <div class="grid grid-cols-2 gap-2 text-xs">
                     <label class="flex items-center gap-2 p-2.5 rounded-xl border border-border-standard bg-surface-container-lowest hover:bg-slate-50 cursor-pointer">
-                        <input type="radio" name="phuongThuc" id="thuphi-pt-ck" value="Chuyển khoản VietQR" checked class="text-primary focus:ring-primary" />
+                        <input type="radio" name="phuongThuc" id="thuphi-pt-ck" value="Chuyển khoản ngân hàng" checked class="text-primary focus:ring-primary" />
                         <span class="font-medium text-slate-800">Chuyển khoản QR</span>
                     </label>
                     <label class="flex items-center gap-2 p-2.5 rounded-xl border border-border-standard bg-surface-container-lowest hover:bg-slate-50 cursor-pointer">
@@ -489,10 +489,10 @@
 
                     if (d.trangThai === 'Chờ xác nhận học phí') {
                         if (titleEl) titleEl.innerText = 'Xác Nhận Đã Nộp Học Phí';
-                        if (subEl) subEl.innerText = 'Học viên đã nộp học phí qua chuyển khoản VietQR • Đối soát và xác nhận';
+                        if (subEl) subEl.innerText = 'Học viên đã xác nhận chuyển khoản • Giáo vụ đối soát và xác nhận';
                         if (btnTextEl) btnTextEl.innerText = 'Xác nhận đã nộp học phí';
                         if (ptCk) ptCk.checked = true;
-                        document.getElementById('thuphi-GhiChu').value = d.ghiChu ? d.ghiChu : 'Đã đối soát chuyển khoản VietQR';
+                        document.getElementById('thuphi-GhiChu').value = d.ghiChu ? d.ghiChu : 'Đã đối soát chuyển khoản ngân hàng';
                     } else {
                         if (titleEl) titleEl.innerText = 'Xác Nhận Thu Học Phí';
                         if (subEl) subEl.innerText = 'Thu đủ 100% học phí để kích hoạt vào lớp';
@@ -585,24 +585,11 @@
         }
     }
 
-    // CSV Export
-    function exportTableToCSV(filename) {
-        const rows = document.querySelectorAll("#dangky-table tr");
-        let csv = [];
-        for (let i = 0; i < rows.length; i++) {
-            let row = [], cols = rows[i].querySelectorAll("td, th");
-            for (let j = 0; j < cols.length - 1; j++) {
-                row.push('"' + cols[j].innerText.replace(/"/g, '""').trim() + '"');
-            }
-            csv.push(row.join(","));
-        }
-        const csvFile = new Blob(["\uFEFF" + csv.join("\n")], { type: "text/csv;charset=utf-8;" });
-        const downloadLink = document.createElement("a");
-        downloadLink.download = filename;
-        downloadLink.href = window.URL.createObjectURL(csvFile);
-        downloadLink.style.display = "none";
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
+    // Xuất file Excel bằng ClosedXML
+    function exportDangKyExcel() {
+        const form = document.getElementById('filter-form');
+        const params = form ? new URLSearchParams(new FormData(form)) : new URLSearchParams(window.location.search);
+        window.location.href = `/DangKyHoc/ExportExcel?${params.toString()}`;
     }
 
     // Khởi tạo Bulk Delete cho Đăng ký học

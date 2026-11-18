@@ -3,11 +3,11 @@
     Họ và tên: Nguyễn Tùng Dương - MSV: 23103100003
 *@
 
-<!-- GLOBAL DELETE CONFIRMATION MODAL -->
-<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs hidden transition-all duration-300" id="global-delete-modal">
-    <div class="bg-white max-w-md w-full rounded-2xl shadow-elevated border border-slate-200/80 p-6 space-y-4" onclick="event.stopPropagation()">
+<!-- GLOBAL DELETE / CONFIRMATION MODAL -->
+<div class="fixed inset-0 z-[110] flex items-center justify-center p-4 backdrop-blur-xs hidden transition-all duration-300" id="global-delete-modal" style="background-color: rgba(15, 23, 42, 0.55);">
+    <div class="bg-white max-w-md w-full rounded-2xl shadow-2xl border border-slate-200/90 p-6 space-y-4" style="background-color: #ffffff !important;" onclick="event.stopPropagation()">
         <!-- Icon Container -->
-        <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center">
+        <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center" id="global-delete-icon-box">
             <span class="material-symbols-outlined text-[28px]" id="global-delete-icon">delete_forever</span>
         </div>
 
@@ -22,8 +22,8 @@
         </div>
 
         <!-- Warning Alert Box -->
-        <div class="bg-rose-50 border border-rose-200/80 rounded-xl p-3 flex items-start gap-2.5">
-            <span class="material-symbols-outlined text-rose-600 text-[18px] flex-shrink-0 mt-0.5">warning</span>
+        <div class="bg-rose-50 border border-rose-200/80 rounded-xl p-3 flex items-start gap-2.5" id="global-delete-warning-box">
+            <span class="material-symbols-outlined text-rose-600 text-[18px] flex-shrink-0 mt-0.5" id="global-delete-warning-icon">warning</span>
             <span class="text-xs text-rose-700 font-medium" id="global-delete-warning">
                 Hành động này mang tính vĩnh viễn và không thể hoàn tác sau khi xác nhận.
             </span>
@@ -35,11 +35,11 @@
             <input type="hidden" name="id" id="global-delete-id" value="0"/>
 
             <div class="flex items-center justify-end gap-3 pt-2">
-                <button type="button" class="border border-border-standard text-slate-700 px-4 py-2 rounded-xl text-sm hover:bg-slate-50 transition-colors cursor-pointer active:scale-95" onclick="closeGlobalDeleteModal()">
+                <button type="button" class="border border-border-standard text-slate-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors cursor-pointer active:scale-95" onclick="closeGlobalDeleteModal()">
                     Hủy bỏ
                 </button>
-                <button type="submit" id="global-delete-submit-btn" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-sm shadow-xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-95">
-                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                <button type="submit" id="global-delete-submit-btn" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-95">
+                    <span class="material-symbols-outlined text-[18px]" id="global-delete-submit-icon">delete</span>
                     <span id="global-delete-btn-text">Xóa vĩnh viễn</span>
                 </button>
             </div>
@@ -60,10 +60,14 @@
         const idInput = document.getElementById('global-delete-id');
         const titleEl = document.getElementById('global-delete-title');
         const msgEl = document.getElementById('global-delete-msg');
+        const warningBox = document.getElementById('global-delete-warning-box');
+        const warningIcon = document.getElementById('global-delete-warning-icon');
         const warningEl = document.getElementById('global-delete-warning');
         const btnTextEl = document.getElementById('global-delete-btn-text');
+        const iconBox = document.getElementById('global-delete-icon-box');
         const iconEl = document.getElementById('global-delete-icon');
         const submitBtn = document.getElementById('global-delete-submit-btn');
+        const submitIconEl = document.getElementById('global-delete-submit-icon');
 
         // Reset custom onclick handlers from previous modal invocations
         if (submitBtn) {
@@ -73,8 +77,10 @@
 
         const actionUrl = options.action || options.confirmUrl || '';
         const targetId = options.id !== undefined ? options.id : options.itemId;
+        const theme = options.theme || 'danger'; // 'danger' | 'warning' | 'primary'
 
         form.action = actionUrl;
+        idInput.name = options.paramName || 'id';
         idInput.value = targetId !== undefined ? targetId : 0;
         titleEl.innerText = options.title || 'Xác nhận xóa?';
 
@@ -86,11 +92,54 @@
             msgEl.innerText = 'Bạn có chắc chắn muốn xóa bản ghi này?';
         }
 
-        warningEl.innerText = options.warning || 'Hành động này mang tính vĩnh viễn và không thể hoàn tác sau khi xác nhận.';
+        if (options.warning === false) {
+            warningBox.classList.add('hidden');
+        } else {
+            warningBox.classList.remove('hidden');
+            warningEl.innerText = options.warning || 'Hành động này mang tính vĩnh viễn và không thể hoàn tác sau khi xác nhận.';
+        }
+
+        // Apply theme colors
+        if (theme === 'warning') {
+            iconBox.className = 'w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center';
+            warningBox.className = 'bg-amber-50 border border-amber-200/80 rounded-xl p-3 flex items-start gap-2.5' + (options.warning === false ? ' hidden' : '');
+            warningIcon.className = 'material-symbols-outlined text-amber-600 text-[18px] flex-shrink-0 mt-0.5';
+            warningEl.className = 'text-xs text-amber-800 font-medium';
+            submitBtn.className = 'bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-95';
+        } else if (theme === 'primary') {
+            iconBox.className = 'w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center';
+            warningBox.className = 'bg-blue-50 border border-blue-200/80 rounded-xl p-3 flex items-start gap-2.5' + (options.warning === false ? ' hidden' : '');
+            warningIcon.className = 'material-symbols-outlined text-blue-600 text-[18px] flex-shrink-0 mt-0.5';
+            warningEl.className = 'text-xs text-blue-800 font-medium';
+            submitBtn.className = 'bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-95';
+        } else {
+            iconBox.className = 'w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center';
+            warningBox.className = 'bg-rose-50 border border-rose-200/80 rounded-xl p-3 flex items-start gap-2.5' + (options.warning === false ? ' hidden' : '');
+            warningIcon.className = 'material-symbols-outlined text-rose-600 text-[18px] flex-shrink-0 mt-0.5';
+            warningEl.className = 'text-xs text-rose-700 font-medium';
+            submitBtn.className = 'bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-95';
+        }
+
         btnTextEl.innerText = options.submitText || 'Xóa vĩnh viễn';
         iconEl.innerText = options.icon || 'delete_forever';
+        submitIconEl.innerText = options.submitIcon || (theme === 'warning' ? 'check_circle' : (theme === 'primary' ? 'check_circle' : 'delete'));
 
         modal.classList.remove('hidden');
+    };
+
+    window.confirmLogout = function(logoutUrl = '/TaiKhoan/Logout') {
+        openGlobalDeleteModal({
+            title: 'Xác nhận thoát / đăng xuất?',
+            message: 'Bạn có chắc chắn muốn đăng xuất khỏi phiên làm việc hiện tại không?',
+            warning: 'Bạn sẽ cần đăng nhập lại để tiếp tục sử dụng các chức năng quản lý.',
+            submitText: 'Đăng xuất ngay',
+            submitIcon: 'logout',
+            icon: 'logout',
+            theme: 'warning',
+            onConfirm: function() {
+                window.location.href = logoutUrl;
+            }
+        });
     };
 
     window.closeGlobalDeleteModal = function() {
