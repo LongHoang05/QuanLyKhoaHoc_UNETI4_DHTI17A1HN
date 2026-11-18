@@ -72,12 +72,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
                 return (false, "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0 (Ví dụ: 0912345678).");
             }
 
-            // 2.1. Quy tắc nghiệp vụ: Số điện thoại phải gồm đúng 10 chữ số (bắt đầu bằng số 0)
-            if (string.IsNullOrWhiteSpace(hocVien.SoDienThoai) || !System.Text.RegularExpressions.Regex.IsMatch(hocVien.SoDienThoai.Trim(), @"^0\d{9}$"))
-            {
-                return (false, "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0 (Ví dụ: 0912345678).");
-            }
-
             // 3. Chuẩn hóa dữ liệu đầu vào
             hocVien.HoTen = hocVien.HoTen.Trim();
             hocVien.Email = hocVien.Email.Trim().ToLower();
@@ -251,6 +245,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
                         MaTaiKhoan = tk.MaTaiKhoan,
                         HoTen = model.HoTen.Trim(),
                         Email = model.Email.Trim().ToLower(),
+                        SoDienThoai = "0900000000",
                         NgaySinh = new DateTime(2004, 1, 1),
                         GioiTinh = "Nam",
                         DiaChi = "Hà Nội",

@@ -51,7 +51,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<List<GiangVien>> SearchAsync(string? search, string? hocVi)
+        private IQueryable<GiangVien> BuildSearchQuery(string? search, string? hocVi)
         {
             var query = _context.GiangViens
                 .Include(g => g.TaiKhoan)
@@ -79,7 +79,25 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                     query = query.Where(g => g.HocVi == hv);
             }
 
-            return await query.OrderByDescending(g => g.MaGiangVien).ToListAsync();
+            return query.OrderByDescending(g => g.MaGiangVien);
+        }
+
+        public async Task<List<GiangVien>> SearchAsync(string? search, string? hocVi)
+        {
+            return await BuildSearchQuery(search, hocVi).ToListAsync();
+        }
+
+        public async Task<(List<GiangVien> Items, int TotalCount)> GetPagedAsync(string? search, string? hocVi, int pageIndex, int pageSize)
+        {
+            var query = BuildSearchQuery(search, hocVi);
+            int totalCount = await query.CountAsync();
+            var items = await query
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return (items, totalCount);
         }
 
         public async Task AddAsync(GiangVien gv)
@@ -167,6 +185,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 .Include(d => d.KetQuaHocTap)
                 .Where(d => d.MaLopHoc == maLop &&
                             (d.TrangThai == "Đã duyệt" ||
+                             d.TrangThai == "Chờ xác nhận học phí" ||
                              d.TrangThai == "Đã đóng học phí" ||
                              d.TrangThai == "Đang học" ||
                              d.TrangThai == "Hoàn thành" ||

@@ -25,9 +25,10 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
 
         // 5. Nghiệp vụ Quản trị Giảng viên (Admin & Giáo vụ)
         Task<List<GiangVien>> GetDanhSachGiangVienAsync(string? search, string? hocVi);
+        Task<(List<GiangVien> Items, int TotalCount)> GetPagedGiangVienAsync(string? search, string? hocVi, int pageIndex, int pageSize);
         Task<GiangVien?> GetGiangVienByIdAsync(int id);
         Task<(bool Success, string Message)> TaoGiangVienAsync(GiangVien gv, string? tenDangNhap, string? matKhau);
-        Task<(bool Success, string Message)> CapNhatGiangVienAsync(int maGiangVien, GiangVien gv);
+        Task<(bool Success, string Message)> CapNhatGiangVienAsync(int maGiangVien, GiangVien gv, string? tenDangNhap = null, string? matKhau = null);
         Task<(bool Success, string Message)> XoaGiangVienAsync(int id);
     }
 }

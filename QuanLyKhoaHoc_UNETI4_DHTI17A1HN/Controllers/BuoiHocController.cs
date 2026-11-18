@@ -115,8 +115,10 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             };
             ViewBag.DanhSachPhong = phongChuanUneti;
 
-            // Liên kết trực tiếp danh sách Giảng viên từ IGiangVienRepository (chuẩn hóa không trùng học vị)
-            var allGiangViens = await _giangVienRepo.GetAllAsync();
+            // Liên kết trực tiếp danh sách Giảng viên từ IGiangVienRepository (chỉ lấy giảng viên đang công tác và đã cấp tài khoản)
+            var allGiangViens = (await _giangVienRepo.GetAllAsync())
+                .Where(g => g.TrangThai && g.MaTaiKhoan != null && (g.TaiKhoan == null || g.TaiKhoan.TrangThai))
+                .ToList();
             ViewBag.GiangVienList = allGiangViens;
 
             var gvEntityNames = allGiangViens
@@ -190,14 +192,23 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 ModelState.AddModelError("", conflictMsg ?? "Lịch bị trùng! Kiểm tra lại Giảng viên, Phòng học hoặc Lớp đã có lịch trong khung giờ này.");
             }
 
+            GiangVien? gvMatchCreate = null;
+            if (!string.IsNullOrWhiteSpace(buoiHoc.GiangVien))
+            {
+                var gvs = await _giangVienRepo.GetAllAsync();
+                gvMatchCreate = gvs.FirstOrDefault(g => g.HoTen == buoiHoc.GiangVien || buoiHoc.GiangVien.Contains(g.HoTen) || g.HoTen.Contains(buoiHoc.GiangVien));
+                if (gvMatchCreate != null && (gvMatchCreate.MaTaiKhoan == null || !gvMatchCreate.TrangThai || (gvMatchCreate.TaiKhoan != null && !gvMatchCreate.TaiKhoan.TrangThai)))
+                {
+                    ModelState.AddModelError("", $"Giảng viên '{gvMatchCreate.HoTen}' chưa được cấp tài khoản hoặc đang tạm nghỉ, không thể xếp lịch giảng dạy!");
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 if (string.IsNullOrEmpty(buoiHoc.TrangThai)) buoiHoc.TrangThai = "Đã lên lịch";
                 if (!string.IsNullOrWhiteSpace(buoiHoc.GiangVien))
                 {
-                    var gvs = await _giangVienRepo.GetAllAsync();
-                    var gvMatch = gvs.FirstOrDefault(g => g.HoTen == buoiHoc.GiangVien || buoiHoc.GiangVien.Contains(g.HoTen) || g.HoTen.Contains(buoiHoc.GiangVien));
-                    buoiHoc.MaGiangVien = gvMatch?.MaGiangVien ?? (lopHoc?.TenGiangVien == buoiHoc.GiangVien ? lopHoc.MaGiangVien : null);
+                    buoiHoc.MaGiangVien = gvMatchCreate?.MaGiangVien ?? (lopHoc?.TenGiangVien == buoiHoc.GiangVien ? lopHoc.MaGiangVien : null);
                 }
                 await _buoiHocRepo.AddAsync(buoiHoc);
 
@@ -257,19 +268,25 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            existing.MaLopHoc = buoiHoc.MaLopHoc;
-            existing.PhongHoc = buoiHoc.PhongHoc;
-            existing.GiangVien = buoiHoc.GiangVien;
+            int? matchedGvId = null;
             if (!string.IsNullOrWhiteSpace(buoiHoc.GiangVien))
             {
                 var gvs = await _giangVienRepo.GetAllAsync();
                 var gvMatch = gvs.FirstOrDefault(g => g.HoTen == buoiHoc.GiangVien || buoiHoc.GiangVien.Contains(g.HoTen) || g.HoTen.Contains(buoiHoc.GiangVien));
-                existing.MaGiangVien = gvMatch?.MaGiangVien;
+                if (gvMatch != null && (gvMatch.MaTaiKhoan == null || !gvMatch.TrangThai || (gvMatch.TaiKhoan != null && !gvMatch.TaiKhoan.TrangThai)))
+                {
+                    string gvErr = $"Giảng viên '{gvMatch.HoTen}' chưa được cấp tài khoản hoặc đang tạm nghỉ, không thể xếp lịch giảng dạy!";
+                    if (isAjax) return Json(new { success = false, message = gvErr });
+                    TempData["Error"] = gvErr;
+                    return RedirectToAction(nameof(Index));
+                }
+                matchedGvId = gvMatch?.MaGiangVien;
             }
-            else
-            {
-                existing.MaGiangVien = null;
-            }
+
+            existing.MaLopHoc = buoiHoc.MaLopHoc;
+            existing.PhongHoc = buoiHoc.PhongHoc;
+            existing.GiangVien = buoiHoc.GiangVien;
+            existing.MaGiangVien = matchedGvId;
             existing.ThoiGianBatDau = buoiHoc.ThoiGianBatDau;
             existing.ThoiGianKetThuc = buoiHoc.ThoiGianKetThuc;
             existing.NoiDung = buoiHoc.NoiDung;

@@ -73,7 +73,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             var upcomingSessions = await _giangVienService.GetUpcomingSessionsAsync(gv, 6);
 
             // Tổng học viên đang dạy
-            int totalStudents = myClasses.Sum(l => l.DangKyHocs.Count(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành"));
+            int totalStudents = myClasses.Sum(l => l.DangKyHocs.Count(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Chờ xác nhận học phí" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành"));
 
             // Số lượt học viên đã có điểm tổng kết
             int gradedCount = await _giangVienService.GetGradedCountAsync(myClassIds);
@@ -142,7 +142,6 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 TempData["Error"] = "Từ chối truy cập: Bạn không phụ trách lớp học này!";
                 return RedirectToAction(nameof(Index));
             }
-
             int selectedClassId = maLop ?? myClasses.FirstOrDefault()?.MaLopHoc ?? 0;
             var currentClass = myClasses.FirstOrDefault(l => l.MaLopHoc == selectedClassId);
 
@@ -220,16 +219,24 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            var list = await _giangVienService.GetDanhSachGiangVienAsync(search, hocVi);
-
             int pageSize = 6;
-            int totalItems = list.Count;
+            if (page < 1) page = 1;
+
+            var (pagedList, totalItems) = await _giangVienService.GetPagedGiangVienAsync(search, hocVi, page, pageSize);
+
             int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
             if (totalPages < 1) totalPages = 1;
-            if (page < 1) page = 1;
-            if (page > totalPages) page = totalPages;
+            if (page > totalPages)
+            {
+                page = totalPages;
+                (pagedList, totalItems) = await _giangVienService.GetPagedGiangVienAsync(search, hocVi, page, pageSize);
+            }
 
-            var pagedList = list.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var allTeachers = await _giangVienService.GetDanhSachGiangVienAsync(null, null);
+
+            ViewBag.TotalTeachers = allTeachers.Count;
+            ViewBag.ActiveTeachers = allTeachers.Count(g => g.TrangThai);
+            ViewBag.TotalAssignedClasses = allTeachers.Sum(g => g.LopHocs?.Count ?? 0);
 
             ViewBag.Search = search;
             ViewBag.HocVi = hocVi;
@@ -280,6 +287,10 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         public async Task<IActionResult> CreatePost(GiangVien gv, string? tenDangNhap, string? matKhau)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            if (Request.HasFormContentType)
+            {
+                gv.TrangThai = Request.Form["TrangThai"].Contains("true") || Request.Form["TrangThai"].Contains("on");
+            }
 
             var (success, message) = await _giangVienService.TaoGiangVienAsync(gv, tenDangNhap, matKhau);
 
@@ -294,11 +305,15 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [SessionAuthorize("Admin", "GiaoVu")]
-        public async Task<IActionResult> EditPost(int maGiangVien, GiangVien gv)
+        public async Task<IActionResult> EditPost(int maGiangVien, GiangVien gv, string? tenDangNhap, string? matKhau)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            if (Request.HasFormContentType)
+            {
+                gv.TrangThai = Request.Form["TrangThai"].Contains("true") || Request.Form["TrangThai"].Contains("on");
+            }
 
-            var (success, message) = await _giangVienService.CapNhatGiangVienAsync(maGiangVien, gv);
+            var (success, message) = await _giangVienService.CapNhatGiangVienAsync(maGiangVien, gv, tenDangNhap, matKhau);
 
             if (isAjax) return Json(new { success, message });
 

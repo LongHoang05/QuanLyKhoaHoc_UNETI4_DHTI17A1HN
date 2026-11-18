@@ -111,6 +111,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
                 {
                     HoTen = taiKhoan.HoTen,
                     Email = taiKhoan.Email,
+                    SoDienThoai = "0900000000",
+                    NgaySinh = new DateTime(2004, 1, 1),
+                    GioiTinh = "Nam",
+                    DiaChi = "Hà Nội",
+                    TrinhDoHocVan = "Đại học",
+                    NgheNghiep = "Học viên",
                     TrangThai = true,
                     NgayTao = DateTime.Now
                 };

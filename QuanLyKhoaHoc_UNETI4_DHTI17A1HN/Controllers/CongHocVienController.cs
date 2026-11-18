@@ -323,6 +323,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             var dk = await _dangKyHocRepo.GetByIdWithDetailsAsync(maDangKy);
             if (dk != null && dk.MaHocVien == student.MaHocVien)
             {
+                if (dk.TrangThai != "Đã duyệt" && dk.TrangThai != "Chờ xác nhận học phí")
+                {
+                    TempData["Error"] = $"Đơn đăng ký đang ở trạng thái '{dk.TrangThai}', không thể xác nhận chuyển khoản học phí.";
+                    return RedirectToAction(nameof(TienTrinh), new { tab = "dangky" });
+                }
+
                 // Khi học viên bấm đã chuyển khoản:
                 // KHÔNG vào thẳng "Đã đóng học phí" mà chuyển sang "Chờ xác nhận học phí"
                 // để Giáo vụ đối soát và bấm xác nhận thu phí
@@ -464,9 +470,17 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return Json(new { success = false, message = "Họ và tên học viên không được để trống." });
             }
 
-            if (model.NgaySinh.HasValue && model.NgaySinh.Value.Date > DateTime.Today)
+            if (model.NgaySinh.HasValue)
             {
-                return Json(new { success = false, message = "Ngày sinh không được lớn hơn ngày hiện tại." });
+                if (model.NgaySinh.Value.Date > DateTime.Today)
+                {
+                    return Json(new { success = false, message = "Ngày sinh không được lớn hơn ngày hiện tại." });
+                }
+
+                if (model.NgaySinh.Value.Date > DateTime.Today.AddYears(-6))
+                {
+                    return Json(new { success = false, message = "Học viên phải từ 6 tuổi trở lên." });
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(model.SoDienThoai) && !System.Text.RegularExpressions.Regex.IsMatch(model.SoDienThoai.Trim(), @"^0\d{9}$"))

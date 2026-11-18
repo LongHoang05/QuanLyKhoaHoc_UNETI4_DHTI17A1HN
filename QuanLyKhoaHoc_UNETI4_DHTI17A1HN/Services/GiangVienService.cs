@@ -102,9 +102,59 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
             return await _giangVienRepo.SearchAsync(search, hocVi);
         }
 
+        public async Task<(List<GiangVien> Items, int TotalCount)> GetPagedGiangVienAsync(string? search, string? hocVi, int pageIndex, int pageSize)
+        {
+            if (pageIndex < 1) pageIndex = 1;
+            if (pageSize < 1) pageSize = 6;
+            return await _giangVienRepo.GetPagedAsync(search, hocVi, pageIndex, pageSize);
+        }
+
         public async Task<GiangVien?> GetGiangVienByIdAsync(int id)
         {
             return await _giangVienRepo.GetByIdAsync(id);
+        }
+
+        private async Task<(bool Success, string? Error, TaiKhoan? Account)> CreateLecturerAccountAsync(GiangVien gv, string? tenDangNhap, string? matKhau)
+        {
+            string username;
+            if (!string.IsNullOrWhiteSpace(tenDangNhap))
+            {
+                username = tenDangNhap.Trim();
+                if (await _giangVienRepo.ExistsUsernameAsync(username))
+                {
+                    return (false, $"Tên đăng nhập '{username}' đã tồn tại trong hệ thống.", null);
+                }
+            }
+            else
+            {
+                string emailPrefix = gv.Email.Trim().Split('@')[0].ToLower();
+                string baseUsername = new string(emailPrefix.Where(c => char.IsLetterOrDigit(c) || c == '.' || c == '_').ToArray());
+                if (string.IsNullOrWhiteSpace(baseUsername))
+                {
+                    baseUsername = "giangvien";
+                }
+                username = baseUsername;
+                int suffix = 1;
+                while (await _giangVienRepo.ExistsUsernameAsync(username))
+                {
+                    username = $"{baseUsername}{suffix++}";
+                }
+            }
+
+            var rawPass = string.IsNullOrWhiteSpace(matKhau) ? "123456" : matKhau.Trim();
+            var tk = new TaiKhoan
+            {
+                TenDangNhap = username,
+                MatKhau = SecurityHelper.HashPassword(rawPass),
+                HoTen = gv.HoTen.Trim(),
+                Email = gv.Email.Trim(),
+                VaiTro = "GiangVien",
+                TrangThai = gv.TrangThai,
+                NgayTao = DateTime.Now
+            };
+
+            await _giangVienRepo.AddTaiKhoanAsync(tk);
+            return (true, null, tk);
         }
 
         public async Task<(bool Success, string Message)> TaoGiangVienAsync(GiangVien gv, string? tenDangNhap, string? matKhau)
@@ -119,34 +169,18 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
                 return (false, $"Email '{gv.Email}' đã được đăng ký bởi giảng viên khác.");
             }
 
-            if (!string.IsNullOrWhiteSpace(tenDangNhap))
+            var (accOk, accErr, tk) = await CreateLecturerAccountAsync(gv, tenDangNhap, matKhau);
+            if (!accOk || tk == null)
             {
-                if (await _giangVienRepo.ExistsUsernameAsync(tenDangNhap.Trim()))
-                {
-                    return (false, $"Tên đăng nhập '{tenDangNhap}' đã tồn tại trong hệ thống.");
-                }
-
-                var rawPass = string.IsNullOrWhiteSpace(matKhau) ? "123456" : matKhau.Trim();
-                var tk = new TaiKhoan
-                {
-                    TenDangNhap = tenDangNhap.Trim(),
-                    MatKhau = SecurityHelper.HashPassword(rawPass),
-                    HoTen = gv.HoTen.Trim(),
-                    Email = gv.Email.Trim(),
-                    VaiTro = "GiangVien",
-                    TrangThai = true,
-                    NgayTao = DateTime.Now
-                };
-
-                await _giangVienRepo.AddTaiKhoanAsync(tk);
-                gv.MaTaiKhoan = tk.MaTaiKhoan;
+                return (false, accErr ?? "Không thể khởi tạo tài khoản cho giảng viên.");
             }
+            gv.MaTaiKhoan = tk.MaTaiKhoan;
 
             await _giangVienRepo.AddAsync(gv);
-            return (true, $"Thêm mới giảng viên '{gv.HoTen}' thành công!");
+            return (true, $"Thêm mới giảng viên '{gv.HoTen}' (tài khoản: {tk.TenDangNhap}) thành công!");
         }
 
-        public async Task<(bool Success, string Message)> CapNhatGiangVienAsync(int maGiangVien, GiangVien gv)
+        public async Task<(bool Success, string Message)> CapNhatGiangVienAsync(int maGiangVien, GiangVien gv, string? tenDangNhap = null, string? matKhau = null)
         {
             var existing = await _giangVienRepo.GetByIdAsync(maGiangVien);
             if (existing == null)
@@ -172,6 +206,15 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
                 existing.TaiKhoan.HoTen = existing.HoTen;
                 existing.TaiKhoan.Email = existing.Email;
                 existing.TaiKhoan.TrangThai = existing.TrangThai;
+            }
+            else if (existing.MaTaiKhoan == null)
+            {
+                var (accOk, accErr, tk) = await CreateLecturerAccountAsync(existing, tenDangNhap, matKhau);
+                if (!accOk || tk == null)
+                {
+                    return (false, accErr ?? "Không thể cấp tài khoản cho giảng viên.");
+                }
+                existing.MaTaiKhoan = tk.MaTaiKhoan;
             }
 
             await _giangVienRepo.UpdateAsync(existing);
