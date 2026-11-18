@@ -1690,70 +1690,77 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
     let conflictCheckTimeout = null;
     let isCurrentFormConflicted = false;
 
-    async function checkScheduleConflictLive() {
-        clearTimeout(conflictCheckTimeout);
-        conflictCheckTimeout = setTimeout(async () => {
-            const maBuoi = document.getElementById('drawer-mabuoi')?.value || '0';
-            const maLop = document.getElementById('drawer-malop')?.value;
-            const phong = document.getElementById('drawer-phong')?.value?.trim();
-            const gv = document.getElementById('drawer-gv')?.value?.trim();
-            const batdau = document.getElementById('drawer-batdau')?.value;
-            const ketthuc = document.getElementById('drawer-ketthuc')?.value;
+    async function runConflictCheckNow() {
+        const maBuoi = document.getElementById('drawer-mabuoi')?.value || '0';
+        const maLop = document.getElementById('drawer-malop')?.value;
+        const phong = document.getElementById('drawer-phong')?.value?.trim();
+        const gv = document.getElementById('drawer-gv')?.value?.trim();
+        const batdau = document.getElementById('drawer-batdau')?.value;
+        const ketthuc = document.getElementById('drawer-ketthuc')?.value;
 
-            const box = document.getElementById('drawer-conflict-box');
-            const conflictAlert = document.getElementById('drawer-conflict-alert');
-            const validAlert = document.getElementById('drawer-valid-alert');
-            const conflictMsg = document.getElementById('drawer-conflict-msg');
-            const submitBtn = document.getElementById('drawer-submit-btn') || drawerForm?.querySelector('button[type="submit"]');
+        const box = document.getElementById('drawer-conflict-box');
+        const conflictAlert = document.getElementById('drawer-conflict-alert');
+        const validAlert = document.getElementById('drawer-valid-alert');
+        const conflictMsg = document.getElementById('drawer-conflict-msg');
+        const submitBtn = document.getElementById('drawer-submit-btn') || drawerForm?.querySelector('button[type="submit"]');
 
-            if (!maLop || !phong || !batdau || !ketthuc) {
-                if (box) box.classList.add('hidden');
-                isCurrentFormConflicted = false;
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                }
-                return;
+        if (!maLop || !phong || !batdau || !ketthuc) {
+            if (box) box.classList.add('hidden');
+            isCurrentFormConflicted = false;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
+            return { hasConflict: false, message: '' };
+        }
 
-            try {
-                const params = new URLSearchParams({
-                    maBuoiHoc: maBuoi,
-                    maLopHoc: maLop,
-                    phongHoc: phong,
-                    giangVien: gv || '',
-                    batDau: batdau,
-                    ketThuc: ketthuc
-                });
+        try {
+            const params = new URLSearchParams({
+                maBuoiHoc: maBuoi,
+                maLopHoc: maLop,
+                phongHoc: phong,
+                giangVien: gv || '',
+                batDau: batdau,
+                ketThuc: ketthuc
+            });
 
-                const res = await fetch(`/BuoiHoc/KiemTraTrungLich?${params.toString()}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (box) box.classList.remove('hidden');
+            const res = await fetch(`/BuoiHoc/KiemTraTrungLich?${params.toString()}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (box) box.classList.remove('hidden');
 
-                    if (data.hasConflict) {
-                        isCurrentFormConflicted = true;
-                        if (conflictAlert) conflictAlert.classList.remove('hidden');
-                        if (validAlert) validAlert.classList.add('hidden');
-                        if (conflictMsg) conflictMsg.innerText = data.message;
-                        if (submitBtn) {
-                            submitBtn.disabled = true;
-                            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                        }
-                    } else {
-                        isCurrentFormConflicted = false;
-                        if (conflictAlert) conflictAlert.classList.add('hidden');
-                        if (validAlert) validAlert.classList.remove('hidden');
-                        if (submitBtn) {
-                            submitBtn.disabled = false;
-                            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                        }
+                if (data.hasConflict) {
+                    isCurrentFormConflicted = true;
+                    if (conflictAlert) conflictAlert.classList.remove('hidden');
+                    if (validAlert) validAlert.classList.add('hidden');
+                    if (conflictMsg) conflictMsg.innerText = data.message;
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
                     }
+                    return { hasConflict: true, message: data.message };
+                } else {
+                    isCurrentFormConflicted = false;
+                    if (conflictAlert) conflictAlert.classList.add('hidden');
+                    if (validAlert) validAlert.classList.remove('hidden');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+                    return { hasConflict: false, message: '' };
                 }
-            } catch (err) {
-                console.error('Lỗi khi kiểm tra trùng lịch:', err);
             }
-        }, 250);
+        } catch (err) {
+            console.error('Lỗi khi kiểm tra trùng lịch:', err);
+        }
+        return { hasConflict: isCurrentFormConflicted, message: '' };
+    }
+
+    function checkScheduleConflictLive() {
+        clearTimeout(conflictCheckTimeout);
+        conflictCheckTimeout = setTimeout(() => {
+            runConflictCheckNow();
+        }, 200);
     }
 
     ['drawer-malop', 'drawer-phong', 'drawer-gv', 'drawer-batdau', 'drawer-ketthuc'].forEach(id => {
@@ -1778,11 +1785,13 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                 }
                 return;
             }
-            if (isCurrentFormConflicted) {
+
+            // Kiểm tra trùng lịch tức thì (không qua debounce) -> trùng là chặn tuyệt đối!
+            clearTimeout(conflictCheckTimeout);
+            const checkRes = await runConflictCheckNow();
+            if (checkRes.hasConflict || isCurrentFormConflicted) {
                 if (window.showToast) {
-                    window.showToast('Không thể lưu do lịch học đang bị trùng! Vui lòng chọn giờ hoặc phòng khác.', 'error');
-                } else {
-                    alert('Không thể lưu do lịch học đang bị trùng! Vui lòng chọn giờ hoặc phòng khác.');
+                    window.showToast(checkRes.message || 'Không thể lưu do lịch học đang bị trùng! Vui lòng chọn giờ, phòng hoặc giảng viên khác.', 'error');
                 }
                 return;
             }

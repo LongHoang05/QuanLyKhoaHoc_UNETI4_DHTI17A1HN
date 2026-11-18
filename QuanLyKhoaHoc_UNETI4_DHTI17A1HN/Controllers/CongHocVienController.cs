@@ -250,6 +250,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return Json(new { success = false, message = "Khóa học đã đủ chỉ tiêu sĩ số. Vui lòng chọn lớp học khác." });
             }
 
+            // 6.5. Kiểm tra học viên có bị trùng thời khóa biểu với lớp đang học/đã duyệt không
+            var (hasScheduleConflict, conflictMsg) = await _dangKyHocRepo.KiemTraTrungLichHocVienAsync(student.MaHocVien, targetMaLop);
+            if (hasScheduleConflict)
+            {
+                return Json(new { success = false, message = conflictMsg ?? "Lịch học của lớp này bị trùng với lớp bạn đang theo học!" });
+            }
+
             // 7. Tạo đăng ký mới với trạng thái 'Chờ duyệt', ngày do hệ thống xác định, học phí 0
             var dangKy = new DangKyHoc
             {

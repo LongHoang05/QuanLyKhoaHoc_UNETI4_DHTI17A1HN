@@ -45,6 +45,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         Task<Dictionary<int, int>> GetSiSoDaDangKyMapAsync(IEnumerable<int> maLopList);
         Task<Dictionary<int, int>> GetAllSiSoMapAsync();
         Task<int> GetTotalCountExcludingCancelledAsync();
+        Task<(bool HasConflict, string? ConflictMessage)> KiemTraTrungLichHocVienAsync(int maHocVien, int maLopMoi);
     }
 }
 

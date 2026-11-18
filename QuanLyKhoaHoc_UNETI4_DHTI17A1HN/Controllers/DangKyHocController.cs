@@ -196,6 +196,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 }
             }
 
+            // Kiểm tra trùng thời khóa biểu của học viên giữa các lớp
+            var (hasScheduleConflict, conflictMsg) = await _dangKyHocRepo.KiemTraTrungLichHocVienAsync(dk.MaHocVien, dk.MaLopHoc);
+            if (hasScheduleConflict)
+            {
+                string msg = $"Không thể duyệt hồ sơ #{id}! {conflictMsg}";
+                if (isAjax) return Json(new { success = false, message = msg });
+                TempData["Error"] = msg;
+                return RedirectToAction(nameof(Index));
+            }
+
             // Cập nhật trạng thái
             string nguoiDuyet = HttpContext.Session.GetString("HoTen") ?? "Ban Giáo vụ";
             dk.TrangThai = "Đã duyệt";
@@ -288,6 +298,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
             {
                 if (isAjax) return Json(new { success = false, message = "Không tìm thấy hồ sơ đăng ký." });
                 TempData["Error"] = "Không tìm thấy hồ sơ.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            bool isPaidOrFreeApproved = dk.TrangThai == "Đã đóng học phí" ||
+                (dk.LopHoc != null && dk.LopHoc.HocPhi <= 0 && dk.TrangThai == "Đã duyệt");
+            if (!isPaidOrFreeApproved)
+            {
+                string errMsg = $"Không thể kích hoạt vào học! Hồ sơ đang ở trạng thái '{dk.TrangThai}', học viên cần hoàn tất nộp học phí trước.";
+                if (isAjax) return Json(new { success = false, message = errMsg });
+                TempData["Error"] = errMsg;
                 return RedirectToAction(nameof(Index));
             }
 
