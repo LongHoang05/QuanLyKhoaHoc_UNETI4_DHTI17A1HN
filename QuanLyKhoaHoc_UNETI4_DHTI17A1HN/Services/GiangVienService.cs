@@ -102,6 +102,13 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
             return await _giangVienRepo.SearchAsync(search, hocVi);
         }
 
+        public async Task<(List<GiangVien> Items, int TotalCount)> GetPagedGiangVienAsync(string? search, string? hocVi, int pageIndex, int pageSize)
+        {
+            if (pageIndex < 1) pageIndex = 1;
+            if (pageSize < 1) pageSize = 6;
+            return await _giangVienRepo.GetPagedAsync(search, hocVi, pageIndex, pageSize);
+        }
+
         public async Task<GiangVien?> GetGiangVienByIdAsync(int id)
         {
             return await _giangVienRepo.GetByIdAsync(id);

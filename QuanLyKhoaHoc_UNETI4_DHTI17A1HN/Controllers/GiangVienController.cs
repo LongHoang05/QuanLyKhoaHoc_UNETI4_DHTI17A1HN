@@ -190,24 +190,24 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            var list = await _giangVienService.GetDanhSachGiangVienAsync(search, hocVi);
+            int pageSize = 6;
+            if (page < 1) page = 1;
 
-            var allTeachers = (!string.IsNullOrWhiteSpace(search) || !string.IsNullOrWhiteSpace(hocVi))
-                ? await _giangVienService.GetDanhSachGiangVienAsync(null, null)
-                : list;
+            var (pagedList, totalItems) = await _giangVienService.GetPagedGiangVienAsync(search, hocVi, page, pageSize);
+
+            int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            if (totalPages < 1) totalPages = 1;
+            if (page > totalPages)
+            {
+                page = totalPages;
+                (pagedList, totalItems) = await _giangVienService.GetPagedGiangVienAsync(search, hocVi, page, pageSize);
+            }
+
+            var allTeachers = await _giangVienService.GetDanhSachGiangVienAsync(null, null);
 
             ViewBag.TotalTeachers = allTeachers.Count;
             ViewBag.ActiveTeachers = allTeachers.Count(g => g.TrangThai);
             ViewBag.TotalAssignedClasses = allTeachers.Sum(g => g.LopHocs?.Count ?? 0);
-
-            int pageSize = 6;
-            int totalItems = list.Count;
-            int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
-            if (totalPages < 1) totalPages = 1;
-            if (page < 1) page = 1;
-            if (page > totalPages) page = totalPages;
-
-            var pagedList = list.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
             ViewBag.Search = search;
             ViewBag.HocVi = hocVi;

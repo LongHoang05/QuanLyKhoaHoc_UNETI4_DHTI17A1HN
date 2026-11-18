@@ -14,6 +14,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         Task<GiangVien?> GetByTaiKhoanIdAsync(int maTaiKhoan);
         Task<GiangVien?> GetFirstAsync();
         Task<List<GiangVien>> SearchAsync(string? search, string? hocVi);
+        Task<(List<GiangVien> Items, int TotalCount)> GetPagedAsync(string? search, string? hocVi, int pageIndex, int pageSize);
         Task AddAsync(GiangVien gv);
         Task UpdateAsync(GiangVien gv);
         Task DeleteAsync(int id);

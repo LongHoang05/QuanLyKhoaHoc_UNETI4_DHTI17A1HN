@@ -624,8 +624,8 @@
                                 var lop = dk.LopHoc;
                                 var kq = dk.KetQuaHocTap;
                                 bool hasKq = kq != null && kq.DiemTongKet > 0;
-                                bool isPassed = dk.TrangThai == "Hoàn thành" || (kq != null && (kq.KetQua == "Hoàn thành" || kq.KetQua == "Đạt" || kq.DiemTongKet >= 4.0));
-                                bool isFailed = dk.TrangThai == "Không hoàn thành" || (kq != null && (kq.KetQua == "Không hoàn thành" || (kq.DiemTongKet > 0 && kq.DiemTongKet < 4.0)));
+                                bool isPassed = dk.TrangThai == "Hoàn thành" || (kq != null && (kq.KetQua == "Hoàn thành" || kq.KetQua == "Đạt"));
+                                bool isFailed = !isPassed && (dk.TrangThai == "Không hoàn thành" || (kq != null && (kq.KetQua == "Không hoàn thành" || (kq.DiemTongKet > 0 && kq.DiemTongKet < 5.0))));
                                 bool isDept = dk.TrangThai == "Chờ duyệt" || dk.TrangThai == "Chờ xác nhận học phí" || (lop != null && lop.HocPhi > 0 && dk.SoTienDaDong < lop.HocPhi);
                                 
                                 string statusKey = isPassed ? "pass" : (isFailed || isDept ? "fail" : "current");

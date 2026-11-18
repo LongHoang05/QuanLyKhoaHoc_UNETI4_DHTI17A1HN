@@ -457,9 +457,17 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return Json(new { success = false, message = "Họ và tên học viên không được để trống." });
             }
 
-            if (model.NgaySinh.HasValue && model.NgaySinh.Value.Date > DateTime.Today)
+            if (model.NgaySinh.HasValue)
             {
-                return Json(new { success = false, message = "Ngày sinh không được lớn hơn ngày hiện tại." });
+                if (model.NgaySinh.Value.Date > DateTime.Today)
+                {
+                    return Json(new { success = false, message = "Ngày sinh không được lớn hơn ngày hiện tại." });
+                }
+
+                if (model.NgaySinh.Value.Date > DateTime.Today.AddYears(-6))
+                {
+                    return Json(new { success = false, message = "Học viên phải từ 6 tuổi trở lên." });
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(model.SoDienThoai) && !System.Text.RegularExpressions.Regex.IsMatch(model.SoDienThoai.Trim(), @"^0\d{9}$"))
