@@ -21,6 +21,7 @@ $RECYCLE.BIN/
 *.tmp
 *.log
 *.docx
+!BaoCaoFinal.docx
 *.pptx
 doc_text.txt
 extracted_doc.txt
