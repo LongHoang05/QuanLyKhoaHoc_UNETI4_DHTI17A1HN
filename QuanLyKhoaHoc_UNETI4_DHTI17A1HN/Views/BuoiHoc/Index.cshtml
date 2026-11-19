@@ -302,16 +302,6 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                         <span>Dọn dẹp ca trùng</span>
                     </button>
                 }
-
-                <!-- Nút cuộn ma trận ngang -->
-                <div class="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl border border-border-subtle text-xs">
-                    <button type="button" onclick="scrollTimetable(-260)" class="w-6.5 h-6.5 rounded-lg bg-surface-white text-outline hover:text-brand-deep flex items-center justify-center transition-all shadow-2xs cursor-pointer active:scale-95" title="Cuộn sang trái">
-                        <span class="material-symbols-outlined text-[16px]">chevron_left</span>
-                    </button>
-                    <button type="button" onclick="scrollTimetable(260)" class="w-6.5 h-6.5 rounded-lg bg-surface-white text-outline hover:text-brand-deep flex items-center justify-center transition-all shadow-2xs cursor-pointer active:scale-95" title="Cuộn sang phải">
-                        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-                    </button>
-                </div>
             </div>
         </div>
 
@@ -1228,14 +1218,6 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
             loadBuoiHocPage(window.location.href, false);
         }
     });
-
-    // Smooth horizontal scroll for weekly timetable
-    function scrollTimetable(offset) {
-        const container = document.getElementById('timetable-scroll-container');
-        if (container) {
-            container.scrollBy({ left: offset, behavior: 'smooth' });
-        }
-    }
 
     // Micro-interactions for Drawer and Global Modal
     const drawerBackdrop = document.getElementById('drawer-backdrop');
