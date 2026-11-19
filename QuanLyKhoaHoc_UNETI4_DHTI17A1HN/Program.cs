@@ -63,6 +63,7 @@ builder.Services.AddScoped<IHocVienService, HocVienService>();
 
 // Module 4 - Nguyễn Hoàng Long (23103100046): Đăng ký khóa học, Quản lý hồ sơ & Thu học phí
 builder.Services.AddScoped<IDangKyHocRepository, DangKyHocRepository>();
+builder.Services.AddScoped<IDangKyHocService, DangKyHocService>();
 
 // Module 5 - Nguyễn Tùng Dương (23103100003): Lịch học, Điểm danh, Kết quả học tập & Dashboard Thống kê
 builder.Services.AddScoped<IBuoiHocRepository, BuoiHocRepository>();
