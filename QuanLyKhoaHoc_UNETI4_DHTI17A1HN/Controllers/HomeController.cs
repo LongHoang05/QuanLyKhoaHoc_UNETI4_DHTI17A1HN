@@ -187,11 +187,28 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return Json(new { success = false, message = "Vui lòng nhập đầy đủ họ tên và số điện thoại liên hệ." });
             }
 
+            string cleanPhone = soDienThoai.Trim();
+            if (!System.Text.RegularExpressions.Regex.IsMatch(cleanPhone, @"^0\d{9}$"))
+            {
+                return Json(new { success = false, message = "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0 (Ví dụ: 0912345678)." });
+            }
+
+            if (!string.IsNullOrWhiteSpace(email) && !new System.ComponentModel.DataAnnotations.EmailAddressAttribute().IsValid(email.Trim()))
+            {
+                return Json(new { success = false, message = "Địa chỉ email không đúng định dạng." });
+            }
+
             return Json(new
             {
                 success = true,
-                message = $"Cảm ơn bạn {hoTen}! Ban Tuyển sinh UNETI EDUSPACE sẽ liên hệ qua SĐT {soDienThoai} trong vòng 24 giờ để tư vấn lộ trình học phù hợp nhất."
+                message = $"Cảm ơn bạn {hoTen.Trim()}! Ban Tuyển sinh UNETI EDUSPACE sẽ liên hệ qua SĐT {cleanPhone} trong vòng 24 giờ để tư vấn lộ trình học phù hợp nhất."
             });
+        }
+
+        [HttpGet]
+        public IActionResult Privacy()
+        {
+            return View();
         }
 
         public IActionResult AccessDenied()

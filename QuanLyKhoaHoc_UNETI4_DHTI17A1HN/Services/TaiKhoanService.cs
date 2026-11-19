@@ -166,12 +166,18 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
                 existing.MatKhau = SecurityHelper.HashPassword(taiKhoan.MatKhau);
             }
 
-            // Đồng bộ sang HocVien nếu có
+            // Đồng bộ sang HocVien hoặc GiangVien nếu có
             if (existing.HocVien != null)
             {
                 existing.HocVien.HoTen = existing.HoTen;
                 existing.HocVien.Email = existing.Email;
                 existing.HocVien.TrangThai = existing.TrangThai;
+            }
+            if (existing.GiangVien != null)
+            {
+                existing.GiangVien.HoTen = existing.HoTen;
+                existing.GiangVien.Email = existing.Email;
+                existing.GiangVien.TrangThai = existing.TrangThai;
             }
 
             await _taiKhoanRepository.UpdateAsync(existing);
@@ -219,6 +225,10 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
             if (user.HocVien != null)
             {
                 user.HocVien.TrangThai = user.TrangThai;
+            }
+            if (user.GiangVien != null)
+            {
+                user.GiangVien.TrangThai = user.TrangThai;
             }
 
             await _taiKhoanRepository.UpdateAsync(user);
@@ -296,6 +306,10 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
                 model.TrinhDoHocVan = user.HocVien.TrinhDoHocVan;
                 model.NgheNghiep = user.HocVien.NgheNghiep;
             }
+            else if (user.GiangVien != null)
+            {
+                model.SoDienThoai = user.GiangVien.SoDienThoai;
+            }
 
             return model;
         }
@@ -326,6 +340,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
                 user.HocVien.GioiTinh = model.GioiTinh;
                 user.HocVien.TrinhDoHocVan = model.TrinhDoHocVan;
                 user.HocVien.NgheNghiep = model.NgheNghiep;
+            }
+
+            if (user.GiangVien != null)
+            {
+                user.GiangVien.HoTen = user.HoTen;
+                user.GiangVien.Email = user.Email;
+                if (model.SoDienThoai != null)
+                {
+                    user.GiangVien.SoDienThoai = model.SoDienThoai.Trim();
+                }
             }
 
             await _taiKhoanRepository.UpdateAsync(user);

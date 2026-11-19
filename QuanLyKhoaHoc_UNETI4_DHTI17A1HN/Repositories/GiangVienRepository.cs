@@ -233,6 +233,20 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 return (false, "Vui lòng nhập đầy đủ Điểm quá trình (40%) và Điểm thi cuối kỳ (60%).", null);
             }
 
+            // Đồng nhất quy tắc với KetQuaHocTapController: lớp phải có buổi học và mọi buổi chưa hủy đều đã hoàn thành
+            var classSessions = await _context.BuoiHocs
+                .Where(b => b.MaLopHoc == dk.MaLopHoc && b.TrangThai != "Đã hủy")
+                .ToListAsync();
+            if (!classSessions.Any())
+            {
+                return (false, "Lớp học này chưa có buổi học nào được lên lịch, không thể chấm điểm.", null);
+            }
+            int chuaHoanThanh = classSessions.Count(b => b.TrangThai != "Đã hoàn thành");
+            if (chuaHoanThanh > 0)
+            {
+                return (false, $"Lớp học vẫn còn {chuaHoanThanh} buổi học chưa hoàn thành. Chỉ khi toàn bộ buổi học đã hoàn thành mới được ghi nhận điểm cuối khóa.", null);
+            }
+
             var ketQua = dk.KetQuaHocTap;
             if (ketQua == null)
             {

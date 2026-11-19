@@ -225,7 +225,7 @@
                                         <button onclick="openEditDrawerFromTk(this, @item.MaTaiKhoan)" class="p-1.5 rounded-lg text-outline hover:text-brand-deep hover:bg-surface-container-low" title="Sửa">
                                             <span class="material-symbols-outlined text-[18px]">edit</span>
                                         </button>
-                                        @if (item.VaiTro != "Admin" || item.TenDangNhap.ToLower() != "admin")
+                                        @if (item.VaiTro != "Admin" || (item.TenDangNhap ?? "").ToLower() != "admin")
                                         {
                                             <button onclick="confirmDeleteTk(@item.MaTaiKhoan, '@item.TenDangNhap')" class="p-1.5 rounded-lg text-outline hover:text-danger-crimson hover:bg-red-50" title="Xóa">
                                                 <span class="material-symbols-outlined text-[18px]">delete</span>

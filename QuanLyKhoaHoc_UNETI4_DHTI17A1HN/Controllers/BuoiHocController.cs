@@ -325,6 +325,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         // ACTION DELETE MULTIPLE: XÓA NHIỀU BUỔI HỌC
         // ========================================================
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteMultiple([FromBody] List<int>? ids)
         {
             if (ids == null || !ids.Any())
@@ -346,6 +347,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
         // --- CẬP NHẬT HOÀN THÀNH SAU BUỔI HỌC (Yêu cầu 9.3) ---
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> HoanThanh(int id)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
@@ -379,6 +381,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Huy(int id)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";

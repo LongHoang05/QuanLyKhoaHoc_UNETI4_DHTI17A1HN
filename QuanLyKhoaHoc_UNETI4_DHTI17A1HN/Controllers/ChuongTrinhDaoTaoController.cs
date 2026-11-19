@@ -223,6 +223,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         // ACTION DELETE MULTIPLE: XÓA NHIỀU CHƯƠNG TRÌNH ĐÀO TẠO
         // ========================================================
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteMultiple([FromBody] List<int>? ids)
         {
             if (ids == null || !ids.Any())

@@ -786,6 +786,15 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
                                     </td>
                                     <td class="py-4 px-6 text-right">
                                         <div class="inline-flex items-center gap-1">
+                                            @if (item.TrangThai == "Đã lên lịch")
+                                            {
+                                                <button type="button" onclick="hoanThanhBuoiHoc(@item.MaBuoiHoc)" class="p-1.5 rounded-lg text-outline hover:text-success-emerald hover:bg-emerald-50 transition-colors cursor-pointer" title="Đánh dấu hoàn thành">
+                                                    <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                                                </button>
+                                                <button type="button" onclick="huyBuoiHoc(@item.MaBuoiHoc, '@($"#BH{item.MaBuoiHoc:D3}")')" class="p-1.5 rounded-lg text-outline hover:text-amber-600 hover:bg-amber-50 transition-colors cursor-pointer" title="Hủy ca học">
+                                                    <span class="material-symbols-outlined text-[18px]">event_busy</span>
+                                                </button>
+                                            }
                                             <button onclick="openEditDrawerFromRow(this)" class="p-1.5 rounded-lg text-outline hover:text-secondary-container hover:bg-surface-container-low transition-colors cursor-pointer" title="Chỉnh sửa">
                                                 <span class="material-symbols-outlined text-[18px]">edit</span>
                                             </button>
@@ -1844,6 +1853,62 @@ Nội dung thực hiện: Module 5 - Quản lý lịch học: Thời khóa biể
         }
     }
     bindSelectAll();
+
+    async function hoanThanhBuoiHoc(id) {
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        const formData = new FormData();
+        formData.append('__RequestVerificationToken', token);
+        try {
+            const res = await fetch(`/BuoiHoc/HoanThanh/${id}`, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (window.showToast) window.showToast(data.message, 'success');
+                await loadBuoiHocPage(window.location.href, false);
+            } else {
+                if (window.showToast) window.showToast(data.message, 'error');
+            }
+        } catch (err) {
+            if (window.showToast) window.showToast('Không thể cập nhật trạng thái buổi học.', 'error');
+        }
+    }
+
+    function huyBuoiHoc(id, codeLabel) {
+        if (!window.openGlobalDeleteModal) return;
+        window.openGlobalDeleteModal({
+            title: 'Hủy buổi học này?',
+            message: `Bạn có chắc muốn hủy buổi học <strong class="text-amber-700">${codeLabel || ('#' + id)}</strong> không?`,
+            warning: 'Buổi học bị hủy sẽ được chuyển sang trạng thái "Đã hủy" và giải phóng phòng/giảng viên.',
+            submitText: 'Xác nhận hủy ca',
+            submitIcon: 'event_busy',
+            icon: 'event_busy',
+            theme: 'warning',
+            onConfirm: async function() {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                const formData = new FormData();
+                formData.append('__RequestVerificationToken', token);
+                try {
+                    const res = await fetch(`/BuoiHoc/Huy/${id}`, {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        if (window.showToast) window.showToast(data.message, 'success');
+                        await loadBuoiHocPage(window.location.href, false);
+                    } else {
+                        if (window.showToast) window.showToast(data.message, 'error');
+                    }
+                } catch (err) {
+                    if (window.showToast) window.showToast('Không thể hủy ca học.', 'error');
+                }
+            }
+        });
+    }
 
     // Xuất Excel lịch học bằng ClosedXML
     function exportBuoiHocExcel() {

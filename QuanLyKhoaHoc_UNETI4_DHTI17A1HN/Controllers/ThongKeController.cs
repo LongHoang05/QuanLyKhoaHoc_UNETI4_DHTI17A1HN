@@ -128,6 +128,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DuyetNhanh(int id)
         {
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
@@ -152,6 +153,16 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                         TempData["Error"] = msg;
                         return RedirectToAction(nameof(Dashboard));
                     }
+                }
+
+                // Kiểm tra trùng thời khóa biểu của học viên giữa các lớp
+                var (hasScheduleConflict, conflictMsg) = await _dangKyHocRepo.KiemTraTrungLichHocVienAsync(dangKy.MaHocVien, dangKy.MaLopHoc);
+                if (hasScheduleConflict)
+                {
+                    string msg = $"Không thể duyệt hồ sơ #{id}! {conflictMsg}";
+                    if (isAjax) return Json(new { success = false, message = msg });
+                    TempData["Error"] = msg;
+                    return RedirectToAction(nameof(Dashboard));
                 }
 
                 dangKy.TrangThai = "Đã duyệt";

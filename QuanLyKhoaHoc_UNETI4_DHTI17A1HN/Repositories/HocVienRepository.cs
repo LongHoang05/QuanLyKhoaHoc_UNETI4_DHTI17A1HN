@@ -44,7 +44,9 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         public async Task<HocVien?> GetByIdAsync(int? id)
         {
             if (id == null) return null;
-            return await _context.HocViens.FindAsync(id.Value);
+            return await _context.HocViens
+                .Include(h => h.TaiKhoan)
+                .FirstOrDefaultAsync(h => h.MaHocVien == id.Value);
         }
 
         public async Task<HocVien?> GetByIdWithDetailsAsync(int? id)

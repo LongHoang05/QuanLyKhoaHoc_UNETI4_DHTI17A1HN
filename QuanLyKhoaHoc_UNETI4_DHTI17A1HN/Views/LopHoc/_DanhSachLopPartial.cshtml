@@ -53,7 +53,7 @@
                         int index = 1;
                         foreach (var item in Model!)
                         {
-                            int soDangKy = item.DangKyHocs?.Count(d => d.TrangThai != "Đã hủy") ?? 0;
+                            int soDangKy = item.DangKyHocs?.Count(d => d.TrangThai != "Đã hủy" && d.TrangThai != "Từ chối") ?? 0;
                             double phanTram = item.SiSoToiDa > 0 ? (double)soDangKy / item.SiSoToiDa * 100 : 0;
                             if (phanTram > 100) phanTram = 100;
                             string tenGv = !string.IsNullOrEmpty(item.TenGiangVien) ? item.TenGiangVien : (item.GiangVien?.HoTen ?? "Chưa phân công");

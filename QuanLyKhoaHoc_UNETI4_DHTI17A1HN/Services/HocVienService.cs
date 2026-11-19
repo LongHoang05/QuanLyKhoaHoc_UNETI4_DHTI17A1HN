@@ -133,6 +133,14 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
             existing.NgheNghiep = hocVien.NgheNghiep?.Trim();
             existing.TrangThai = hocVien.TrangThai;
 
+            // Đồng bộ ngược sang TaiKhoan nếu có liên kết
+            if (existing.TaiKhoan != null)
+            {
+                existing.TaiKhoan.HoTen = existing.HoTen;
+                existing.TaiKhoan.Email = existing.Email;
+                existing.TaiKhoan.TrangThai = existing.TrangThai;
+            }
+
             // 5. Cập nhật xuống CSDL qua Repository
             await _hocVienRepo.UpdateAsync(existing);
             return (true, null);
@@ -168,6 +176,10 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Services
             }
 
             existing.TrangThai = !existing.TrangThai;
+            if (existing.TaiKhoan != null)
+            {
+                existing.TaiKhoan.TrangThai = existing.TrangThai;
+            }
             await _hocVienRepo.UpdateAsync(existing);
             return (true, null, existing.TrangThai);
         }

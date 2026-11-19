@@ -169,7 +169,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
 
         public async Task<(int ChoDuyetCount, int DaDuyetCount, double TongDoanhThu)> GetThongKeNhanhAsync()
         {
-            int choDuyet = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Chờ duyệt" || d.TrangThai == "Chờ xác nhận học phí");
+            int choDuyet = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Chờ duyệt");
             int daDuyet = await _context.DangKyHocs.CountAsync(d =>
                 d.TrangThai == "Đã duyệt" ||
                 d.TrangThai == "Chờ xác nhận học phí" ||

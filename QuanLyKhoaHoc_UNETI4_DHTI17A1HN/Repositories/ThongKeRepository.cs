@@ -31,7 +31,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             int tongHocVien = await _context.HocViens.CountAsync();
             int tongDangKy = await _context.DangKyHocs.CountAsync();
             int dangKyChoDuyet = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Chờ duyệt");
-            int dangKyDaDuyet = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành");
+            int dangKyDaDuyet = await _context.DangKyHocs.CountAsync(d => d.TrangThai == "Đã duyệt" || d.TrangThai == "Chờ xác nhận học phí" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành");
             int buoiHocSapToi = await _context.BuoiHocs.CountAsync(b => b.ThoiGianBatDau > now && b.TrangThai == "Đã lên lịch");
             int tongBuoiHoc = await _context.BuoiHocs.CountAsync();
 
@@ -170,10 +170,10 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                     TenLop = l.TenLop,
                     SiSoToiDa = l.SiSoToiDa,
                     SiSoHienTai = _context.DangKyHocs.Count(dk => dk.MaLopHoc == l.MaLopHoc && 
-                                  (dk.TrangThai == "Đã duyệt" || dk.TrangThai == "Đã đóng học phí" || dk.TrangThai == "Đang học" || dk.TrangThai == "Hoàn thành" || dk.TrangThai == "Không hoàn thành")),
+                                  (dk.TrangThai == "Đã duyệt" || dk.TrangThai == "Chờ xác nhận học phí" || dk.TrangThai == "Đã đóng học phí" || dk.TrangThai == "Đang học" || dk.TrangThai == "Hoàn thành" || dk.TrangThai == "Không hoàn thành")),
                     TyLe = l.SiSoToiDa > 0 
                         ? (double)_context.DangKyHocs.Count(dk => dk.MaLopHoc == l.MaLopHoc && 
-                          (dk.TrangThai == "Đã duyệt" || dk.TrangThai == "Đã đóng học phí" || dk.TrangThai == "Đang học" || dk.TrangThai == "Hoàn thành" || dk.TrangThai == "Không hoàn thành")) / l.SiSoToiDa * 100 
+                          (dk.TrangThai == "Đã duyệt" || dk.TrangThai == "Chờ xác nhận học phí" || dk.TrangThai == "Đã đóng học phí" || dk.TrangThai == "Đang học" || dk.TrangThai == "Hoàn thành" || dk.TrangThai == "Không hoàn thành")) / l.SiSoToiDa * 100 
                         : 0
                 })
                 .ToListAsync();
@@ -190,7 +190,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
                 .GroupBy(l => l.TenGiangVien!)
                 .Select(g => {
                     var maLops = g.Select(x => x.MaLopHoc).ToList();
-                    var svCount = dkList.Count(d => maLops.Contains(d.MaLopHoc) && (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành"));
+                    var svCount = dkList.Count(d => maLops.Contains(d.MaLopHoc) && (d.TrangThai == "Đã duyệt" || d.TrangThai == "Chờ xác nhận học phí" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành"));
                     var scores = kqList.Where(k => k.DangKyHoc != null && maLops.Contains(k.DangKyHoc.MaLopHoc)).Select(k => k.DiemTongKet).ToList();
                     return (dynamic)new {
                         GiangVien = g.Key,

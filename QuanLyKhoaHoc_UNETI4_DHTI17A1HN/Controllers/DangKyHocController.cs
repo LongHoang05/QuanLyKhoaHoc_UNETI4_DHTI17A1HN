@@ -247,13 +247,25 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Kiểm tra sĩ số nếu hồ sơ trước đó chưa nằm trong nhóm đã duyệt
-            if (dk.TrangThai == "Chờ duyệt" && dk.LopHoc != null)
+            // Kiểm tra sĩ số và trùng lịch nếu hồ sơ trước đó chưa nằm trong nhóm đã duyệt
+            if (dk.TrangThai == "Chờ duyệt")
             {
-                int enrolledCount = await _dangKyHocRepo.CountEnrolledInLopAsync(dk.MaLopHoc);
-                if (enrolledCount >= dk.LopHoc.SiSoToiDa)
+                if (dk.LopHoc != null)
                 {
-                    string msg = $"Không thể thu tiền! Lớp '{dk.LopHoc.TenLop}' đã đạt sĩ số tối đa ({dk.LopHoc.SiSoToiDa} học viên).";
+                    int enrolledCount = await _dangKyHocRepo.CountEnrolledInLopAsync(dk.MaLopHoc);
+                    if (enrolledCount >= dk.LopHoc.SiSoToiDa)
+                    {
+                        string msg = $"Không thể thu tiền! Lớp '{dk.LopHoc.TenLop}' đã đạt sĩ số tối đa ({dk.LopHoc.SiSoToiDa} học viên).";
+                        if (isAjax) return Json(new { success = false, message = msg });
+                        TempData["Error"] = msg;
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+
+                var (hasScheduleConflict, conflictMsg) = await _dangKyHocRepo.KiemTraTrungLichHocVienAsync(dk.MaHocVien, dk.MaLopHoc);
+                if (hasScheduleConflict)
+                {
+                    string msg = $"Không thể duyệt & thu học phí hồ sơ #{id}! {conflictMsg}";
                     if (isAjax) return Json(new { success = false, message = msg });
                     TempData["Error"] = msg;
                     return RedirectToAction(nameof(Index));
@@ -471,6 +483,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         // ACTION DELETE MULTIPLE: XÓA NHIỀU HỒ SƠ ĐĂNG KÝ HỌC
         // ========================================================
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteMultiple([FromBody] List<int>? ids)
         {
             if (ids == null || !ids.Any())

@@ -221,6 +221,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         // 5. AJAX KHÓA / MỞ KHÓA TÀI KHOẢN (Entity TaiKhoan - Mục 5.1)
         // ========================================================
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleTaiKhoanStatus(int id)
         {
             if (!CoQuyenQuanTri(out _))
@@ -236,6 +237,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         // 6. AJAX CẤP LẠI MẬT KHẨU TÀI KHOẢN
         // ========================================================
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetMatKhau(int id, string? newPassword)
         {
             if (!CoQuyenQuanTri(out _))
@@ -251,6 +253,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         // 7. AJAX THÊM TÀI KHOẢN MỚI TỪ MODAL
         // ========================================================
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ThemNguoiDungAjax(ThemTaiKhoanViewModel model)
         {
             if (!CoQuyenQuanTri(out _))
@@ -272,6 +275,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         // 8. AJAX ĐỔI TRẠNG THÁI HỌC VIÊN
         // ========================================================
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleTrangThai(int id)
         {
             if (!CoQuyenQuanTri(out _))
@@ -287,6 +291,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         // 9. AJAX XÓA HỌC VIÊN
         // ========================================================
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteAjax(int id)
         {
             if (!CoQuyenQuanTri(out _))
@@ -302,6 +307,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         // ACTION DELETE MULTIPLE: XÓA NHIỀU HỌC VIÊN
         // ========================================================
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteMultiple([FromBody] List<int>? ids)
         {
             if (!CoQuyenQuanTri(out _))
@@ -574,7 +580,26 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, HocVien hocVien)
         {
-            if (!CoQuyenQuanTri(out var redirectResult))
+            var vaiTro = HttpContext.Session.GetString("VaiTro");
+            var maTaiKhoan = HttpContext.Session.GetInt32("MaTaiKhoan");
+            bool isSelfStudentEdit = string.Equals(vaiTro, "HocVien", StringComparison.OrdinalIgnoreCase) && maTaiKhoan.HasValue;
+
+            if (isSelfStudentEdit)
+            {
+                var currentHv = await _hocVienRepo.GetByMaTaiKhoanAsync(maTaiKhoan!.Value);
+                if (currentHv == null || currentHv.MaHocVien != id || id != hocVien.MaHocVien)
+                {
+                    TempData["Error"] = "Bạn không có quyền chỉnh sửa hồ sơ học viên khác!";
+                    return RedirectToAction("AccessDenied", "Home");
+                }
+                // Không cho học viên tự thay đổi MaTaiKhoan / TrangThai và bảo toàn các trường không có trên form Portal
+                hocVien.MaTaiKhoan = currentHv.MaTaiKhoan;
+                hocVien.TrangThai = currentHv.TrangThai;
+                if (string.IsNullOrWhiteSpace(hocVien.GioiTinh)) hocVien.GioiTinh = currentHv.GioiTinh;
+                if (string.IsNullOrWhiteSpace(hocVien.TrinhDoHocVan)) hocVien.TrinhDoHocVan = currentHv.TrinhDoHocVan;
+                if (hocVien.NgheNghiep == null) hocVien.NgheNghiep = currentHv.NgheNghiep;
+            }
+            else if (!CoQuyenQuanTri(out var redirectResult))
             {
                 return redirectResult!;
             }
@@ -593,14 +618,32 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Controllers
 
             if (!ModelState.IsValid)
             {
+                if (isSelfStudentEdit)
+                {
+                    TempData["Error"] = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                    return RedirectToAction(nameof(Portal));
+                }
                 return View(hocVien);
             }
 
             var (success, error) = await _hocVienService.CapNhatHocVienAsync(hocVien);
             if (!success)
             {
+                if (isSelfStudentEdit)
+                {
+                    TempData["Error"] = error;
+                    return RedirectToAction(nameof(Portal));
+                }
                 ModelState.AddModelError("", error!);
                 return View(hocVien);
+            }
+
+            if (isSelfStudentEdit)
+            {
+                HttpContext.Session.SetString("HoTen", hocVien.HoTen.Trim());
+                HttpContext.Session.SetString("Email", hocVien.Email.Trim().ToLower());
+                TempData["Success"] = "Cập nhật thông tin cá nhân thành công!";
+                return RedirectToAction(nameof(Portal));
             }
 
             TempData["Success"] = $"Cập nhật thông tin học viên '{hocVien.HoTen}' thành công!";

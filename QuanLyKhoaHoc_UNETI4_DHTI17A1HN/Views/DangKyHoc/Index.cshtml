@@ -645,10 +645,26 @@
         }
     }
 
-    // Xuất file Excel bằng ClosedXML
+    // Xuất file Excel bằng ClosedXML theo đúng bộ lọc AJAX đang chọn
     function exportDangKyExcel() {
-        const form = document.getElementById('filter-form');
-        const params = form ? new URLSearchParams(new FormData(form)) : new URLSearchParams(window.location.search);
+        const search = document.getElementById('searchInput')?.value.trim() || '';
+        const maChuongTrinh = document.getElementById('filterMaCT')?.value || '';
+        const trangThai = document.getElementById('filterTrangThai')?.value || '';
+        const sortBy = document.getElementById('filterSortBy')?.value || '';
+        const tuNgay = document.getElementById('filterTuNgay')?.value || '';
+        const denNgay = document.getElementById('filterDenNgay')?.value || '';
+        const urlParams = new URLSearchParams(window.location.search);
+        const maLop = urlParams.get('maLop') || '';
+
+        const params = new URLSearchParams();
+        if (search) params.set('search', search);
+        if (maChuongTrinh) params.set('maChuongTrinh', maChuongTrinh);
+        if (maLop) params.set('maLop', maLop);
+        if (trangThai) params.set('trangThai', trangThai);
+        if (sortBy) params.set('sortBy', sortBy);
+        if (tuNgay) params.set('tuNgay', tuNgay);
+        if (denNgay) params.set('denNgay', denNgay);
+
         window.location.href = `/DangKyHoc/ExportExcel?${params.toString()}`;
     }
 

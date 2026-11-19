@@ -23,6 +23,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         {
             return await _context.TaiKhoans
                 .Include(t => t.HocVien)
+                .Include(t => t.GiangVien)
                 .FirstOrDefaultAsync(t => t.MaTaiKhoan == id);
         }
 
@@ -30,6 +31,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         {
             return await _context.TaiKhoans
                 .Include(t => t.HocVien)
+                .Include(t => t.GiangVien)
                 .FirstOrDefaultAsync(t => t.TenDangNhap.ToLower() == tenDangNhap.ToLower().Trim());
         }
 
@@ -37,6 +39,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         {
             return await _context.TaiKhoans
                 .Include(t => t.HocVien)
+                .Include(t => t.GiangVien)
                 .FirstOrDefaultAsync(t => t.Email.ToLower() == email.ToLower().Trim());
         }
 

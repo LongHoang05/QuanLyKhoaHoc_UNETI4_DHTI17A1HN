@@ -119,7 +119,7 @@
                                     <div class="small text-muted">Học phí:</div>
                                     <div class="fw-bold fs-5 text-primary" style="font-family: var(--font-serif);">@lop.HocPhi.ToString("N0") VNĐ</div>
                                 </div>
-                                <button type="button" class="btn btn-sm rounded-pill px-3 py-2 text-white fw-semibold" style="background: var(--primary-rose);" onclick="showToast('Bạn đã gửi đăng ký lớp: @lop.TenLop thành công! Đơn đang ở trạng thái Chờ duyệt.', 'success')">
+                                <button type="button" class="btn btn-sm rounded-pill px-3 py-2 text-white fw-semibold" style="background: var(--primary-rose);" onclick="dangKyLopPortal(@lop.MaLopHoc, this)">
                                     <i class="bi bi-pencil-square me-1"></i> Đăng Ký Học
                                 </button>
                             </div>
@@ -304,3 +304,34 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+<script>
+    async function dangKyLopPortal(maLop, btn) {
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        if (btn) btn.disabled = true;
+        try {
+            const formData = new FormData();
+            formData.append('maLop', maLop);
+            formData.append('__RequestVerificationToken', token);
+
+            const res = await fetch('/CongHocVien/DangKyLopPost', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (typeof showToast === 'function') showToast(data.message, 'success');
+                setTimeout(() => window.location.reload(), 800);
+            } else {
+                if (typeof showToast === 'function') showToast(data.message || 'Không thể đăng ký lớp học.', 'error');
+            }
+        } catch (err) {
+            if (typeof showToast === 'function') showToast('Có lỗi xảy ra khi đăng ký lớp học.', 'error');
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    }
+</script>
+}

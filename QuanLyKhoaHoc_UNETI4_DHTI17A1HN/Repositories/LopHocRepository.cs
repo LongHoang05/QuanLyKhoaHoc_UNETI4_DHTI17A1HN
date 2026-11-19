@@ -86,7 +86,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         {
             return await _context.DangKyHocs
                 .CountAsync(d => d.MaLopHoc == id &&
-                    (d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành"));
+                    (d.TrangThai == "Đã duyệt" || d.TrangThai == "Chờ xác nhận học phí" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành"));
         }
 
         public async Task<bool> ExistsTenLopAsync(string tenLop, int? excludeId = null)
@@ -194,12 +194,12 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
             if (filterConCho == "con_cho")
             {
                 query = query.Where(l => l.DangKyHocs.Count(d =>
-                    d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học") < l.SiSoToiDa);
+                    d.TrangThai == "Đã duyệt" || d.TrangThai == "Chờ xác nhận học phí" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành") < l.SiSoToiDa);
             }
             else if (filterConCho == "het_cho")
             {
                 query = query.Where(l => l.DangKyHocs.Count(d =>
-                    d.TrangThai == "Đã duyệt" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học") >= l.SiSoToiDa);
+                    d.TrangThai == "Đã duyệt" || d.TrangThai == "Chờ xác nhận học phí" || d.TrangThai == "Đã đóng học phí" || d.TrangThai == "Đang học" || d.TrangThai == "Hoàn thành" || d.TrangThai == "Không hoàn thành") >= l.SiSoToiDa);
             }
 
             // 3. SẮP XẾP LINQ
@@ -244,7 +244,7 @@ namespace QuanLyKhoaHoc_UNETI4_DHTI17A1HN.Repositories
         {
             var tongSoLop = await _context.LopHocs.CountAsync();
             var soLopDangMo = await _context.LopHocs.CountAsync(l => l.TrangThai == "Đang mở đăng ký");
-            var soLopDaDong = await _context.LopHocs.CountAsync(l => l.TrangThai == "Đã kết thúc");
+            var soLopDaDong = await _context.LopHocs.CountAsync(l => l.TrangThai == "Đã đóng đăng ký" || l.TrangThai == "Đã kết thúc");
             var soLopTamDung = await _context.LopHocs.CountAsync(l => l.TrangThai == "Tạm dừng");
 
             return (tongSoLop, soLopDangMo, soLopDaDong, soLopTamDung);
