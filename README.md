@@ -22,7 +22,7 @@ Dự án được phân chia thành **5 Module độc lập** theo cấu trúc *
 | **1** | **Vũ Đình Trường** | `23103100026` | **Nhóm trưởng** | **Module 1**: Quản trị Hệ thống, Tài khoản, Phân quyền & Chương trình đào tạo | `ITaiKhoanRepository.cs`, `TaiKhoanRepository.cs`<br>`ITaiKhoanService.cs`, `TaiKhoanService.cs`<br>`IChuongTrinhDaoTaoRepository.cs`, `ChuongTrinhDaoTaoRepository.cs`<br>`IChuongTrinhDaoTaoService.cs`, `ChuongTrinhDaoTaoService.cs` |
 | **2** | **Nguyễn Đình Kiên** | `23103100020` | Thành viên | **Module 2**: Quản lý Lớp học & Đội ngũ Giảng viên | `ILopHocRepository.cs`, `LopHocRepository.cs`<br>`ILopHocService.cs`, `LopHocService.cs`<br>`IGiangVienRepository.cs`, `GiangVienRepository.cs`<br>`IGiangVienService.cs`, `GiangVienService.cs` |
 | **3** | **Nguyễn Đức Linh** | `23103100042` | Thành viên | **Module 3**: Quản lý Học viên, Hồ sơ sinh viên & Cổng dịch vụ học viên (Eduspace) | `IHocVienRepository.cs`, `HocVienRepository.cs`<br>`IHocVienService.cs`, `HocVienService.cs`<br>`CongHocVienController.cs` (Giao diện Không gian học tập) |
-| **4** | **Nguyễn Hoàng Long** | `23103100046` | Thành viên | **Module 4**: Tiếp nhận đăng ký, Xét duyệt hồ sơ, Quản lý tài chính & Thu học phí | `IDangKyHocRepository.cs`, `DangKyHocRepository.cs`<br>`DangKyHocController.cs`<br>Quy trình xác nhận chuyển khoản & thu học phí, xuất Excel `ClosedXML` |
+| **4** | **Nguyễn Hoàng Long** | `23103100046` | Thành viên | **Module 4**: Tiếp nhận đăng ký, Xét duyệt hồ sơ, Quản lý tài chính & Thu học phí | `IDangKyHocRepository.cs`, `DangKyHocRepository.cs`<br>`IDangKyHocService.cs`, `DangKyHocService.cs`<br>`DangKyHocController.cs`<br>Quy trình duyệt/trùng lịch, đối soát học phí (kể cả hoàn tác `Chưa nhận học phí`), xuất Excel `ClosedXML` |
 | **5** | **Nguyễn Tùng Dương** | `23103100003` | Thành viên | **Module 5**: Xếp Thời khóa biểu (TKB), Quản lý Kết quả học tập (Bảng điểm) & Thống kê | `IBuoiHocRepository.cs`, `BuoiHocRepository.cs`<br>`IKetQuaHocTapRepository.cs`, `KetQuaHocTapRepository.cs`<br>`IThongKeRepository.cs`, `ThongKeRepository.cs`<br>`BuoiHocController.cs`, `KetQuaHocTapController.cs` |
 
 ---
@@ -86,21 +86,21 @@ erDiagram
 ### Chi tiết các thực thể chính:
 
 1. **`TaiKhoan`** (Quản lý đăng nhập & phân quyền):
-   - `MaTaiKhoan` (PK), `TenDangNhap`, `MatKhau` (mã hóa SHA256), `HoTen`, `Email`, `SoDienThoai`, `VaiTro` (`Admin`, `GiaoVu`, `HocVien`), `TrangThai` (Hoạt động / Khóa).
+   - `MaTaiKhoan` (PK), `TenDangNhap`, `MatKhau` (mã hóa SHA-256), `HoTen`, `Email`, `VaiTro` (`Admin`, `GiaoVu`, `GiangVien`, `HocVien`), `TrangThai` (Hoạt động / Khóa), `NgayTao`.
 2. **`ChuongTrinhDaoTao`** (Danh mục khóa học):
-   - `MaCTDT` (PK), `MaChuongTrinh`, `TenChuongTrinh`, `MoTa`, `SoTinChi`, `HocPhiGoc`, `HocPhiUuDai`, `ThoiLuongGio`, `TrinhDo` (Cơ bản, Nâng cao), `HinhThuc` (Online, Offline), `DeCuong`, `HinhAnh`.
+   - `MaChuongTrinh` (PK), `TenChuongTrinh`, `MoTa`, `EmailLienHe`, `TrangThai` (Hoạt động / Tạm dừng), `NgayTao`.
 3. **`GiangVien`** (Hồ sơ giảng viên):
-   - `MaGiangVien` (PK), `MaGV`, `HoTen`, `Email`, `SoDienThoai`, `HocVi` (ThS, TS, PGS.TS), `ChuyenMon`, `DonViCongTac`, `HinhAnh`.
+   - `MaGiangVien` (PK), `MaTaiKhoan` (FK), `HoTen`, `Email`, `SoDienThoai`, `HocVi`, `ChuyenNganh`, `GioiThieu`, `TrangThai`, `NgayTao`.
 4. **`LopHoc`** (Lớp học theo chương trình):
-   - `MaLopHoc` (PK), `MaLop`, `TenLop`, `MaCTDT` (FK), `MaGiangVien` (FK), `NgayMoDangKy`, `HanDangKy`, `NgayKhaiGiang`, `NgayKetThuc`, `SiSoToiDa`, `SiSoHienTai`, `HocPhi`, `PhongHoc`, `TrangThai`.
+   - `MaLopHoc` (PK), `TenLop`, `MaChuongTrinh` (FK), `MaGiangVien` (FK), `TenGiangVien`, `TrinhDoDauVao`, `SiSoToiDa`, `SoBuoiHoc`, `HocPhi`, `NgayBatDauDangKy`, `HanDangKy`, `NgayKhaiGiang`, `MoTa`, `YeuCauHocVien`, `TrangThai`, `PhongHoc`.
 5. **`HocVien`** (Hồ sơ học viên):
-   - `MaHocVien` (PK), `MaHV`, `MaTaiKhoan` (FK), `HoTen`, `NgaySinh`, `GioiTinh`, `Email`, `SoDienThoai`, `DiaChi`, `NgheNghiep`, `DonViCongTac`.
+   - `MaHocVien` (PK), `MaTaiKhoan` (FK), `HoTen`, `Email`, `SoDienThoai`, `NgaySinh`, `GioiTinh`, `DiaChi`, `TrinhDoHocVan`, `NgheNghiep`, `HinhAnh`, `TrangThai`, `NgayTao`.
 6. **`DangKyHoc`** (Đơn đăng ký & Quản lý thu học phí):
-   - `MaDangKy` (PK), `MaHocVien` (FK), `MaLopHoc` (FK), `NgayDangKy`, `TrangThai` (`ChoDuyet`, `DaDuyet`, `TuChoi`, `DaHuy`), `TrangThaiHocPhi` (`ChuaDong`, `ChoXacNhan`, `DaDong`), `SoTienPhaiDong`, `SoTienDaDong`, `NgayDongHocPhi`, `PhuongThucThanhToan`, `GhiChu`.
+   - `MaDangKy` (PK), `MaHocVien` (FK), `MaLopHoc` (FK), `NgayDangKy`, `GhiChu`, `TrangThai` (`Chờ duyệt`, `Đã duyệt`, `Chờ xác nhận học phí`, `Đã đóng học phí`, `Đang học`, `Hoàn thành`, `Không hoàn thành`, `Từ chối`, `Đã hủy`), `NgayXuLy`, `NhanXetGiaoVu`, `NgayDongHocPhi`, `SoTienDaDong`.
 7. **`BuoiHoc`** (Thời khóa biểu từng buổi học):
-   - `MaBuoiHoc` (PK), `MaLopHoc` (FK), `ThuTrongTuan` (2..8), `NgayHoc`, `CaHoc` (1..5), `PhongHoc` (HA8, HA9, HA10, HA11), `MaGiangVien` (FK), `NoiDung`.
+   - `MaBuoiHoc` (PK), `MaLopHoc` (FK), `ThoiGianBatDau`, `ThoiGianKetThuc`, `PhongHoc`, `MaGiangVien` (FK), `GiangVien`, `NoiDung`, `GhiChu`, `TrangThai` (`Đã lên lịch`, `Đã hoàn thành`, `Đã hủy`).
 8. **`KetQuaHocTap`** (Bảng điểm & Đánh giá kết quả):
-   - `MaKetQua` (PK), `MaDangKy` (FK), `DiemChuyenCan` (trọng số 40%), `DiemCuoiKhoa` (trọng số 60%), `DiemTongKet` (Hệ 10), `DiemChu` (A, B+, B, C+, C, D, F), `DiemHe4`, `XepLoai` (Xuất sắc, Giỏi, Khá, Trung bình, Yếu), `TrangThai` (Đạt, Học lại).
+   - `MaKetQua` (PK), `MaDangKy` (FK), `DiemChuyenCan` (Điểm quá trình 40%), `DiemCuoiKhoa` (Điểm cuối kỳ 60%), `DiemTongKet`, `KetQua` (`Hoàn thành`, `Không hoàn thành`), `NhanXet`, `NgayCapNhat` (kèm thuộc tính suy diễn `DiemHe4`, `DiemChu`, `XepLoai`).
 
 ---
 
@@ -120,25 +120,26 @@ Quy trình đảm bảo kiểm soát tài chính minh bạch và chặt chẽ:
 4. **Học viên xác nhận chuyển khoản**:
    - Sau khi chuyển qua App Ngân hàng, học viên bấm nút **"Tôi Đã Chuyển Khoản"**.
    - Trạng thái đơn cập nhật sang **`Chờ xác nhận học phí`** (Chờ giáo vụ đối soát).
-5. **Giáo vụ phê duyệt & Kích hoạt lớp học**:
-   - Phía Quản lý / Giáo vụ kiểm tra đối soát thanh toán, bấm **"Xác nhận đã nộp học phí"**.
-   - Trạng thái đơn chuyển sang **`Đã đóng học phí`** / **`Đang học`**, mở khóa lớp học và cho phép xuất danh sách báo cáo Excel (`.xlsx`) bằng thư viện **ClosedXML**.
+5. **Giáo vụ đối soát & Kích hoạt lớp học**:
+   - Phía Quản lý / Giáo vụ kiểm tra đối soát thanh toán, bấm **"Xác nhận đã nộp học phí"** (thu đủ 1 lần 100%) để chuyển sang **`Đã đóng học phí`**, sau đó bấm **"Vào học"** chuyển **`Đang học`**.
+   - Nếu kiểm tra chưa nhận được tiền, giáo vụ bấm **"Chưa nhận học phí"** để trả hồ sơ về **`Đã duyệt`** (`SoTienDaDong = 0`) cho học viên nộp lại.
+   - Hỗ trợ xuất danh sách đăng ký & thu học phí ra file Excel (`.xlsx`) bằng thư viện **ClosedXML**.
 
 ---
 
 ### 📊 B. Bảng điểm Học phần Đơn nhất & Tính điểm Chuẩn (Module 5)
-Bảng điểm được thiết kế chuyên nghiệp, loại bỏ chia học kỳ giả định, lấy **100% dữ liệu thật từ database**:
+Bảng điểm được thiết kế chuyên nghiệp, không chia học kỳ giả định, lấy **100% dữ liệu thật từ database**:
 - **Công thức tính điểm**:
-  $$\text{Điểm Tổng Kết} = (\text{Điểm Quá Trình} \times 0.4) + (\text{Điểm Cuối Khóa} \times 0.6)$$
+  $$\text{Điểm Tổng Kết} = (\text{Điểm Quá Trình} \times 0.4) + (\text{Điểm Cuối Kỳ} \times 0.6)$$
 - **Thang điểm chuẩn 4 & Quy đổi Điểm Chữ**:
-  - $\ge 8.5$: Loại **A** (Hệ 4: 4.0) — *Xuất sắc*
-  - $7.8 - 8.4$: Loại **B+** (Hệ 4: 3.5) — *Giỏi*
-  - $7.0 - 7.7$: Loại **B** (Hệ 4: 3.0) — *Khá*
-  - $6.3 - 6.9$: Loại **C+** (Hệ 4: 2.5) — *Trung bình khá*
-  - $5.5 - 6.2$: Loại **C** (Hệ 4: 2.0) — *Trung bình*
-  - $4.8 - 5.4$: Loại **D+** (Hệ 4: 1.5) — *Trung bình yếu*
-  - $4.0 - 4.7$: Loại **D** (Hệ 4: 1.0) — *Đạt*
-  - $< 4.0$: Loại **F** (Hệ 4: 0.0) — *Cần học lại*
+  - $\ge 8.5$: Loại **A** (Hệ 4: 4.0) — *Xuất sắc* (`Hoàn thành`)
+  - $8.0 - 8.49$: Loại **B+** (Hệ 4: 3.5) — *Giỏi* (`Hoàn thành`)
+  - $7.0 - 7.99$: Loại **B** (Hệ 4: 3.0) — *Khá* (`Hoàn thành`)
+  - $6.5 - 6.99$: Loại **C+** (Hệ 4: 2.5) — *Trung bình khá* (`Hoàn thành`)
+  - $5.5 - 6.49$: Loại **C** (Hệ 4: 2.0) — *Trung bình* (`Hoàn thành`)
+  - $5.0 - 5.49$: Loại **D+** (Hệ 4: 1.5) — *Trung bình yếu* (`Hoàn thành`)
+  - $4.0 - 4.99$: Loại **D** (Hệ 4: 1.0) — *Yếu* (`Không hoàn thành`)
+  - $< 4.0$: Loại **F** (Hệ 4: 0.0) — *Kém* (`Không hoàn thành`)
 - **Tính năng UI nâng cao**:
   - **Bộ lọc trạng thái**: Tất cả, Đang học, Đã hoàn thành (Đạt), Cần lưu ý / Nợ HP.
   - **Tìm kiếm thông minh tích hợp Autocomplete**: Gõ tên môn hoặc tên giảng viên sẽ hiển thị danh sách gợi ý rơi xuống (dropdown) để chọn nhanh.
@@ -147,23 +148,25 @@ Bảng điểm được thiết kế chuyên nghiệp, loại bỏ chia học k�
 ---
 
 ### 📅 C. Ma trận Thời khóa biểu & Thuật toán Chống trùng lịch (Module 5)
-- **Ma trận 7 ngày trong tuần**: Thứ 2 đến Chủ nhật với 5 ca học linh hoạt.
-- **Giảng đường chuẩn UNETI**: Khu phòng học HA8, HA9, HA10, HA11.
-- **Thuật toán LINQ kiểm tra trùng lịch (Overlap Check)**:
+- **Ma trận 7 ngày trong tuần**: Thứ 2 đến Chủ nhật với **4 ca học chính** (`Ca 1`: 07:00–09:15, `Ca 2`: 09:30–11:45, `Ca 3`: 13:30–15:45, `Ca 4`: 16:00–18:15).
+- **Giảng đường chuẩn UNETI**: Khu phòng học HA8, HA9, HA10, HA11 và phòng Lab.
+- **Thuật toán LINQ kiểm tra trùng lịch (Overlap Check theo khoảng thời gian)**:
   ```csharp
-  // Kiểm tra trùng phòng học
+  // Kiểm tra trùng phòng học theo khoảng thời gian giao nhau
   bool biTrungPhong = await _context.BuoiHocs.AnyAsync(b =>
-      b.MaBuoiHoc != buoiHocMoi.MaBuoiHoc &&
-      b.NgayHoc == buoiHocMoi.NgayHoc &&
-      b.CaHoc == buoiHocMoi.CaHoc &&
-      b.PhongHoc == buoiHocMoi.PhongHoc);
+      (!excludeId.HasValue || b.MaBuoiHoc != excludeId.Value) &&
+      b.PhongHoc == phongHoc &&
+      b.TrangThai != "Đã hủy" &&
+      b.ThoiGianBatDau < ketThuc &&
+      b.ThoiGianKetThuc > batDau);
 
   // Kiểm tra trùng lịch giảng viên
   bool biTrungGiangVien = await _context.BuoiHocs.AnyAsync(b =>
-      b.MaBuoiHoc != buoiHocMoi.MaBuoiHoc &&
-      b.NgayHoc == buoiHocMoi.NgayHoc &&
-      b.CaHoc == buoiHocMoi.CaHoc &&
-      b.MaGiangVien == buoiHocMoi.MaGiangVien);
+      (!excludeId.HasValue || b.MaBuoiHoc != excludeId.Value) &&
+      b.MaGiangVien == maGiangVien &&
+      b.TrangThai != "Đã hủy" &&
+      b.ThoiGianBatDau < ketThuc &&
+      b.ThoiGianKetThuc > batDau);
   ```
 
 ---
@@ -249,7 +252,7 @@ Bộ câu hỏi chuẩn sát thực tế chấm điểm của các Thầy/Cô Kh
 1. **Câu hỏi:** *Cơ chế xác thực của hệ thống sử dụng gì? Khác biệt giữa Session và Cookie Authentication với Claims?*  
    **Trả lời:** Hệ thống sử dụng Cookie Authentication kết hợp Claims. Khi đăng nhập thành công qua `ITaiKhoanService.KiemTraDangNhapAsync()`, hệ thống tạo `ClaimsIdentity` chứa `NameIdentifier` (ID), `Name` (Họ tên), `Role` (`Admin`, `GiaoVu`, `HocVien`) và ghi vào cookie bảo mật HTTP-Only. Đồng thời dùng Session để lưu trữ thông tin hiển thị nhanh trên Header.
 2. **Câu hỏi:** *Chỉ ra vị trí code kiểm tra quyền truy cập không cho người dùng gõ thẳng URL vào trang Admin?*  
-   **Trả lời:** Sử dụng thuộc tính `[Authorize(Roles = "Admin,GiaoVu")]` trên đầu `AdminController` và `ChuongTrinhDaoTaoController`. Nếu người dùng chưa đăng nhập, hệ thống tự động redirect về `/TaiKhoan/DangNhap`. Nếu sai quyền sẽ dẫn tới `/Home/AccessDenied`.
+   **Trả lời:** Sử dụng bộ lọc phân quyền tùy biến `[SessionAuthorize("Admin")]` trên `AdminController` và `[SessionAuthorize("Admin", "GiaoVu")]` trên `ChuongTrinhDaoTaoController`, `DangKyHocController`... Nếu người dùng chưa đăng nhập, hệ thống tự động redirect về `/TaiKhoan/DangNhap`; nếu sai vai trò sẽ chuyển tới `/Home/AccessDenied`.
 
 ### 🔹 Sinh viên 2: Nguyễn Đình Kiên (23103100020 - Module 2)
 1. **Câu hỏi:** *Tại sao trong `LopHocRepository` phải dùng `Skip()` và `Take()` trước khi gọi `ToListAsync()`?*  
@@ -269,17 +272,23 @@ Bộ câu hỏi chuẩn sát thực tế chấm điểm của các Thầy/Cô Kh
 
 ### 🔹 Sinh viên 4: Nguyễn Hoàng Long (23103100046 - Module 4)
 1. **Câu hỏi:** *Quy trình đóng học phí diễn ra thế nào? Làm sao để tránh việc học viên chưa chuyển tiền mà đã được vào học?*  
-   **Trả lời:** Khi học viên mở modal thanh toán, hệ thống hiển thị ảnh mã QR chuyển khoản cùng số tiền và cú pháp thanh toán chuẩn (`UNETI DKxxx`). Sau khi chuyển khoản, học viên bấm "Tôi Đã Chuyển Khoản" thì trạng thái chỉ là `Chờ xác nhận học phí`. Chỉ khi Giáo vụ kiểm tra đối soát và bấm "Xác nhận đã nộp học phí" trên trang quản lý của Giáo vụ thì trạng thái mới chuyển thành `Đã đóng học phí` và kích hoạt quyền vào lớp. Ngoài ra hệ thống hỗ trợ xuất file Excel `.xlsx` qua thư viện `ClosedXML`.
-2. **Câu hỏi:** *Viết câu lệnh LINQ kiểm tra số học viên đã nộp học phí của lớp để chốt danh sách?*  
-   **Trả lời:** Trong `IDangKyHocRepository`:
+   **Trả lời:** Khi học viên mở modal thanh toán, hệ thống hiển thị ảnh mã QR chuyển khoản cùng số tiền và cú pháp thanh toán chuẩn (`UNETI DKxxx`). Sau khi chuyển khoản, học viên bấm "Tôi Đã Chuyển Khoản" thì trạng thái chỉ là `Chờ xác nhận học phí`. Giáo vụ kiểm tra đối soát: nếu tiền đã về thì bấm "Xác nhận đã nộp học phí" (`XacNhanHocPhiAsync` thu 100%) chuyển thành `Đã đóng học phí` rồi bấm "Vào học"; nếu chưa thấy tiền thì bấm "Chưa nhận học phí" (`HoanTacChuaNhanHocPhiAsync`) trả về `Đã duyệt`. Ngoài ra hệ thống hỗ trợ xuất file Excel `.xlsx` qua thư viện `ClosedXML`.
+2. **Câu hỏi:** *Viết câu lệnh LINQ kiểm tra số học viên đã giữ chỗ trong lớp để kiểm soát sĩ số tối đa?*  
+   **Trả lời:** Trong `DangKyHocRepository.CountEnrolledInLopAsync`:
    ```csharp
-   int siSoDaNopTien = await _context.DangKyHocs
-       .CountAsync(d => d.MaLopHoc == maLop && d.TrangThaiHocPhi == "DaDong");
+   return await _context.DangKyHocs.CountAsync(d =>
+       d.MaLopHoc == maLop &&
+       (d.TrangThai == "Đã duyệt" ||
+        d.TrangThai == "Chờ xác nhận học phí" ||
+        d.TrangThai == "Đã đóng học phí" ||
+        d.TrangThai == "Đang học" ||
+        d.TrangThai == "Hoàn thành" ||
+        d.TrangThai == "Không hoàn thành"));
    ```
 
 ### 🔹 Sinh viên 5: Nguyễn Tùng Dương (23103100003 - Module 5)
 1. **Câu hỏi:** *Trình bày thuật toán kiểm tra xung đột thời khóa biểu khi xếp lịch học mới?*  
-   **Trả lời:** Trong `BuoiHocRepository`, thuật toán kiểm tra 3 điều kiện trùng: Trùng phòng học (`PhongHoc`), trùng giảng viên (`MaGiangVien`), và trùng lớp học (`MaLopHoc`) trong cùng một `NgayHoc` và `CaHoc`. Nếu tồn tại bất kỳ bản ghi nào thỏa mãn điều kiện đó (khác với mã buổi học đang cập nhật), hàm sẽ trả về `false` và thông báo lỗi cụ thể.
+   **Trả lời:** Trong `BuoiHocRepository.KiemTraTrungLichChiTietAsync`, thuật toán kiểm tra khoảng thời gian giao nhau (`batDau < b.ThoiGianKetThuc && ketThuc > b.ThoiGianBatDau` với các buổi `TrangThai != "Đã hủy"`) cho cả 3 tiêu chí: trùng lớp học (`MaLopHoc`), trùng phòng học (đã chuẩn hóa tên phòng) và trùng giảng viên đứng lớp (đã chuẩn hóa học vị/tên). Nếu trùng sẽ chặn thêm/sửa ngay và báo rõ ca bị trùng.
 2. **Câu hỏi:** *Công thức tính điểm trung bình tích lũy toàn khóa (GPA) theo thang điểm 10 và thang điểm 4 được thực hiện thế nào trong Repository?*  
    **Trả lời:** Hệ thống lấy tất cả bản ghi từ bảng `KetQuaHocTap` kết hợp với bảng `LopHoc` và `ChuongTrinhDaoTao` để lấy số tín chỉ:
    $$\text{GPA}_{10} = \frac{\sum (\text{DiemTongKet} \times \text{SoTinChi})}{\sum \text{SoTinChi}}$$
